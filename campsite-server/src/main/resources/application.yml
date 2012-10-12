@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: campsite-power
+  datasource:
+    url: jdbc:postgresql://${CAMPSITE_DB_HOST:localhost}:${CAMPSITE_DB_PORT:5432}/${CAMPSITE_DB_NAME:campsite_power}
+    username: ${CAMPSITE_DB_USER:campsite}
+    password: ${CAMPSITE_DB_PASSWORD:campsite}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${CAMPSITE_HTTP_PORT:8080}
