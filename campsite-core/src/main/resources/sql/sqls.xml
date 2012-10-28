@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<!--
+  Hand-written SQL looked up by name (bean "sqls", injected with @Value("#{sqls['<name>']}")).
+  PostgreSQL only. Values are always bound as named parameters, never concatenated.
+-->
+<properties>
+
+    <comment>Group trees: subtrees and parent lines</comment>
+
+    <!-- Subtree of a group including the group itself, ordered hierarchically (level, then id). -->
+    <entry key="findManageableGroupIds"><![CDATA[
+WITH RECURSIVE tree (id, lvl) AS (
+    SELECT g.ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT c.ID, t.lvl + 1 FROM TBL_GROUP c JOIN tree t ON c.PARENT_ID = t.id
+)
+SELECT id FROM tree ORDER BY lvl, id
+]]></entry>
+
+    <!-- Parent line of a group from the group itself (level 1) up to its root. -->
+    <entry key="findParentGroupIds"><![CDATA[
+WITH RECURSIVE parent_line (id, parent_id, lvl) AS (
+    SELECT g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
+)
+SELECT id FROM parent_line ORDER BY lvl
+]]></entry>
+
+</properties>
