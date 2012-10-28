@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface GroupDao extends JpaRepository<Group, Long> {
+public interface GroupDao extends JpaRepository<Group, Long>, GroupDaoCustom {
 
     Group findByNameAndType(String name, String type);
 
