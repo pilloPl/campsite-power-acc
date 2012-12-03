@@ -76,6 +76,16 @@ class GroupDaoIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void groupViewShowsThePathOfNamesAndTheLevel() {
+        Map<String, Object> row = jdbcTemplate.queryForMap(
+                "SELECT NAME_PATH, LVL, TYPENAME FROM V_GROUP WHERE ID = ?", 51L);
+
+        assertThat(row.get("name_path")).isEqualTo(" | HR SITES | NETWORK ACCESS HR");
+        assertThat(row.get("lvl")).isEqualTo(2);
+        assertThat(row.get("typename")).isEqualTo("SITE");
+    }
+
+    @Test
     void groupTypeIsRestrictedToTheThreeTrees() {
         assertThatThrownBy(() -> jdbcTemplate.update(
                 "INSERT INTO TBL_GROUP (NAME, TYPENAME, DISPLAYNAME) VALUES ('X', 'SALES', 'X')"))
