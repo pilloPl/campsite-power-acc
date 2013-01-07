@@ -78,6 +78,31 @@ public final class GroupServiceHelper {
         return null;
     }
 
+    public static List<String> getGroupMarkets() {
+        List<String> list = new ArrayList<>();
+        for (Market market : Market.values()) {
+            if (market.isPrefixMarket()) {
+                list.add(market.name());
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Checks whether the group name starts with a market prefix ("HR ") and passes the market back.
+     *
+     * @return the market or null when the name has no market prefix
+     */
+    public static Market checkMarket(Group group) {
+        for (Market market : Market.values()) {
+            if (market.isPrefixMarket() && group != null && group.getName() != null
+                    && group.getName().startsWith(market.name() + " ")) {
+                return market;
+            }
+        }
+        return null;
+    }
+
     /**
      * Type hierarchy check: a group must have the type of its parent.
      */

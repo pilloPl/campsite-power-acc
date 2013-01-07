@@ -40,6 +40,16 @@ class GroupServiceHelperTest {
     }
 
     @Test
+    void marketIsReadFromTheNamePrefixFollowedByASpace() {
+        assertThat(GroupServiceHelper.checkMarket(sites)).isEqualTo(Market.HR);
+        assertThat(GroupServiceHelper.checkMarket(groups.root(GroupType.SITE, "IT SITES"))).isEqualTo(Market.IT);
+        assertThat(GroupServiceHelper.checkMarket(groups.root(GroupType.SITE, "FRANCE"))).isNull();
+        assertThat(GroupServiceHelper.checkMarket(groups.root(GroupType.SITE, "UNKNOWN SITES"))).isNull();
+        assertThat(GroupServiceHelper.checkMarket(adriatic)).isNull();
+        assertThat(GroupServiceHelper.checkMarket(null)).isNull();
+    }
+
+    @Test
     void childOfAnotherTypeThanItsParentBreaksTheTypeHierarchy() {
         Group wrong = groups.child(bayCampsite, "WRONG");
         wrong.setType(GroupType.STAFF);
@@ -49,6 +59,11 @@ class GroupServiceHelperTest {
         GroupServiceHelper.checkParent(pineCampsite, errors, new HashSet<>());
 
         assertThat(errors).singleElement().asString().contains("Type hierarchy broken", "WRONG");
+    }
+
+    @Test
+    void groupMarketsAreOnlyThePrefixMarkets() {
+        assertThat(GroupServiceHelper.getGroupMarkets()).containsExactly("HR", "IT", "FR");
     }
 
     @Test
