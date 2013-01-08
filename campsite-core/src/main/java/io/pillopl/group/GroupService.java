@@ -15,7 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Organisation trees: lookups by the names that carry logic, administrative scope by subtree.
+ * Organisation trees: lookups by the names that carry logic, administrative scope by subtree, markets from name
+ * prefixes.
  */
 @Service
 public class GroupService {
@@ -85,6 +86,35 @@ public class GroupService {
         LOG.info(String.format("Group '%s' has no access to group '%s'", GroupServiceHelper.groupToPrettyString(group),
                 GroupServiceHelper.groupToPrettyString(groupIsManageable)));
         return false;
+    }
+
+    /**
+     * Walks up the parent line until a name starts with a market prefix ("HR ", "IT ", "FR ").
+     *
+     * @return the market or null when the group does not exist or no group on the line has a market prefix
+     */
+    @Transactional(readOnly = true)
+    public Market determineMarketByGroupId(Long groupId) {
+        Market market = null;
+
+        Group group = groupId != null ? groupDao.findById(groupId).orElse(null) : null;
+
+        if (group == null) {
+            return null;
+        }
+        while ((market = GroupServiceHelper.checkMarket(group)) == null) {
+            group = group.getParent();
+            if (group == null) {
+                break;
+            }
+        }
+        return market;
+    }
+
+    @Transactional(readOnly = true)
+    public String findMarketFromParentGroups(Long groupId) {
+        Market market = determineMarketByGroupId(groupId);
+        return market != null ? market.name() : null;
     }
 
     @Transactional(readOnly = true)

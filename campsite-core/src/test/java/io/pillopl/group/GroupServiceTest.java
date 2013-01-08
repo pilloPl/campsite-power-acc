@@ -23,6 +23,32 @@ class GroupServiceTest {
     private final Group otherSites = groups.root(GroupType.SITE, "ADRIATIC HOLDING");
 
     @Test
+    void marketIsTakenFromTheNearestGroupWithAMarketPrefix() {
+        when(groupDao.findById(affiliate.getId())).thenReturn(Optional.of(affiliate));
+        when(groupDao.findById(sites.getId())).thenReturn(Optional.of(sites));
+
+        assertThat(groupService.determineMarketByGroupId(affiliate.getId())).isEqualTo(Market.HR);
+        assertThat(groupService.determineMarketByGroupId(sites.getId())).isEqualTo(Market.HR);
+        assertThat(groupService.findMarketFromParentGroups(affiliate.getId())).isEqualTo("HR");
+    }
+
+    @Test
+    void groupWithoutMarketPrefixOnItsLineHasNoMarket() {
+        when(groupDao.findById(otherSites.getId())).thenReturn(Optional.of(otherSites));
+
+        assertThat(groupService.determineMarketByGroupId(otherSites.getId())).isNull();
+        assertThat(groupService.findMarketFromParentGroups(otherSites.getId())).isNull();
+    }
+
+    @Test
+    void unknownGroupHasNoMarket() {
+        when(groupDao.findById(99L)).thenReturn(Optional.empty());
+
+        assertThat(groupService.determineMarketByGroupId(99L)).isNull();
+        assertThat(groupService.determineMarketByGroupId(null)).isNull();
+    }
+
+    @Test
     void groupManagesItsSubtree() {
         when(groupDao.findManageable(networkAccess.getId())).thenReturn(List.of(networkAccess.getId(), affiliate.getId()));
 
