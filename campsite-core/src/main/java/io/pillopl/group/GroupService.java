@@ -138,12 +138,23 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
+    public Group fetchNetworkCardIssuerGroup() {
+        return groupDao.findByNameAndType(GroupServiceConstants.NETWORK_CARD, GroupType.ISSUER.name());
+    }
+
+    @Transactional(readOnly = true)
     public List<Group> fetchAllGroupsByType(GroupType type) {
         List<Group> result = new ArrayList<>();
         for (Group root : groupDao.findRoots(type.name())) {
             result.addAll(GroupServiceHelper.extractAllManageableGroupsForGroup(root));
         }
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> fetchSiteGroupIds(Market market, String searchString) {
+        Group root = getExtensionByMarket(market).findSiteRoot();
+        return GroupServiceHelper.extractAllManageableGroupIDsForGroup(root, searchString);
     }
 
     /**
@@ -220,6 +231,11 @@ public class GroupService {
     public List<Long> findParents(Group group) {
         Objects.requireNonNull(group);
         return groupDao.findParents(group.getId());
+    }
+
+    /*NON_TRANSACTIONAL*/
+    public MarketExtension<Market> getExtensionByMarket(final Market market) {
+        return new MarketExtension<>(market, this);
     }
 
     @Transactional
