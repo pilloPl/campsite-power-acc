@@ -43,4 +43,22 @@ public class GroupManager {
 
         return child;
     }
+
+    /**
+     * Cards of the issuer group are accepted in the subtree of the site group. The agreement list of the issuer
+     * group replaces the lists of its ancestors.
+     */
+    @Transactional
+    public Group addAcceptanceAgreement(Group issuerGroup, Group siteGroup) {
+        Assert.isTrue(GroupType.ISSUER.isGroupType(issuerGroup), "Agreement owner must be an ISSUER group.");
+        Assert.isTrue(GroupType.SITE.isGroupType(siteGroup), "Agreement target must be a SITE group.");
+        issuerGroup.addAssociatedGroup(siteGroup);
+        return groupDao.saveAndFlush(issuerGroup);
+    }
+
+    @Transactional
+    public Group removeAcceptanceAgreement(Group issuerGroup, Group siteGroup) {
+        issuerGroup.getGroups().remove(siteGroup);
+        return groupDao.saveAndFlush(issuerGroup);
+    }
 }

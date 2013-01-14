@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import static io.pillopl.group.InMemoryGroups.agree;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GroupServiceHelperTest {
@@ -23,6 +24,70 @@ class GroupServiceHelperTest {
     private final Group caravanClub = groups.child(issuers, "CARAVAN CLUB");
     private final Group caravanClubJunior = groups.child(caravanClub, "CARAVAN CLUB JUNIOR");
     private final Group caravanClubJuniorSummer = groups.child(caravanClubJunior, "CARAVAN CLUB JUNIOR SUMMER");
+
+    @Test
+    void nearestAncestorWithAgreementsReplacesTheListsAboveIt() {
+        agree(caravanClub, adriatic);
+        agree(caravanClubJunior, lakeCampsite);
+
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(caravanClubJuniorSummer))
+                .containsExactly(lakeCampsite.getId());
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(caravanClubJunior))
+                .containsExactly(lakeCampsite.getId());
+    }
+
+    @Test
+    void groupWithoutOwnAgreementsInheritsTheNearestAncestorList() {
+        agree(caravanClub, bayCampsite, lakeCampsite);
+
+        assertThat(GroupServiceHelper.getAcceptanceAgreements(caravanClubJuniorSummer, GroupType.SITE))
+                .containsExactly(bayCampsite, lakeCampsite);
+    }
+
+    @Test
+    void agreementCoversTheWholeSubtreeOfTheAgreedSiteGroup() {
+        agree(caravanClub, adriatic);
+
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(caravanClub))
+                .containsExactlyInAnyOrder(adriatic.getId(), bayCampsite.getId(), bayBeachSection.getId(),
+                        pineCampsite.getId());
+    }
+
+    @Test
+    void overlappingAgreementsListEveryAcceptingGroupOnce() {
+        agree(caravanClub, adriatic, bayCampsite);
+
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(caravanClub))
+                .containsExactlyInAnyOrder(adriatic.getId(), bayCampsite.getId(), bayBeachSection.getId(),
+                        pineCampsite.getId());
+    }
+
+    @Test
+    void noAgreementOnTheWholeParentLineMeansNoAcceptingGroups() {
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(caravanClubJuniorSummer)).isEmpty();
+        assertThat(GroupServiceHelper.extractAllAcceptingSiteGroupIds(null)).isEmpty();
+    }
+
+    @Test
+    void associatedGroupsOfAnotherTypeAreNotAgreementsWhereverTheyStandInTheList() {
+        Group staff = groups.root(GroupType.STAFF, "HR STAFF");
+        agree(caravanClub, lakeCampsite);
+        caravanClubJunior.addAssociatedGroup(staff);
+        caravanClubJunior.addAssociatedGroup(pineCampsite);
+
+        assertThat(GroupServiceHelper.getAcceptanceAgreements(caravanClubJunior, GroupType.SITE))
+                .containsExactly(pineCampsite);
+    }
+
+    @Test
+    void listWithOnlyGroupsOfAnotherTypeFallsThroughToTheParent() {
+        Group staff = groups.root(GroupType.STAFF, "HR STAFF");
+        agree(caravanClub, lakeCampsite);
+        caravanClubJunior.addAssociatedGroup(staff);
+
+        assertThat(GroupServiceHelper.getAcceptanceAgreements(caravanClubJunior, GroupType.SITE))
+                .containsExactly(lakeCampsite);
+    }
 
     @Test
     void subtreeIdsCanBeFilteredByDisplayNameIgnoringCase() {
@@ -59,6 +124,20 @@ class GroupServiceHelperTest {
         GroupServiceHelper.checkParent(pineCampsite, errors, new HashSet<>());
 
         assertThat(errors).singleElement().asString().contains("Type hierarchy broken", "WRONG");
+    }
+
+    @Test
+    void onlyIssuerToSiteAgreementsAreValid() {
+        List<String> errors = new ArrayList<>();
+        agree(caravanClub, adriatic);
+        bayCampsite.addAssociatedGroup(lakeCampsite);
+        caravanClubJunior.addAssociatedGroup(issuers);
+
+        GroupServiceHelper.checkAgreements(caravanClub, errors);
+        GroupServiceHelper.checkAgreements(bayCampsite, errors);
+        GroupServiceHelper.checkAgreements(caravanClubJunior, errors);
+
+        assertThat(errors).hasSize(2);
     }
 
     @Test

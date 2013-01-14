@@ -73,6 +73,18 @@ class GroupServiceTest {
     }
 
     @Test
+    void cardsAreAcceptedOnlyInTheSubtreesOfTheEffectiveAgreements() {
+        Group issuers = groups.root(GroupType.ISSUER, "HR ISSUERS");
+        Group club = groups.child(issuers, "CARAVAN CLUB");
+        InMemoryGroups.agree(club, networkAccess);
+
+        assertThat(groupService.isAcceptedAt(club, affiliate.getId())).isTrue();
+        assertThat(groupService.isAcceptedAt(club, sites.getId())).isFalse();
+        assertThat(groupService.isAcceptedAt(issuers, affiliate.getId())).isFalse();
+        assertThat(groupService.isAcceptedAt(null, affiliate.getId())).isFalse();
+    }
+
+    @Test
     void parentLineGoesFromTheGroupToTheRootOrBack() {
         when(groupDao.findById(affiliate.getId())).thenReturn(Optional.of(affiliate));
 
@@ -90,5 +102,16 @@ class GroupServiceTest {
         assertThatThrownBy(() -> groupManager.createChildGroup(sites, "RECEPTION", "Reception", GroupType.STAFF))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Group type mismatch");
+    }
+
+    @Test
+    void agreementsOnlyLeadFromIssuerToSite() {
+        GroupManager groupManager = new GroupManager(groupDao);
+        Group issuers = groups.root(GroupType.ISSUER, "HR ISSUERS");
+
+        assertThatThrownBy(() -> groupManager.addAcceptanceAgreement(sites, networkAccess))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> groupManager.addAcceptanceAgreement(issuers, issuers))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

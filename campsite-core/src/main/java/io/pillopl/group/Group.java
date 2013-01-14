@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -22,6 +24,7 @@ import java.util.List;
  * Node of one of the three typed organisation trees (see {@link GroupType}).
  * <p>
  * The name carries logic (market prefix, affiliate prefix, roots looked up by name) and is unique within the type.
+ * The acceptance agreements are not a tree element: an ISSUER group lists SITE groups where its cards are accepted.
  */
 @Entity
 @Table(name = "TBL_GROUP")
@@ -51,6 +54,17 @@ public class Group {
     @Column(name = "DISPLAYNAME", nullable = false, length = 256)
     private String displayName;
 
+    /*
+     * Not a tree element: the list of groups of another tree attached to this one, i.e. the SITE groups where the
+     * cards of this ISSUER group are accepted.
+     */
+    @ManyToMany
+    @JoinTable(name = "GROUP_ASSOCIATEDGROUP",
+            joinColumns = @JoinColumn(name = "GROUP_ID"),
+            inverseJoinColumns = @JoinColumn(name = "ASSOCIATEDGROUP_ID"))
+    @OrderBy("id")
+    private List<Group> groups = new ArrayList<>();
+
     public Group() {
     }
 
@@ -75,6 +89,12 @@ public class Group {
     public void addChild(Group group) {
         if (!children.contains(group)) {
             children.add(group);
+        }
+    }
+
+    public void addAssociatedGroup(Group group) {
+        if (!groups.contains(group)) {
+            groups.add(group);
         }
     }
 

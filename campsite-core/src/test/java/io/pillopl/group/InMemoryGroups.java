@@ -22,4 +22,10 @@ class InMemoryGroups {
         parent.addChild(group);
         return group;
     }
+
+    static void agree(Group issuerGroup, Group... siteGroups) {
+        for (Group siteGroup : siteGroups) {
+            issuerGroup.addAssociatedGroup(siteGroup);
+        }
+    }
 }

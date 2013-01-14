@@ -16,7 +16,7 @@ import java.util.Set;
 
 /**
  * Organisation trees: lookups by the names that carry logic, administrative scope by subtree, markets from name
- * prefixes.
+ * prefixes and acceptance agreements (one semantics, see {@link GroupServiceHelper#getAcceptanceAgreements}).
  */
 @Service
 public class GroupService {
@@ -35,7 +35,7 @@ public class GroupService {
     /**
      * Consistency check of the trees, run by an integration test and by the nightly control job.
      * <p>
-     * Today it checks the type hierarchy. Next to come (same loop shape): staff users must hang
+     * Today it checks the type hierarchy and the agreements. Next to come (same loop shape): staff users must hang
      * in STAFF groups, guests in ISSUER groups, pedestals in SITE groups.
      *
      * @return true when no error was found (errors are logged)
@@ -49,6 +49,11 @@ public class GroupService {
         // check for valid type-hierarchy
         for (Group g : all) {
             GroupServiceHelper.checkParent(g, errors, checked);
+        }
+
+        // agreements only ISSUER -> SITE
+        for (Group g : all) {
+            GroupServiceHelper.checkAgreements(g, errors);
         }
 
         for (String error : errors) {
@@ -207,6 +212,26 @@ public class GroupService {
             }
         }
         return result;
+    }
+
+    /**
+     * In-memory walk: ids of the SITE groups where cards of the issuer group are accepted.
+     */
+    @Transactional(readOnly = true)
+    public List<Long> extractAllAcceptingSiteGroupIds(Group issuerGroup) {
+        return GroupServiceHelper.extractAllAcceptingSiteGroupIds(issuerGroup);
+    }
+
+    /**
+     * True when cards of the issuer group are accepted in the given SITE group.
+     */
+    @Transactional(readOnly = true)
+    public boolean isAcceptedAt(Group issuerGroup, Long siteGroupId) {
+        if (issuerGroup == null || siteGroupId == null) {
+            return false;
+        }
+        List<Long> allGroupIds = GroupServiceHelper.extractAllAcceptingSiteGroupIds(issuerGroup);
+        return allGroupIds.contains(siteGroupId);
     }
 
     /*NON_TRANSACTIONAL*/

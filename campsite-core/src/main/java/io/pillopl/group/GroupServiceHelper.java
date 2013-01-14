@@ -2,12 +2,17 @@ package io.pillopl.group;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 /**
  * Walks over the loaded group trees in memory (no DAO access here, no transactions).
+ * <p>
+ * The acceptance agreement rule implemented here is the only one in the system and is the same as the SQL
+ * {@code findAcceptingGroupIds}: the nearest ancestor-or-self with a non-empty agreement list replaces the lists
+ * of all groups above it.
  */
 public final class GroupServiceHelper {
 
@@ -33,6 +38,77 @@ public final class GroupServiceHelper {
             }
             return name1.compareTo(name2);
         }
+    }
+
+    /**
+     * Agreement list → subtrees → ids.
+     *
+     * @return ids of all SITE groups where the cards of the ISSUER group are accepted
+     */
+    public static List<Long> extractAllAcceptingSiteGroupIds(Group issuerGroup) {
+        return extractAllAcceptingGroupIds(issuerGroup, GroupType.SITE);
+    }
+
+    public static List<Long> extractAllAcceptingGroupIds(Group group, GroupType targetGroupType) {
+        List<Group> agreements = getAcceptanceAgreements(group, targetGroupType);
+        if (agreements.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Long> allAcceptingGroupIds = new ArrayList<>();
+        for (Group agreement : agreements) {
+            for (Long id : extractAllManageableGroupIDsForGroup(agreement, null)) {
+                if (!allAcceptingGroupIds.contains(id)) {
+                    allAcceptingGroupIds.add(id);
+                }
+            }
+        }
+        return allAcceptingGroupIds;
+    }
+
+    public static List<Group> extractAllAcceptingGroups(Group group, GroupType targetGroupType) {
+        List<Group> agreements = getAcceptanceAgreements(group, targetGroupType);
+        if (agreements.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Group> allAcceptingGroups = new ArrayList<>();
+        for (Group agreement : agreements) {
+            for (Group accepting : extractAllManageableGroupsForGroup(agreement)) {
+                if (!allAcceptingGroups.contains(accepting)) {
+                    allAcceptingGroups.add(accepting);
+                }
+            }
+        }
+        return allAcceptingGroups;
+    }
+
+    /**
+     * Recursion up the parent line: the nearest ancestor-or-self whose agreement list contains groups of the target
+     * type owns the list; lists above it are replaced, not merged. The type is checked on every element of the list
+     * (elements of another type are not agreements of this kind and are ignored).
+     */
+    public static List<Group> getAcceptanceAgreements(Group group, GroupType targetGroupType) {
+        if (group == null) {
+            return Collections.emptyList();
+        }
+
+        List<Group> agreements = new ArrayList<>();
+        if (group.getGroups() != null) {
+            for (Group associatedGroup : group.getGroups()) {
+                if (targetGroupType.isGroupType(associatedGroup)) {
+                    agreements.add(associatedGroup);
+                }
+            }
+        }
+        if (!agreements.isEmpty()) {
+            return agreements;
+        }
+
+        Group parent = group.getParent();
+        if (parent == null) {
+            return Collections.emptyList();
+        }
+
+        return getAcceptanceAgreements(parent, targetGroupType);
     }
 
     public static List<Long> extractAllManageableGroupIDsForGroup(Group group, String searchString) {
@@ -122,6 +198,21 @@ public final class GroupServiceHelper {
 
         if (!checked.contains(parent.getId())) {
             checkParent(parent, errors, checked);
+        }
+    }
+
+    /**
+     * Agreement check: an ISSUER group may only list SITE groups, other groups no agreements at all.
+     */
+    public static void checkAgreements(Group g, List<String> errors) {
+        if (g.getGroups() == null) {
+            return;
+        }
+        for (Group associatedGroup : g.getGroups()) {
+            if (!GroupType.ISSUER.isGroupType(g) || !GroupType.SITE.isGroupType(associatedGroup)) {
+                errors.add(String.format("Acceptance agreement %s -> %s is not ISSUER -> SITE",
+                        groupToPrettyString(g), groupToPrettyString(associatedGroup)));
+            }
         }
     }
 
