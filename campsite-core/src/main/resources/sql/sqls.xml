@@ -6,7 +6,7 @@
 -->
 <properties>
 
-    <comment>Group trees: subtrees, parent lines, acceptance agreements</comment>
+    <comment>Group trees: subtrees, parent lines, acceptance agreements, nearest attributes</comment>
 
     <!-- Subtree of a group including the group itself, ordered hierarchically (level, then id). -->
     <entry key="findManageableGroupIds"><![CDATA[
@@ -91,6 +91,34 @@ SELECT DISTINCT ao.source_id
   JOIN target_line tl ON tl.id = ga.ASSOCIATEDGROUP_ID
   JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = :targetType
  ORDER BY ao.source_id
+]]></entry>
+
+    <!-- Nearest ancestor-or-self site tenant (ORDER BY level: the nearest wins). -->
+    <entry key="findNearestSiteTenantId"><![CDATA[
+WITH RECURSIVE parent_line (id, parent_id, lvl) AS (
+    SELECT g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
+)
+SELECT a.ID
+  FROM parent_line pl
+  JOIN GRP_ATTR_SITE_TENANT a ON a.GROUP_ID = pl.id
+ ORDER BY pl.lvl
+ LIMIT 1
+]]></entry>
+
+    <!-- Nearest ancestor-or-self issuer tenant (ORDER BY level: the nearest wins). -->
+    <entry key="findNearestIssuerTenantId"><![CDATA[
+WITH RECURSIVE parent_line (id, parent_id, lvl) AS (
+    SELECT g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
+)
+SELECT a.ID
+  FROM parent_line pl
+  JOIN GRP_ATTR_ISSUER_TENANT a ON a.GROUP_ID = pl.id
+ ORDER BY pl.lvl
+ LIMIT 1
 ]]></entry>
 
 </properties>
