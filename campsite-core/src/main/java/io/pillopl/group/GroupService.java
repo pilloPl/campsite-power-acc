@@ -232,6 +232,18 @@ public class GroupService {
     }
 
     /**
+     * Whose cards are accepted in this SITE group (e.g. for the card lists of its pedestals), same semantics.
+     */
+    @Transactional(readOnly = true)
+    public List<Long> findIssuerGroupIdsAcceptedAt(Group siteGroup) {
+        Objects.requireNonNull(siteGroup);
+        if (!GroupType.SITE.isGroupType(siteGroup)) {
+            throw new IllegalStateException("Not a SITE group: " + GroupServiceHelper.groupToPrettyString(siteGroup));
+        }
+        return groupDao.findGroupIdsAcceptedAt(siteGroup.getId(), GroupType.ISSUER.name(), GroupType.SITE.name());
+    }
+
+    /**
      * True when cards of the issuer group are accepted in the given SITE group.
      */
     @Transactional(readOnly = true)

@@ -28,4 +28,10 @@ public interface GroupDaoCustom {
      * the subtrees of the nearest ancestor-or-self agreement list (that list replaces the lists above it).
      */
     List<Long> findAcceptingGroupIds(Long groupId, String targetType);
+
+    /**
+     * Reverse of {@link #findAcceptingGroupIds(Long, String)}, same semantics: groups of {@code sourceType} whose
+     * effective agreement list covers the given group.
+     */
+    List<Long> findGroupIdsAcceptedAt(Long groupId, String sourceType, String targetType);
 }

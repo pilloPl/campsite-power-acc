@@ -82,6 +82,22 @@ class AcceptanceAgreementIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void reverseSqlListsExactlyTheIssuersWhoseJavaAnswerContainsTheSite() {
+        List<Group> issuerGroups = groupService.fetchAllGroupsByType(GroupType.ISSUER);
+        for (Group siteGroup : groupService.fetchAllGroupsByType(GroupType.SITE)) {
+            List<Long> expected = new ArrayList<>();
+            for (Group issuerGroup : issuerGroups) {
+                if (groupService.extractAllAcceptingSiteGroupIds(issuerGroup).contains(siteGroup.getId())) {
+                    expected.add(issuerGroup.getId());
+                }
+            }
+            assertThat(groupService.findIssuerGroupIdsAcceptedAt(siteGroup))
+                    .as("issuers accepted at %s", siteGroup.getName())
+                    .containsExactlyInAnyOrderElementsOf(expected);
+        }
+    }
+
+    @Test
     void nearestAgreementListReplacesTheListOfTheParent() {
         assertThat(groupService.findAcceptingSiteGroupIds(reload(clubJuniorSummer)))
                 .containsExactlyInAnyOrder(lake.getId(), bayBeach.getId());
@@ -95,6 +111,18 @@ class AcceptanceAgreementIntegrationTest extends IntegrationTest {
 
         assertThat(groupService.findAcceptingSiteGroupIds(hrIssuers)).isEmpty();
         assertThat(groupService.extractAllAcceptingSiteGroupIds(hrIssuers)).isEmpty();
+    }
+
+    @Test
+    void cardsOfAnIssuerAreAcceptedWhereverItsEffectiveListReaches() {
+        assertThat(groupService.findIssuerGroupIdsAcceptedAt(reload(bayBeach)))
+                .containsExactlyInAnyOrder(networkCard.getId(), club.getId(), clubJunior.getId(),
+                        clubJuniorSummer.getId());
+        assertThat(groupService.findIssuerGroupIdsAcceptedAt(reload(pine)))
+                .containsExactlyInAnyOrder(networkCard.getId(), club.getId(), discountCards.getId(),
+                        discountGold.getId());
+        assertThat(groupService.findIssuerGroupIdsAcceptedAt(reload(affiliate)))
+                .containsExactly(networkCard.getId());
     }
 
     @Test

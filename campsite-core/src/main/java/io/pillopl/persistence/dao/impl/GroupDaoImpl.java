@@ -27,6 +27,9 @@ public class GroupDaoImpl implements GroupDaoCustom {
     @Value("#{sqls['findAcceptingGroupIds']}")
     private String findAcceptingGroupIds;
 
+    @Value("#{sqls['findGroupIdsAcceptedAt']}")
+    private String findGroupIdsAcceptedAt;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -67,6 +70,16 @@ public class GroupDaoImpl implements GroupDaoCustom {
                 .addValue("groupId", groupId)
                 .addValue("targetType", targetType);
         return jdbcTemplate.queryForList(findAcceptingGroupIds, params, Long.class);
+    }
+
+    @Override
+    public List<Long> findGroupIdsAcceptedAt(Long groupId, String sourceType, String targetType) {
+        Objects.requireNonNull(groupId, "groupId");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("groupId", groupId)
+                .addValue("sourceType", sourceType)
+                .addValue("targetType", targetType);
+        return jdbcTemplate.queryForList(findGroupIdsAcceptedAt, params, Long.class);
     }
 
     private List<Group> toGroups(List<Long> ids) {

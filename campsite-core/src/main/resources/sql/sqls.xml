@@ -60,4 +60,37 @@ accepted_subtree (id) AS (
 SELECT id FROM accepted_subtree ORDER BY id
 ]]></entry>
 
+    <!--
+      Reverse of findAcceptingGroupIds with the same semantics: all groups of :sourceType whose effective agreement
+      list (nearest ancestor-or-self with a non-empty list of :targetType groups) contains the group :groupId or one
+      of its ancestors. Used e.g. for "whose cards are accepted at this campsite" when exporting card lists.
+    -->
+    <entry key="findGroupIdsAcceptedAt"><![CDATA[
+WITH RECURSIVE source_line (source_id, id, parent_id, lvl) AS (
+    SELECT g.ID, g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.TYPENAME = :sourceType
+    UNION ALL
+    SELECT sl.source_id, p.ID, p.PARENT_ID, sl.lvl + 1 FROM TBL_GROUP p JOIN source_line sl ON p.ID = sl.parent_id
+),
+agreement_owner (source_id, owner_id) AS (
+    SELECT DISTINCT ON (sl.source_id) sl.source_id, sl.id
+      FROM source_line sl
+     WHERE EXISTS (SELECT 1
+                     FROM GROUP_ASSOCIATEDGROUP ga
+                     JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = :targetType
+                    WHERE ga.GROUP_ID = sl.id)
+     ORDER BY sl.source_id, sl.lvl
+),
+target_line (id, parent_id) AS (
+    SELECT g.ID, g.PARENT_ID FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID FROM TBL_GROUP p JOIN target_line tl ON p.ID = tl.parent_id
+)
+SELECT DISTINCT ao.source_id
+  FROM agreement_owner ao
+  JOIN GROUP_ASSOCIATEDGROUP ga ON ga.GROUP_ID = ao.owner_id
+  JOIN target_line tl ON tl.id = ga.ASSOCIATEDGROUP_ID
+  JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = :targetType
+ ORDER BY ao.source_id
+]]></entry>
+
 </properties>
