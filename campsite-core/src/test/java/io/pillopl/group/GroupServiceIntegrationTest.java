@@ -15,6 +15,9 @@ class GroupServiceIntegrationTest extends IntegrationTest {
     GroupService groupService;
 
     @Autowired
+    AffiliateGroupService affiliateGroupService;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
@@ -47,6 +50,39 @@ class GroupServiceIntegrationTest extends IntegrationTest {
         assertThat(it.findHouseCardsOnlySiteGroup().getId()).isEqualTo(62L);
         assertThat(it.findWelcomeCardPoolIssuerGroup().getId()).isEqualTo(42L);
         assertThat(it.findReceptionStaffGroup().getId()).isEqualTo(72L);
+    }
+
+    @Test
+    void marketAdminManagesItsCampsitesButNotAnotherMarket() {
+        Group hrSites = groupService.fetchByGroupId(11L);
+        Group affiliate = affiliateGroupService.createAffiliateSiteGroup("marko", "Marko's campsite", Market.HR,
+                AccessMode.NETWORK_ACCESS);
+
+        assertThat(groupService.isManageable(hrSites, affiliate)).isTrue();
+        assertThat(groupService.isManageable(groupService.fetchByGroupId(12L), affiliate)).isFalse();
+        assertThat(groupService.isManageable(affiliate, hrSites)).isFalse();
+    }
+
+    @Test
+    void affiliateCampsiteGetsTheAccessModeOfTheParentItWasCreatedUnder() {
+        Group open = affiliateGroupService.createAffiliateSiteGroup("marko", "Marko", Market.HR,
+                AccessMode.NETWORK_ACCESS);
+        Group closed = affiliateGroupService.createAffiliateSiteGroup("ana", "Ana", Market.FR,
+                AccessMode.HOUSE_CARDS_ONLY);
+
+        assertThat(open.getName()).isEqualTo("AFFILIATE marko");
+        assertThat(affiliateGroupService.checkAccessMode(open.getId())).isEqualTo(AccessMode.NETWORK_ACCESS);
+        assertThat(affiliateGroupService.checkAccessMode(closed.getId())).isEqualTo(AccessMode.HOUSE_CARDS_ONLY);
+        assertThat(affiliateGroupService.isAffiliate(open.getId())).isTrue();
+        assertThat(affiliateGroupService.findAffiliateSiteGroup("ana")).isEqualTo(closed);
+        assertThat(groupService.determineMarketByGroupId(closed.getId())).isEqualTo(Market.FR);
+    }
+
+    @Test
+    void groupThatIsNoAffiliateHasNoAccessMode() {
+        assertThat(affiliateGroupService.checkAccessMode(51L)).isNull();
+        assertThat(affiliateGroupService.checkAccessMode(999_999L)).isNull();
+        assertThat(affiliateGroupService.isAffiliate(51L)).isFalse();
     }
 
     @Test

@@ -141,6 +141,12 @@ class GroupServiceHelperTest {
     }
 
     @Test
+    void affiliateAndSupplierGroupNamesAreComposedFromTheirPrefix() {
+        assertThat(GroupServiceHelper.getAffiliateGroupName("marko")).isEqualTo("AFFILIATE marko");
+        assertThat(GroupServiceHelper.getSupplierGroupName("ACME PEDESTALS")).isEqualTo("SUPPLIER ACME PEDESTALS");
+    }
+
+    @Test
     void groupMarketsAreOnlyThePrefixMarkets() {
         assertThat(GroupServiceHelper.getGroupMarkets()).containsExactly("HR", "IT", "FR");
     }

@@ -164,6 +164,14 @@ public final class GroupServiceHelper {
         return list;
     }
 
+    public static String getAffiliateGroupName(String username) {
+        return concat(GroupServiceConstants.PREFIX_AFFILIATE, username);
+    }
+
+    public static String getSupplierGroupName(String manufacturer) {
+        return concat(GroupServiceConstants.PREFIX_SUPPLIER, manufacturer);
+    }
+
     /**
      * Checks whether the group name starts with a market prefix ("HR ") and passes the market back.
      *
