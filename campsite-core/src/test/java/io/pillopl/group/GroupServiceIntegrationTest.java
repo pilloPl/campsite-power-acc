@@ -18,6 +18,9 @@ class GroupServiceIntegrationTest extends IntegrationTest {
     AffiliateGroupService affiliateGroupService;
 
     @Autowired
+    IssuerCodeService issuerCodeService;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
@@ -83,6 +86,11 @@ class GroupServiceIntegrationTest extends IntegrationTest {
         assertThat(affiliateGroupService.checkAccessMode(51L)).isNull();
         assertThat(affiliateGroupService.checkAccessMode(999_999L)).isNull();
         assertThat(affiliateGroupService.isAffiliate(51L)).isFalse();
+    }
+
+    @Test
+    void networkCardIssuerCodeComesFromItsMarket() {
+        assertThat(issuerCodeService.defineIssuer(groupService.fetchNetworkCardIssuerGroup())).isEqualTo("CPN-HR");
     }
 
     @Test
