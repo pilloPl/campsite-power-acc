@@ -6,7 +6,7 @@
 -->
 <properties>
 
-    <comment>Group trees: subtrees and parent lines</comment>
+    <comment>Group trees: subtrees, parent lines, acceptance agreements</comment>
 
     <!-- Subtree of a group including the group itself, ordered hierarchically (level, then id). -->
     <entry key="findManageableGroupIds"><![CDATA[
@@ -26,6 +26,38 @@ WITH RECURSIVE parent_line (id, parent_id, lvl) AS (
     SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
 )
 SELECT id FROM parent_line ORDER BY lvl
+]]></entry>
+
+    <!--
+      Acceptance agreements, the one semantics: walk up from the group, the nearest ancestor-or-self having at least
+      one agreement with a group of :targetType owns the list and replaces all lists above it. Result: the subtrees
+      of the agreed groups.
+    -->
+    <entry key="findAcceptingGroupIds"><![CDATA[
+WITH RECURSIVE parent_line (id, parent_id, lvl) AS (
+    SELECT g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
+),
+agreement_owner (id) AS (
+    SELECT pl.id
+      FROM parent_line pl
+     WHERE EXISTS (SELECT 1
+                     FROM GROUP_ASSOCIATEDGROUP ga
+                     JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = :targetType
+                    WHERE ga.GROUP_ID = pl.id)
+     ORDER BY pl.lvl
+     LIMIT 1
+),
+accepted_subtree (id) AS (
+    SELECT ga.ASSOCIATEDGROUP_ID
+      FROM GROUP_ASSOCIATEDGROUP ga
+      JOIN agreement_owner ao ON ga.GROUP_ID = ao.id
+      JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = :targetType
+    UNION
+    SELECT c.ID FROM TBL_GROUP c JOIN accepted_subtree s ON c.PARENT_ID = s.id
+)
+SELECT id FROM accepted_subtree ORDER BY id
 ]]></entry>
 
 </properties>

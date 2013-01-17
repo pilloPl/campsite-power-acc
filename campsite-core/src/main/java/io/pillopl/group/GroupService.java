@@ -223,6 +223,15 @@ public class GroupService {
     }
 
     /**
+     * The same answer as {@link #extractAllAcceptingSiteGroupIds(Group)}, computed by the recursive SQL.
+     */
+    @Transactional(readOnly = true)
+    public List<Long> findAcceptingSiteGroupIds(Group issuerGroup) {
+        Objects.requireNonNull(issuerGroup);
+        return groupDao.findAcceptingGroupIds(issuerGroup.getId(), GroupType.SITE.name());
+    }
+
+    /**
      * True when cards of the issuer group are accepted in the given SITE group.
      */
     @Transactional(readOnly = true)

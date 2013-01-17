@@ -22,4 +22,10 @@ public interface GroupDaoCustom {
     List<Long> findParents(Long groupId);
 
     List<Group> findParentGroups(Long groupId);
+
+    /**
+     * Groups of {@code targetType} accepting the group (e.g. SITE groups accepting cards of an ISSUER group):
+     * the subtrees of the nearest ancestor-or-self agreement list (that list replaces the lists above it).
+     */
+    List<Long> findAcceptingGroupIds(Long groupId, String targetType);
 }
