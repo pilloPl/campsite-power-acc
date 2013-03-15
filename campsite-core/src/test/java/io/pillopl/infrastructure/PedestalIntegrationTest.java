@@ -24,6 +24,7 @@ class PedestalIntegrationTest extends IntegrationTest {
     @Autowired GroupService groupService;
     @Autowired EntityManager entityManager;
     @Autowired JdbcTemplate jdbcTemplate;
+    @Autowired io.pillopl.persistence.dao.PedestalStateDao pedestalStateDao;
 
     @Test
     void pedestalIsStoredWithItsSocketsInPositionOrder() {
@@ -71,5 +72,18 @@ class PedestalIntegrationTest extends IntegrationTest {
         assertThat(socket.getPedestal()).isEqualTo(pedestal);
         assertThat(pedestalDao.findBySocketId(socket.getId())).isEqualTo(pedestal);
         assertThat(socket.getMaxCurrentInAmperes()).isEqualTo(16);
+    }
+
+    @Test
+    void linkStateIsKeptOncePerPedestal() {
+        Pedestal pedestal = fixture.pedestal("HR-BAY-P005", groupService.fetchSiteGroup("HR SITES"), 1);
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        pedestalStateDao.saveAndFlush(new PedestalState(pedestal, now.minusHours(1)));
+
+        assertThat(pedestalStateDao.findByPedestalId(pedestal.getId()).isTimeout()).isFalse();
+        assertThat(pedestalStateDao.findAliveWithLastIncomingBefore(now.minusMinutes(15))).hasSize(1);
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> pedestalStateDao.saveAndFlush(new PedestalState(pedestal, now)))
+                .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     }
 }
