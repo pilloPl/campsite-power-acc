@@ -55,6 +55,10 @@ public class MarketExtension<M extends Enum<Market>> {
         return GroupServiceHelper.getGroupByName(getReceptionGroupName(), groups);
     }
 
+    public Group findSelfServiceStaffGroup() {
+        return groupService.fetchStaffGroup(getSelfServiceGroupName());
+    }
+
     public String getIssuerRootName() {
         return GroupServiceHelper.concat(market.name(), GroupServiceConstants.ISSUERS);
     }
@@ -81,6 +85,10 @@ public class MarketExtension<M extends Enum<Market>> {
 
     public String getReceptionGroupName() {
         return GroupServiceHelper.concat(market.name(), GroupServiceConstants.RECEPTION);
+    }
+
+    public String getSelfServiceGroupName() {
+        return GroupServiceHelper.concat(market.name(), GroupServiceConstants.SELF_SERVICE);
     }
 
     public String getRootName(GroupType groupType) {

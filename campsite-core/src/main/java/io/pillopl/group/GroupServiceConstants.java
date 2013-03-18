@@ -29,6 +29,11 @@ public final class GroupServiceConstants {
     public static final String RECEPTION = "RECEPTION";
 
     /**
+     * STAFF group of the self-service console users of a market: "&lt;MKT&gt; SELF SERVICE".
+     */
+    public static final String SELF_SERVICE = "SELF SERVICE";
+
+    /**
      * Welcome cards shipped with an affiliate kit, adopted by the affiliate campsite on first use.
      */
     public static final String WELCOME_CARD_POOL = "WELCOME_CARD_POOL";

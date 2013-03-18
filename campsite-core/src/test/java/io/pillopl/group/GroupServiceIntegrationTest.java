@@ -53,6 +53,7 @@ class GroupServiceIntegrationTest extends IntegrationTest {
         assertThat(it.findHouseCardsOnlySiteGroup().getId()).isEqualTo(62L);
         assertThat(it.findWelcomeCardPoolIssuerGroup().getId()).isEqualTo(42L);
         assertThat(it.findReceptionStaffGroup().getId()).isEqualTo(72L);
+        assertThat(it.findSelfServiceStaffGroup().getId()).isEqualTo(82L);
     }
 
     @Test

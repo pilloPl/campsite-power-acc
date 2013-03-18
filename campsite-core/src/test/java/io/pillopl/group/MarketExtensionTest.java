@@ -20,6 +20,7 @@ class MarketExtensionTest {
         assertThat(it.getHouseCardsOnlyGroupName()).isEqualTo("HOUSE CARDS ONLY IT");
         assertThat(it.getWelcomeCardPoolGroupName()).isEqualTo("IT WELCOME_CARD_POOL");
         assertThat(it.getReceptionGroupName()).isEqualTo("IT RECEPTION");
+        assertThat(it.getSelfServiceGroupName()).isEqualTo("IT SELF SERVICE");
         assertThat(it.getRootName(GroupType.SITE)).isEqualTo("IT SITES");
     }
 }
