@@ -19,6 +19,12 @@ public interface UserinfoDao extends JpaRepository<Userinfo, Long> {
     @Query("select u from Userinfo u where lower(u.username) like lower(concat(:username, '%')) order by u.username")
     List<Userinfo> findByUsernameStartingWith(@Param("username") String username);
 
+    /**
+     * All users with this username ignoring case (deleted ones too): a generated username must not collide.
+     */
+    @Query("select u from Userinfo u where lower(u.username) = lower(:username)")
+    List<Userinfo> findAllByUsernameIgnoreCase(@Param("username") String username);
+
     @Query("select u from Userinfo u where lower(u.email) = lower(:email) and u.deleted = false order by u.id")
     List<Userinfo> findByEmail(@Param("email") String email);
 
