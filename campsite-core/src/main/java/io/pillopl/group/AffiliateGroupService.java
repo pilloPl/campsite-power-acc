@@ -1,11 +1,14 @@
 package io.pillopl.group;
 
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.GroupDao;
+import io.pillopl.persistence.dao.PedestalDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,10 +26,14 @@ public class AffiliateGroupService {
 
     private final GroupManager groupManager;
 
-    public AffiliateGroupService(GroupDao groupDao, GroupService groupService, GroupManager groupManager) {
+    private final PedestalDao pedestalDao;
+
+    public AffiliateGroupService(GroupDao groupDao, GroupService groupService, GroupManager groupManager,
+                                 PedestalDao pedestalDao) {
         this.groupDao = groupDao;
         this.groupService = groupService;
         this.groupManager = groupManager;
+        this.pedestalDao = pedestalDao;
     }
 
     @Transactional(readOnly = true)
@@ -45,6 +52,59 @@ public class AffiliateGroupService {
         }
         return groupManager.createChildGroup(parent, GroupServiceHelper.getAffiliateGroupName(username), displayName,
                 GroupType.SITE);
+    }
+
+    /**
+     * Moves the affiliate campsite group under "NETWORK ACCESS &lt;MKT&gt;" or "HOUSE CARDS ONLY &lt;MKT&gt;" and sets the
+     * flags of its pedestals: with network access they are listed in the app and remote controlled as requested;
+     * with house cards only they are neither listed nor remote controlled nor settled by the campsite.
+     *
+     * @return the access mode after the switch, or null (logged) when the group is not an affiliate group
+     */
+    @Transactional
+    public AccessMode switchAccessMode(Long groupId, AccessMode targetMode, boolean listedInApp) {
+        if (targetMode == AccessMode.HOUSE_CARDS_ONLY && listedInApp) {
+            LOG.warn("House cards only with listed in app seems not reasonable");
+        }
+
+        Market market = groupService.determineMarketByGroupId(groupId);
+        MarketExtension<Market> extension = groupService.getExtensionByMarket(market != null ? market : Market.UNKNOWN);
+        Group houseCardsOnlyGroup = extension.findHouseCardsOnlySiteGroup();
+        Group networkAccessGroup = extension.findNetworkAccessSiteGroup();
+        Group affiliateGroup = groupId != null ? groupDao.findById(groupId).orElse(null) : null;
+        AccessMode accessMode = checkAccessMode(groupId);
+        if (affiliateGroup != null && accessMode != null) {
+            if (networkAccessGroup != null && houseCardsOnlyGroup != null) {
+                List<Pedestal> pedestals = pedestalDao.findByGroupIds(List.of(affiliateGroup.getId()));
+                if (targetMode == AccessMode.NETWORK_ACCESS) { // switch to network access
+                    affiliateGroup.setParent(networkAccessGroup);
+                    for (Pedestal pedestal : pedestals) {
+                        pedestal.setListedInApp(listedInApp);
+                        // when the pedestal is not listed in the app it should not be remote controlled
+                        pedestal.setRemoteControl(listedInApp);
+                        pedestalDao.save(pedestal);
+                    }
+                } else { // switch to house cards only
+                    affiliateGroup.setParent(houseCardsOnlyGroup);
+                    for (Pedestal pedestal : pedestals) {
+                        pedestal.setListedInApp(false);
+                        pedestal.setRemoteControl(false);
+                        pedestal.setSettledByCampsite(false);
+                        pedestalDao.save(pedestal);
+                    }
+                }
+                groupDao.saveAndFlush(affiliateGroup);
+            } else {
+                LOG.error(String.format("Under the SITE root there should be one %s and one %s group "
+                        + "(affiliate group id: %s)", GroupServiceConstants.NETWORK_ACCESS,
+                        GroupServiceConstants.HOUSE_CARDS_ONLY, groupId));
+            }
+            accessMode = checkAccessMode(affiliateGroup);
+        } else {
+            LOG.error(String.format("Seems that the group is not set up right, affiliate group id: %s", groupId));
+        }
+
+        return accessMode;
     }
 
     /**
