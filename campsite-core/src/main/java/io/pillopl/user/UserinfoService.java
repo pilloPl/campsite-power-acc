@@ -1,6 +1,8 @@
 package io.pillopl.user;
 
 import io.pillopl.group.AccessDeniedException;
+import io.pillopl.group.AccessMode;
+import io.pillopl.group.AffiliateGroupService;
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
 import io.pillopl.group.GroupType;
@@ -44,10 +46,14 @@ public class UserinfoService {
 
     private final GroupService groupService;
 
-    public UserinfoService(UserinfoDao userinfoDao, UserroleDao userroleDao, GroupService groupService) {
+    private final AffiliateGroupService affiliateGroupService;
+
+    public UserinfoService(UserinfoDao userinfoDao, UserroleDao userroleDao, GroupService groupService,
+                           AffiliateGroupService affiliateGroupService) {
         this.userinfoDao = userinfoDao;
         this.userroleDao = userroleDao;
         this.groupService = groupService;
+        this.affiliateGroupService = affiliateGroupService;
     }
 
     public Userinfo find(Long id) {
@@ -252,6 +258,94 @@ public class UserinfoService {
         Userinfo user = userinfoDao.findByUsername(username);
         user.setName(name);
         return userinfoDao.save(user);
+    }
+
+    /**
+     * Sets a user up as owner of an affiliate campsite, including groups and roles. <b>All other scope groups are
+     * removed</b>; existing roles stay. May run again for an owner set up before: an existing affiliate group keeps
+     * its parent (its access mode). A new affiliate group starts as HOUSE CARDS ONLY.
+     */
+    public Userinfo setupAffiliateOwner(final Userinfo userinfo) {
+        Market market = determineMarket(userinfo.getUsername());
+        if (market == null) {
+            throw new IllegalStateException("Cannot set up affiliate owner without market: " + userinfo.getUsername());
+        }
+        Group selfServiceGroup = groupService.getExtensionByMarket(market).findSelfServiceStaffGroup();
+        Group houseCardsOnly = groupService.getExtensionByMarket(market).findHouseCardsOnlySiteGroup();
+        if (selfServiceGroup == null || houseCardsOnly == null) {
+            throw new IllegalStateException(String.format(
+                    "Self service group and/or %s group of market %s could not be found", AccessMode.HOUSE_CARDS_ONLY,
+                    market));
+        }
+
+        Group affiliateGroup = affiliateGroupService.findAffiliateSiteGroup(userinfo.getUsername());
+        if (affiliateGroup == null) {
+            // default setup is house cards only
+            affiliateGroup = affiliateGroupService.createAffiliateSiteGroup(userinfo.getUsername(), userinfo.getName(),
+                    market, AccessMode.HOUSE_CARDS_ONLY);
+        }
+        List<Group> groups = new ArrayList<>(); // an affiliate owner only has his one SITE group
+        groups.add(affiliateGroup);
+        userinfo.setGroups(groups);
+
+        userinfo.setGroup(selfServiceGroup);
+
+        // add the roles if not already set
+        if (!userinfo.containsRole(UserroleName.AFFILIATE_OWNER)) {
+            userinfo.getRoles().add(userroleDao.findByName(UserroleName.AFFILIATE_OWNER.name()));
+        }
+        if (Market.HR != market && !userinfo.containsRole(UserroleName.AFFILIATE_PRICE_REPORTING)) {
+            userinfo.getRoles().add(userroleDao.findByName(UserroleName.AFFILIATE_PRICE_REPORTING.name()));
+        }
+        return userinfoDao.save(userinfo);
+    }
+
+    /**
+     * Checks the group set-up of an affiliate owner (before commissioning pedestals for him).
+     *
+     * @return the owner, or null when the set-up was not done yet (no affiliate group at all, a valid state)
+     * @throws AffiliateSetupException when the set-up is broken
+     */
+    public Userinfo checkAffiliateOwnerSetup(String ownerUsername) {
+        Userinfo owner = userinfoDao.findByUsername(ownerUsername);
+        if (owner == null) {
+            String message = String.format("Affiliate owner '%s' not found", ownerUsername);
+            LOG.error(message);
+            throw new AffiliateSetupException(message);
+        }
+
+        Group affiliateGroup = affiliateGroupService.findAffiliateSiteGroup(ownerUsername);
+        Group ownersSiteGroup = owner.getGroup(GroupType.SITE);
+        if (ownersSiteGroup == null && affiliateGroup == null) { // only this case is a valid state
+            LOG.error("Seems that the affiliate owner's group setup is not done yet. There is no affiliate group.");
+            return null;
+        }
+        if (ownersSiteGroup != null && affiliateGroup == null) {
+            String message = "Seems something is wrong with the affiliate owner's group setup. The owner has a SITE "
+                    + "group, but the naming is wrong ('" + ownersSiteGroup.getName() + "')";
+            LOG.error(message);
+            throw new AffiliateSetupException(message);
+        }
+        if (affiliateGroup.getParent() == null) {
+            String message = "Seems something is wrong with the affiliate owner's group setup. The affiliate group has "
+                    + "no parent group.";
+            LOG.error(message);
+            throw new AffiliateSetupException(message);
+        }
+        if (ownersSiteGroup == null) {
+            String message = "Seems something is wrong with the affiliate owner's group setup. The affiliate group "
+                    + "exists but is not associated to the owner.";
+            LOG.error(message);
+            throw new AffiliateSetupException(message);
+        }
+        if (!affiliateGroup.getId().equals(ownersSiteGroup.getId())) {
+            String message = "Seems something is wrong with the affiliate owner's group setup. There is an affiliate "
+                    + "group but it's not the one associated to the owner.";
+            LOG.error(message);
+            throw new AffiliateSetupException(message);
+        }
+
+        return owner;
     }
 
     public List<Userinfo> findByAssociatedGroup(Group searchGroup) {

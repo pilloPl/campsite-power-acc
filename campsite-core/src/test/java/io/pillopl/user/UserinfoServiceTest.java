@@ -21,7 +21,7 @@ class UserinfoServiceTest {
     private final UserinfoDao userinfoDao = mock(UserinfoDao.class);
     private final GroupService groupService = mock(GroupService.class);
     private final UserinfoService userinfoService = new UserinfoService(userinfoDao, mock(UserroleDao.class),
-            groupService);
+            groupService, mock(io.pillopl.group.AffiliateGroupService.class));
 
     private final Group hrStaff = group(GroupType.STAFF, 21L, "HR STAFF");
     private final Group reception = group(GroupType.STAFF, 71L, "HR RECEPTION");
