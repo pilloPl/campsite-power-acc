@@ -1,6 +1,10 @@
 package io.pillopl.group;
 
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.GroupDao;
+import io.pillopl.persistence.dao.PedestalDao;
+import io.pillopl.persistence.dao.UserinfoDao;
+import io.pillopl.user.Userinfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,16 +31,23 @@ public class GroupService {
 
     private final GroupManager groupManager;
 
-    public GroupService(GroupDao groupDao, GroupManager groupManager) {
+    private final UserinfoDao userinfoDao;
+
+    private final PedestalDao pedestalDao;
+
+    public GroupService(GroupDao groupDao, GroupManager groupManager, UserinfoDao userinfoDao,
+                        PedestalDao pedestalDao) {
         this.groupDao = groupDao;
         this.groupManager = groupManager;
+        this.userinfoDao = userinfoDao;
+        this.pedestalDao = pedestalDao;
     }
 
     /**
      * Consistency check of the trees, run by an integration test and by the nightly control job.
      * <p>
-     * Today it checks the type hierarchy and the agreements. Next to come (same loop shape): staff users must hang
-     * in STAFF groups, guests in ISSUER groups, pedestals in SITE groups.
+     * Checks the type hierarchy, the agreements, that console users hang in STAFF groups and pedestals in SITE groups.
+     * Next to come (same loop shape): guests in ISSUER groups.
      *
      * @return true when no error was found (errors are logged)
      */
@@ -54,6 +65,38 @@ public class GroupService {
         // agreements only ISSUER -> SITE
         for (Group g : all) {
             GroupServiceHelper.checkAgreements(g, errors);
+        }
+
+        // check for type and correctly attached objects, only for users and pedestals (guests later),
+        // to make sure they are correctly attached to their trees
+
+        // find all users
+        List<Userinfo> users = userinfoDao.findAll();
+
+        for (Userinfo user : users) {
+            if (user.getGroup() == null) {
+                // a user without group is allowed (not yet set up)
+                continue;
+            }
+
+            if (!GroupType.STAFF.isGroupType(user.getGroup())) {
+                errors.add(String.format("User %s is attached to the wrong group %s", user,
+                        user.getGroup().getType()));
+            }
+        }
+
+        // find all pedestals
+        List<Pedestal> pedestals = pedestalDao.findAll();
+
+        for (Pedestal pedestal : pedestals) {
+            if (pedestal.getGroup() == null) {
+                errors.add(String.format("No group attached to Pedestal %s", pedestal));
+                continue;
+            }
+            if (!GroupType.SITE.isGroupType(pedestal.getGroup())) {
+                errors.add(String.format("Pedestal %s is attached to the wrong group %s", pedestal,
+                        pedestal.getGroup().getType()));
+            }
         }
 
         for (String error : errors) {

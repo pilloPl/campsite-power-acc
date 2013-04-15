@@ -15,7 +15,8 @@ class GroupServiceTest {
 
     private final InMemoryGroups groups = new InMemoryGroups();
     private final GroupDao groupDao = mock(GroupDao.class);
-    private final GroupService groupService = new GroupService(groupDao, new GroupManager(groupDao));
+    private final GroupService groupService = new GroupService(groupDao, new GroupManager(groupDao),
+            mock(io.pillopl.persistence.dao.UserinfoDao.class), mock(io.pillopl.persistence.dao.PedestalDao.class));
 
     private final Group sites = groups.root(GroupType.SITE, "HR SITES");
     private final Group networkAccess = groups.child(sites, "NETWORK ACCESS HR");
