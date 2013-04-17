@@ -29,7 +29,7 @@ class TenantAttributeIntegrationTest extends GroupAttributeIntegrationTestBase {
     @Test
     void siteTenantNameFallsBackToTheDisplayNameOfTheGroup() {
         assertThat(siteTenantService.findSiteTenantNameFor(section)).isEqualTo("Bay beach");
-        assertThat(siteTenantService.findSiteTenantNameFor(null)).isEqualTo("N/A");
+        assertThat(siteTenantService.findSiteTenantNameFor((io.pillopl.group.Group) null)).isEqualTo("N/A");
         assertThat(siteTenantService.findFor(club)).isNull();
     }
 

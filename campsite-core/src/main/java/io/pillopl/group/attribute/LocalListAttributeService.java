@@ -2,6 +2,7 @@ package io.pillopl.group.attribute;
 
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.LocalListAttributeDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,20 @@ public class LocalListAttributeService {
             return nearest;
         }
         return null;
+    }
+
+    /**
+     * A pedestal gets a local card list when its controller keeps one and its group allows it.
+     */
+    @Transactional(readOnly = true)
+    public boolean isLocalListPedestal(Pedestal pedestal) {
+        if (pedestal == null || pedestal.getGroup() == null) {
+            return false;
+        }
+        if (pedestal.getPedestalType() == null || !pedestal.getPedestalType().isLocalCardList()) {
+            return false;
+        }
+        return isLocalListGroup(pedestal.getGroup());
     }
 
     private LocalListAttribute findNearest(Long groupId) {

@@ -2,6 +2,7 @@ package io.pillopl.group.attribute;
 
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupType;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.TenantAttributeDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,5 +57,13 @@ public class SiteTenantService {
             }
         }
         return siteTenantName;
+    }
+
+    /**
+     * Operator name of the campsite the pedestal stands on, "N/A" when the pedestal has no group.
+     */
+    @Transactional(readOnly = true)
+    public String findSiteTenantNameFor(Pedestal pedestal) {
+        return findSiteTenantNameFor(pedestal != null ? pedestal.getGroup() : null);
     }
 }
