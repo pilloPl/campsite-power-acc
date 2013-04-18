@@ -121,4 +121,74 @@ SELECT a.ID
  LIMIT 1
 ]]></entry>
 
+    <!-- ===== Pedestals restricted to the SITE scope of a user ===== -->
+
+    <!-- Pedestal by code, only when it hangs in the SITE subtree of the user's group (INNER JOIN on the subtree). -->
+    <entry key="findPedestalIdByCodeRestrictedToUserSiteGroup"><![CDATA[
+SELECT p.ID
+  FROM PEDESTAL p
+ INNER JOIN (WITH RECURSIVE tree (id) AS (
+                 SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :userSiteGroupId
+                 UNION ALL
+                 SELECT c.ID FROM TBL_GROUP c JOIN tree t ON c.PARENT_ID = t.id)
+             SELECT id FROM tree) su ON p.GROUP_ID = su.id
+ WHERE p.CODE = :pedestalCode
+]]></entry>
+
+    <!--
+      Pedestals where the cards of a guest's ISSUER group are accepted, restricted to the user's SITE subtree.
+      Outer IN: the user's subtree. Inner IN: the subtrees of the agreement list of the nearest ancestor-or-self
+      of the issuer group having a non-empty list of SITE groups (that list replaces the lists above it) -
+      the same rule as findAcceptingGroupIds and GroupServiceHelper.getAcceptanceAgreements.
+    -->
+    <entry key="findPedestalIdsForGuestRestrictedToUserSiteGroup"><![CDATA[
+WITH RECURSIVE user_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :userSiteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN user_tree t ON c.PARENT_ID = t.id
+),
+parent_line (id, parent_id, lvl) AS (
+    SELECT g.ID, g.PARENT_ID, 1 FROM TBL_GROUP g WHERE g.ID = :guestIssuerGroupId
+    UNION ALL
+    SELECT p.ID, p.PARENT_ID, pl.lvl + 1 FROM TBL_GROUP p JOIN parent_line pl ON p.ID = pl.parent_id
+),
+agreement_owner (id) AS (
+    SELECT pl.id
+      FROM parent_line pl
+     WHERE EXISTS (SELECT 1
+                     FROM GROUP_ASSOCIATEDGROUP ga
+                     JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = 'SITE'
+                    WHERE ga.GROUP_ID = pl.id)
+     ORDER BY pl.lvl
+     LIMIT 1
+),
+accepted_subtree (id) AS (
+    SELECT ga.ASSOCIATEDGROUP_ID
+      FROM GROUP_ASSOCIATEDGROUP ga
+      JOIN agreement_owner ao ON ga.GROUP_ID = ao.id
+      JOIN TBL_GROUP target ON target.ID = ga.ASSOCIATEDGROUP_ID AND target.TYPENAME = 'SITE'
+    UNION
+    SELECT c.ID FROM TBL_GROUP c JOIN accepted_subtree s ON c.PARENT_ID = s.id
+)
+SELECT p.ID
+  FROM PEDESTAL p
+ WHERE p.DELETED = FALSE
+   AND p.GROUP_ID IN (SELECT id FROM user_tree)
+   AND p.GROUP_ID IN (SELECT id FROM accepted_subtree)
+ ORDER BY p.CODE
+]]></entry>
+
+    <!-- Subtree of the user's SITE group, the base of the pedestal state list and count. -->
+    <entry key="pedestalsInSiteSubtree"><![CDATA[
+WITH RECURSIVE tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :userSiteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN tree t ON c.PARENT_ID = t.id
+)
+SELECT DISTINCT p.ID, p.CODE
+  FROM PEDESTAL p
+  JOIN tree t ON p.GROUP_ID = t.id
+ WHERE p.DELETED = FALSE
+]]></entry>
+
 </properties>

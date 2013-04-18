@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Collection;
 import java.util.List;
 
-public interface PedestalDao extends JpaRepository<Pedestal, Long> {
+public interface PedestalDao extends JpaRepository<Pedestal, Long>, PedestalDaoCustom {
 
     Pedestal findByCode(String code);
 
