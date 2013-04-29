@@ -37,6 +37,12 @@ public class Location {
     @Column(name = "NAME", length = 256)
     private String name;
 
+    /**
+     * Short code of the campsite, prefix of the socket codes (see {@link SocketCodeHelper}).
+     */
+    @Column(name = "CAMPSITE_CODE", length = 16)
+    private String campsiteCode;
+
     @Column(name = "STREET", length = 128, nullable = false)
     private String street;
 
