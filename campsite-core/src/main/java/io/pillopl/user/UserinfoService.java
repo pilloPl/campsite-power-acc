@@ -8,6 +8,7 @@ import io.pillopl.group.GroupService;
 import io.pillopl.group.GroupType;
 import io.pillopl.group.IsLinkedToGroup;
 import io.pillopl.group.Market;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.persistence.dao.UserroleDao;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -346,6 +348,41 @@ public class UserinfoService {
         }
 
         return owner;
+    }
+
+    /**
+     * ERP partner number of the affiliate owner whose campsite the pedestal belongs to (for campsites settling
+     * with the network). Walks the parent line of the pedestal's group from the pedestal up; the first group with
+     * an associated user having a number wins.
+     *
+     * @return the number, or null when there is none or when two users of the same group have one (logged as a
+     * configuration error; no number is better than the wrong one)
+     */
+    public String findSettlementPartnerNo(Pedestal pedestal) {
+        String settlementPartnerNo = null;
+        if (null != pedestal.getGroup()) {
+            List<Long> siteParentLine = groupService.fetchParentLineIds(pedestal.getGroup().getId(), true);
+            ListIterator<Long> siteParentLineIterator = siteParentLine.listIterator();
+            while (siteParentLineIterator.hasNext() && settlementPartnerNo == null) {
+                final Long groupId = siteParentLineIterator.next();
+                final Group siteGroup = groupService.fetchByGroupId(groupId);
+                for (Userinfo userinfo : findByAssociatedGroup(siteGroup)) {
+                    if (userinfo.getSettlementPartnerNo() == null) {
+                        continue;
+                    }
+                    if (settlementPartnerNo == null) {
+                        settlementPartnerNo = userinfo.getSettlementPartnerNo();
+                    } else if (!settlementPartnerNo.equals(userinfo.getSettlementPartnerNo())) {
+                        // should not occur, but can with a wrong configuration
+                        LOG.error(String.format("Too many settlement partner numbers for pedestal %s in group %s: "
+                                + "%s and %s", pedestal, siteGroup.getName(), settlementPartnerNo,
+                                userinfo.getSettlementPartnerNo()));
+                        return null;
+                    }
+                }
+            }
+        }
+        return settlementPartnerNo;
     }
 
     public List<Userinfo> findByAssociatedGroup(Group searchGroup) {
