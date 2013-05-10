@@ -18,6 +18,9 @@ public enum SystemPropertyKey {
     UnknownStateTimeoutInMinutes,
     UnknownStateEventTriggerJobIntervalInSeconds,
 
+    // commissioning
+    DecommissioningMailExcludedMarkets,
+
     // supply sessions
     StaleSessionTimeoutInHours,
     CheckoutSessionCloseDelayInMinutes,

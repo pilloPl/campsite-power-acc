@@ -154,6 +154,16 @@ public class SystemPropertyService {
         return getProperty(SystemPropertyKey.MailSenderAddress, "noreply@campsite.local");
     }
 
+    // ---------------------------------------------------------------- commissioning
+
+    /**
+     * Comma separated markets (e.g. "IT,FR") whose affiliate owners get no mail when a pedestal goes back to the
+     * supplier.
+     */
+    public String getDecommissioningMailExcludedMarkets() {
+        return getProperty(SystemPropertyKey.DecommissioningMailExcludedMarkets, "");
+    }
+
     // ---------------------------------------------------------------- pedestal link and monitoring
 
     public int getPedestalHeartbeatIntervalInSeconds() {
