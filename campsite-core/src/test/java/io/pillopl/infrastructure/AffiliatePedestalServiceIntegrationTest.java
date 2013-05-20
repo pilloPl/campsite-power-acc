@@ -51,6 +51,14 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
     @Autowired UserinfoDao userinfoDao;
     @Autowired SystemPropertyService systemPropertyService;
     @Autowired InfrastructureFixture fixture;
+    @Autowired io.pillopl.persistence.dao.AuditDao auditDao;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
+    @org.junit.jupiter.api.AfterEach
+    void removeAuditRows() {
+        // audit rows are written in their own transaction and survive the rollback of the test
+        jdbcTemplate.update("DELETE FROM AUDIT WHERE ACTION_TYPE LIKE 'PEDESTAL_%'");
+    }
 
     Group stock;
     Userinfo installer, marko;
@@ -139,6 +147,8 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
         assertThat(pedestal.isBillable()).isFalse();
         assertThat(pedestal.getSockets()).allMatch(s -> s.getSocketCode() == null && s.getPitchNo() == null);
         assertThat(NOTIFIED).containsExactly("ACME-0001 -> marko@example.org");
+        assertThat(auditDao.findAll()).extracting(io.pillopl.audit.Audit::getActionType)
+                .contains("PEDESTAL_COMMISSIONING", "PEDESTAL_DECOMMISSIONING");
     }
 
     @Test

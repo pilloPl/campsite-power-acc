@@ -1,5 +1,7 @@
 package io.pillopl.infrastructure;
 
+import io.pillopl.audit.AuditActionType;
+import io.pillopl.audit.AuditService;
 import io.pillopl.config.SystemPropertyService;
 import io.pillopl.group.AccessDeniedException;
 import io.pillopl.group.AccessMode;
@@ -69,6 +71,8 @@ public class AffiliatePedestalService {
 
     private final DecommissioningNotifier decommissioningNotifier;
 
+    private final AuditService auditService;
+
     public AffiliatePedestalService(GroupDao groupDao, UserinfoDao userinfoDao, LocationDao locationDao,
                                     PedestalDao pedestalDao, SupplierMarkerDao supplierMarkerDao,
                                     GroupService groupService, AffiliateGroupService affiliateGroupService,
@@ -76,7 +80,7 @@ public class AffiliatePedestalService {
                                     CommissioningService commissioningService, PedestalService pedestalService,
                                     UserinfoService userinfoService, LocationService locationService,
                                     SystemPropertyService systemPropertyService,
-                                    DecommissioningNotifier decommissioningNotifier) {
+                                    DecommissioningNotifier decommissioningNotifier, AuditService auditService) {
         this.groupDao = groupDao;
         this.userinfoDao = userinfoDao;
         this.locationDao = locationDao;
@@ -91,6 +95,7 @@ public class AffiliatePedestalService {
         this.locationService = locationService;
         this.systemPropertyService = systemPropertyService;
         this.decommissioningNotifier = decommissioningNotifier;
+        this.auditService = auditService;
     }
 
     /**
@@ -154,10 +159,15 @@ public class AffiliatePedestalService {
                 Pedestal p = pedestalDao.findById(pedestal.getId()).orElseThrow();
                 if (!isCommissioned(pedestal.getId())) {
                     commission(p, affiliateGroup, LocationService.copyOf(commissioning.getLocation()));
+                    auditService.auditAction(AuditActionType.PEDESTAL_COMMISSIONING, installerUsername, p.getCode(),
+                            String.valueOf(affiliateGroup.getId()), "commissioning " + commissioning.getId(), null);
                 }
             } catch (RuntimeException e) {
                 failed.add(pedestal);
                 LOG.error("Error commissioning pedestal " + pedestal, e);
+                auditService.auditAction(AuditActionType.PEDESTAL_COMMISSIONING, installerUsername,
+                        String.valueOf(pedestal.getId()), String.valueOf(affiliateGroup.getId()),
+                        "commissioning " + commissioning.getId(), e.getMessage());
             }
         }
         switchAccessMode(affiliateGroup.getId(), commissioning);
@@ -201,6 +211,8 @@ public class AffiliatePedestalService {
         commissioning = commissioningService.create(commissioning);
 
         commission(pedestal, affiliateGroup, LocationService.copyOf(location));
+        auditService.auditAction(AuditActionType.PEDESTAL_COMMISSIONING, installerUsername, pedestal.getCode(),
+                String.valueOf(affiliateGroup.getId()), "direct commissioning for " + ownerUsername, null);
         switchAccessMode(affiliateGroup.getId(), commissioning);
         commissioningService.finish(commissioning);
     }
@@ -251,6 +263,8 @@ public class AffiliatePedestalService {
         pedestalService.checkIsManageable(userinfo, pedestal);
         defaultPedestalForDecommission(pedestal);
         pedestalDao.save(pedestal);
+        auditService.auditAction(AuditActionType.PEDESTAL_DECOMMISSIONING, userinfo.getUsername(), pedestal.getCode(),
+                String.valueOf(pedestal.getGroup().getId()), "back to supplier", null);
 
         Collection<Market> excludeMarkets = excludedMarkets();
 
