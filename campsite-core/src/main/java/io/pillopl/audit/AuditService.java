@@ -7,8 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
@@ -32,9 +34,14 @@ public class AuditService {
 
     private final SystemPropertyService systemPropertyService;
 
-    public AuditService(AuditDao auditDao, SystemPropertyService systemPropertyService) {
+    private final TransactionTemplate requiresNew;
+
+    public AuditService(AuditDao auditDao, SystemPropertyService systemPropertyService,
+                        PlatformTransactionManager transactionManager) {
         this.auditDao = auditDao;
         this.systemPropertyService = systemPropertyService;
+        this.requiresNew = new TransactionTemplate(transactionManager);
+        this.requiresNew.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
     }
 
     /**
@@ -122,7 +129,6 @@ public class AuditService {
      * Inserts a row in its own transaction (it stays even when the caller rolls back). Abbreviates the free text
      * columns to their lengths.
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Long insert(Audit audit) {
         audit.setUserId(abbreviate(audit.getUserId(), 100));
         audit.setActionName(abbreviate(audit.getActionName(), 100));
@@ -138,7 +144,7 @@ public class AuditService {
         audit.setInfoField2(abbreviate(audit.getInfoField2(), 200));
         audit.setMessage(abbreviate(audit.getMessage(), 2000));
         audit.setAuditData(abbreviate(audit.getAuditData(), 2000));
-        return auditDao.save(audit).getId();
+        return requiresNew.execute(status -> auditDao.save(audit).getId());
     }
 
     /**

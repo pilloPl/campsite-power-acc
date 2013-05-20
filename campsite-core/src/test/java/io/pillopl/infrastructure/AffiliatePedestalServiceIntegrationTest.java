@@ -147,8 +147,8 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
         assertThat(pedestal.isBillable()).isFalse();
         assertThat(pedestal.getSockets()).allMatch(s -> s.getSocketCode() == null && s.getPitchNo() == null);
         assertThat(NOTIFIED).containsExactly("ACME-0001 -> marko@example.org");
-        assertThat(auditDao.findAll()).extracting(io.pillopl.audit.Audit::getActionType)
-                .contains("PEDESTAL_COMMISSIONING", "PEDESTAL_DECOMMISSIONING");
+        assertThat(jdbcTemplate.queryForList("SELECT ACTION_TYPE FROM AUDIT WHERE ACTION_NAME = 'ACME-0001'",
+                String.class)).contains("PEDESTAL_COMMISSIONING", "PEDESTAL_DECOMMISSIONING");
     }
 
     @Test
