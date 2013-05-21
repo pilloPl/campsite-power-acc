@@ -54,7 +54,7 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
     @Autowired io.pillopl.persistence.dao.AuditDao auditDao;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
-    @org.junit.jupiter.api.AfterEach
+    @org.springframework.test.context.transaction.AfterTransaction
     void removeAuditRows() {
         // audit rows are written in their own transaction and survive the rollback of the test
         jdbcTemplate.update("DELETE FROM AUDIT WHERE ACTION_TYPE LIKE 'PEDESTAL_%'");

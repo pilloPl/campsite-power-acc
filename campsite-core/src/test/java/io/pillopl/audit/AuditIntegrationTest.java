@@ -20,6 +20,7 @@ class AuditIntegrationTest extends IntegrationTest {
     @Autowired AuditDao auditDao;
     @Autowired JdbcTemplate jdbcTemplate;
 
+    @org.junit.jupiter.api.BeforeEach
     @AfterEach
     void cleanUp() {
         jdbcTemplate.update("DELETE FROM AUDIT");
