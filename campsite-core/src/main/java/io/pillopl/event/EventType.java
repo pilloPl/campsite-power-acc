@@ -1,0 +1,20 @@
+package io.pillopl.event;
+
+/**
+ * Types of the events passed between the pedestal link, supply, monitoring and card handling.
+ */
+public enum EventType {
+    SUPPLY_STARTED,
+    SUPPLY_STOPPED,
+    REMOTE_SUPPLY_START_REQUEST,
+    SOCKET_STATE_NOTIFICATION,
+    QRPAY_ERROR,
+    BOOT_NOTIFICATION,
+    PEDESTAL_COMMUNICATION_EVENT,
+    METER_READING_CHANGED,
+    CHECK_WELCOME_CARD_ADOPTION,
+    HOUSE_CARD_CHANGED,
+    AUTHORIZATION,
+    CHECK_URL,
+    ISSUER_IMPORT_CARDS
+}
