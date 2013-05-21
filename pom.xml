@@ -19,6 +19,7 @@
     <description>Power supply on campsite pitches: pedestals, sockets, camping cards, stays and billing</description>
 
     <modules>
+        <module>campsite-commons</module>
         <module>campsite-db-migrations</module>
         <module>campsite-core</module>
         <module>campsite-server</module>
@@ -32,6 +33,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.pillopl</groupId>
+                <artifactId>campsite-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.pillopl</groupId>
                 <artifactId>campsite-db-migrations</artifactId>
