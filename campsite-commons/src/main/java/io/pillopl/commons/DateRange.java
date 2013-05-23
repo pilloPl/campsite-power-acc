@@ -1,11 +1,12 @@
 package io.pillopl.commons;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * A period with optional ends: from inclusive, to inclusive. A missing end is open.
  */
-public record DateRange(LocalDateTime from, LocalDateTime to) {
+public record DateRange(LocalDateTime from, LocalDateTime to) implements Serializable {
 
     public static final DateRange UNBOUNDED = new DateRange(null, null);
 

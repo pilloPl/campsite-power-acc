@@ -21,6 +21,7 @@
     <modules>
         <module>campsite-commons</module>
         <module>campsite-value-objects</module>
+        <module>campsite-transfer-objects</module>
         <module>campsite-db-migrations</module>
         <module>campsite-core</module>
         <module>campsite-server</module>
@@ -42,6 +43,11 @@
             <dependency>
                 <groupId>io.pillopl</groupId>
                 <artifactId>campsite-value-objects</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.pillopl</groupId>
+                <artifactId>campsite-transfer-objects</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
