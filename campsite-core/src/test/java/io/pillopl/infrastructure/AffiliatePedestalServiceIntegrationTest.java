@@ -2,6 +2,11 @@ package io.pillopl.infrastructure;
 
 import io.pillopl.config.SystemPropertyKey;
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.event.Event;
+import io.pillopl.event.EventService;
+import io.pillopl.event.EventType;
+import io.pillopl.event.PedestalCommissionedEvent;
+import io.pillopl.event.PedestalDecommissionedEvent;
 import io.pillopl.group.AccessDeniedException;
 import io.pillopl.group.AccessMode;
 import io.pillopl.group.AffiliateGroupService;
@@ -51,6 +56,7 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
     @Autowired UserinfoDao userinfoDao;
     @Autowired SystemPropertyService systemPropertyService;
     @Autowired InfrastructureFixture fixture;
+    @Autowired EventService eventService;
     @Autowired io.pillopl.persistence.dao.AuditDao auditDao;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
@@ -149,6 +155,28 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
         assertThat(NOTIFIED).containsExactly("ACME-0001 -> marko@example.org");
         assertThat(jdbcTemplate.queryForList("SELECT ACTION_TYPE FROM AUDIT WHERE ACTION_NAME = 'ACME-0001'",
                 String.class)).contains("PEDESTAL_COMMISSIONING", "PEDESTAL_DECOMMISSIONING");
+    }
+
+    @Test
+    void commissioningAndDecommissioningAreAnnouncedAsEvents() {
+        eventService.registerQueue("test-commissioned", EventType.PEDESTAL_COMMISSIONED);
+        eventService.registerQueue("test-decommissioned", EventType.PEDESTAL_DECOMMISSIONED);
+        try {
+            Pedestal pedestal = fixture.pedestal("ACME-0001", stock, 1);
+            affiliatePedestalService.commission("ACME-0001", "ivo", "marko", location(), true,
+                    AccessMode.NETWORK_ACCESS);
+            affiliatePedestalService.decommission(pedestal.getId(), marko.getId());
+
+            Event commissioned = eventService.getQueueAndRegisterListener("test-commissioned").poll();
+            Event decommissioned = eventService.getQueueAndRegisterListener("test-decommissioned").poll();
+            assertThat(PedestalCommissionedEvent.getPedestalId(commissioned)).isEqualTo(pedestal.getId());
+            assertThat(PedestalCommissionedEvent.getGroupId(commissioned))
+                    .isEqualTo(affiliateGroupService.findAffiliateSiteGroup("marko").getId());
+            assertThat(PedestalDecommissionedEvent.getPedestalId(decommissioned)).isEqualTo(pedestal.getId());
+        } finally {
+            eventService.unregisterQueue("test-commissioned", EventType.PEDESTAL_COMMISSIONED);
+            eventService.unregisterQueue("test-decommissioned", EventType.PEDESTAL_DECOMMISSIONED);
+        }
     }
 
     @Test
