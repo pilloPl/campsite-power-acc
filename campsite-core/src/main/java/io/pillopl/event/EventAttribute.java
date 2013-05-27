@@ -41,7 +41,10 @@ public enum EventAttribute {
     STOP_METER_KWH(BigDecimal.class),
     AUTHORIZATION_RESULT(String.class),
     URL(String.class),
-    ISSUER_PARTNER_ID(Long.class);
+    ISSUER_PARTNER_ID(Long.class),
+    USERNAME(String.class),
+    ACCESS_MODE(String.class),
+    CHANGE_TYPE(String.class);
 
     private final Class<?> clazz;
 
