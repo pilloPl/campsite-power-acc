@@ -1,5 +1,7 @@
 package io.pillopl.group;
 
+import io.pillopl.event.AccessModeSwitchedEvent;
+import io.pillopl.event.EventService;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.GroupDao;
 import io.pillopl.persistence.dao.PedestalDao;
@@ -28,12 +30,15 @@ public class AffiliateGroupService {
 
     private final PedestalDao pedestalDao;
 
+    private final EventService eventService;
+
     public AffiliateGroupService(GroupDao groupDao, GroupService groupService, GroupManager groupManager,
-                                 PedestalDao pedestalDao) {
+                                 PedestalDao pedestalDao, EventService eventService) {
         this.groupDao = groupDao;
         this.groupService = groupService;
         this.groupManager = groupManager;
         this.pedestalDao = pedestalDao;
+        this.eventService = eventService;
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +99,7 @@ public class AffiliateGroupService {
                     }
                 }
                 groupDao.saveAndFlush(affiliateGroup);
+                eventService.send(new AccessModeSwitchedEvent(affiliateGroup.getId(), targetMode.name()));
             } else {
                 LOG.error(String.format("Under the SITE root there should be one %s and one %s group "
                         + "(affiliate group id: %s)", GroupServiceConstants.NETWORK_ACCESS,

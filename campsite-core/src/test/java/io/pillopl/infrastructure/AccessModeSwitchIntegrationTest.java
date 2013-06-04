@@ -1,5 +1,9 @@
 package io.pillopl.infrastructure;
 
+import io.pillopl.event.AccessModeSwitchedEvent;
+import io.pillopl.event.Event;
+import io.pillopl.event.EventService;
+import io.pillopl.event.EventType;
 import io.pillopl.group.AccessMode;
 import io.pillopl.group.AffiliateGroupService;
 import io.pillopl.group.Group;
@@ -18,6 +22,7 @@ class AccessModeSwitchIntegrationTest extends IntegrationTest {
     @Autowired AffiliateGroupService affiliateGroupService;
     @Autowired GroupService groupService;
     @Autowired InfrastructureFixture fixture;
+    @Autowired EventService eventService;
 
     @Test
     void switchToNetworkAccessMovesTheCampsiteAndListsItsPedestalsAsRequested() {
@@ -69,5 +74,24 @@ class AccessModeSwitchIntegrationTest extends IntegrationTest {
         assertThat(affiliateGroupService.switchAccessMode(networkAccess.getId(), AccessMode.HOUSE_CARDS_ONLY, false))
                 .isNull();
         assertThat(networkAccess.getParent().getName()).isEqualTo("HR SITES");
+    }
+
+    @Test
+    void onlyARealSwitchIsAnnouncedAsEvent() {
+        eventService.registerQueue("test-switched", EventType.ACCESS_MODE_SWITCHED);
+        try {
+            Group affiliate = affiliateGroupService.createAffiliateSiteGroup("marko", "Marko", Market.HR,
+                    AccessMode.HOUSE_CARDS_ONLY);
+            affiliateGroupService.switchAccessMode(groupService.fetchSiteGroup("NETWORK ACCESS HR").getId(),
+                    AccessMode.HOUSE_CARDS_ONLY, false);
+            affiliateGroupService.switchAccessMode(affiliate.getId(), AccessMode.NETWORK_ACCESS, true);
+
+            Event event = eventService.getQueueAndRegisterListener("test-switched").poll();
+            assertThat(AccessModeSwitchedEvent.getGroupId(event)).isEqualTo(affiliate.getId());
+            assertThat(AccessModeSwitchedEvent.getAccessMode(event)).isEqualTo("NETWORK_ACCESS");
+            assertThat(eventService.getQueueSize("test-switched")).isZero();
+        } finally {
+            eventService.unregisterQueue("test-switched", EventType.ACCESS_MODE_SWITCHED);
+        }
     }
 }
