@@ -72,7 +72,7 @@
     <build>
         <plugins>
             <plugin>
-                <!-- shares the integration-test base (io.pillopl.test) with later modules -->
+                <!-- shares the integration-test base (io.pillopl.test) and the pedestal fixture with later modules -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
@@ -83,6 +83,7 @@
                         <configuration>
                             <includes>
                                 <include>io/pillopl/test/**</include>
+                                <include>io/pillopl/infrastructure/InfrastructureFixture*</include>
                             </includes>
                         </configuration>
                     </execution>

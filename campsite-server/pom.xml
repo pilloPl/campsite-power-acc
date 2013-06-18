@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>io.pillopl</groupId>
-            <artifactId>campsite-core</artifactId>
+            <artifactId>campsite-endpoints</artifactId>
         </dependency>
         <dependency>
             <groupId>io.pillopl</groupId>

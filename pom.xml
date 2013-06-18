@@ -25,6 +25,7 @@
         <module>campsite-api</module>
         <module>campsite-db-migrations</module>
         <module>campsite-core</module>
+        <module>campsite-endpoints</module>
         <module>campsite-server</module>
     </modules>
 
@@ -64,6 +65,11 @@
             <dependency>
                 <groupId>io.pillopl</groupId>
                 <artifactId>campsite-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.pillopl</groupId>
+                <artifactId>campsite-endpoints</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
