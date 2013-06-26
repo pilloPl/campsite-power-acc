@@ -1,0 +1,25 @@
+-- Guest: holder of the billing account a camping card is issued on. Hangs in an ISSUER group (the card issuer).
+-- Only the columns the card validation needs; stays, units, billing accounts and contracts come with the guests
+-- module.
+
+CREATE SEQUENCE GUEST_ID_SEQ START WITH 1000 INCREMENT BY 1;
+
+CREATE TABLE GUEST
+(
+    ID             BIGINT       NOT NULL DEFAULT nextval('GUEST_ID_SEQ'),
+    GROUP_ID       BIGINT       NOT NULL,
+    GUEST_TYPE     VARCHAR(16)  NOT NULL,
+    NAME           VARCHAR(255) NOT NULL,
+    FIRST_NAME     VARCHAR(255),
+    EMAIL          VARCHAR(255),
+    STATUS         VARCHAR(16)  NOT NULL DEFAULT 'ACTIVE',
+    ERP_PARTNER_NO VARCHAR(32),
+    CREATE_DATE    TIMESTAMP    NOT NULL,
+    DELETED        BOOLEAN      NOT NULL DEFAULT FALSE,
+    CONSTRAINT PK_GUEST PRIMARY KEY (ID),
+    CONSTRAINT FK_GUEST_GROUP FOREIGN KEY (GROUP_ID) REFERENCES TBL_GROUP (ID),
+    CONSTRAINT CHECK_GUEST_TYPE CHECK (GUEST_TYPE IN ('TRANSIT', 'SEASONAL')),
+    CONSTRAINT CHECK_GUEST_STATUS CHECK (STATUS IN ('ACTIVE', 'DEACTIVATED'))
+);
+
+CREATE INDEX IDX_GUEST_GROUP ON GUEST (GROUP_ID);
