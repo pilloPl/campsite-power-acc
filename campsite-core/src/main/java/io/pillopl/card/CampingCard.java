@@ -33,6 +33,10 @@ import java.util.Objects;
 @Setter
 public class CampingCard {
 
+    static final int BILLING_ACCOUNT_NO_MIN_LENGTH = 6;
+
+    static final int BILLING_ACCOUNT_NO_MAX_LENGTH = 20;
+
     /**
      * Builder for new cards: UID and printed number are mandatory.
      */
@@ -151,6 +155,54 @@ public class CampingCard {
         this.validTo = builder.validTo;
         this.billingAccountNo = builder.billingAccountNo;
         this.partnerSyncState = builder.partnerSyncState;
+    }
+
+    /**
+     * Validity of the card at a moment (the pedestal's remote date). The first failing check wins: deactivated card,
+     * stay or season not begun, stay or season over (the departure day is still valid), no guest, guest deactivated,
+     * billing account missing or malformed.
+     */
+    public CardStatus validate(final LocalDateTime validationDate) {
+        if (activation == CardActivation.DEACTIVATED) {
+            return CardStatus.CARD_DEACTIVATED;
+        }
+        LocalDate validationDay = validationDate != null ? validationDate.toLocalDate() : null;
+        if (validationDay != null && validFrom != null && validFrom.isAfter(validationDay)) {
+            return CardStatus.NOT_VALID_YET;
+        }
+        if (validationDay != null && validTo != null && validTo.isBefore(validationDay)) {
+            return CardStatus.NOT_VALID_ANYMORE;
+        }
+        if (guest == null) {
+            return CardStatus.NO_GUEST;
+        }
+        if (guest.isDeactivated()) {
+            return CardStatus.GUEST_DEACTIVATED;
+        }
+        if (!isValidBillingAccountNo(billingAccountNo)) {
+            return CardStatus.BILLING_ACCOUNT_INVALID;
+        }
+
+        return CardStatus.VALID;
+    }
+
+    /**
+     * A billing account number of the ERP: 6 to 20 digits.
+     */
+    public static boolean isValidBillingAccountNo(String billingAccountNo) {
+        if (billingAccountNo == null || billingAccountNo.isBlank()) {
+            return false;
+        }
+        if (billingAccountNo.length() < BILLING_ACCOUNT_NO_MIN_LENGTH
+                || billingAccountNo.length() > BILLING_ACCOUNT_NO_MAX_LENGTH) {
+            return false;
+        }
+        for (int i = 0; i < billingAccountNo.length(); i++) {
+            if (!Character.isDigit(billingAccountNo.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isActive() {
