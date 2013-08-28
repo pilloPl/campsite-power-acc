@@ -1,5 +1,6 @@
 package io.pillopl.group;
 
+import io.pillopl.card.CampingCard;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.GroupDao;
 import io.pillopl.persistence.dao.PedestalDao;
@@ -296,6 +297,37 @@ public class GroupService {
         }
         List<Long> allGroupIds = GroupServiceHelper.extractAllAcceptingSiteGroupIds(issuerGroup);
         return allGroupIds.contains(siteGroupId);
+    }
+
+    /**
+     * Is the card accepted at the pedestal? Card, guest, the guest's ISSUER group, its accepting SITE subtrees
+     * (in-memory walk, the one agreement rule), then the DAO checks the pedestal against those groups.
+     */
+    @Transactional(readOnly = true)
+    public boolean isCardAcceptedAt(final Long pedestalId, final CampingCard card) {
+        if (card == null || card.getGuest() == null) {
+            return false;
+        }
+        Group issuerGroup = card.getGuest().getGroup();
+        List<Long> allGroupIds = GroupServiceHelper.extractAllAcceptingSiteGroupIds(issuerGroup);
+        Pedestal pedestal = (allGroupIds != null && !allGroupIds.isEmpty())
+                ? pedestalDao.isInGroupList(pedestalId, allGroupIds) : null;
+        return pedestal != null;
+    }
+
+    /**
+     * Same as {@link #isCardAcceptedAt(Long, CampingCard)} for the pedestal code used on the pedestal link.
+     */
+    @Transactional(readOnly = true)
+    public boolean isCardAcceptedAt(final String pedestalCode, final CampingCard card) {
+        if (card == null || card.getGuest() == null) {
+            return false;
+        }
+        Group issuerGroup = card.getGuest().getGroup();
+        List<Long> allGroupIds = GroupServiceHelper.extractAllAcceptingSiteGroupIds(issuerGroup);
+        Pedestal pedestal = (allGroupIds != null && !allGroupIds.isEmpty())
+                ? pedestalDao.findByCodeAndGroupIds(pedestalCode, allGroupIds) : null;
+        return pedestal != null;
     }
 
     /*NON_TRANSACTIONAL*/
