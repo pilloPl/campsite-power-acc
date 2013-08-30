@@ -1,5 +1,8 @@
 package io.pillopl.group;
 
+import io.pillopl.card.CampingCard;
+import io.pillopl.guest.Guest;
+import io.pillopl.guest.GuestType;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,5 +39,18 @@ class IssuerCodeServiceTest {
         when(groupService.determineMarketByGroupId(6L)).thenReturn(Market.FR);
 
         assertThat(issuerCodeService.defineIssuer(group)).isEqualTo("CPN-FR");
+    }
+
+    @Test
+    void issuerCodeOfACardFollowsTheGroupOfItsGuest() {
+        Group group = new Group(GroupType.ISSUER, "NETWORK CARD");
+        group.setId(7L);
+        when(groupService.determineMarketByGroupId(7L)).thenReturn(Market.IT);
+        CampingCard card = new CampingCard.Builder("1", "1").guest(new Guest(group, GuestType.TRANSIT, "Rossi")).build();
+
+        assertThat(issuerCodeService.defineIssuer(card)).isEqualTo("CPN-IT");
+        assertThat(issuerCodeService.defineIssuer(new CampingCard.Builder("2", "2").build()))
+                .isEqualTo(IssuerCodeService.UNKNOWN_ISSUER);
+        assertThat(issuerCodeService.defineIssuer((CampingCard) null)).isEqualTo(IssuerCodeService.UNKNOWN_ISSUER);
     }
 }

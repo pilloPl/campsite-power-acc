@@ -1,5 +1,6 @@
 package io.pillopl.group;
 
+import io.pillopl.card.CampingCard;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,15 @@ public class IssuerCodeService {
     public String defineIssuer(Group issuerGroup) {
         Market market = issuerGroup != null ? groupService.determineMarketByGroupId(issuerGroup.getId()) : null;
         return defineIssuer(market);
+    }
+
+    /**
+     * Issuer code of a card: decided by the ISSUER group of the card's guest.
+     */
+    @Transactional(readOnly = true)
+    public String defineIssuer(CampingCard card) {
+        Group issuerGroup = card != null && card.getGuest() != null ? card.getGuest().getGroup() : null;
+        return defineIssuer(issuerGroup);
     }
 
     public String defineIssuer(Market market) {
