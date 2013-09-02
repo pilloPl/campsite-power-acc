@@ -1,5 +1,6 @@
 package io.pillopl.group;
 
+import io.pillopl.card.CardFixture;
 import io.pillopl.infrastructure.InfrastructureFixture;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.test.IntegrationTest;
@@ -16,6 +17,7 @@ class GroupValidityIntegrationTest extends IntegrationTest {
     @Autowired GroupService groupService;
     @Autowired UserinfoDao userinfoDao;
     @Autowired InfrastructureFixture fixture;
+    @Autowired CardFixture cards;
 
     @Test
     void usersInStaffGroupsAndPedestalsInSiteGroupsAreValid() {
@@ -43,6 +45,20 @@ class GroupValidityIntegrationTest extends IntegrationTest {
     @Test
     void pedestalInAnIssuerGroupMakesTheTreesInvalid() {
         fixture.pedestal("HR-BAY-P001", groupService.fetchNetworkCardIssuerGroup(), 1);
+
+        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+    }
+
+    @Test
+    void guestsInIssuerGroupsAreValid() {
+        cards.guest("Horvat", groupService.fetchNetworkCardIssuerGroup());
+
+        assertThat(groupService.checkAllGroupsForValidity()).isTrue();
+    }
+
+    @Test
+    void guestInASiteGroupMakesTheTreesInvalid() {
+        cards.guest("Horvat", groupService.fetchSiteGroup("HR SITES"));
 
         assertThat(groupService.checkAllGroupsForValidity()).isFalse();
     }

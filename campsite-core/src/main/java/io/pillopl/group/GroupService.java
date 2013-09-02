@@ -1,8 +1,10 @@
 package io.pillopl.group;
 
 import io.pillopl.card.CampingCard;
+import io.pillopl.guest.Guest;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.GroupDao;
+import io.pillopl.persistence.dao.GuestDao;
 import io.pillopl.persistence.dao.PedestalDao;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.user.Userinfo;
@@ -36,19 +38,22 @@ public class GroupService {
 
     private final PedestalDao pedestalDao;
 
+    private final GuestDao guestDao;
+
     public GroupService(GroupDao groupDao, GroupManager groupManager, UserinfoDao userinfoDao,
-                        PedestalDao pedestalDao) {
+                        PedestalDao pedestalDao, GuestDao guestDao) {
         this.groupDao = groupDao;
         this.groupManager = groupManager;
         this.userinfoDao = userinfoDao;
         this.pedestalDao = pedestalDao;
+        this.guestDao = guestDao;
     }
 
     /**
      * Consistency check of the trees, run by an integration test and by the nightly control job.
      * <p>
-     * Checks the type hierarchy, the agreements, that console users hang in STAFF groups and pedestals in SITE groups.
-     * Next to come (same loop shape): guests in ISSUER groups.
+     * Checks the type hierarchy, the agreements, that console users hang in STAFF groups, guests in ISSUER groups and
+     * pedestals in SITE groups.
      *
      * @return true when no error was found (errors are logged)
      */
@@ -68,7 +73,7 @@ public class GroupService {
             GroupServiceHelper.checkAgreements(g, errors);
         }
 
-        // check for type and correctly attached objects, only for users and pedestals (guests later),
+        // check for type and correctly attached objects, for users, guests and pedestals,
         // to make sure they are correctly attached to their trees
 
         // find all users
@@ -83,6 +88,20 @@ public class GroupService {
             if (!GroupType.STAFF.isGroupType(user.getGroup())) {
                 errors.add(String.format("User %s is attached to the wrong group %s", user,
                         user.getGroup().getType()));
+            }
+        }
+
+        // find all guests
+        List<Guest> guests = guestDao.findAll();
+
+        for (Guest guest : guests) {
+            if (guest.getGroup() == null) {
+                errors.add(String.format("No group attached to Guest %s", guest));
+                continue;
+            }
+            if (!GroupType.ISSUER.isGroupType(guest.getGroup())) {
+                errors.add(String.format("Guest %s is attached to the wrong group %s", guest,
+                        guest.getGroup().getType()));
             }
         }
 
