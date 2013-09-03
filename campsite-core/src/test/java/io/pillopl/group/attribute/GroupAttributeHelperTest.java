@@ -52,7 +52,7 @@ class GroupAttributeHelperTest {
 
     @Test
     void attributesOfLaterIslandsAreListedWithTheirTask() {
-        assertThat(GroupAttributeType.HOUSE_CARD.isImplemented()).isFalse();
+        assertThat(GroupAttributeType.HOUSE_CARD.isImplemented()).isTrue();
         assertThat(GroupAttributeType.HOUSE_CARD.getOwningModule()).isEqualTo("cards");
         assertThat(GroupAttributeType.DEFAULT_TARIFF.getOwningModule()).isEqualTo("pricing");
         assertThat(GroupAttributeType.SITE_TENANT.isImplemented()).isTrue();

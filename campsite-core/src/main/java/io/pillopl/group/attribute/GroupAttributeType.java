@@ -16,9 +16,9 @@ public enum GroupAttributeType {
     SUPPLIER_MARKER("GRP_ATTR_SUPPLIER", true, "organisation"),
     WHITELIST_FILTER("GRP_ATTR_WHITELIST_FILTER", true, "organisation"),
     /**
-     * House cards (STAFF / RENTAL) of a campsite: implemented with the cards module.
+     * House cards (STAFF / RENTAL) of a campsite, many per group; the cards of the whole parent line are accepted.
      */
-    HOUSE_CARD("HOUSECARD", false, "cards"),
+    HOUSE_CARD("HOUSECARD", true, "cards"),
     /**
      * Default tariff of a SITE subtree (replaces the "market to tariff" fallback): implemented with pricing.
      */
