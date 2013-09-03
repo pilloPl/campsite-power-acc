@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class PriceByNightCalculator extends PriceCalculator<PricingInput> {
 
     public PriceByNightCalculator(PricingInput pricingInput, PriceComponent nightPrice) {
-        super(pricingInput, nightPrice, BigDecimal.ONE);
+        super(pricingInput, nightPrice, null);
     }
 
     @Override

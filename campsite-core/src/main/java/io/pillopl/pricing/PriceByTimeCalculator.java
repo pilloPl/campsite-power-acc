@@ -11,14 +11,14 @@ public class PriceByTimeCalculator extends PriceCalculator<PricingInput> {
 
     public static final BigDecimal HOUR_IN_SECONDS = BigDecimal.valueOf(3600);
 
-    public PriceByTimeCalculator(PricingInput pricingInput, PriceComponent timePrice, BigDecimal share) {
-        super(pricingInput, timePrice, share);
+    public PriceByTimeCalculator(PricingInput pricingInput, PriceComponent timePrice, Long windowSeconds) {
+        super(pricingInput, timePrice, windowSeconds);
     }
 
     @Override
     protected BigDecimal calculateCost() throws PriceCalculationException {
-        BigDecimal durationInSeconds = checkPositiveValue(BigDecimal.valueOf(pricingContext.getDurationSeconds()))
-                .multiply(share);
+        BigDecimal durationInSeconds = portionOf(
+                checkPositiveValue(BigDecimal.valueOf(pricingContext.getDurationSeconds())));
 
         BigDecimal steps = stepsRoundedUp(durationInSeconds, price.getStepSize());
         billedQuantity = steps.multiply(BigDecimal.valueOf(price.getStepSize()))

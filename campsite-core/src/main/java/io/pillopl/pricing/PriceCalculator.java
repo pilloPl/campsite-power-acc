@@ -21,16 +21,17 @@ public abstract class PriceCalculator<T extends PricingInput> {
     protected final PriceComponent price;
 
     /**
-     * Part of the supply priced by this component (time inside its tariff window / whole duration), 1 for all.
+     * Seconds of the supply inside the tariff window of this component; null when the component prices the whole
+     * supply.
      */
-    protected final BigDecimal share;
+    protected final Long windowSeconds;
 
     protected BigDecimal billedQuantity;
 
-    protected PriceCalculator(T pricingContext, PriceComponent price, BigDecimal share) {
+    protected PriceCalculator(T pricingContext, PriceComponent price, Long windowSeconds) {
         this.pricingContext = pricingContext;
         this.price = price;
-        this.share = share != null ? share : BigDecimal.ONE;
+        this.windowSeconds = windowSeconds;
     }
 
     public BigDecimal calculate() throws PriceCalculationException {
@@ -84,8 +85,30 @@ public abstract class PriceCalculator<T extends PricingInput> {
         return price;
     }
 
+    /**
+     * The part of a quantity of the whole supply that falls into the window of this component, proportionally to
+     * time: quantity * window seconds / duration. The whole quantity without a window or for a supply without
+     * duration.
+     */
+    protected BigDecimal portionOf(BigDecimal quantity) {
+        Long totalSeconds = pricingContext.getDurationSeconds();
+        if (windowSeconds == null || totalSeconds == null || totalSeconds == 0
+                || windowSeconds.longValue() == totalSeconds.longValue()) {
+            return quantity;
+        }
+        return quantity.multiply(BigDecimal.valueOf(windowSeconds))
+                .divide(BigDecimal.valueOf(totalSeconds), INTERMEDIATE_SCALE, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * @return the share of the supply priced by this component (1 for the whole supply)
+     */
     public BigDecimal getShare() {
-        return share;
+        return portionOf(BigDecimal.ONE);
+    }
+
+    public Long getWindowSeconds() {
+        return windowSeconds;
     }
 
     /**

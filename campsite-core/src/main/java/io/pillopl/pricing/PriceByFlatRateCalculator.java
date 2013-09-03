@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class PriceByFlatRateCalculator extends PriceCalculator<PricingInput> {
 
     public PriceByFlatRateCalculator(PricingInput pricingInput, PriceComponent flatPrice) {
-        super(pricingInput, flatPrice, BigDecimal.ONE);
+        super(pricingInput, flatPrice, null);
     }
 
     @Override

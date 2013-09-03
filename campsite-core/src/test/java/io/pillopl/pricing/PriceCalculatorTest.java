@@ -20,7 +20,7 @@ class PriceCalculatorTest {
     @Test
     void energyIsRoundedUpToTheStepSizeInWh() throws Exception {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("12.3401", 60),
-                PriceComponent.energy("0.50", 100), BigDecimal.ONE);
+                PriceComponent.energy("0.50", 100), null);
 
         BigDecimal cost = calculator.calculate();
 
@@ -31,7 +31,7 @@ class PriceCalculatorTest {
     @Test
     void energyOnAStepBoundaryIsNotRoundedFurther() throws Exception {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("12.3", 60),
-                PriceComponent.energy("0.50", 100), BigDecimal.ONE);
+                PriceComponent.energy("0.50", 100), null);
 
         assertThat(calculator.calculate()).isEqualByComparingTo("6.15");
     }
@@ -40,7 +40,7 @@ class PriceCalculatorTest {
     void energyKeepsFullPrecisionUntilTheTotalIsRounded() throws Exception {
         // 3 significant digits (the old MathContext(3)) would give 46.6 instead of 46.55385
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("103.453", 60),
-                PriceComponent.energy("0.45", 1), BigDecimal.ONE);
+                PriceComponent.energy("0.45", 1), null);
 
         assertThat(calculator.calculate()).isEqualByComparingTo("46.55385");
     }
@@ -48,7 +48,7 @@ class PriceCalculatorTest {
     @Test
     void energyShareOfTheWindowIsPriced() throws Exception {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("10", 60),
-                PriceComponent.energy("0.40", 1), new BigDecimal("0.25"));
+                PriceComponent.energy("0.40", 1), 900L);
 
         assertThat(calculator.calculate()).isEqualByComparingTo("1.00");
         assertThat(calculator.getBilledQuantity()).isEqualByComparingTo("2.5");
@@ -57,7 +57,7 @@ class PriceCalculatorTest {
     @Test
     void negativeEnergyCannotBePriced() {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("-1", 60),
-                PriceComponent.energy("0.50", 1), BigDecimal.ONE);
+                PriceComponent.energy("0.50", 1), null);
 
         assertThatThrownBy(calculator::calculate).isInstanceOf(PriceCalculationException.class)
                 .hasMessageContaining("negative");
@@ -66,7 +66,7 @@ class PriceCalculatorTest {
     @Test
     void missingEnergyCannotBePriced() {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply(null, 60),
-                PriceComponent.energy("0.50", 1), BigDecimal.ONE);
+                PriceComponent.energy("0.50", 1), null);
 
         assertThatThrownBy(calculator::calculate).hasMessage("consumption is not set");
     }
@@ -74,7 +74,7 @@ class PriceCalculatorTest {
     @Test
     void componentOfAnotherDimensionIsRejected() {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("1", 60),
-                PriceComponent.flat("1.00"), BigDecimal.ONE);
+                PriceComponent.flat("1.00"), null);
 
         assertThatThrownBy(calculator::calculate).hasMessageContaining("wrong type");
     }
@@ -84,14 +84,14 @@ class PriceCalculatorTest {
         PriceComponent energy = PriceComponent.energy("0.50", 1);
         energy.setStepSize(null);
 
-        assertThatThrownBy(() -> new PriceByEnergyCalculator(supply("1", 60), energy, BigDecimal.ONE).calculate())
+        assertThatThrownBy(() -> new PriceByEnergyCalculator(supply("1", 60), energy, null).calculate())
                 .hasMessage("stepSize is not set");
     }
 
     @Test
     void startedQuarterOfAnHourIsChargedFully() throws Exception {
         PriceByTimeCalculator calculator = new PriceByTimeCalculator(supply("1", 61),
-                PriceComponent.time("0.20", 900), BigDecimal.ONE);
+                PriceComponent.time("0.20", 900), null);
 
         BigDecimal cost = calculator.calculate();
 
@@ -102,7 +102,7 @@ class PriceCalculatorTest {
     @Test
     void negativeDurationCannotBePriced() {
         PriceByTimeCalculator calculator = new PriceByTimeCalculator(supply("1", -5),
-                PriceComponent.time("0.20", 1), BigDecimal.ONE);
+                PriceComponent.time("0.20", 1), null);
 
         assertThatThrownBy(calculator::calculate).isInstanceOf(PriceCalculationException.class);
     }

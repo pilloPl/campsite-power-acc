@@ -10,14 +10,14 @@ public class PriceByEnergyCalculator extends PriceCalculator<PricingInput> {
 
     public static final BigDecimal WH_PER_KWH = BigDecimal.valueOf(1000);
 
-    public PriceByEnergyCalculator(PricingInput pricingInput, PriceComponent energyPrice, BigDecimal share) {
-        super(pricingInput, energyPrice, share);
+    public PriceByEnergyCalculator(PricingInput pricingInput, PriceComponent energyPrice, Long windowSeconds) {
+        super(pricingInput, energyPrice, windowSeconds);
     }
 
     @Override
     protected BigDecimal calculateCost() throws PriceCalculationException {
         BigDecimal consumptionInKwh = checkPositiveValue(pricingContext.getKwh());
-        BigDecimal consumptionInWh = consumptionInKwh.multiply(share).multiply(WH_PER_KWH);
+        BigDecimal consumptionInWh = portionOf(consumptionInKwh).multiply(WH_PER_KWH);
 
         BigDecimal steps = stepsRoundedUp(consumptionInWh, price.getStepSize());
         billedQuantity = steps.multiply(BigDecimal.valueOf(price.getStepSize()))
