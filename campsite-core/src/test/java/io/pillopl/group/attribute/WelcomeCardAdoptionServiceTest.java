@@ -12,7 +12,10 @@ import static org.mockito.Mockito.when;
 class WelcomeCardAdoptionServiceTest {
 
     private final WelcomeCardAdoptionDao dao = mock(WelcomeCardAdoptionDao.class);
-    private final WelcomeCardAdoptionService service = new WelcomeCardAdoptionService(dao);
+    private final WelcomeCardAdoptionService service = new WelcomeCardAdoptionService(dao,
+            mock(io.pillopl.persistence.dao.PedestalDao.class), mock(io.pillopl.persistence.dao.CampingCardDao.class),
+            mock(io.pillopl.group.GroupService.class), mock(io.pillopl.group.AffiliateGroupService.class),
+            mock(io.pillopl.card.HouseCardService.class));
 
     private final Group root = group(1, null);
     private final Group campsite = group(2, root);
