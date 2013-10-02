@@ -191,4 +191,26 @@ SELECT DISTINCT p.ID, p.CODE
  WHERE p.DELETED = FALSE
 ]]></entry>
 
+    <!-- Camping cards -->
+
+    <!--
+      Cards for the local card list of a pedestal controller: living, activated cards of active guests, valid on :day,
+      with a billing account, whose guest hangs in one of the ISSUER groups accepted at the pedestal's campsite
+      (findGroupIdsAcceptedAt, same agreement semantics). Newest cards first: a full list keeps the newest.
+    -->
+    <entry key="findValidCardsForLocalCardList"><![CDATA[
+SELECT c.ID
+  FROM CAMPING_CARD c
+  JOIN GUEST g ON g.ID = c.GUEST_ID
+ WHERE c.DELETED = FALSE
+   AND c.STATUS = 'ACTIVATED'
+   AND g.DELETED = FALSE
+   AND g.STATUS = 'ACTIVE'
+   AND (c.VALID_FROM IS NULL OR c.VALID_FROM <= :day)
+   AND (c.VALID_TO IS NULL OR c.VALID_TO >= :day)
+   AND c.BILLING_ACCOUNT_NO IS NOT NULL
+   AND g.GROUP_ID IN (:issuerGroupIds)
+ ORDER BY c.ID DESC
+]]></entry>
+
 </properties>

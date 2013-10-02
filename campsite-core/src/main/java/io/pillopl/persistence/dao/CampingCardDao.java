@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface CampingCardDao extends JpaRepository<CampingCard, Long> {
+public interface CampingCardDao extends JpaRepository<CampingCard, Long>, CampingCardDaoCustom {
 
     /**
      * The living card with the UID the pedestal sent (the newest one when the UID was issued twice).
