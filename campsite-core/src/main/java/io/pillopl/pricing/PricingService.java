@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +78,20 @@ public class PricingService {
             return PriceCalculation.notBillable();
         }
         return calculateCost(new ResolvedTariff(tariff, TariffSource.GIVEN), pricingInput);
+    }
+
+    /**
+     * Price text of the tariff of a socket for the answer to the start of a supply (shown on the pedestal display).
+     *
+     * @return the text or null (logged) when the socket has no tariff
+     */
+    public String getPriceInformation(Long socketId, Long cardId, LocalDateTime at) {
+        try {
+            return TariffPriceText.describe(tariffResolver.resolve(socketId, cardId, at).tariff());
+        } catch (NoTariffFoundException | IllegalArgumentException e) {
+            LOGGER.warn(String.format("No price information for socket %s: %s", socketId, e.getMessage()));
+            return null;
+        }
     }
 
     PriceCalculation calculateCost(ResolvedTariff resolved, PricingInput pricingInput) {
