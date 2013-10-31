@@ -1,5 +1,6 @@
 package io.pillopl.audit;
 
+import io.pillopl.commons.TextUtil;
 import io.pillopl.config.SystemPropertyService;
 import io.pillopl.persistence.dao.AuditDao;
 import org.slf4j.Logger;
@@ -161,10 +162,7 @@ public class AuditService {
     }
 
     static String abbreviate(String value, int maxLength) {
-        if (value == null || value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength - 3) + "...";
+        return TextUtil.abbreviate(value, maxLength);
     }
 
     private static String blankToNull(String value) {
