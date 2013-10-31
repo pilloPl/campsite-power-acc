@@ -29,6 +29,13 @@ public interface PedestalDao extends JpaRepository<Pedestal, Long>, PedestalDaoC
     @Query("select p from Pedestal p where p.deleted = false and p.code = :code and p.group.id in (:groupIds)")
     Pedestal findByCodeAndGroupIds(@Param("code") String code, @Param("groupIds") Collection<Long> groupIds);
 
+    /**
+     * Pedestals whose controller keeps a local card list and gets it pushed automatically.
+     */
+    @Query("select p from Pedestal p where p.deleted = false and p.automatedWhitelistUpdates = true"
+            + " and p.pedestalType.localCardList = true order by p.code")
+    List<Pedestal> findPedestalsForLocalCardListDistribution();
+
     @Query("select p from Pedestal p join p.sockets s where s.id = :socketId")
     Pedestal findBySocketId(@Param("socketId") Long socketId);
 }
