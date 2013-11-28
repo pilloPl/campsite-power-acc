@@ -22,6 +22,9 @@ public class CampingCardDaoImpl implements CampingCardDaoCustom {
     @Value("#{sqls['findValidCardsForLocalCardList']}")
     private String findValidCardsForLocalCardList;
 
+    private static final String UPSERT_CARD = "SELECT CARD_UTILS.UPSERT_CARD(:cardRfidHex, :cardNumber, :validFrom,"
+            + " :validTo, :billingAccountNo, :guestId)";
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -41,6 +44,23 @@ public class CampingCardDaoImpl implements CampingCardDaoCustom {
                 .addValue("issuerGroupIds", issuerGroupIds)
                 .addValue("day", day);
         return toCards(jdbcTemplate.queryForList(findValidCardsForLocalCardList, params, Long.class));
+    }
+
+    @Override
+    public Long upsertCard(String cardRfidHex, String cardNumber, LocalDate validFrom, LocalDate validTo,
+                           String billingAccountNo, Long guestId) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("cardRfidHex", cardRfidHex, java.sql.Types.VARCHAR)
+                .addValue("cardNumber", cardNumber, java.sql.Types.VARCHAR)
+                .addValue("validFrom", validFrom, java.sql.Types.DATE)
+                .addValue("validTo", validTo, java.sql.Types.DATE)
+                .addValue("billingAccountNo", billingAccountNo, java.sql.Types.VARCHAR)
+                .addValue("guestId", guestId, java.sql.Types.BIGINT);
+        // the card rows changed behind the persistence context
+        entityManager.flush();
+        Long id = jdbcTemplate.queryForObject(UPSERT_CARD, params, Long.class);
+        entityManager.clear();
+        return id;
     }
 
     private List<CampingCard> toCards(List<Long> ids) {
