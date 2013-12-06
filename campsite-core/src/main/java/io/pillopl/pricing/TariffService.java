@@ -75,6 +75,17 @@ public class TariffService {
         return defaultTariffForMarket;
     }
 
+    /**
+     * @return the default tariff of the user's market, or null
+     */
+    public Tariff getDefaultTariff(Userinfo principal) {
+        return getDefaultTariff(evaluateMarket(principal));
+    }
+
+    public boolean existsTariff(Userinfo principal, String tariffName) {
+        return existsTariff(evaluateMarket(principal), tariffName);
+    }
+
     public boolean existsTariff(Market market, String tariffName) {
         LOGGER.debug(String.format("Checking if tariff %s is unique for %s", tariffName, market));
         return tariffDao.findForNameAndMarket(market, tariffName) != null;
