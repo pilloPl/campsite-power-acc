@@ -17,6 +17,8 @@ public final class WebServicePaths {
 
     public static final String ADMINISTRATION = CONSOLE + "/administration";
 
+    public static final String TARIFF = CONSOLE + "/tariff";
+
     private WebServicePaths() {
         throw new AssertionError();
     }
