@@ -4,6 +4,7 @@ import io.pillopl.api.exception.AccessNotAllowedException;
 import io.pillopl.api.exception.ConflictException;
 import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.api.exception.ObjectNotFoundException;
+import io.pillopl.card.LocalCardListException;
 import io.pillopl.group.AccessDeniedException;
 import io.pillopl.user.AffiliateSetupException;
 import io.pillopl.util.ApiExceptionTranslator;
@@ -33,6 +34,8 @@ class ApiExceptionTranslatorTest {
                 .isInstanceOf(InvalidInputException.class);
         assertThat(ApiExceptionTranslator.translate(new NoSuchElementException()))
                 .isInstanceOf(ObjectNotFoundException.class);
+        assertThat(ApiExceptionTranslator.translate(new LocalCardListException("HR-BAY-P001", "offline")))
+                .isInstanceOf(ConflictException.class);
     }
 
     @Test

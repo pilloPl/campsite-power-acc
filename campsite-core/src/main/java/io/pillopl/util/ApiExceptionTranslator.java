@@ -5,6 +5,7 @@ import io.pillopl.api.exception.ApiException;
 import io.pillopl.api.exception.ConflictException;
 import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.api.exception.ObjectNotFoundException;
+import io.pillopl.card.LocalCardListException;
 import io.pillopl.group.AccessDeniedException;
 import io.pillopl.user.AffiliateSetupException;
 import io.pillopl.value.InvalidValueException;
@@ -35,7 +36,8 @@ public final class ApiExceptionTranslator {
         if (e instanceof InvalidValueException) {
             return new InvalidInputException(e.getMessage(), e);
         }
-        if (e instanceof AffiliateSetupException || e instanceof DataIntegrityViolationException) {
+        if (e instanceof AffiliateSetupException || e instanceof DataIntegrityViolationException
+                || e instanceof LocalCardListException) {
             return new ConflictException(e.getMessage(), e);
         }
         if (e instanceof NoSuchElementException) {
