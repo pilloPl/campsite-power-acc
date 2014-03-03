@@ -17,6 +17,10 @@ public final class WebServicePaths {
 
     public static final String ADMINISTRATION = CONSOLE + "/administration";
 
+    public static final String CARD = CONSOLE + "/card";
+
+    public static final String HOUSE_CARD = CONSOLE + "/houseCard";
+
     private WebServicePaths() {
         throw new AssertionError();
     }
