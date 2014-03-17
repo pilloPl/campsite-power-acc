@@ -50,6 +50,10 @@ public class ConsoleFixture {
         return groupService.fetchStaffGroup(name);
     }
 
+    public Group issuer(String name) {
+        return groupService.fetchIssuerGroup(name);
+    }
+
     public Group site(String name) {
         return groupService.fetchSiteGroup(name);
     }
