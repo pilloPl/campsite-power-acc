@@ -44,7 +44,8 @@ public enum EventAttribute {
     ISSUER_PARTNER_ID(Long.class),
     USERNAME(String.class),
     ACCESS_MODE(String.class),
-    CHANGE_TYPE(String.class);
+    CHANGE_TYPE(String.class),
+    TARIFF_ID(Long.class);
 
     private final Class<?> clazz;
 

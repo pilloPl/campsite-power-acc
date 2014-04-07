@@ -20,6 +20,7 @@ public final class WebServicePaths {
     public static final String CARD = CONSOLE + "/card";
 
     public static final String HOUSE_CARD = CONSOLE + "/houseCard";
+    public static final String TARIFF = CONSOLE + "/tariff";
 
     private WebServicePaths() {
         throw new AssertionError();

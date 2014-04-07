@@ -85,6 +85,7 @@
                                 <include>io/pillopl/test/**</include>
                                 <include>io/pillopl/infrastructure/InfrastructureFixture*</include>
                                 <include>io/pillopl/card/CardFixture*</include>
+                                <include>io/pillopl/pricing/PricingFixture*</include>
                             </includes>
                         </configuration>
                     </execution>

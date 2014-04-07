@@ -20,9 +20,9 @@ public enum GroupAttributeType {
      */
     HOUSE_CARD("HOUSECARD", true, "cards"),
     /**
-     * Default tariff of a SITE subtree (replaces the "market to tariff" fallback): implemented with pricing.
+     * Default tariff of a SITE subtree, before the default tariff of the market (step 3 of the tariff resolution).
      */
-    DEFAULT_TARIFF("GRP_ATTR_DEFAULT_TARIFF", false, "pricing");
+    DEFAULT_TARIFF("GRP_ATTR_DEFAULT_TARIFF", true, "pricing");
 
     private final String tableName;
 
