@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -258,6 +259,9 @@ public class UserinfoService {
             throw new IllegalArgumentException("Name must not be empty");
         }
         Userinfo user = userinfoDao.findByUsername(username);
+        if (user == null) {
+            throw new NoSuchElementException(String.format("No console user is registered as '%s'", username));
+        }
         user.setName(name);
         return userinfoDao.save(user);
     }

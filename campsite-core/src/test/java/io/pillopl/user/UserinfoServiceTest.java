@@ -91,6 +91,15 @@ class UserinfoServiceTest {
     }
 
     @Test
+    void renamingAnUnknownUserIsRefusedAsNotFound() {
+        when(userinfoDao.findByUsername("ghost")).thenReturn(null);
+
+        assertThatThrownBy(() -> userinfoService.changeName("ghost", "Ghost Rider"))
+                .isInstanceOf(java.util.NoSuchElementException.class)
+                .hasMessageContaining("'ghost'");
+    }
+
+    @Test
     void localPartOfAnEmailIsLowerCased() {
         assertThat(userinfoService.getLocalPartOfEmail("Ana.Horvat@Bay.example")).isEqualTo("ana.horvat");
         assertThat(userinfoService.getLocalPartOfEmail("not an email")).isNull();
