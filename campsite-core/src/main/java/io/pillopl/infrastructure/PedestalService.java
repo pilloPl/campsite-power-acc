@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -252,6 +253,57 @@ public class PedestalService {
         checkIsManageable(userinfo, socket.getPedestal());
         socket.setFreeSocket(freeSocket);
         return socketDao.save(socket);
+    }
+
+    /**
+     * A meter reading of the socket arrived (meter readings, stop of a supply). Missing and negative readings are
+     * skipped: the socket keeps its last good reading.
+     *
+     * @return true when the reading was stored
+     */
+    public boolean updateMeterReading(Socket socket, BigDecimal meterKwh, LocalDateTime at) {
+        Objects.requireNonNull(socket);
+        if (meterKwh == null || meterKwh.signum() < 0) {
+            LOG.warn(String.format("Meter reading %s of socket %s skipped", meterKwh, socket));
+            return false;
+        }
+        socket.setMeterKwh(meterKwh);
+        socket.setModDate(at);
+        socketDao.save(socket);
+        return true;
+    }
+
+    /**
+     * The pedestal reported the status of a socket.
+     */
+    public Socket updateSocketStatus(Socket socket, SocketStatus status, LocalDateTime at) {
+        Objects.requireNonNull(socket);
+        socket.updateStatus(status, at);
+        return socketDao.save(socket);
+    }
+
+    /**
+     * The pedestal booted: stores what its controller reports about itself.
+     *
+     * @return the pedestal, or null when the code is unknown or the pedestal is deleted (the boot is rejected)
+     */
+    public Pedestal updateBootData(String pedestalCode, String firmwareVersion, String serialNumber,
+                                   String modemIccid) {
+        Pedestal pedestal = pedestalCode != null ? pedestalDao.findByCode(pedestalCode) : null;
+        if (pedestal == null || pedestal.isDeleted()) {
+            LOG.warn(String.format("Boot of unknown pedestal %s", pedestalCode));
+            return null;
+        }
+        if (firmwareVersion != null) {
+            pedestal.setFirmwareVersion(firmwareVersion);
+        }
+        if (serialNumber != null) {
+            pedestal.setSerialNumber(serialNumber);
+        }
+        if (modemIccid != null) {
+            pedestal.setModemIccid(modemIccid);
+        }
+        return pedestalDao.save(pedestal);
     }
 
     /**
