@@ -45,7 +45,10 @@ public enum EventAttribute {
     USERNAME(String.class),
     ACCESS_MODE(String.class),
     CHANGE_TYPE(String.class),
-    TARIFF_ID(Long.class);
+    TARIFF_ID(Long.class),
+    STOP_REASON(String.class),
+    BILLABLE(Boolean.class),
+    INCIDENT_TYPE(String.class);
 
     private final Class<?> clazz;
 
