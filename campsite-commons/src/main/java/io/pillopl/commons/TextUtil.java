@@ -23,8 +23,13 @@ public final class TextUtil {
 
     /**
      * Cuts the text to the length, ending with "..." when cut.
+     *
+     * @throws IllegalArgumentException for a negative length
      */
     public static String abbreviate(String s, int maxLength) {
+        if (maxLength < 0) {
+            throw new IllegalArgumentException("Maximum length must not be negative: " + maxLength);
+        }
         if (s == null || s.length() <= maxLength) {
             return s;
         }

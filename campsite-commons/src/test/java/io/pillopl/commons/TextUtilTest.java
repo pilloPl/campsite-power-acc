@@ -3,6 +3,7 @@ package io.pillopl.commons;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TextUtilTest {
 
@@ -18,6 +19,13 @@ class TextUtilTest {
         assertThat(TextUtil.abbreviate("abcdefgh", 6)).isEqualTo("abc...");
         assertThat(TextUtil.abbreviate("abc", 6)).isEqualTo("abc");
         assertThat(TextUtil.abbreviate("abcdef", 2)).isEqualTo("ab");
+    }
+
+    @Test
+    void negativeLengthIsRejected() {
+        assertThatThrownBy(() -> TextUtil.abbreviate("abc", -1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("-1");
     }
 
     @Test
