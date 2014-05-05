@@ -69,6 +69,11 @@ public class SupplySessionManager implements SupplySessionRegistry {
     }
 
     @Transactional(readOnly = true)
+    public SupplySession getSession(Long sessionId) {
+        return sessionId != null ? supplySessionDao.findById(sessionId).orElse(null) : null;
+    }
+
+    @Transactional(readOnly = true)
     public SupplySession getActiveSession(final Socket socket) {
         List<SupplySession> sessions = supplySessionDao.findActiveBySocket(socket);
         if (sessions.isEmpty()) {
