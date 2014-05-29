@@ -38,6 +38,8 @@ public class UserinfoSummaryService {
                                                       Boolean seasonalResident, Pageable pageable) {
         Group staffGroup = principal.getGroup(GroupType.STAFF);
         if (staffGroup == null) {
+            LOG.info(String.format("Console user '%s' has no STAFF group, so no self-service users are listed",
+                    principal.getUsername()));
             return Page.empty(pageable);
         }
         List<Group> groups = groupService.findManageableGroups(staffGroup);
