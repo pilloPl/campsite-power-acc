@@ -89,6 +89,12 @@ public class Pedestal implements IsLinkedToGroup {
     @Column(name = "PRICE_INFORMATION", length = 50)
     private String priceInformation;
 
+    /**
+     * Address of the controller for messages of the pedestal backend; null when the pedestal can only send.
+     */
+    @Column(name = "LINK_URL", length = 255)
+    private String linkUrl;
+
     @Column(name = "BILLABLE", nullable = false)
     private boolean billable;
 
