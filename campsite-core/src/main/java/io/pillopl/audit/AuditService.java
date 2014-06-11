@@ -61,20 +61,24 @@ public class AuditService {
             column = "id";
         }
 
-        Sort.Direction direction;
-        if (sortOrder != null && !sortOrder.isBlank()) {
-            try {
-                direction = Sort.Direction.fromString(sortOrder);
-            } catch (IllegalArgumentException e) {
-                LOG.warn("Unknown sort order " + sortOrder);
-                direction = Sort.Direction.DESC;
-            }
-        } else {
-            direction = Sort.Direction.DESC;
-        }
-        PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE, Sort.by(direction, column));
+        PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE, Sort.by(sortDirection(sortOrder), column));
         return auditDao.findAuditEntries(blankToNull(nameFilter), blankToNull(typeFilter), blankToNull(statusFilter),
                 categoryFilter, dateFrom, dateTo, blankToNull(freeSearch), pageRequest);
+    }
+
+    /**
+     * Descending unless the console asks for a known order; an unknown order is logged.
+     */
+    static Sort.Direction sortDirection(String sortOrder) {
+        if (sortOrder == null || sortOrder.isBlank()) {
+            return Sort.Direction.DESC;
+        }
+        try {
+            return Sort.Direction.fromString(sortOrder.trim());
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Unknown sort order '" + sortOrder + "' of the audit search, sorting descending");
+            return Sort.Direction.DESC;
+        }
     }
 
     /**
