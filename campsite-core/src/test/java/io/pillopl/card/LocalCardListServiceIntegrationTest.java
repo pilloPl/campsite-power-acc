@@ -67,9 +67,9 @@ class LocalCardListServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    void withoutPedestalLinkTheListIsNotSent() {
+    void pedestalWithoutLinkAddressDoesNotGetTheList() {
         assertThatThrownBy(() -> localCardListService.sendFull("HR-BAY-P001", false))
                 .isInstanceOf(LocalCardListException.class)
-                .hasMessageContaining(NoLinkLocalCardListSender.NO_LINK);
+                .hasMessageContaining("Pedestal has no link address");
     }
 }
