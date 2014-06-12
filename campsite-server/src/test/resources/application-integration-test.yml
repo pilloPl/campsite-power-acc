@@ -1,0 +1,4 @@
+# Jobs are triggered by the tests themselves, never by the scheduler.
+spring:
+  quartz:
+    auto-startup: false
