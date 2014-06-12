@@ -1,7 +1,7 @@
 package io.pillopl.webservice.console.common;
 
 /**
- * Paths of the console web services. Every operation is a POST of its request to {@code <service path>/<operation>}.
+ * Paths of the console web services and of the pedestal link. Every operation is a POST of its request to {@code <service path>/<operation>}.
  */
 public final class WebServicePaths {
 
@@ -21,6 +21,11 @@ public final class WebServicePaths {
 
     public static final String HOUSE_CARD = CONSOLE + "/houseCard";
     public static final String TARIFF = CONSOLE + "/tariff";
+
+    /**
+     * Messages of the pedestal controllers on link v1: {@code <path>/<pedestal code>/<message>}.
+     */
+    public static final String PEDESTAL_LINK_V1 = "/api/pedestal-link/v1";
 
     private WebServicePaths() {
         throw new AssertionError();
