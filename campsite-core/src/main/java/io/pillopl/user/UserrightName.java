@@ -19,5 +19,6 @@ public enum UserrightName {
     USER_ADMIN,
     AUDIT_VIEW,
     CONFIG_EDIT,
+    CONSUMPTION_RECORD_REVIEW,
     SELF_SERVICE
 }
