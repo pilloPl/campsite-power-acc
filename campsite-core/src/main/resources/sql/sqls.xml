@@ -213,4 +213,107 @@ SELECT c.ID
  ORDER BY c.ID DESC
 ]]></entry>
 
+    <!-- ===== Consumption records seen by a user: operator side UNION issuer side ===== -->
+
+    <!--
+      Consumption records with plug-out in [:from, :to] visible to a user: the records of pedestals in the subtree of
+      the user's SITE group (operator side) UNION the records of guests in the subtree of the user's ISSUER group
+      (issuer side). A record seen from both sides comes once. A missing group id makes its side empty.
+    -->
+    <entry key="findConsumptionRecordIds"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT v.ID
+  FROM (
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.SITE_GROUP_ID IN (SELECT id FROM site_tree)
+    UNION
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree)
+       ) v
+ ORDER BY v.PLUG_OUT DESC, v.ID DESC
+]]></entry>
+
+    <!-- Copy of findConsumptionRecordIds for the console list: optional validation state, one page. -->
+    <entry key="findConsumptionRecordIdsPage"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT v.ID
+  FROM (
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.SITE_GROUP_ID IN (SELECT id FROM site_tree)
+       AND (CAST(:validationState AS VARCHAR) IS NULL OR cr.VALIDATION_STATE = :validationState)
+    UNION
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree)
+       AND (CAST(:validationState AS VARCHAR) IS NULL OR cr.VALIDATION_STATE = :validationState)
+       ) v
+ ORDER BY v.PLUG_OUT DESC, v.ID DESC
+ LIMIT :pageSize OFFSET :offset
+]]></entry>
+
+    <!-- Copy of findConsumptionRecordIds for the export: only records waiting for export (EXPORT_STATUS NEW). -->
+    <entry key="findConsumptionRecordIdsForExport"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT v.ID
+  FROM (
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.SITE_GROUP_ID IN (SELECT id FROM site_tree)
+       AND cr.EXPORT_STATUS = 'NEW'
+    UNION
+    SELECT cr.ID, cr.PLUG_OUT
+      FROM CONSUMPTION_RECORD cr
+     WHERE cr.PLUG_OUT >= :from
+       AND cr.PLUG_OUT <= :to
+       AND cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree)
+       AND cr.EXPORT_STATUS = 'NEW'
+       ) v
+ ORDER BY v.PLUG_OUT, v.ID
+]]></entry>
+
+    <!-- Next number of the natural record id (never cut to a fixed width). -->
+    <entry key="nextConsumptionRecordNumber"><![CDATA[
+SELECT nextval('CONSUMPTION_RECORD_NO_SEQ')
+]]></entry>
+
 </properties>
