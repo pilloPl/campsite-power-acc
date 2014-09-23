@@ -276,8 +276,9 @@ public class UserinfoService {
         if (market == null) {
             throw new IllegalStateException("Cannot set up affiliate owner without market: " + userinfo.getUsername());
         }
-        Group selfServiceGroup = groupService.getExtensionByMarket(market).findSelfServiceStaffGroup();
-        Group houseCardsOnly = groupService.getExtensionByMarket(market).findHouseCardsOnlySiteGroup();
+        var marketGroups = groupService.getExtensionByMarket(market);
+        Group selfServiceGroup = marketGroups.findSelfServiceStaffGroup();
+        Group houseCardsOnly = marketGroups.findHouseCardsOnlySiteGroup();
         if (selfServiceGroup == null || houseCardsOnly == null) {
             throw new IllegalStateException(String.format(
                     "Self service group and/or %s group of market %s could not be found", AccessMode.HOUSE_CARDS_ONLY,
