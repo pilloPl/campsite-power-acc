@@ -16,6 +16,14 @@ class CardValuesTest {
     }
 
     @Test
+    void cardUidMayFillTheColumnAndMissingValuesAreRefused() {
+        assertThat(CardRfid.of("1".repeat(CardRfid.MAX_LENGTH)).value()).hasSize(64);
+        assertThat(CardRfid.of("0")).hasToString("0");
+        assertThatThrownBy(() -> CardRfid.of(null)).isInstanceOf(InvalidValueException.class);
+        assertThatThrownBy(() -> HouseCardId.of(null)).isInstanceOf(InvalidValueException.class);
+    }
+
+    @Test
     void cardIdsArePositive() {
         assertThat(CardId.of(5L).value()).isEqualTo(5);
         assertThatThrownBy(() -> CardId.of(0L)).isInstanceOf(InvalidValueException.class);
