@@ -17,7 +17,8 @@ public enum StopReason {
     OTHER;
 
     /**
-     * Reason sent by a pedestal; unknown or missing reasons are OTHER, never an error (the stop must be accepted).
+     * Reason sent by a pedestal: a missing reason is LOCAL (the guest stopped at the socket), an unknown one is OTHER,
+     * never an error (the stop must be accepted).
      */
     public static StopReason fromPedestal(String reason) {
         if (reason == null || reason.isBlank()) {
