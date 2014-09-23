@@ -5,6 +5,8 @@ import io.pillopl.card.ValidationService;
 import io.pillopl.card.ValidationService.ValidationResult;
 import io.pillopl.card.ValidationStatus;
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.consumption.ConsumptionRecord;
+import io.pillopl.consumption.ConsumptionRecordWriteService;
 import io.pillopl.event.Event;
 import io.pillopl.event.EventAttribute;
 import io.pillopl.event.EventService;
@@ -64,6 +66,8 @@ public class SupplyControlUnitImpl {
 
     private final ObjectProvider<CheckedOutStayFinder> checkedOutStayFinder;
 
+    private final ConsumptionRecordWriteService consumptionRecordWriteService;
+
     private final TransactionTemplate transactionTemplate;
 
     public SupplyControlUnitImpl(DateService dateService, SupplySessionManager sessionManager,
@@ -71,6 +75,7 @@ public class SupplyControlUnitImpl {
                                  PricingService pricingService, EventService eventService,
                                  SupplyIncidentDao supplyIncidentDao, SystemPropertyService systemPropertyService,
                                  ObjectProvider<CheckedOutStayFinder> checkedOutStayFinder,
+                                 ConsumptionRecordWriteService consumptionRecordWriteService,
                                  PlatformTransactionManager transactionManager) {
         this.dateService = dateService;
         this.sessionManager = sessionManager;
@@ -81,6 +86,7 @@ public class SupplyControlUnitImpl {
         this.supplyIncidentDao = supplyIncidentDao;
         this.systemPropertyService = systemPropertyService;
         this.checkedOutStayFinder = checkedOutStayFinder;
+        this.consumptionRecordWriteService = consumptionRecordWriteService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -311,19 +317,23 @@ public class SupplyControlUnitImpl {
         final StopReason stopReason = stopData.supplyRequest.getStopReason() != null
                 ? stopData.supplyRequest.getStopReason() : StopReason.LOCAL;
 
-        saveConsumption(stopData, consumption, duration, billed);
+        saveConsumption(stopData, consumption, duration, billed, stopReason);
         updatePedestal(socket, stopData.supplyRequest, duration);
         sessionManager.deactivate(stopData.session, stopReason, duration.plugOut());
         createSupplyStoppedEvent(stopData, consumption, duration, billed, stopReason);
     }
 
     /**
-     * One consumption record per session is written from these values by the consumption record module.
+     * The one consumption record of the session: the single place for stops of the pedestal and sessions closed by
+     * the job.
      */
     private void saveConsumption(final StopData stopData, final Consumption consumption,
-                                 final SupplyDuration duration, final boolean billed) {
+                                 final SupplyDuration duration, final boolean billed, final StopReason stopReason) {
         LOG.info(String.format("Consumption of session %s: %s, %s, billed: %s", stopData.session, consumption,
                 duration, billed));
+        ConsumptionRecord record = consumptionRecordWriteService.createConsumptionRecord(stopData.session,
+                stopData.validationResult, consumption, duration, billed, stopReason, stopData.systemDate);
+        LOG.debug(String.format("Saved consumption record %s", record));
     }
 
     private void updatePedestal(final Socket socket, final SupplyRequest supplyRequest,

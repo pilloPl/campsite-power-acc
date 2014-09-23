@@ -7,6 +7,7 @@ import io.pillopl.card.ValidationService;
 import io.pillopl.card.ValidationService.ValidationResult;
 import io.pillopl.card.ValidationStatus;
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.consumption.ConsumptionRecordWriteService;
 import io.pillopl.event.Event;
 import io.pillopl.event.EventAttribute;
 import io.pillopl.event.EventService;
@@ -66,10 +67,12 @@ class SupplyControlUnitImplTest {
     @SuppressWarnings("unchecked")
     final ObjectProvider<CheckedOutStayFinder> stayFinderProvider = mock(ObjectProvider.class);
     final CheckedOutStayFinder stayFinder = mock(CheckedOutStayFinder.class);
+    final ConsumptionRecordWriteService consumptionRecordWriteService = mock(ConsumptionRecordWriteService.class);
 
     final SupplyControlUnitImpl controlUnit = new SupplyControlUnitImpl(dateService, sessionManager,
             validationService, pedestalService, pricingService, eventService, supplyIncidentDao,
-            systemPropertyService, stayFinderProvider, mock(PlatformTransactionManager.class));
+            systemPropertyService, stayFinderProvider, consumptionRecordWriteService,
+            mock(PlatformTransactionManager.class));
 
     final Pedestal pedestal = new Pedestal();
     final Socket socket = new Socket();
@@ -196,6 +199,8 @@ class SupplyControlUnitImplTest {
         assertThat(incident.getPedestalCode()).isEqualTo(PEDESTAL);
         assertThat(incident.getMeterKwh()).isEqualByComparingTo("1262.5");
         verify(sessionManager, never()).deactivate(any(), any(), any());
+        verify(consumptionRecordWriteService, never()).createConsumptionRecord(any(), any(), any(), any(),
+                anyBoolean(), any(), any());
     }
 
     @Test
@@ -231,6 +236,8 @@ class SupplyControlUnitImplTest {
         assertThat(event.getAttribute(EventAttribute.BILLABLE)).isEqualTo(true);
         assertThat(event.getAttribute(EventAttribute.START_TIME)).isEqualTo(PLUG_IN);
         verify(supplyIncidentDao, never()).save(any());
+        verify(consumptionRecordWriteService).createConsumptionRecord(eq(session), any(), any(), any(), eq(true),
+                eq(StopReason.UNPLUGGED), eq(NOW));
     }
 
     @Test
@@ -316,6 +323,8 @@ class SupplyControlUnitImplTest {
         Event event = sentEvent();
         assertThat(EventAttribute.STOP_REASON.getStringValue(event)).isEqualTo("TIMEOUT");
         assertThat(event.getAttribute(EventAttribute.STOP_METER_KWH)).isEqualTo(new BigDecimal("1250.000"));
+        verify(consumptionRecordWriteService).createConsumptionRecord(eq(stale), any(), any(), any(), eq(true),
+                eq(StopReason.TIMEOUT), eq(NOW));
     }
 
     @Test
