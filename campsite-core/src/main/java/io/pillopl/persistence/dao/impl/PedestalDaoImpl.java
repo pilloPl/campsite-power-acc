@@ -99,8 +99,9 @@ public class PedestalDaoImpl implements PedestalDaoCustom {
             case ERROR:
                 return " AND sub.ID IN (SELECT s.PEDESTAL_ID FROM SOCKET s WHERE s.MONITORING = TRUE AND s.DELETED = FALSE"
                         + " AND (s.STATUS IN " + SOCKET_ERROR_STATUSES
-                        + " OR s.PEDESTAL_ID IN (SELECT ps.PEDESTAL_ID FROM PEDESTAL_STATE ps WHERE ps.TIMEOUT = TRUE)"
-                        + " OR s.PEDESTAL_ID NOT IN (SELECT ps.PEDESTAL_ID FROM PEDESTAL_STATE ps)))";
+                        + " OR EXISTS (SELECT 1 FROM PEDESTAL_STATE ps WHERE ps.PEDESTAL_ID = s.PEDESTAL_ID"
+                        + " AND ps.TIMEOUT = TRUE)"
+                        + " OR NOT EXISTS (SELECT 1 FROM PEDESTAL_STATE ps WHERE ps.PEDESTAL_ID = s.PEDESTAL_ID)))";
             case WORKING:
                 return " AND (sub.ID IN (SELECT s.PEDESTAL_ID FROM SOCKET s WHERE s.MONITORING = TRUE AND s.DELETED = FALSE)"
                         + " AND sub.ID NOT IN (SELECT s.PEDESTAL_ID FROM SOCKET s WHERE s.MONITORING = TRUE"
