@@ -24,6 +24,15 @@ class SocketCodeHelperTest {
     }
 
     @Test
+    void socketCodeNeedsAPedestalCode() {
+        assertThatThrownBy(() -> SocketCodeHelper.createSocketCode("HRBAY", null, 1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Pedestal code");
+        assertThatThrownBy(() -> SocketCodeHelper.createSocketCode("HRBAY", "  ", 1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void allSocketsOfAPedestalGetTheirCodeAndLoseItAgain() {
         Location location = new Location("Rovinj", "52210", "Obala", "12");
         location.setCampsiteCode("HRBAY");

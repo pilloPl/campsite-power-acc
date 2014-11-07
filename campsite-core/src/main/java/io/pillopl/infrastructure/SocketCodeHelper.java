@@ -19,8 +19,12 @@ public final class SocketCodeHelper {
         if (campsiteCode == null || campsiteCode.isBlank()) {
             throw new IllegalArgumentException("Campsite code is needed for a socket code of pedestal " + pedestalCode);
         }
-        String pedestalPart = stripCampsitePrefix(normalize(pedestalCode), normalize(campsiteCode));
-        return normalize(campsiteCode) + SEPARATOR + pedestalPart + SEPARATOR + socketNo;
+        if (pedestalCode == null || pedestalCode.isBlank()) {
+            throw new IllegalArgumentException("Pedestal code is needed for a socket code at campsite " + campsiteCode);
+        }
+        String campsitePart = normalize(campsiteCode);
+        String pedestalPart = stripCampsitePrefix(normalize(pedestalCode), campsitePart);
+        return campsitePart + SEPARATOR + pedestalPart + SEPARATOR + socketNo;
     }
 
     /**
