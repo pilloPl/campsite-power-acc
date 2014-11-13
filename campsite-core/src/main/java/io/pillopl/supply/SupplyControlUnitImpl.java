@@ -125,10 +125,8 @@ public class SupplyControlUnitImpl {
         SupplySession session = sessionManager.findSessionFor(socketLinkId, cardRfid, startMeterKwh, remoteDate,
                 validationResult.isHouseCardAccepted());
         if (session == null) {
-            // not processed yet: new session
+            // not processed yet: new session (the session manager logs it)
             session = sessionManager.createNewSessionFor(validationResult, null, startMeterKwh, remoteDate);
-            LOG.info(String.format("Created new session (%s) for socket (%s), card (%s), start meter (%s), remote date (%s).",
-                    session, socketLinkId, cardRfid, startMeterKwh, remoteDate));
             alreadyProcessed = false;
         }
         // Enrich the answer
