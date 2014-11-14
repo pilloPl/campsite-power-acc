@@ -1,6 +1,7 @@
 package io.pillopl.group.attribute;
 
 import io.pillopl.group.GroupService;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.NotificationDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,19 @@ public class NotificationService {
         List<Notification> notifications = notificationDao.findByGroupIds(parentGroupLineIds);
         return GroupAttributeHelper.findNearest(parentGroupLineIds, notifications,
                 notification -> notification.getNotificationType() == notificationType);
+    }
+
+    /**
+     * Recipient of the service mails of the given type for a pedestal: the nearest notification above its group.
+     *
+     * @return the notification, or null when the pedestal hangs in no group or no group above has one
+     */
+    @Transactional(readOnly = true)
+    public Notification fetchNotification(Pedestal pedestal, NotificationType notificationType) {
+        if (pedestal == null || pedestal.getGroup() == null) {
+            return null;
+        }
+        return fetchNotification(pedestal.getGroup().getId(), notificationType);
     }
 
     @Transactional
