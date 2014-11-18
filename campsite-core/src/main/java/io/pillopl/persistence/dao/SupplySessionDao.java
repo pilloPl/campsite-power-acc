@@ -1,6 +1,7 @@
 package io.pillopl.persistence.dao;
 
 import io.pillopl.infrastructure.Socket;
+import io.pillopl.power.PowerSection;
 import io.pillopl.supply.SupplySession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,9 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
 
     @Query("select s from SupplySession s where s.socket = :socket and s.active = true order by s.createDate desc")
     List<SupplySession> findActiveBySocket(@Param("socket") Socket socket);
+
+    @Query("select s from SupplySession s where s.socket.powerSection = :section and s.active = true order by s.id")
+    List<SupplySession> findActiveByPowerSection(@Param("section") PowerSection section);
 
     @Query("select s from SupplySession s where s.socket = :socket and s.card.cardRfid = :rfid"
             + " and s.transactionId = :transactionId")

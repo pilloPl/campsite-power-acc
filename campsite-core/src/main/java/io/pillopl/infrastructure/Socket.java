@@ -1,5 +1,6 @@
 package io.pillopl.infrastructure;
 
+import io.pillopl.power.PowerSection;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -85,6 +86,13 @@ public class Socket {
 
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
+
+    /**
+     * Section switchboard the socket hangs on; null is the explicit configuration "no section limit".
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "POWER_SECTION_ID")
+    private PowerSection powerSection;
 
     public Socket() {
     }
