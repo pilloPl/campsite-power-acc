@@ -15,12 +15,20 @@ public final class RfidConverter {
 
     /**
      * "04A1B2C3" (big-endian hex from an issuer file) to the decimal UID a pedestal sends.
+     *
+     * @throws IllegalArgumentException when the value has other characters than hex digits
      */
     public static String hexBigEndianToDecimal(String hex) {
         if (hex == null || hex.isBlank()) {
             return null;
         }
-        return new BigInteger(turnByteOrder(hex.trim()), 16).toString();
+        String trimmed = hex.trim();
+        for (int i = 0; i < trimmed.length(); i++) {
+            if (Character.digit(trimmed.charAt(i), 16) < 0) {
+                throw new IllegalArgumentException("Not a hexadecimal UID: " + hex);
+            }
+        }
+        return new BigInteger(turnByteOrder(trimmed), 16).toString();
     }
 
     /**

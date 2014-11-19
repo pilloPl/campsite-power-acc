@@ -22,6 +22,15 @@ class RfidConverterTest {
     }
 
     @Test
+    void issuerUidWithOtherCharactersThanHexDigitsIsRefused() {
+        assertThatThrownBy(() -> RfidConverter.hexBigEndianToDecimal("04:A1:B2:C3"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Not a hexadecimal UID: 04:A1:B2:C3");
+        assertThatThrownBy(() -> RfidConverter.hexBigEndianToDecimal("-04A1"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void oddNumberOfDigitsGetsALeadingZero() {
         assertThat(RfidConverter.turnByteOrder("ABC")).isEqualTo("BC0A");
     }
