@@ -362,27 +362,11 @@ public class SupplyControlUnitImpl {
     }
 
     public Consumption determineConsumption(Socket socket, SupplyRequest supplyRequest) {
-        boolean startMeterOk = true;
-        // on problems the start meter is the last known reading of the socket
-        BigDecimal startMeterKwh = supplyRequest.getStartMeterKwh();
-        if (startMeterKwh == null || startMeterKwh.signum() == -1) {
-            startMeterKwh = socket.getMeterKwh();
-            startMeterOk = false;
-            LOG.info(String.format("Consumption: invalid start meter, set to the last known reading %s of %s!",
-                    startMeterKwh, socket));
-        }
-        LOG.debug(String.format("Consumption: start meter %s", startMeterKwh));
-
-        boolean stopMeterOk = true;
-        // on problems the stop meter is the last known reading of the socket
-        BigDecimal stopMeterKwh = supplyRequest.getStopMeterKwh();
-        if (stopMeterKwh == null || stopMeterKwh.signum() == -1) {
-            stopMeterKwh = socket.getMeterKwh();
-            stopMeterOk = false;
-            LOG.info(String.format("Consumption: invalid stop meter, set to the last known reading %s of %s!",
-                    stopMeterKwh, socket));
-        }
-        LOG.debug(String.format("Consumption: stop meter %s", stopMeterKwh));
+        // on problems a meter value is the last known reading of the socket
+        final boolean startMeterOk = isValidMeterValue(supplyRequest.getStartMeterKwh());
+        final BigDecimal startMeterKwh = meterOrLastReading(supplyRequest.getStartMeterKwh(), socket, "start");
+        final boolean stopMeterOk = isValidMeterValue(supplyRequest.getStopMeterKwh());
+        final BigDecimal stopMeterKwh = meterOrLastReading(supplyRequest.getStopMeterKwh(), socket, "stop");
 
         BigDecimal consumptionKwh = null;
         if (startMeterOk && stopMeterOk) {
@@ -397,6 +381,20 @@ public class SupplyControlUnitImpl {
         }
 
         return new Consumption(startMeterKwh, stopMeterKwh, consumptionKwh);
+    }
+
+    private static boolean isValidMeterValue(BigDecimal meterKwh) {
+        return meterKwh != null && meterKwh.signum() != -1;
+    }
+
+    private static BigDecimal meterOrLastReading(BigDecimal meterKwh, Socket socket, String which) {
+        if (isValidMeterValue(meterKwh)) {
+            LOG.debug(String.format("Consumption: %s meter %s", which, meterKwh));
+            return meterKwh;
+        }
+        LOG.info(String.format("Consumption: invalid %s meter, set to the last known reading %s of %s!", which,
+                socket.getMeterKwh(), socket));
+        return socket.getMeterKwh();
     }
 
     SupplyDuration determineDuration(SupplyRequest supplyRequest, SupplySession session, LocalDateTime systemDate) {
