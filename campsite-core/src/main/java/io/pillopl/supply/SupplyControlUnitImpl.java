@@ -240,6 +240,8 @@ public class SupplyControlUnitImpl {
         final Set<Long> stayIds = sessions.stream().map(SupplySession::getStayId).collect(Collectors.toSet());
         final Set<Long> checkedOut = finder.findCheckedOutStayIds(stayIds,
                 now.minusMinutes(systemPropertyService.getCheckoutSessionCloseDelayInMinutes()));
+        LOG.debug(String.format("%d of %d stays with an active supply session are checked out", checkedOut.size(),
+                stayIds.size()));
         int closed = 0;
         for (SupplySession session : sessions) {
             if (checkedOut.contains(session.getStayId()) && closeInOwnTransaction(session.getId(),
