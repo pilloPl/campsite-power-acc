@@ -126,10 +126,10 @@ public class HouseCardService {
                                    HouseCardType houseCardType, String rfid, String cardNumber, boolean active) {
         Userinfo owner = checkUserPrivileges(username, ownerUsername);
         if (houseCardType == null) {
-            throw new IllegalArgumentException("House card type is null");
+            throw new IllegalArgumentException("House card type is missing");
         }
         if (rfid == null || rfid.isBlank()) {
-            throw new IllegalArgumentException("Card UID is null");
+            throw new IllegalArgumentException("Card UID of the house card is missing");
         }
 
         HouseCard houseCard = null;
