@@ -65,12 +65,12 @@ class SocketStatusLogDaoIntegrationTest extends IntegrationTest {
     @Test
     void errorMaskOfTheManufacturerWinsOverTheProtocolMask() {
         jdbcTemplate.update("INSERT INTO PEDESTAL_ERROR_CODE (MANUFACTURER, CODE, MASK, MASKED, ABBREVIATION,"
-                + " DESCRIPTION) VALUES (?, 'BreakerTripped', 256, TRUE, 'MCB', 'Miniature circuit breaker')",
+                + " DESCRIPTION) VALUES (?, 'BREAKER_TRIPPED', 256, TRUE, 'MCB', 'Miniature circuit breaker')",
                 InfrastructureFixture.MANUFACTURER);
 
-        assertThat(socketStatusLogDao.findErrorMask(InfrastructureFixture.MANUFACTURER, "BreakerTripped"))
+        assertThat(socketStatusLogDao.findErrorMask(InfrastructureFixture.MANUFACTURER, "BREAKER_TRIPPED"))
                 .isEqualTo(256L);
-        assertThat(socketStatusLogDao.findErrorMask("OTHER PEDESTALS", "BreakerTripped")).isEqualTo(1L);
+        assertThat(socketStatusLogDao.findErrorMask("OTHER PEDESTALS", "BREAKER_TRIPPED")).isEqualTo(1L);
         assertThat(socketStatusLogDao.findErrorMask("OTHER PEDESTALS", "NoSuchCode")).isNull();
     }
 
@@ -86,7 +86,7 @@ class SocketStatusLogDaoIntegrationTest extends IntegrationTest {
     @Test
     void errorFlagsOfAManufacturerWithOwnMasksUseOnlyItsMasks() {
         jdbcTemplate.update("INSERT INTO PEDESTAL_ERROR_CODE (MANUFACTURER, CODE, MASK, MASKED, ABBREVIATION,"
-                + " DESCRIPTION) VALUES (?, 'BreakerTripped', 1, TRUE, 'MCB', 'Miniature circuit breaker')",
+                + " DESCRIPTION) VALUES (?, 'BREAKER_TRIPPED', 1, TRUE, 'MCB', 'Miniature circuit breaker')",
                 InfrastructureFixture.MANUFACTURER);
 
         assertThat(socketStatusLogDao.findErrorAbbreviations(InfrastructureFixture.MANUFACTURER, 1L | 4L))
