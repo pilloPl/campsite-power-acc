@@ -40,7 +40,7 @@ public abstract class WebServiceIntegrationTest extends IntegrationTest {
     @AfterTransaction
     void cleanUpCommittedRows() {
         jdbcTemplate.update("DELETE FROM AUDIT WHERE ACTION_TYPE IN ('PEDESTAL_IMPORT', 'PEDESTAL_COMMISSIONING', "
-                + "'PEDESTAL_DECOMMISSIONING', 'CONFIG_CHANGE')");
+                + "'PEDESTAL_DECOMMISSIONING', 'CONFIG_CHANGE', 'EMAIL')");
         systemPropertyService.reloadSystemProperties();
     }
 

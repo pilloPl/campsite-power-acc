@@ -5,6 +5,8 @@ import io.pillopl.dto.pedestallink.v1.AuthorizeRequest;
 import io.pillopl.dto.pedestallink.v1.AuthorizeResponse;
 import io.pillopl.dto.pedestallink.v1.BootRequest;
 import io.pillopl.dto.pedestallink.v1.BootResponse;
+import io.pillopl.dto.pedestallink.v1.DiagnosticsStatusRequest;
+import io.pillopl.dto.pedestallink.v1.FirmwareStatusRequest;
 import io.pillopl.dto.pedestallink.v1.MeterReadingsRequest;
 import io.pillopl.dto.pedestallink.v1.SocketStatusRequest;
 import io.pillopl.dto.pedestallink.v1.SupplyStartedRequest;
@@ -97,6 +99,22 @@ public class PedestalLinkV1WebService extends AbstractWebService<PedestalLinkSer
             throws PedestalLinkV1WebServiceFault {
         LOGGER.debug(String.format("Link v1 call meterReadings(%s, %s)", pedestalCode, request));
         return invoke("meterReadings", () -> getBean().meterReadings(pedestalCode, request));
+    }
+
+    @PostMapping("/firmwareStatus")
+    public AcknowledgeResponse firmwareStatus(@PathVariable String pedestalCode,
+                                              @RequestBody FirmwareStatusRequest request)
+            throws PedestalLinkV1WebServiceFault {
+        LOGGER.debug(String.format("Link v1 call firmwareStatus(%s, %s)", pedestalCode, request));
+        return invoke("firmwareStatus", () -> getBean().firmwareStatus(pedestalCode, request));
+    }
+
+    @PostMapping("/diagnosticsStatus")
+    public AcknowledgeResponse diagnosticsStatus(@PathVariable String pedestalCode,
+                                                 @RequestBody DiagnosticsStatusRequest request)
+            throws PedestalLinkV1WebServiceFault {
+        LOGGER.debug(String.format("Link v1 call diagnosticsStatus(%s, %s)", pedestalCode, request));
+        return invoke("diagnosticsStatus", () -> getBean().diagnosticsStatus(pedestalCode, request));
     }
 
     @Override
