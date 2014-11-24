@@ -9,6 +9,8 @@ import io.pillopl.dto.pedestallink.v1.AuthorizeRequest;
 import io.pillopl.dto.pedestallink.v1.AuthorizeResponse;
 import io.pillopl.dto.pedestallink.v1.BootRequest;
 import io.pillopl.dto.pedestallink.v1.BootResponse;
+import io.pillopl.dto.pedestallink.v1.DiagnosticsStatusRequest;
+import io.pillopl.dto.pedestallink.v1.FirmwareStatusRequest;
 import io.pillopl.dto.pedestallink.v1.MeterReading;
 import io.pillopl.dto.pedestallink.v1.MeterReadingsRequest;
 import io.pillopl.dto.pedestallink.v1.SocketStatusRequest;
@@ -20,10 +22,14 @@ import io.pillopl.event.Event;
 import io.pillopl.event.EventAttribute;
 import io.pillopl.event.EventService;
 import io.pillopl.event.EventType;
+import io.pillopl.group.attribute.NotificationType;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.PedestalService;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.infrastructure.SocketStatus;
+import io.pillopl.monitoring.PedestalMailService;
+import io.pillopl.monitoring.SocketStateParams;
+import io.pillopl.monitoring.SocketStateTaskWorker;
 import io.pillopl.supply.StopReason;
 import io.pillopl.supply.SupplyControlUnitImpl;
 import io.pillopl.supply.SupplyRequest;
@@ -61,6 +67,8 @@ public class PedestalLinkServiceV1 {
 
     static final String OCCUPIED = "OCCUPIED";
 
+    static final String BREAKER_TRIPPED = "BREAKER_TRIPPED";
+
     private static final String NOT_SUPPORTED = "";
 
     private final Authorization authorization;
@@ -79,10 +87,16 @@ public class PedestalLinkServiceV1 {
 
     private final PedestalLinkClientV1 pedestalLinkClient;
 
+    private final SocketStateTaskWorker socketStateTaskWorker;
+
+    private final PedestalMailService pedestalMailService;
+
     public PedestalLinkServiceV1(Authorization authorization, DateService dateService,
                                  SystemPropertyService systemPropertyService, SupplyControlUnitImpl supplyControlUnit,
                                  SupplySessionManager supplySessionManager, PedestalService pedestalService,
-                                 EventService eventService, PedestalLinkClientV1 pedestalLinkClient) {
+                                 EventService eventService, PedestalLinkClientV1 pedestalLinkClient,
+                                 SocketStateTaskWorker socketStateTaskWorker,
+                                 PedestalMailService pedestalMailService) {
         this.authorization = authorization;
         this.dateService = dateService;
         this.systemPropertyService = systemPropertyService;
@@ -91,6 +105,8 @@ public class PedestalLinkServiceV1 {
         this.pedestalService = pedestalService;
         this.eventService = eventService;
         this.pedestalLinkClient = pedestalLinkClient;
+        this.socketStateTaskWorker = socketStateTaskWorker;
+        this.pedestalMailService = pedestalMailService;
     }
 
     @Transactional
@@ -254,8 +270,9 @@ public class PedestalLinkServiceV1 {
         LocalDateTime now = dateService.getNow();
         pedestalService.registerIncoming(pedestal, now);
 
-        SocketStatus status = translateStatus(request.status());
-        pedestalService.updateSocketStatus(socket, status, now);
+        SocketStatus status = translateStatus(request.status(), request.errorCode());
+        Long errorFlags = socketStateTaskWorker.translateErrorCode(pedestal, request.errorCode());
+        socketStateTaskWorker.monitorSocket(socket, SocketStateParams.status(now, status, errorFlags));
 
         // Socket state event
         try {
@@ -304,12 +321,57 @@ public class PedestalLinkServiceV1 {
         }
         for (MeterReading meterReading : request.readings()) {
             BigDecimal meterKwh = toKwh(meterReading.valueWh());
-            LocalDateTime at = meterReading.timestamp() != null ? meterReading.timestamp() : dateService.getNow();
-            if (pedestalService.updateMeterReading(socket, meterKwh, at)) {
-                LOGGER.debug(String.format("Meter reading %s kWh of socket %s at %s (transaction %s)", meterKwh,
-                        socket, at, request.transactionId()));
+            if (meterKwh == null) {
+                LOGGER.warn(String.format("Meter reading without value of socket %s skipped", socket));
+                continue;
             }
+            LocalDateTime at = meterReading.timestamp() != null ? meterReading.timestamp() : dateService.getNow();
+            LOGGER.debug(String.format("Meter reading %s kWh of socket %s at %s (transaction %s)", meterKwh,
+                    socket, at, request.transactionId()));
+            socketStateTaskWorker.monitorSocket(socket, SocketStateParams.meterReading(at, meterKwh));
         }
+    }
+
+    /**
+     * Progress of a firmware update: only mailed to the service recipient of the pedestal.
+     */
+    @Transactional
+    public AcknowledgeResponse firmwareStatus(String pedestalCode, FirmwareStatusRequest request) {
+        registerIncoming(pedestalCode);
+        LocalDateTime now = dateService.getNow();
+        try {
+            Pedestal pedestal = getPedestal(pedestalCode);
+            pedestalMailService.sendStatusMail(pedestal, NotificationType.FIRMWARE_STATUS, request.status(), now);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Firmware status %s of pedestal %s not mailed", request.status(),
+                    pedestalCode), e);
+        }
+        return new AcknowledgeResponse(now);
+    }
+
+    /**
+     * Result of a diagnostics upload: only mailed to the service recipient of the pedestal.
+     */
+    @Transactional
+    public AcknowledgeResponse diagnosticsStatus(String pedestalCode, DiagnosticsStatusRequest request) {
+        registerIncoming(pedestalCode);
+        LocalDateTime now = dateService.getNow();
+        try {
+            Pedestal pedestal = getPedestal(pedestalCode);
+            pedestalMailService.sendStatusMail(pedestal, NotificationType.DIAGNOSTICS_STATUS, request.status(), now);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Diagnostics status %s of pedestal %s not mailed", request.status(),
+                    pedestalCode), e);
+        }
+        return new AcknowledgeResponse(now);
+    }
+
+    private Pedestal getPedestal(String pedestalCode) {
+        Pedestal pedestal = pedestalService.findByCode(pedestalCode);
+        if (pedestal == null) {
+            throw new IllegalArgumentException("Unknown pedestal " + pedestalCode);
+        }
+        return pedestal;
     }
 
     private void registerIncoming(String pedestalCode) {
@@ -362,6 +424,17 @@ public class PedestalLinkServiceV1 {
             default:
                 return INVALID;
         }
+    }
+
+    /**
+     * Link v1 knows no breaker status: a faulted socket with the breaker error code is a tripped breaker.
+     */
+    static SocketStatus translateStatus(String status, String errorCode) {
+        SocketStatus socketStatus = translateStatus(status);
+        if (socketStatus == SocketStatus.FAULTED && BREAKER_TRIPPED.equals(errorCode)) {
+            return SocketStatus.BREAKER_TRIPPED;
+        }
+        return socketStatus;
     }
 
     static SocketStatus translateStatus(String status) {

@@ -31,6 +31,15 @@ class PedestalLinkServiceV1Test {
     }
 
     @Test
+    void faultedSocketWithTheBreakerErrorCodeIsATrippedBreaker() {
+        assertThat(PedestalLinkServiceV1.translateStatus("FAULTED", "BREAKER_TRIPPED"))
+                .isEqualTo(SocketStatus.BREAKER_TRIPPED);
+        assertThat(PedestalLinkServiceV1.translateStatus("FAULTED", "GROUND_FAILURE")).isEqualTo(SocketStatus.FAULTED);
+        assertThat(PedestalLinkServiceV1.translateStatus("AVAILABLE", "BREAKER_TRIPPED"))
+                .isEqualTo(SocketStatus.AVAILABLE);
+    }
+
+    @Test
     void statusUnknownToLinkV1IsRefused() {
         assertThatThrownBy(() -> PedestalLinkServiceV1.translateStatus("BREAKER_TRIPPED"))
                 .isInstanceOf(IllegalArgumentException.class);
