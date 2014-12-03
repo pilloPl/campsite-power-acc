@@ -18,6 +18,9 @@ import io.pillopl.group.attribute.SupplierMarker;
 import io.pillopl.group.attribute.SupplierMarkerService;
 import io.pillopl.persistence.dao.GroupDao;
 import io.pillopl.persistence.dao.LocationDao;
+import io.pillopl.monitoring.PedestalCommunicationLog;
+import io.pillopl.monitoring.PedestalCommunicationLog.LogType;
+import io.pillopl.persistence.dao.PedestalCommunicationLogDao;
 import io.pillopl.persistence.dao.PedestalDao;
 import io.pillopl.persistence.dao.SupplierMarkerDao;
 import io.pillopl.persistence.dao.UserinfoDao;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,6 +82,8 @@ public class AffiliatePedestalService {
 
     private final EventService eventService;
 
+    private final PedestalCommunicationLogDao pedestalCommunicationLogDao;
+
     public AffiliatePedestalService(GroupDao groupDao, UserinfoDao userinfoDao, LocationDao locationDao,
                                     PedestalDao pedestalDao, SupplierMarkerDao supplierMarkerDao,
                                     GroupService groupService, AffiliateGroupService affiliateGroupService,
@@ -86,7 +92,8 @@ public class AffiliatePedestalService {
                                     UserinfoService userinfoService, LocationService locationService,
                                     SystemPropertyService systemPropertyService,
                                     DecommissioningNotifier decommissioningNotifier, AuditService auditService,
-                                    EventService eventService) {
+                                    EventService eventService,
+                                    PedestalCommunicationLogDao pedestalCommunicationLogDao) {
         this.groupDao = groupDao;
         this.userinfoDao = userinfoDao;
         this.locationDao = locationDao;
@@ -103,6 +110,7 @@ public class AffiliatePedestalService {
         this.decommissioningNotifier = decommissioningNotifier;
         this.auditService = auditService;
         this.eventService = eventService;
+        this.pedestalCommunicationLogDao = pedestalCommunicationLogDao;
     }
 
     /**
@@ -127,9 +135,21 @@ public class AffiliatePedestalService {
         List<SupplierStockEntry> list = new ArrayList<>();
         if (!groupIds.isEmpty()) {
             for (Pedestal pedestal : pedestalDao.findByGroupIds(groupIds)) {
+                LocalDateTime lastBoot = null;
+                List<PedestalCommunicationLog> logs = pedestalCommunicationLogDao.getLogs(pedestal.getId(),
+                        LogType.BOOT);
+                if (logs != null && !logs.isEmpty()) {
+                    lastBoot = logs.get(0).getDate();
+                }
+
+                LocalDateTime lastConsumptionRecord = null;
+                logs = pedestalCommunicationLogDao.getLogs(pedestal.getId(), LogType.CONSUMPTION_RECORD);
+                if (logs != null && !logs.isEmpty()) {
+                    lastConsumptionRecord = logs.get(0).getDate();
+                }
                 list.add(new SupplierStockEntry(pedestal.getId(), pedestal.getCode(),
                         pedestal.getPedestalType().getName(), pedestal.getSockets().size(), pedestal.getModemIccid(),
-                        pedestal.getSerialNumber()));
+                        pedestal.getSerialNumber(), lastBoot, lastConsumptionRecord));
             }
         }
         return list;

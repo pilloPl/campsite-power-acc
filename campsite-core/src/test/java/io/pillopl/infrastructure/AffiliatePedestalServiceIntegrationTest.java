@@ -14,6 +14,9 @@ import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
 import io.pillopl.group.Market;
 import io.pillopl.group.attribute.SupplierMarkerService;
+import io.pillopl.monitoring.PedestalCommunicationLog;
+import io.pillopl.monitoring.PedestalCommunicationLog.LogType;
+import io.pillopl.persistence.dao.PedestalCommunicationLogDao;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.test.IntegrationTest;
 import io.pillopl.user.Userinfo;
@@ -26,11 +29,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 @Transactional
 @Import(AffiliatePedestalServiceIntegrationTest.RecordingNotifierConfiguration.class)
@@ -58,6 +63,7 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
     @Autowired InfrastructureFixture fixture;
     @Autowired EventService eventService;
     @Autowired io.pillopl.persistence.dao.AuditDao auditDao;
+    @Autowired PedestalCommunicationLogDao communicationLogDao;
     @Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     @org.springframework.test.context.transaction.AfterTransaction
@@ -90,6 +96,24 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
         assertThat(affiliatePedestalService.isCommissioned(pedestal.getId())).isFalse();
         assertThat(affiliatePedestalService.findNotCommissioned()).containsExactly(pedestal);
         assertThat(affiliatePedestalService.isCommissioned(999_999L)).isNull();
+    }
+
+    @Test
+    void supplierStockShowsTheLastBootAndTheLastConsumptionRecordOfTheCommunicationLog() {
+        Pedestal logged = fixture.pedestal("ACME-0001", stock, 1);
+        Pedestal silent = fixture.pedestal("ACME-0002", stock, 1);
+        LocalDateTime day = LocalDateTime.of(2026, 5, 4, 10, 0);
+        communicationLogDao.save(new PedestalCommunicationLog(logged, day, LogType.BOOT, "{}"));
+        communicationLogDao.save(new PedestalCommunicationLog(logged, day.plusDays(2), LogType.BOOT, "{}"));
+        communicationLogDao.save(new PedestalCommunicationLog(logged, day.plusDays(1), LogType.CONSUMPTION_RECORD,
+                "{}"));
+
+        assertThat(affiliatePedestalService.supplierStock("ivo"))
+                .extracting(SupplierStockEntry::pedestalCode, SupplierStockEntry::lastBoot,
+                        SupplierStockEntry::lastConsumptionRecord)
+                .containsExactlyInAnyOrder(
+                        tuple(logged.getCode(), day.plusDays(2), day.plusDays(1)),
+                        tuple(silent.getCode(), null, null));
     }
 
     @Test
