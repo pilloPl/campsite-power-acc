@@ -79,7 +79,7 @@ public class WelcomeCardAdoptionService {
     public boolean checkAndAdopt(String pedestalCode, String cardRfid) {
         Pedestal pedestal = pedestalCode != null ? pedestalDao.findByCode(pedestalCode) : null;
         if (pedestal == null || pedestal.getGroup() == null) {
-            LOG.info("Failed test: card " + cardRfid + " has not been adopted at pedestal " + pedestalCode);
+            LOG.info("Card {} not adopted: pedestal {} unknown or without group", cardRfid, pedestalCode);
             return false;
         }
 
@@ -97,7 +97,8 @@ public class WelcomeCardAdoptionService {
                     owner));
             return true;
         } else {
-            LOG.info("Failed test: card " + cardRfid + " has not been adopted at pedestal " + pedestal);
+            LOG.info("Card {} not adopted at {}: {}", cardRfid, pedestal,
+                    card == null ? "not a welcome pool card" : "the campsite does not adopt welcome cards");
             return false;
         }
     }
