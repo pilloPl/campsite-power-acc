@@ -254,6 +254,22 @@ class SupplyControlUnitImplTest {
     }
 
     @Test
+    void stopOfAHouseCardSessionIsBookedAsNotBilled() {
+        HouseCard houseCard = new HouseCard(HouseCardType.STAFF, RFID, "S1");
+        SupplySession session = session(null, houseCard, true);
+        when(sessionManager.findSessionFor(PEDESTAL, 1001)).thenReturn(session);
+        validatedForStop(ValidationStatus.ACCEPTED, null, houseCard);
+
+        SupplyResponse response = controlUnit.stopSupply(PEDESTAL, RFID, stop(1001));
+
+        assertThat(response.getStatus()).isEqualTo(ValidationStatus.ACCEPTED);
+        assertThat(response.getExpiryDate()).isNull();
+        assertThat(sentEvent().getAttribute(EventAttribute.BILLABLE)).isEqualTo(false);
+        verify(consumptionRecordWriteService).createConsumptionRecord(eq(session), any(), any(), any(), eq(false),
+                eq(StopReason.LOCAL), eq(NOW));
+    }
+
+    @Test
     void consumptionOfAHouseCardIsNotBilled() {
         ValidationResult result = result(ValidationStatus.ACCEPTED, null, new HouseCard(HouseCardType.STAFF, RFID, "S1"));
 
