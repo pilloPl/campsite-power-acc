@@ -92,9 +92,7 @@ public class PedestalApiService implements PedestalApi {
         try {
             Userinfo principal = principalResolver.resolve(authUsername, UserrightName.PEDESTAL_EDIT);
             Userinfo owner = principalResolver.findUser(ownerUsername);
-            if (pedestalService.findByCode(code.value()) == null) {
-                throw ObjectNotFoundException.of("Pedestal", code);
-            }
+            checkPedestalExists(code);
             pedestalService.deletePedestal(principal, owner, code.value());
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
@@ -107,9 +105,7 @@ public class PedestalApiService implements PedestalApi {
         try {
             Userinfo principal = principalResolver.resolve(authUsername, UserrightName.PEDESTAL_EDIT);
             Userinfo owner = principalResolver.findUser(ownerUsername);
-            if (pedestalService.findByCode(code.value()) == null) {
-                throw ObjectNotFoundException.of("Pedestal", code);
-            }
+            checkPedestalExists(code);
             Pedestal pedestal = pedestalService.updateLocation(principal, owner, code.value(),
                     PedestalMapper.toLocation(location));
             return PedestalMapper.toDTO(pedestal, pedestalService.findState(pedestal.getId()));
@@ -138,6 +134,12 @@ public class PedestalApiService implements PedestalApi {
             return PedestalMapper.toDTO(pedestalService.setFreeSocket(principal, socketId.value(), freeSocket));
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    private void checkPedestalExists(PedestalCode code) {
+        if (pedestalService.findByCode(code.value()) == null) {
+            throw ObjectNotFoundException.of("Pedestal", code);
         }
     }
 
