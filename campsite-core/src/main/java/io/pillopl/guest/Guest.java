@@ -2,6 +2,7 @@ package io.pillopl.guest;
 
 import io.pillopl.group.Group;
 import io.pillopl.group.IsLinkedToGroup;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,12 +12,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -152,6 +159,11 @@ public class Guest implements IsLinkedToGroup {
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
+    @SQLRestriction("DELETED = FALSE")
+    @OrderBy("id")
+    private List<Unit> units = new ArrayList<>();
+
     public Guest() {
     }
 
@@ -238,6 +250,28 @@ public class Guest implements IsLinkedToGroup {
             return trailerPlate;
         }
         return carPlate != null && !carPlate.isBlank() ? carPlate : null;
+    }
+
+    public Unit addUnit(Unit.UnitType unitType, String plate, BigDecimal lengthM) {
+        Unit unit = new Unit(this, unitType, plate, lengthM);
+        units.add(unit);
+        return unit;
+    }
+
+    /**
+     * The guest's unit with a plate, or null: a guest with one camper or caravan needs no choice at check-in.
+     */
+    public Unit getOnlyUnitWithPlate() {
+        Unit found = null;
+        for (Unit unit : units) {
+            if (unit.getPlate() != null) {
+                if (found != null) {
+                    return null;
+                }
+                found = unit;
+            }
+        }
+        return found;
     }
 
     /**
