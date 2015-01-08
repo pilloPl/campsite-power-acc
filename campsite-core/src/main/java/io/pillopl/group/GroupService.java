@@ -59,6 +59,14 @@ public class GroupService {
      */
     @Transactional(readOnly = true)
     public boolean checkAllGroupsForValidity() {
+        return collectValidityErrors().isEmpty();
+    }
+
+    /**
+     * The checks of {@link #checkAllGroupsForValidity()}, with the errors found (also logged) for the control mail.
+     */
+    @Transactional(readOnly = true)
+    public List<String> collectValidityErrors() {
         Set<Long> checked = new HashSet<>();
         List<String> errors = new ArrayList<>();
         List<Group> all = groupDao.findAll();
@@ -122,7 +130,7 @@ public class GroupService {
         for (String error : errors) {
             LOG.error(error);
         }
-        return errors.isEmpty();
+        return errors;
     }
 
     @Transactional(readOnly = true)
