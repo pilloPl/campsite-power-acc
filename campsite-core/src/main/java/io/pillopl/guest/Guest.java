@@ -164,6 +164,10 @@ public class Guest implements IsLinkedToGroup {
     @OrderBy("id")
     private List<Unit> units = new ArrayList<>();
 
+    @OneToMany(mappedBy = "guest", cascade = CascadeType.ALL)
+    @OrderBy("id")
+    private List<BillingAccount> billingAccounts = new ArrayList<>();
+
     public Guest() {
     }
 
@@ -272,6 +276,24 @@ public class Guest implements IsLinkedToGroup {
             }
         }
         return found;
+    }
+
+    public BillingAccount openBillingAccount(String erpAccountNo, String description) {
+        BillingAccount account = new BillingAccount(this, erpAccountNo, description);
+        billingAccounts.add(account);
+        return account;
+    }
+
+    /**
+     * The guest's account with the ERP number, open or closed; null when the guest has no such account.
+     */
+    public BillingAccount findBillingAccount(String erpAccountNo) {
+        for (BillingAccount account : billingAccounts) {
+            if (account.hasErpAccountNo(erpAccountNo)) {
+                return account;
+            }
+        }
+        return null;
     }
 
     /**
