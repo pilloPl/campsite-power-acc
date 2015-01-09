@@ -95,4 +95,36 @@ class CampingCardTest {
         assertThat(CampingCard.isValidBillingAccountNo("   ")).isFalse();
         assertThat(CampingCard.isValidBillingAccountNo("12 345 678")).isFalse();
     }
+
+    @Test
+    void cardOfAGuestWithBillingAccountsMustBeBilledToOneOfThem() {
+        guest.openBillingAccount("400099999999", "Reception bill");
+
+        assertThat(stayCard().build().validate(NOON_JULY_10)).isEqualTo(CardStatus.BILLING_ACCOUNT_INVALID);
+
+        guest.openBillingAccount("400012345678", "Season 2026");
+        assertThat(stayCard().build().validate(NOON_JULY_10)).isEqualTo(CardStatus.VALID);
+    }
+
+    @Test
+    void cardBilledToAClosedAccountIsRefused() {
+        guest.openBillingAccount("400012345678", "Season 2025").close(NOON_JULY_10.minusDays(1));
+
+        assertThat(stayCard().build().validate(NOON_JULY_10)).isEqualTo(CardStatus.BILLING_ACCOUNT_INVALID);
+    }
+
+    @Test
+    void cardBilledToAnAccountAwaitingItsErpNumberIsRefused() {
+        guest.openBillingAccount(null, "Season 2026, ordered");
+
+        assertThat(stayCard().billingAccountNo("400012345678").build().validate(NOON_JULY_10))
+                .isEqualTo(CardStatus.BILLING_ACCOUNT_INVALID);
+    }
+
+    @Test
+    void cardOfAnIssuerThatBillsItsMembersNeedsOnlyAWellFormedAccountNumber() {
+        assertThat(guest.getBillingAccounts()).isEmpty();
+
+        assertThat(stayCard().build().validate(NOON_JULY_10)).isEqualTo(CardStatus.VALID);
+    }
 }

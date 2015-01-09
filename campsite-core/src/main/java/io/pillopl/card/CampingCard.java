@@ -1,5 +1,6 @@
 package io.pillopl.card;
 
+import io.pillopl.guest.BillingAccount;
 import io.pillopl.guest.Guest;
 import io.pillopl.issuer.PartnerSyncState;
 import jakarta.persistence.Column;
@@ -160,7 +161,7 @@ public class CampingCard {
     /**
      * Validity of the card at a moment (the pedestal's remote date). The first failing check wins: deactivated card,
      * stay or season not begun, stay or season over (the departure day is still valid), no guest, guest deactivated,
-     * billing account missing or malformed.
+     * billing account missing, malformed, or unknown to a guest whose billing accounts the network keeps.
      */
     public CardStatus validate(final LocalDateTime validationDate) {
         if (activation == CardActivation.DEACTIVATED) {
@@ -182,8 +183,24 @@ public class CampingCard {
         if (!isValidBillingAccountNo(billingAccountNo)) {
             return CardStatus.BILLING_ACCOUNT_INVALID;
         }
+        if (!isBillingAccountOfGuest()) {
+            return CardStatus.BILLING_ACCOUNT_INVALID;
+        }
 
         return CardStatus.VALID;
+    }
+
+    /**
+     * The guest's billing accounts kept by the network must contain the card's account, open and known to the ERP.
+     * Guests of issuers that bill their members themselves have no accounts here; their cards carry the issuer's
+     * account number and only its format is checked.
+     */
+    boolean isBillingAccountOfGuest() {
+        if (guest.getBillingAccounts().isEmpty()) {
+            return true;
+        }
+        BillingAccount account = guest.findBillingAccount(billingAccountNo);
+        return account != null && account.isBillable();
     }
 
     /**
