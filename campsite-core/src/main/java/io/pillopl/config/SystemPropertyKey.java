@@ -17,6 +17,7 @@ public enum SystemPropertyKey {
     PedestalHeartbeatTimeoutJobIntervalInSeconds,
     UnknownStateTimeoutInMinutes,
     UnknownStateEventTriggerJobIntervalInSeconds,
+    GroupValidityControlJobIntervalInSeconds,
 
     // commissioning
     DecommissioningMailExcludedMarkets,
@@ -46,5 +47,6 @@ public enum SystemPropertyKey {
 
     // audit
     AuditErrorEventsExpiryPeriodInDays,
-    AuditSuccessEventsExpiryPeriodInDays
+    AuditSuccessEventsExpiryPeriodInDays,
+    AuditCleanupJobIntervalInSeconds
 }

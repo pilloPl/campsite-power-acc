@@ -186,6 +186,13 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.UnknownStateEventTriggerJobIntervalInSeconds, 300);
     }
 
+    /**
+     * Interval of the control job checking the group trees (nightly by default, the first run in the night).
+     */
+    public int getGroupValidityControlJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.GroupValidityControlJobIntervalInSeconds, 86400);
+    }
+
     // ---------------------------------------------------------------- supply sessions
 
     /**
@@ -265,5 +272,9 @@ public class SystemPropertyService {
 
     public int getAuditSuccessEventsExpiryPeriodInDays() {
         return getPropertyInt(SystemPropertyKey.AuditSuccessEventsExpiryPeriodInDays, 60);
+    }
+
+    public int getAuditCleanupJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.AuditCleanupJobIntervalInSeconds, 86400);
     }
 }
