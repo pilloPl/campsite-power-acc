@@ -2,6 +2,7 @@ package io.pillopl.card;
 
 import io.pillopl.config.SystemPropertyService;
 import io.pillopl.infrastructure.Pedestal;
+import io.pillopl.mail.MailService;
 import io.pillopl.persistence.dao.PedestalDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +31,16 @@ public class LocalCardListDistributionService {
 
     private final SystemPropertyService systemPropertyService;
 
+    private final MailService mailService;
+
     public LocalCardListDistributionService(PedestalDao pedestalDao, LocalCardListService localCardListService,
                                             LocalCardListSender localCardListSender,
-                                            SystemPropertyService systemPropertyService) {
+                                            SystemPropertyService systemPropertyService, MailService mailService) {
         this.pedestalDao = pedestalDao;
         this.localCardListService = localCardListService;
         this.localCardListSender = localCardListSender;
         this.systemPropertyService = systemPropertyService;
+        this.mailService = mailService;
     }
 
     private class LocalCardListUpdater implements Runnable {
@@ -125,6 +129,14 @@ public class LocalCardListDistributionService {
             LOG.error("Local card list distribution was stopped after " + maxMinutes + " minutes."
                     + " Please check for mobile network problems or adjust thread pool or timeout.");
             threadPool.shutdownNow();
+            // send error mail
+            mailService.sendErrorMail("Local card list distribution error", "Local card list distribution was"
+                    + " stopped after " + maxMinutes + " minutes (" + sent.get() + " of " + pedestals.size()
+                    + " pedestals sent). Please check for mobile network problems or adjust thread pool or timeout.");
+        } else if (failed.get() > 0) {
+            // send error mail
+            mailService.sendErrorMail("Local card list distribution error", failed.get() + " of "
+                    + pedestals.size() + " pedestals did not get their local card list, see the log for the codes.");
         }
 
         LOG.info("Execution of LocalCardListDistributionJob stopped.");
