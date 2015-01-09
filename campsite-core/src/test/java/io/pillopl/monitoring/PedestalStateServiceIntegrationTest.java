@@ -10,7 +10,9 @@ import io.pillopl.group.attribute.NotificationType;
 import io.pillopl.infrastructure.InfrastructureFixture;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.PedestalState;
+import io.pillopl.infrastructure.SocketStatus;
 import io.pillopl.persistence.dao.PedestalStateDao;
+import io.pillopl.persistence.dao.SocketStatusLogDao;
 import io.pillopl.test.IntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ class PedestalStateServiceIntegrationTest extends IntegrationTest {
 
     @Autowired PedestalStateService pedestalStateService;
     @Autowired PedestalStateDao pedestalStateDao;
+    @Autowired SocketStatusLogDao socketStatusLogDao;
     @Autowired NotificationService notificationService;
     @Autowired GroupService groupService;
     @Autowired GroupManager groupManager;
@@ -85,6 +88,19 @@ class PedestalStateServiceIntegrationTest extends IntegrationTest {
 
         assertThat(report.getSentEvents()).isEqualTo(2);
         assertThat(report.getSentMails()).isZero();
+    }
+
+    @Test
+    void utilizationViewIsRefreshedFromTheMonitoringLog() {
+        Pedestal pedestal = fixture.pedestal("HR-BAY-P001", bay, 1);
+        SocketStatusLog log = new SocketStatusLog(pedestal.findSocketBySocketNo(1), now, now);
+        log.setStatus(SocketStatus.SUPPLYING);
+        socketStatusLogDao.saveAndFlush(log);
+
+        pedestalStateService.refreshSocketUtilization();
+
+        assertThat(jdbcTemplate.queryForObject("SELECT COUNT(*) FROM SOCKET_UTILIZATION WHERE ID = ?", Long.class,
+                log.getId())).isEqualTo(1L);
     }
 
     private PedestalState state(String code, LocalDateTime lastIncoming, boolean timeout) {

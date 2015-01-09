@@ -8,6 +8,7 @@ import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.PedestalState;
 import io.pillopl.infrastructure.SocketStatus;
 import io.pillopl.persistence.dao.PedestalStateDao;
+import io.pillopl.persistence.dao.SocketStatusLogDao;
 import io.pillopl.util.DateService;
 import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
@@ -21,7 +22,8 @@ import java.util.List;
 /**
  * Link state of the pedestals over time: pedestals without a message for too long are timed out (mail and UNKNOWN
  * event) and keep getting UNKNOWN events while they stay silent. Called by the heartbeat timeout job and the unknown
- * state event trigger job; a run handles at most {@link #MAX_PEDESTALS_TO_TIMEOUT} pedestals.
+ * state event trigger job; a run handles at most {@link #MAX_PEDESTALS_TO_TIMEOUT} pedestals. Also refreshes the
+ * utilization view built from the monitoring log.
  */
 @Service
 public class PedestalStateService {
@@ -38,12 +40,16 @@ public class PedestalStateService {
 
     private final DateService dateService;
 
+    private final SocketStatusLogDao socketStatusLogDao;
+
     public PedestalStateService(PedestalStateDao pedestalStateDao, PedestalMailService pedestalMailService,
-                                EventService eventService, DateService dateService) {
+                                EventService eventService, DateService dateService,
+                                SocketStatusLogDao socketStatusLogDao) {
         this.pedestalStateDao = pedestalStateDao;
         this.pedestalMailService = pedestalMailService;
         this.eventService = eventService;
         this.dateService = dateService;
+        this.socketStatusLogDao = socketStatusLogDao;
     }
 
     /**
@@ -88,6 +94,15 @@ public class PedestalStateService {
 
         report.log();
         return report;
+    }
+
+    /**
+     * Refreshes the utilization view of the sockets (MV SOCKET_UTILIZATION) from the monitoring log.
+     */
+    @Transactional
+    public void refreshSocketUtilization() {
+        LOGGER.info("Refreshing SOCKET_UTILIZATION");
+        socketStatusLogDao.refreshSocketUtilization();
     }
 
     void sendUnknownEvent(Pedestal pedestal, Report report) {
