@@ -52,7 +52,9 @@ class UserinfoServiceTest {
         Userinfo admin = user("admin", hrStaff, hrStaff);
 
         assertThatThrownBy(() -> userinfoService.checkIsManageable(ana, admin, true))
-                .isInstanceOf(AccessDeniedException.class);
+                .isInstanceOf(AccessDeniedException.class)
+                .hasMessageContaining("'ana'")
+                .hasMessageContaining("'admin'");
     }
 
     @Test

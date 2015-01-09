@@ -112,7 +112,8 @@ public class UserinfoService {
         if (isManageable(user, userIsManageable, introspection)) {
             return true;
         }
-        throw new AccessDeniedException("No access to user");
+        throw new AccessDeniedException(String.format("Console user '%s' may not manage console user '%s'",
+                user.getUsername(), userIsManageable.getUsername()));
     }
 
     /**
