@@ -231,7 +231,7 @@ public class ValidationService {
             validationResult.setStatus(ValidationStatus.SOCKET_INVALID);
             validationResult.setCheckStatus(withoutCardValidation);
         }
-        LOG.debug("Validation result: " + validationResult);
+        LOG.debug("Validation result: {}", validationResult);
         return validationResult;
     }
 
@@ -243,7 +243,7 @@ public class ValidationService {
         final Pedestal pedestal = getPedestal(pedestalCode);
         if (pedestal == null) {
             validationResult.setStatus(ValidationStatus.SOCKET_INVALID);
-            LOG.debug("Validation result: " + validationResult);
+            LOG.debug("Validation result: {}", validationResult);
             return validationResult;
         }
 
@@ -278,7 +278,7 @@ public class ValidationService {
                 validationResult.setStatus(ValidationStatus.ACCEPTED);
             }
             validationResult.setFreeSocket(determineFreeSocket(socket));
-            LOG.debug("Validation result: " + validationResult);
+            LOG.debug("Validation result: {}", validationResult);
 
             // enough validation for now
             return validationResult;
@@ -287,14 +287,14 @@ public class ValidationService {
         // Is the card accepted on this campsite?
         if (!isCardAcceptedAt(card, pedestal)) {
             validationResult.setStatus(ValidationStatus.CARD_NOT_ACCEPTED_AT_SITE);
-            LOG.debug("Validation result: " + validationResult);
+            LOG.debug("Validation result: {}", validationResult);
             return validationResult;
         }
 
         // Is the card valid at the time the pedestal reported?
         CardStatus cardStatus = card.validate(remoteDate);
         validationResult.setStatus(translate(cardStatus));
-        LOG.debug("Validation result: " + validationResult);
+        LOG.debug("Validation result: {}", validationResult);
         return validationResult;
     }
 
