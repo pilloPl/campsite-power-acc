@@ -1,6 +1,7 @@
 package io.pillopl.infrastructure;
 
 import io.pillopl.dto.infrastructure.CommissioningDTO;
+import io.pillopl.user.Userinfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +19,10 @@ public final class CommissioningMapper {
         if (commissioning == null) {
             return null;
         }
+        Userinfo owner = commissioning.getAffiliateOwner();
         return new CommissioningDTO(commissioning.getId(),
-                commissioning.getAffiliateOwner() != null ? commissioning.getAffiliateOwner().getUsername() : null,
-                commissioning.getAffiliateOwner() != null ? commissioning.getAffiliateOwner().getName() : null,
+                owner != null ? owner.getUsername() : null,
+                owner != null ? owner.getName() : null,
                 PedestalMapper.toDTO(commissioning.getLocation()), commissioning.getComments(),
                 commissioning.isListedInApp(),
                 commissioning.getAccessMode() != null ? commissioning.getAccessMode().name() : null,
