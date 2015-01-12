@@ -1,5 +1,6 @@
 package io.pillopl.infrastructure;
 
+import io.pillopl.value.SocketCode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,6 +11,14 @@ class SocketCodeHelperTest {
     @Test
     void socketCodeIsCampsitePedestalAndSocketNumber() {
         assertThat(SocketCodeHelper.createSocketCode("hrbay", "P012", 2)).isEqualTo("HRBAY*P012*2");
+    }
+
+    @Test
+    void createdSocketCodeCanBeReadBackAsSocketCodeValue() {
+        SocketCode code = SocketCode.parse(SocketCodeHelper.createSocketCode("hrbay", "HRBAY-P012", 3));
+
+        assertThat(code.pedestalPart()).isEqualTo("P012");
+        assertThat(code.socketNo()).isEqualTo(3);
     }
 
     @Test

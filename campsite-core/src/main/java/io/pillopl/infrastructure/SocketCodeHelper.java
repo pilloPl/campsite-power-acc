@@ -1,5 +1,7 @@
 package io.pillopl.infrastructure;
 
+import io.pillopl.value.SocketCode;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -9,7 +11,10 @@ import java.util.Locale;
  */
 public final class SocketCodeHelper {
 
-    public static final String SEPARATOR = "*";
+    /**
+     * Same separator as the {@link SocketCode} value, so codes created here can be read back by it.
+     */
+    public static final String SEPARATOR = SocketCode.SEPARATOR;
 
     private SocketCodeHelper() {
         throw new AssertionError();
