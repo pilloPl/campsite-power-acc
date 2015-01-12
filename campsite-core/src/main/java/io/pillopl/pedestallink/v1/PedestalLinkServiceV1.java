@@ -246,8 +246,8 @@ public class PedestalLinkServiceV1 {
      */
     private void monitor(Socket socket, LocalDateTime stopTimestamp) {
         try {
-            pedestalService.updateSocketStatus(socket, SocketStatus.AVAILABLE,
-                    stopTimestamp != null ? stopTimestamp : dateService.getNow());
+            socketStateTaskWorker.monitorSocket(socket, SocketStateParams.status(
+                    stopTimestamp != null ? stopTimestamp : dateService.getNow(), SocketStatus.AVAILABLE, null));
         } catch (Exception e) {
             LOGGER.warn(e.getMessage(), e);
             LOGGER.error(String.format("Error during monitoring for socket (%s) and stop timestamp (%s)", socket,
