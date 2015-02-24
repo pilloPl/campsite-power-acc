@@ -1,0 +1,9 @@
+-- A supply started by the remote supply start of a QR payment has no card: the session keeps the process id instead
+-- (no foreign key, the process chain moves to the archive).
+
+ALTER TABLE SUPPLY_SESSION ADD COLUMN QRPAY_PROCESS_ID BIGINT;
+
+ALTER TABLE SUPPLY_SESSION ADD CONSTRAINT CHECK_SUPPLY_SESSION_QRPAY_WITHOUT_CARD
+    CHECK (QRPAY_PROCESS_ID IS NULL OR (CARD_ID IS NULL AND HOUSECARD_ID IS NULL));
+
+CREATE INDEX IDX_SUPPLY_SESSION_QRPAY_PROCESS ON SUPPLY_SESSION (QRPAY_PROCESS_ID);

@@ -32,6 +32,20 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
     SupplySession findHouseCardSessionBy(@Param("socket") Socket socket, @Param("rfid") String rfid,
                                          @Param("transactionId") Integer transactionId);
 
+    @Query("select s from SupplySession s where s.socket = :socket and s.qrPayProcessId = :qrPayProcessId"
+            + " and s.transactionId = :transactionId")
+    SupplySession findQrPaySessionBy(@Param("socket") Socket socket, @Param("qrPayProcessId") Long qrPayProcessId,
+                                     @Param("transactionId") Integer transactionId);
+
+    @Query("select s from SupplySession s where s.socket = :socket and s.qrPayProcessId = :qrPayProcessId"
+            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate")
+    List<SupplySession> findQrPaySessionsBy(@Param("socket") Socket socket,
+                                            @Param("qrPayProcessId") Long qrPayProcessId,
+                                            @Param("startMeterKwh") BigDecimal startMeterKwh,
+                                            @Param("remoteDate") LocalDateTime remoteDate);
+
+    SupplySession findFirstByQrPayProcessIdOrderByIdDesc(Long qrPayProcessId);
+
     @Query("select s from SupplySession s where s.socket = :socket and s.card.cardRfid = :rfid"
             + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate")
     List<SupplySession> findBy(@Param("socket") Socket socket, @Param("rfid") String rfid,

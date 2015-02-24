@@ -14,6 +14,7 @@ import io.pillopl.util.DateService;
 import io.pillopl.value.SocketLinkId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -39,8 +40,11 @@ class ValidationServiceTest {
     final GroupService groupService = mock(GroupService.class);
     final HouseCardService houseCardService = mock(HouseCardService.class);
     final DateService dateService = new DateService();
+    @SuppressWarnings("unchecked")
+    final ObjectProvider<QrPaySupplyAuthorizer> qrPayProvider = mock(ObjectProvider.class);
+    final QrPaySupplyAuthorizer qrPayAuthorizer = mock(QrPaySupplyAuthorizer.class);
     final ValidationService validationService = new ValidationService(pedestalService, campingCardDao, dateService,
-            groupService, houseCardService);
+            groupService, houseCardService, qrPayProvider);
 
     final Pedestal pedestal = new Pedestal();
     final Socket socket = new Socket();
@@ -54,6 +58,7 @@ class ValidationServiceTest {
         socket.setSocketNo(1);
         when(pedestalService.findByCode(PEDESTAL)).thenReturn(pedestal);
         when(pedestalService.findSocket(PEDESTAL, 1)).thenReturn(socket);
+        when(qrPayProvider.getIfAvailable()).thenReturn(qrPayAuthorizer);
         dateService.setClock(Clock.fixed(DURING_STAY.atZone(ZoneId.systemDefault()).toInstant(),
                 ZoneId.systemDefault()));
     }
@@ -174,6 +179,44 @@ class ValidationServiceTest {
         card("7011", stayCard());
 
         assertThat(validationService.validateForNow(PEDESTAL, "7011").isFreeSocket()).isFalse();
+    }
+
+    @Test
+    void remoteSupplyStartOfAQrPaymentIsAcceptedWithoutCard() {
+        when(qrPayAuthorizer.isSupplyAuthorized(1005L, socket, false)).thenReturn(true);
+
+        ValidationResult result = validationService.validateFor(SOCKET_1, "QR1005", DURING_STAY, false);
+
+        assertThat(result.getStatus()).isEqualTo(ValidationStatus.ACCEPTED);
+        assertThat(result.isQrPayAccepted()).isTrue();
+        assertThat(result.getQrPayProcessId()).isEqualTo(1005L);
+        assertThat(result.getCard()).isNull();
+        verify(campingCardDao, never()).findByCardRfid(any());
+    }
+
+    @Test
+    void qrPaymentAuthTagOfAnotherSocketOrStateIsInvalid() {
+        when(qrPayAuthorizer.isSupplyAuthorized(1005L, socket, false)).thenReturn(false);
+
+        ValidationResult result = validationService.validateFor(SOCKET_1, "QR1005", DURING_STAY, false);
+
+        assertThat(result.getStatus()).isEqualTo(ValidationStatus.CARD_INVALID);
+        assertThat(result.isQrPayAccepted()).isFalse();
+    }
+
+    @Test
+    void stopOfAQrPaymentSupplyOnlyNeedsTheProcess() {
+        when(qrPayAuthorizer.isSupplyAuthorized(1005L, socket, true)).thenReturn(true);
+
+        assertThat(validationService.validateFor(SOCKET_1, "QR1005", null, true).isQrPayAccepted()).isTrue();
+    }
+
+    @Test
+    void withoutQrPaymentQrAuthTagsAreInvalid() {
+        when(qrPayProvider.getIfAvailable()).thenReturn(null);
+
+        assertThat(validationService.validateFor(SOCKET_1, "QR1005", DURING_STAY, false).getStatus())
+                .isEqualTo(ValidationStatus.CARD_INVALID);
     }
 
     @Test

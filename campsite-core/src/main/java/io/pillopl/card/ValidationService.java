@@ -7,9 +7,11 @@ import io.pillopl.infrastructure.PedestalService;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.persistence.dao.CampingCardDao;
 import io.pillopl.util.DateService;
+import io.pillopl.value.QrPayAuthTag;
 import io.pillopl.value.SocketLinkId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,8 @@ public class ValidationService {
         private boolean checkStatus;
 
         private boolean freeSocket;
+
+        private Long qrPayProcessId;
 
         public ValidationResult() {
         }
@@ -121,6 +125,21 @@ public class ValidationService {
             this.freeSocket = freeSocket;
         }
 
+        /**
+         * The id tag was the remote start of this QR payment process (no card, no house card).
+         */
+        public Long getQrPayProcessId() {
+            return qrPayProcessId;
+        }
+
+        public void setQrPayProcessId(Long qrPayProcessId) {
+            this.qrPayProcessId = qrPayProcessId;
+        }
+
+        public boolean isQrPayAccepted() {
+            return qrPayProcessId != null && status == ValidationStatus.ACCEPTED;
+        }
+
         @Override
         public String toString() {
             return new StringBuilder().append("ValidationResult[status=").append(status).append(";socket=")
@@ -128,7 +147,7 @@ public class ValidationService {
                     .append(checkStatus).append(";card=").append(card == null ? "null" : card.getCardRfid())
                     .append(";houseCard=").append(houseCard == null ? "null" : houseCard.getRfid())
                     .append(";guest=").append(guest == null ? "null" : guest.getFullName())
-                    .append(";freeSocket=").append(freeSocket).append("]").toString();
+                    .append(";freeSocket=").append(freeSocket).append(";qrPayProcess=").append(qrPayProcessId).append("]").toString();
         }
 
         public static class Builder {
@@ -192,13 +211,17 @@ public class ValidationService {
 
     private final HouseCardService houseCardService;
 
+    private final ObjectProvider<QrPaySupplyAuthorizer> qrPaySupplyAuthorizer;
+
     public ValidationService(PedestalService pedestalService, CampingCardDao campingCardDao, DateService dateService,
-                             GroupService groupService, HouseCardService houseCardService) {
+                             GroupService groupService, HouseCardService houseCardService,
+                             ObjectProvider<QrPaySupplyAuthorizer> qrPaySupplyAuthorizer) {
         this.pedestalService = pedestalService;
         this.campingCardDao = campingCardDao;
         this.dateService = dateService;
         this.groupService = groupService;
         this.houseCardService = houseCardService;
+        this.qrPaySupplyAuthorizer = qrPaySupplyAuthorizer;
     }
 
     @Transactional(readOnly = true)
@@ -253,6 +276,24 @@ public class ValidationService {
             validationResult.setHouseCard(houseCard);
             validationResult.setStatus(ValidationStatus.ACCEPTED);
             LOG.info(String.format("House card used. Returning result (%s)", validationResult));
+            return validationResult;
+        }
+
+        // Is it the remote start of a QR payment?
+        Long qrPayProcessId = QrPayAuthTag.parse(cardRfid);
+        if (qrPayProcessId != null) {
+            QrPaySupplyAuthorizer authorizer = qrPaySupplyAuthorizer.getIfAvailable();
+            if (authorizer != null && socket != null
+                    && authorizer.isSupplyAuthorized(qrPayProcessId, socket, withoutCardValidation)) {
+                validationResult.setQrPayProcessId(qrPayProcessId);
+                validationResult.setStatus(ValidationStatus.ACCEPTED);
+                LOG.info(String.format("QR payment %s used. Returning result (%s)", qrPayProcessId,
+                        validationResult));
+            } else {
+                validationResult.setStatus(ValidationStatus.CARD_INVALID);
+                LOG.warn(String.format("QR payment id tag [%s] not valid at socket %s. Returning result (%s)",
+                        cardRfid, socket, validationResult));
+            }
             return validationResult;
         }
 
