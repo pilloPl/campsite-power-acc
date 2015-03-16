@@ -91,11 +91,7 @@ public class LocalCardListService {
         LocalCardListSendResult result = localCardListSender.sendLocalList(pedestal, fullUpdate, list.entries(),
                 version, useCache);
 
-        if (!result.success()) {
-            throw new LocalCardListException(pedestalCode, result.errorMessage());
-        }
-
-        return result.success();
+        return requireSent(pedestalCode, result);
     }
 
     /**
@@ -119,11 +115,7 @@ public class LocalCardListService {
         LocalCardListSendResult result = localCardListSender.sendLocalList(pedestal, fullUpdate, entries, version,
                 useCache);
 
-        if (!result.success()) {
-            throw new LocalCardListException(pedestalCode, result.errorMessage());
-        }
-
-        return result.success();
+        return requireSent(pedestalCode, result);
     }
 
     /**
@@ -244,6 +236,13 @@ public class LocalCardListService {
             throw new IllegalArgumentException(String.format("No pedestal found for code: %s", pedestalCode));
         }
         return pedestal;
+    }
+
+    private boolean requireSent(String pedestalCode, LocalCardListSendResult result) {
+        if (!result.success()) {
+            throw new LocalCardListException(pedestalCode, result.errorMessage());
+        }
+        return true;
     }
 
     private List<HouseCard> sortAndCutHouseCards(List<HouseCard> houseCards, final int maxListLength) {

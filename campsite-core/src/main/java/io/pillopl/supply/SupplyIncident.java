@@ -76,7 +76,7 @@ public class SupplyIncident {
 
     @Override
     public String toString() {
-        return "SupplyIncident{" + incidentType + ", pedestal=" + pedestalCode + ", tx=" + transactionId + ", card="
-                + cardRfid + ", '" + message + "'}";
+        return "SupplyIncident{id=" + id + ", " + incidentType + ", pedestal=" + pedestalCode + ", tx=" + transactionId
+                + ", session=" + supplySessionId + ", card=" + cardRfid + ", '" + message + "'}";
     }
 }

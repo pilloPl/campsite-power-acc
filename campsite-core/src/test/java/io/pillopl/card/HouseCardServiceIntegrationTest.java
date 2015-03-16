@@ -118,9 +118,10 @@ class HouseCardServiceIntegrationTest extends IntegrationTest {
     @Test
     void houseCardNeedsTypeAndUid() {
         assertThatThrownBy(() -> houseCardService.saveHouseCard("marko", "marko", null, null, "6006", null, true))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("House card type is missing");
         assertThatThrownBy(() -> houseCardService.saveHouseCard("marko", "marko", null, HouseCardType.STAFF, " ",
-                null, true)).isInstanceOf(IllegalArgumentException.class);
+                null, true)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Card UID of the house card is missing");
     }
 
     @Test

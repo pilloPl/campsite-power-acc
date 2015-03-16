@@ -13,6 +13,7 @@ public enum EventAttribute {
     EXTERNAL_USER_ID(Long.class),
     PEDESTAL_ID(Long.class),
     SOCKET_ID(Long.class),
+    POWER_SECTION_ID(Long.class),
     PEDESTAL_CODE(String.class),
     SOCKET_NO(Integer.class),
     RFID(String.class),

@@ -75,7 +75,8 @@ public class Authorization {
         AuthorizationResult result;
         if (validationResult.getStatus() != ValidationStatus.ACCEPTED) {
             result = createAuthorizationResult(validationResult);
-        } else if (validationResult.getStatus() == ValidationStatus.ACCEPTED && validationResult.isHouseCardAccepted()) {
+        } else if (validationResult.isHouseCardAccepted()) {
+            // house cards start supply without the session and power budget checks
             houseCardService.recordUse(validationResult.getHouseCard());
             result = createAuthorizationResult(ValidationStatus.ACCEPTED, validationResult);
         } else if (supplySessionRegistry.hasConcurrentSession(socketLinkId, cardRfid)) {

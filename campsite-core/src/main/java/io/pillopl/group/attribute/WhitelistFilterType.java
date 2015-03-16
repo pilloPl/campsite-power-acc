@@ -24,6 +24,10 @@ public enum WhitelistFilterType {
         if (whitelistFilterType == null) {
             return IMPORT_EXPORT;
         }
-        return WhitelistFilterType.valueOf(whitelistFilterType);
+        try {
+            return WhitelistFilterType.valueOf(whitelistFilterType.trim());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Unknown whitelist filter type '" + whitelistFilterType + "'", e);
+        }
     }
 }

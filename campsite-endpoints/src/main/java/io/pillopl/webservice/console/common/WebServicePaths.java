@@ -22,6 +22,8 @@ public final class WebServicePaths {
     public static final String HOUSE_CARD = CONSOLE + "/houseCard";
     public static final String TARIFF = CONSOLE + "/tariff";
 
+    public static final String CONSUMPTION_RECORD = CONSOLE + "/consumptionRecord";
+
     /**
      * Messages of the pedestal controllers on link v1: {@code <path>/<pedestal code>/<message>}.
      */

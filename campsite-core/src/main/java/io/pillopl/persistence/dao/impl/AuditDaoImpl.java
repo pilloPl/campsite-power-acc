@@ -10,15 +10,19 @@ import java.time.LocalTime;
 
 public class AuditDaoImpl implements AuditDaoCustom {
 
+    /**
+     * The leading range on ACTION_DATE (the latest of the four expiry dates) lets the planner use
+     * IDX_AUDIT_ACTION_DATE instead of scanning the whole table for the OR of the four categories.
+     */
     private static final String CLEAN_AUDIT_TABLE = "DELETE FROM AUDIT"
-            + " WHERE "
+            + " WHERE ACTION_DATE <= :latestExpiryDate AND ("
             + "(CATEGORY = 'TECHNICAL' AND STATUS = 'SUCCESS' AND ACTION_DATE <= :technicalSuccessExpiryDate)"
             + " OR "
             + "(CATEGORY = 'TECHNICAL' AND STATUS <> 'SUCCESS' AND ACTION_DATE <= :technicalErrorExpiryDate)"
             + " OR "
             + "(CATEGORY = 'FUNCTIONAL' AND STATUS = 'SUCCESS' AND ACTION_DATE <= :functionalSuccessExpiryDate)"
             + " OR "
-            + "(CATEGORY = 'FUNCTIONAL' AND STATUS <> 'SUCCESS' AND ACTION_DATE <= :functionalErrorExpiryDate)";
+            + "(CATEGORY = 'FUNCTIONAL' AND STATUS <> 'SUCCESS' AND ACTION_DATE <= :functionalErrorExpiryDate))";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -30,7 +34,10 @@ public class AuditDaoImpl implements AuditDaoCustom {
     public int cleanAuditTable(int technicalSuccessExpiryInDays, int technicalErrorExpiryInDays,
                                int functionalSuccessExpiryInDays, int functionalErrorExpiryInDays) {
         LocalDate today = LocalDate.now();
+        int shortestExpiryInDays = Math.min(Math.min(technicalSuccessExpiryInDays, technicalErrorExpiryInDays),
+                Math.min(functionalSuccessExpiryInDays, functionalErrorExpiryInDays));
         MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("latestExpiryDate", endOfDay(today, shortestExpiryInDays))
                 .addValue("technicalSuccessExpiryDate", endOfDay(today, technicalSuccessExpiryInDays))
                 .addValue("technicalErrorExpiryDate", endOfDay(today, technicalErrorExpiryInDays))
                 .addValue("functionalSuccessExpiryDate", endOfDay(today, functionalSuccessExpiryInDays))

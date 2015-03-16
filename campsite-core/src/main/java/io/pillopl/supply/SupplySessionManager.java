@@ -6,6 +6,7 @@ import io.pillopl.card.ValidationService.ValidationResult;
 import io.pillopl.infrastructure.PedestalService;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.persistence.dao.SupplySessionDao;
+import io.pillopl.power.PowerSection;
 import io.pillopl.util.DateService;
 import io.pillopl.value.SocketLinkId;
 import org.slf4j.Logger;
@@ -81,6 +82,14 @@ public class SupplySessionManager implements SupplySessionRegistry {
             return null;
         }
         return sessions.get(0);
+    }
+
+    /**
+     * Active sessions of all sockets hanging on the section switchboard.
+     */
+    @Transactional(readOnly = true)
+    public List<SupplySession> getActiveSessions(final PowerSection section) {
+        return supplySessionDao.findActiveByPowerSection(section);
     }
 
     @Transactional(readOnly = true)

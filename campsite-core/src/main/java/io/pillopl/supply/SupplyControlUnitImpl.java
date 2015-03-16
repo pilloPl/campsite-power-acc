@@ -5,6 +5,8 @@ import io.pillopl.card.ValidationService;
 import io.pillopl.card.ValidationService.ValidationResult;
 import io.pillopl.card.ValidationStatus;
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.consumption.ConsumptionRecord;
+import io.pillopl.consumption.ConsumptionRecordWriteService;
 import io.pillopl.event.Event;
 import io.pillopl.event.EventAttribute;
 import io.pillopl.event.EventService;
@@ -64,6 +66,8 @@ public class SupplyControlUnitImpl {
 
     private final ObjectProvider<CheckedOutStayFinder> checkedOutStayFinder;
 
+    private final ConsumptionRecordWriteService consumptionRecordWriteService;
+
     private final TransactionTemplate transactionTemplate;
 
     public SupplyControlUnitImpl(DateService dateService, SupplySessionManager sessionManager,
@@ -71,6 +75,7 @@ public class SupplyControlUnitImpl {
                                  PricingService pricingService, EventService eventService,
                                  SupplyIncidentDao supplyIncidentDao, SystemPropertyService systemPropertyService,
                                  ObjectProvider<CheckedOutStayFinder> checkedOutStayFinder,
+                                 ConsumptionRecordWriteService consumptionRecordWriteService,
                                  PlatformTransactionManager transactionManager) {
         this.dateService = dateService;
         this.sessionManager = sessionManager;
@@ -81,6 +86,7 @@ public class SupplyControlUnitImpl {
         this.supplyIncidentDao = supplyIncidentDao;
         this.systemPropertyService = systemPropertyService;
         this.checkedOutStayFinder = checkedOutStayFinder;
+        this.consumptionRecordWriteService = consumptionRecordWriteService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
@@ -119,10 +125,8 @@ public class SupplyControlUnitImpl {
         SupplySession session = sessionManager.findSessionFor(socketLinkId, cardRfid, startMeterKwh, remoteDate,
                 validationResult.isHouseCardAccepted());
         if (session == null) {
-            // not processed yet: new session
+            // not processed yet: new session (the session manager logs it)
             session = sessionManager.createNewSessionFor(validationResult, null, startMeterKwh, remoteDate);
-            LOG.info(String.format("Created new session (%s) for socket (%s), card (%s), start meter (%s), remote date (%s).",
-                    session, socketLinkId, cardRfid, startMeterKwh, remoteDate));
             alreadyProcessed = false;
         }
         // Enrich the answer
@@ -236,6 +240,8 @@ public class SupplyControlUnitImpl {
         final Set<Long> stayIds = sessions.stream().map(SupplySession::getStayId).collect(Collectors.toSet());
         final Set<Long> checkedOut = finder.findCheckedOutStayIds(stayIds,
                 now.minusMinutes(systemPropertyService.getCheckoutSessionCloseDelayInMinutes()));
+        LOG.debug(String.format("%d of %d stays with an active supply session are checked out", checkedOut.size(),
+                stayIds.size()));
         int closed = 0;
         for (SupplySession session : sessions) {
             if (checkedOut.contains(session.getStayId()) && closeInOwnTransaction(session.getId(),
@@ -311,19 +317,23 @@ public class SupplyControlUnitImpl {
         final StopReason stopReason = stopData.supplyRequest.getStopReason() != null
                 ? stopData.supplyRequest.getStopReason() : StopReason.LOCAL;
 
-        saveConsumption(stopData, consumption, duration, billed);
+        saveConsumption(stopData, consumption, duration, billed, stopReason);
         updatePedestal(socket, stopData.supplyRequest, duration);
         sessionManager.deactivate(stopData.session, stopReason, duration.plugOut());
         createSupplyStoppedEvent(stopData, consumption, duration, billed, stopReason);
     }
 
     /**
-     * One consumption record per session is written from these values by the consumption record module.
+     * The one consumption record of the session: the single place for stops of the pedestal and sessions closed by
+     * the job.
      */
     private void saveConsumption(final StopData stopData, final Consumption consumption,
-                                 final SupplyDuration duration, final boolean billed) {
+                                 final SupplyDuration duration, final boolean billed, final StopReason stopReason) {
         LOG.info(String.format("Consumption of session %s: %s, %s, billed: %s", stopData.session, consumption,
                 duration, billed));
+        ConsumptionRecord record = consumptionRecordWriteService.createConsumptionRecord(stopData.session,
+                stopData.validationResult, consumption, duration, billed, stopReason, stopData.systemDate);
+        LOG.debug(String.format("Saved consumption record %s", record));
     }
 
     private void updatePedestal(final Socket socket, final SupplyRequest supplyRequest,
@@ -352,27 +362,11 @@ public class SupplyControlUnitImpl {
     }
 
     public Consumption determineConsumption(Socket socket, SupplyRequest supplyRequest) {
-        boolean startMeterOk = true;
-        // on problems the start meter is the last known reading of the socket
-        BigDecimal startMeterKwh = supplyRequest.getStartMeterKwh();
-        if (startMeterKwh == null || startMeterKwh.signum() == -1) {
-            startMeterKwh = socket.getMeterKwh();
-            startMeterOk = false;
-            LOG.info(String.format("Consumption: invalid start meter, set to the last known reading %s of %s!",
-                    startMeterKwh, socket));
-        }
-        LOG.debug(String.format("Consumption: start meter %s", startMeterKwh));
-
-        boolean stopMeterOk = true;
-        // on problems the stop meter is the last known reading of the socket
-        BigDecimal stopMeterKwh = supplyRequest.getStopMeterKwh();
-        if (stopMeterKwh == null || stopMeterKwh.signum() == -1) {
-            stopMeterKwh = socket.getMeterKwh();
-            stopMeterOk = false;
-            LOG.info(String.format("Consumption: invalid stop meter, set to the last known reading %s of %s!",
-                    stopMeterKwh, socket));
-        }
-        LOG.debug(String.format("Consumption: stop meter %s", stopMeterKwh));
+        // on problems a meter value is the last known reading of the socket
+        final boolean startMeterOk = isValidMeterValue(supplyRequest.getStartMeterKwh());
+        final BigDecimal startMeterKwh = meterOrLastReading(supplyRequest.getStartMeterKwh(), socket, "start");
+        final boolean stopMeterOk = isValidMeterValue(supplyRequest.getStopMeterKwh());
+        final BigDecimal stopMeterKwh = meterOrLastReading(supplyRequest.getStopMeterKwh(), socket, "stop");
 
         BigDecimal consumptionKwh = null;
         if (startMeterOk && stopMeterOk) {
@@ -387,6 +381,20 @@ public class SupplyControlUnitImpl {
         }
 
         return new Consumption(startMeterKwh, stopMeterKwh, consumptionKwh);
+    }
+
+    private static boolean isValidMeterValue(BigDecimal meterKwh) {
+        return meterKwh != null && meterKwh.signum() != -1;
+    }
+
+    private static BigDecimal meterOrLastReading(BigDecimal meterKwh, Socket socket, String which) {
+        if (isValidMeterValue(meterKwh)) {
+            LOG.debug(String.format("Consumption: %s meter %s", which, meterKwh));
+            return meterKwh;
+        }
+        LOG.info(String.format("Consumption: invalid %s meter, set to the last known reading %s of %s!", which,
+                socket.getMeterKwh(), socket));
+        return socket.getMeterKwh();
     }
 
     SupplyDuration determineDuration(SupplyRequest supplyRequest, SupplySession session, LocalDateTime systemDate) {
