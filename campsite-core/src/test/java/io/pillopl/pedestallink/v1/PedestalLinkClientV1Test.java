@@ -188,4 +188,48 @@ class PedestalLinkClientV1Test {
 
         assertThat(PedestalLinkClientV1.merge(queued, full)).isSameAs(full);
     }
+
+    @Test
+    void remoteSupplyStartPostsTheSocketAndTheAuthTag() {
+        server.expect(requestTo(URL + "/remoteSupplyStart")).andExpect(method(HttpMethod.POST))
+                .andExpect(jsonPath("$.socketNo").value(2))
+                .andExpect(jsonPath("$.authTag").value("QR1005"))
+                .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
+
+        assertThat(client.remoteSupplyStart(pedestal, 2, "QR1005")).isTrue();
+        server.verify();
+    }
+
+    @Test
+    void remoteSupplyStopPostsTheTransaction() {
+        server.expect(requestTo(URL + "/remoteSupplyStop")).andExpect(jsonPath("$.transactionId").value(1007))
+                .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
+
+        assertThat(client.remoteSupplyStop(pedestal, 1007)).isTrue();
+        server.verify();
+    }
+
+    @Test
+    void remoteSupplyStartRejectedByThePedestalFails() {
+        server.expect(requestTo(URL + "/remoteSupplyStart"))
+                .andRespond(withSuccess("{\"status\":\"REJECTED\"}", MediaType.APPLICATION_JSON));
+
+        assertThat(client.remoteSupplyStart(pedestal, 1, "QR1005")).isFalse();
+    }
+
+    @Test
+    void remoteCommandToAnUnreachablePedestalFailsAndIsNotQueued() {
+        server.expect(requestTo(URL + "/remoteSupplyStop")).andRespond(withException(new IOException("timeout")));
+
+        assertThat(client.remoteSupplyStop(pedestal, 1007)).isFalse();
+        assertThat(client.hasQueuedLocalList(pedestal)).isFalse();
+    }
+
+    @Test
+    void remoteCommandNeedsALinkAddress() {
+        pedestal.setLinkUrl(" ");
+
+        assertThat(client.remoteSupplyStart(pedestal, 1, "QR1005")).isFalse();
+        server.verify();
+    }
 }
