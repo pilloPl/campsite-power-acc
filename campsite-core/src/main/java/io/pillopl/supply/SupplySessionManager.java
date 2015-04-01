@@ -3,8 +3,10 @@ package io.pillopl.supply;
 import io.pillopl.card.CampingCard;
 import io.pillopl.card.HouseCard;
 import io.pillopl.card.ValidationService.ValidationResult;
+import io.pillopl.guest.Stay;
 import io.pillopl.infrastructure.PedestalService;
 import io.pillopl.infrastructure.Socket;
+import io.pillopl.persistence.dao.StayDao;
 import io.pillopl.persistence.dao.SupplySessionDao;
 import io.pillopl.power.PowerSection;
 import io.pillopl.util.DateService;
@@ -35,11 +37,14 @@ public class SupplySessionManager implements SupplySessionRegistry {
 
     private final DateService dateService;
 
+    private final StayDao stayDao;
+
     public SupplySessionManager(SupplySessionDao supplySessionDao, PedestalService pedestalService,
-                                DateService dateService) {
+                                DateService dateService, StayDao stayDao) {
         this.supplySessionDao = supplySessionDao;
         this.pedestalService = pedestalService;
         this.dateService = dateService;
+        this.stayDao = stayDao;
     }
 
     @Override
@@ -155,6 +160,12 @@ public class SupplySessionManager implements SupplySessionRegistry {
             session.setHouseCard(houseCard);
         } else {
             session.setCard(card);
+            // the stay of the guest: its check-out closes the session, its unit is the one supplied
+            final Stay stay = findStayFor(card, remoteDate != null ? remoteDate : session.getCreateDate());
+            if (stay != null) {
+                session.setStayId(stay.getId());
+                session.setUnitPlate(stay.getUnitPlate());
+            }
         }
         // set transaction id
         if (transactionId == null) {
@@ -193,6 +204,22 @@ public class SupplySessionManager implements SupplySessionRegistry {
     @Transactional(readOnly = true)
     public List<SupplySession> findActiveSessionsWithStay() {
         return supplySessionDao.findActiveWithStay();
+    }
+
+    /**
+     * The open stay the card was handed out for on the day of the supply; null for cards without a stay (seasonal
+     * residents, issuer cards).
+     */
+    private Stay findStayFor(final CampingCard card, final LocalDateTime at) {
+        if (card == null || card.getId() == null) {
+            return null;
+        }
+        final List<Stay> stays = stayDao.findOpenStaysOfCardOn(card.getId(), at.toLocalDate());
+        if (stays.isEmpty()) {
+            LOG.debug(String.format("No open stay of card %s on %s", card, at));
+            return null;
+        }
+        return stays.get(0);
     }
 
     private Socket getSocket(final SocketLinkId socketLinkId) {
