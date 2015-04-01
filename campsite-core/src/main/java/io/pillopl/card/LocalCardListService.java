@@ -188,18 +188,15 @@ public class LocalCardListService {
         }
 
         LocalListVersion localListVersion = localListVersionDao.findByPedestal(pedestal);
-        if (null != localListVersion) {
-            Integer version = localListVersion.getVersion();
-            localListVersion.setVersion(version + 1);
-            localListVersion.setModDate(dateService.getNow());
-            localListVersion = localListVersionDao.save(localListVersion);
-        } else {
+        if (localListVersion == null) {
+            // the first list the controller gets
             localListVersion = new LocalListVersion(pedestal, 1);
-            localListVersion.setModDate(dateService.getNow());
-            localListVersion = localListVersionDao.save(localListVersion);
+        } else {
+            localListVersion.setVersion(localListVersion.getVersion() + 1);
         }
+        localListVersion.setModDate(dateService.getNow());
 
-        return localListVersion.getVersion();
+        return localListVersionDao.save(localListVersion).getVersion();
     }
 
     /**
