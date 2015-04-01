@@ -86,6 +86,10 @@ public class SupplySessionManager implements SupplySessionRegistry {
             LOG.debug(String.format("No active session found for socket %s", socket));
             return null;
         }
+        if (sessions.size() > 1) {
+            LOG.warn(String.format("Socket %s has %d active sessions, using the newest %s", socket, sessions.size(),
+                    sessions.get(0)));
+        }
         return sessions.get(0);
     }
 
