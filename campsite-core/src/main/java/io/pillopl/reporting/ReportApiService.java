@@ -79,7 +79,8 @@ public class ReportApiService implements ReportApi {
                 issuerGroupId = null;
             }
 
-            switch (reportType.trim().toUpperCase(Locale.ROOT)) {
+            // the same reading as the enum values of the calls: blanks and dashes as underscores, case ignored
+            switch (reportType.trim().replace(' ', '_').replace('-', '_').toUpperCase(Locale.ROOT)) {
                 case AVERAGE_PER_HOUR_OF_DAY:
                     requirePeriod(period);
                     return campsiteReportService.getAverageConsumptionPerHourOfDay(period.from(), period.to(),
