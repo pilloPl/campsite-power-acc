@@ -38,6 +38,11 @@ class ConsumptionRecordFactoryTest {
     }
 
     @Test
+    void negativeDurationIsTheReasonWhenTheConsumptionIsNegativeToo() {
+        assertThat(factory.suspectReasonFor(-60L, new BigDecimal("-0.5"), 1)).isEqualTo("Negative duration: -60 s");
+    }
+
+    @Test
     void moreThanTheThresholdPerNightIsSuspect() {
         assertThat(factory.isSuspect(3 * 86400L, new BigDecimal("900.0001"), 3)).isTrue();
     }
