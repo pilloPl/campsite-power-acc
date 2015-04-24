@@ -26,6 +26,10 @@ public enum SystemPropertyKey {
     CheckoutSessionCloseDelayInMinutes,
     CloseSessionsOnCheckoutJobIntervalInSeconds,
 
+    // QR payment
+    QrPayArchiveDelayInHours,
+    ArchiveQrPayProcessJobIntervalInSeconds,
+
     // consumption records
     SuspectRecordKwhPerNightThreshold,
 
