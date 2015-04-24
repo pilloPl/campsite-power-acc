@@ -169,6 +169,17 @@ public class QrPayProcess {
         return copy;
     }
 
+    /**
+     * Copy of this row as it is (the state works on it without touching the managed row).
+     */
+    public QrPayProcess detachedCopy() {
+        QrPayProcess copy = copyForNextState(id, getStateName(), startTime);
+        copy.setStopTime(stopTime);
+        copy.setPreviousProcessId(previousProcessId);
+        copy.setNextProcessId(nextProcessId);
+        return copy;
+    }
+
     @Override
     public String toString() {
         return "QrPayProcess{id=" + id + ", process=" + processId + ", order=" + orderReference + ", state=" + state
