@@ -16,7 +16,11 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
     @Query(value = "select nextval('SUPPLY_TRANSACTION_ID_SEQ')", nativeQuery = true)
     Long nextTransactionId();
 
-    @Query("select s from SupplySession s where s.socket = :socket and s.active = true order by s.createDate desc")
+    /**
+     * Active sessions of the socket, the newest first (the id decides between sessions created in the same instant).
+     */
+    @Query("select s from SupplySession s where s.socket = :socket and s.active = true"
+            + " order by s.createDate desc, s.id desc")
     List<SupplySession> findActiveBySocket(@Param("socket") Socket socket);
 
     @Query("select s from SupplySession s where s.socket.powerSection = :section and s.active = true order by s.id")
