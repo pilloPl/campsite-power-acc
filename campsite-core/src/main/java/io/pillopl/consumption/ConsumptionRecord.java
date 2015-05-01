@@ -265,8 +265,7 @@ public class ConsumptionRecord {
         this.tariffId = calculation.getTariffId();
         this.tariffName = calculation.getTariffName();
         this.pricingFailureReason = calculation.getFailureReason();
-        this.exportStatus = calculation.getStatus() == PricingStatus.PRICING_FAILED ? ExportStatus.REVIEW
-                : ExportStatus.NEW;
+        this.exportStatus = pricingStatus == PricingStatus.PRICING_FAILED ? ExportStatus.REVIEW : ExportStatus.NEW;
     }
 
     /**
