@@ -39,6 +39,9 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
     @Value("#{sqls['getConsumptionPerStayNight']}")
     private String getConsumptionPerStayNight;
 
+    @Value("#{sqls['getTopPitches']}")
+    private String getTopPitches;
+
     @Value("#{sqls['sumKwhPerPedestal']}")
     private String sumKwhPerPedestal;
 
@@ -86,6 +89,18 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
                 .addValue("powerSectionId", powerSectionId, Types.BIGINT);
         return jdbcTemplate.query(getConsumptionPerStayNight, params, (rs, rowNum) -> new ReportLineDTO(
                 rs.getString("CAMPSITE_CODE"), null, rs.getBigDecimal("KWH"), rs.getLong("NIGHTS"), null));
+    }
+
+    @Override
+    public List<ReportLineDTO> getTopPitches(LocalDateTime from, LocalDateTime to, Long siteGroupId,
+                                             Long issuerGroupId, Long powerSectionId, int maxRows) {
+        MapSqlParameterSource params = period(from, to)
+                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
+                .addValue("issuerGroupId", issuerGroupId, Types.BIGINT)
+                .addValue("powerSectionId", powerSectionId, Types.BIGINT)
+                .addValue("maxRows", maxRows);
+        return jdbcTemplate.query(getTopPitches, params, (rs, rowNum) -> new ReportLineDTO(rs.getString("PITCH_NO"),
+                rs.getString("CAMPSITE_CODE"), rs.getBigDecimal("KWH"), rs.getLong("RECORDS"), null));
     }
 
     @Override

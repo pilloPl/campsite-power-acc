@@ -1,5 +1,6 @@
 package io.pillopl.reporting;
 
+import io.pillopl.config.SystemPropertyService;
 import io.pillopl.dto.report.ReportLineDTO;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.ConsumptionReportDao;
@@ -33,7 +34,9 @@ class CampsiteReportServiceTest {
     final ConsumptionReportDao dao = mock(ConsumptionReportDao.class);
     final SupplyIncidentDao incidentDao = mock(SupplyIncidentDao.class);
     final PedestalDao pedestalDao = mock(PedestalDao.class);
-    final CampsiteReportService service = new CampsiteReportService(dao, incidentDao, pedestalDao);
+    final SystemPropertyService systemPropertyService = mock(SystemPropertyService.class);
+    final CampsiteReportService service = new CampsiteReportService(dao, incidentDao, pedestalDao,
+            systemPropertyService);
 
     @Test
     void supplyOverSeveralHoursIsSpreadOverTheHoursByTime() {
@@ -133,6 +136,15 @@ class CampsiteReportServiceTest {
         assertThat(lines.get(0).period()).isEqualTo("BAY");
         assertThat(lines.get(0).kwh()).isEqualByComparingTo("33.333");
         assertThat(lines.get(0).count()).isEqualTo(3);
+    }
+
+    @Test
+    void topPitchesReportTakesAsManyRowsAsConfigured() {
+        when(systemPropertyService.getReportTopPitchesMaxRows()).thenReturn(5);
+        List<ReportLineDTO> top = List.of(new ReportLineDTO("A12", "BAY", new BigDecimal("80"), 4, null));
+        when(dao.getTopPitches(FROM, TO, SITE, null, null, 5)).thenReturn(top);
+
+        assertThat(service.getTopPitches(FROM, TO, SITE, null, null)).isEqualTo(top);
     }
 
     @Test

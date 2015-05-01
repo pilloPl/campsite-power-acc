@@ -19,6 +19,7 @@ public interface ReportApi {
     String CONSUMPTION_PER_STAY_NIGHT = "CONSUMPTION_PER_STAY_NIGHT";
     String ACCUMULATED_KWH_PER_PEDESTAL = "ACCUMULATED_KWH_PER_PEDESTAL";
     String SUPPLY_INCIDENTS_PER_PEDESTAL = "SUPPLY_INCIDENTS_PER_PEDESTAL";
+    String TOP_PITCHES = "TOP_PITCHES";
 
     /**
      * @param reportType      one of the constants of this interface

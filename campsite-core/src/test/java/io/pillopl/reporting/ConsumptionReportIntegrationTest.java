@@ -165,6 +165,22 @@ class ConsumptionReportIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void topPitchesAreThePitchesWithTheMostKwhFirst() {
+        record(baySocket, "10", JULY.plusHours(10), "BAY", 1, null).setPitchNo("A1");
+        record(baySocket, "5", JULY.plusHours(13), "BAY", 1, null).setPitchNo("A1");
+        record(lakeSocket, "20", JULY.plusHours(11), "LAKE", 1, null).setPitchNo("L7");
+        record(lakeSocket, "1", JULY.plusHours(12), "LAKE", 1, null).setPitchNo("L8");
+        record(lakeSocket, "99", JULY.plusHours(14), "LAKE", 1, null);
+        consumptionRecordDao.flush();
+
+        assertThat(reportDao.getTopPitches(JULY, JULY.plusDays(1), operator.getId(), null, null, 2))
+                .extracting(ReportLineDTO::period, ReportLineDTO::series, ReportLineDTO::kwh, ReportLineDTO::count)
+                .containsExactly(
+                        tuple("L7", "LAKE", new BigDecimal("20.0000"), 1L),
+                        tuple("A1", "BAY", new BigDecimal("15.0000"), 2L));
+    }
+
+    @Test
     void accumulatedKwhPerPedestalSumsTheMonthsOfTheSelectedPedestals() {
         record(baySocket, "10", JULY.plusHours(10), "BAY", 1, null);
         record(baySectionSocket, "2.5", JULY.plusHours(12), "BAY", 1, null);

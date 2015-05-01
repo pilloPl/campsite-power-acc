@@ -212,6 +212,13 @@ public class SystemPropertyService {
         return getPropertyBigDecimal(SystemPropertyKey.SuspectRecordKwhPerNightThreshold, BigDecimal.valueOf(300));
     }
 
+    /**
+     * Rows of the top pitches report.
+     */
+    public int getReportTopPitchesMaxRows() {
+        return getPropertyInt(SystemPropertyKey.ReportTopPitchesMaxRows, 20);
+    }
+
     // ---------------------------------------------------------------- local card lists
 
     /**

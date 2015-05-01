@@ -50,6 +50,13 @@ public interface ConsumptionReportDao {
                                                    Long issuerGroupId, Long powerSectionId);
 
     /**
+     * @return at most {@code maxRows} lines, most kWh first: period = pitch number, series = campsite code,
+     * count = records
+     */
+    List<ReportLineDTO> getTopPitches(LocalDateTime from, LocalDateTime to, Long siteGroupId, Long issuerGroupId,
+                                      Long powerSectionId, int maxRows);
+
+    /**
      * @param to exclusive
      * @return rows {pedestal code, kWh sum, record count} of the pedestals having records in [from, to)
      */

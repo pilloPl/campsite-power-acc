@@ -104,6 +104,10 @@ public class ReportApiService implements ReportApi {
                     return reportingService.fetchAccumulatedKwhPerPedestal(
                             ApiValues.parseEnum(TimeResolution.class, timeResolution, "time resolution"),
                             period.from(), period.to(), pedestalCodes, siteGroupId, issuerGroupId);
+                case TOP_PITCHES:
+                    requirePeriod(period);
+                    return campsiteReportService.getTopPitches(period.from(), period.to(), siteGroupId,
+                            issuerGroupId, powerSectionId);
                 case SUPPLY_INCIDENTS_PER_PEDESTAL:
                     requirePeriod(period);
                     return campsiteReportService.getSupplyIncidentsPerPedestal(period.from(), period.to(),

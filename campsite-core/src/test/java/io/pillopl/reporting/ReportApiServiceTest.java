@@ -95,16 +95,18 @@ class ReportApiServiceTest {
     }
 
     @Test
-    void stayNightAccumulatedAndIncidentReportsGetTheirParameters() {
+    void stayNightAccumulatedIncidentAndTopPitchReportsGetTheirParameters() {
         api.getReport(CALLER, ReportApi.CONSUMPTION_PER_STAY_NIGHT, JULY, null, null, null, null, null, null);
         api.getReport(CALLER, ReportApi.ACCUMULATED_KWH_PER_PEDESTAL, JULY, null, null, null, null, "quarter",
                 List.of("P1"));
         api.getReport(CALLER, ReportApi.SUPPLY_INCIDENTS_PER_PEDESTAL, JULY, null, null, null, null, null, null);
+        api.getReport(CALLER, ReportApi.TOP_PITCHES, JULY, null, null, null, null, null, null);
 
         verify(campsiteReportService).getConsumptionPerStayNight(FROM, TO, 10L, 20L, null);
         verify(reportingService).fetchAccumulatedKwhPerPedestal(TimeResolution.QUARTER, FROM, TO, List.of("P1"),
                 10L, 20L);
         verify(campsiteReportService).getSupplyIncidentsPerPedestal(FROM, TO, 10L);
+        verify(campsiteReportService).getTopPitches(FROM, TO, 10L, 20L, null);
     }
 
     @Test
@@ -112,7 +114,7 @@ class ReportApiServiceTest {
         DateRange open = new DateRange(FROM, null);
         for (String type : List.of(ReportApi.AVERAGE_PER_HOUR_OF_DAY, ReportApi.AVERAGE_PER_DAY_OF_WEEK,
                 ReportApi.CONSUMPTION_PER_STAY_NIGHT, ReportApi.ACCUMULATED_KWH_PER_PEDESTAL,
-                ReportApi.SUPPLY_INCIDENTS_PER_PEDESTAL)) {
+                ReportApi.SUPPLY_INCIDENTS_PER_PEDESTAL, ReportApi.TOP_PITCHES)) {
             assertThatThrownBy(() -> api.getReport(CALLER, type, open, null, null, null, null, "MONTH",
                     List.of("P1"))).isInstanceOf(InvalidInputException.class);
         }
@@ -123,7 +125,7 @@ class ReportApiServiceTest {
     void missingOrUnknownReportTypeIsInvalid() {
         assertThatThrownBy(() -> api.getReport(CALLER, " ", JULY, null, null, null, null, null, null))
                 .isInstanceOf(InvalidInputException.class);
-        assertThatThrownBy(() -> api.getReport(CALLER, "TOP_PITCHES", JULY, null, null, null, null, null, null))
+        assertThatThrownBy(() -> api.getReport(CALLER, "BEST_GUESTS", JULY, null, null, null, null, null, null))
                 .isInstanceOf(InvalidInputException.class);
     }
 

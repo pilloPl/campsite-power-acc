@@ -1,5 +1,6 @@
 package io.pillopl.reporting;
 
+import io.pillopl.config.SystemPropertyService;
 import io.pillopl.dto.report.ReportLineDTO;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.ConsumptionReportDao;
@@ -28,7 +29,7 @@ import java.util.TreeMap;
 
 /**
  * Management reports of the campsites: average consumption per hour of the day and per day of the week, consumption
- * per month and quarter, kWh per stay night, supply incidents per pedestal.
+ * per month and quarter, kWh per stay night, top pitches, supply incidents per pedestal.
  * <p>
  * Every report reads the scope of its reader: the SITE subtree {@code siteGroupId} (a campsite or the whole operator)
  * and/or the ISSUER subtree {@code issuerGroupId}; a null id makes that side empty. A power section narrows the
@@ -50,11 +51,14 @@ public class CampsiteReportService {
 
     private final PedestalDao pedestalDao;
 
+    private final SystemPropertyService systemPropertyService;
+
     public CampsiteReportService(ConsumptionReportDao consumptionReportDao, SupplyIncidentDao supplyIncidentDao,
-                                 PedestalDao pedestalDao) {
+                                 PedestalDao pedestalDao, SystemPropertyService systemPropertyService) {
         this.consumptionReportDao = consumptionReportDao;
         this.supplyIncidentDao = supplyIncidentDao;
         this.pedestalDao = pedestalDao;
+        this.systemPropertyService = systemPropertyService;
     }
 
     /**
@@ -291,6 +295,17 @@ public class CampsiteReportService {
             lines.add(new ReportLineDTO(campsite.period(), null, kwhPerNight, campsite.count(), null));
         }
         return lines;
+    }
+
+    /**
+     * The pitches drawing the most energy, as many as {@code ReportTopPitchesMaxRows} in SYSTEM_PROPERTY says.
+     *
+     * @return period = pitch number, series = campsite code, kWh and records; most kWh first
+     */
+    public List<ReportLineDTO> getTopPitches(LocalDateTime from, LocalDateTime to, Long siteGroupId,
+                                             Long issuerGroupId, Long powerSectionId) {
+        return consumptionReportDao.getTopPitches(from, to, siteGroupId, issuerGroupId, powerSectionId,
+                systemPropertyService.getReportTopPitchesMaxRows());
     }
 
     /**
