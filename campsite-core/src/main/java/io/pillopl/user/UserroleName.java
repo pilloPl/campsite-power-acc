@@ -28,5 +28,10 @@ public enum UserroleName {
 
     SELF_SERVICE_USER,
 
-    SELF_SERVICE_SUPPORT
+    SELF_SERVICE_SUPPORT,
+
+    /**
+     * Technical user of the payment app calling the QR payment web service.
+     */
+    QRPAY_APP_CLIENT
 }
