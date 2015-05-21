@@ -154,10 +154,10 @@ public class SeasonalContract {
     }
 
     /**
-     * The contract runs on some day of the period [from, to].
+     * The contract ran on some day of the period [from, to]; an ended contract counts up to its end date.
      */
     public boolean isActiveIn(LocalDate from, LocalDate to) {
-        if (status == ContractStatus.ENDED || to.isBefore(startDate)) {
+        if (to.isBefore(startDate) || status == ContractStatus.ENDED && endDate == null) {
             return false;
         }
         LocalDate lastDay = getLastDay();
