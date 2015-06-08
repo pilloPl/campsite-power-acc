@@ -385,6 +385,17 @@ class SupplyControlUnitImplTest {
         assertThat(SupplyControlUnitImpl.lastReadingDate(session, socket, NOW)).isEqualTo(NOW);
     }
 
+    @Test
+    void readingWithinTheSessionIsItsStopDateAndAFutureOneIsNot() {
+        SupplySession session = session(card, null, true);
+        socket.setModDate(PLUG_IN.plusHours(2));
+
+        assertThat(SupplyControlUnitImpl.lastReadingDate(session, socket, NOW)).isEqualTo(PLUG_IN.plusHours(2));
+
+        socket.setModDate(NOW.plusMinutes(5));
+        assertThat(SupplyControlUnitImpl.lastReadingDate(session, socket, NOW)).isEqualTo(NOW);
+    }
+
     // ------------------------------------------------------------------------------------------ helpers
 
     private SupplyRequest start() {
