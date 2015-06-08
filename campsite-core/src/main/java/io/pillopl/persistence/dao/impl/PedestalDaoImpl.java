@@ -116,14 +116,15 @@ public class PedestalDaoImpl implements PedestalDaoCustom {
                                                 List<Long> excludeIds) {
         StringBuilder sb = new StringBuilder(
                 "update Pedestal p set p.deleted = :deleted, p.listedInApp = :listedInApp where p.group.id in (:groupIds)");
-        if (excludeIds != null && !excludeIds.isEmpty()) {
+        boolean withExclusions = excludeIds != null && !excludeIds.isEmpty();
+        if (withExclusions) {
             sb.append(" and p.id not in (:excludeIds)");
         }
         Query query = entityManager.createQuery(sb.toString());
         query.setParameter("deleted", deleted);
         query.setParameter("listedInApp", listedInApp);
         query.setParameter("groupIds", groupIds);
-        if (excludeIds != null && !excludeIds.isEmpty()) {
+        if (withExclusions) {
             query.setParameter("excludeIds", excludeIds);
         }
         return query.executeUpdate();
