@@ -29,6 +29,11 @@ public class WelcomeCardAdoptionService {
 
     private static final Logger LOG = LoggerFactory.getLogger(WelcomeCardAdoptionService.class);
 
+    /**
+     * Name prefix of the affiliate campsite group, followed by the owner's username.
+     */
+    private static final String AFFILIATE_NAME_PREFIX = GroupServiceConstants.PREFIX_AFFILIATE + " ";
+
     private final WelcomeCardAdoptionDao welcomeCardAdoptionDao;
 
     private final PedestalDao pedestalDao;
@@ -145,7 +150,7 @@ public class WelcomeCardAdoptionService {
         if (group == null) {
             return null;
         }
-        if (group.getName().startsWith(GroupServiceConstants.PREFIX_AFFILIATE + " ")) {
+        if (group.getName().startsWith(AFFILIATE_NAME_PREFIX)) {
             return group;
         }
         return getAffiliateGroup(group.getParent());
@@ -153,7 +158,6 @@ public class WelcomeCardAdoptionService {
 
     static String getAffiliateOwner(Pedestal pedestal) {
         Group group = getAffiliateGroup(pedestal.getGroup());
-        return group != null ? group.getName().substring((GroupServiceConstants.PREFIX_AFFILIATE + " ").length())
-                : null;
+        return group != null ? group.getName().substring(AFFILIATE_NAME_PREFIX.length()) : null;
     }
 }

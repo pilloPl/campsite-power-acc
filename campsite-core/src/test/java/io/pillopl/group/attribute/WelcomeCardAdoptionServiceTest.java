@@ -2,6 +2,7 @@ package io.pillopl.group.attribute;
 
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupType;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.WelcomeCardAdoptionDao;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +42,20 @@ class WelcomeCardAdoptionServiceTest {
         when(dao.findForGroup(1L)).thenReturn(new WelcomeCardAdoption(true));
 
         assertThat(service.adoptionIsAllowedFor(section)).isTrue();
+    }
+
+    @Test
+    void ownerOfTheNearestAffiliateCampsiteAdoptsTheCard() {
+        Group affiliate = new Group(GroupType.SITE, "AFFILIATE marko");
+        affiliate.setParent(root);
+        Group beach = new Group(GroupType.SITE, "MARKO BEACH SECTION");
+        beach.setParent(affiliate);
+        Pedestal pedestal = new Pedestal();
+        pedestal.setGroup(beach);
+
+        assertThat(WelcomeCardAdoptionService.getAffiliateGroup(beach)).isSameAs(affiliate);
+        assertThat(WelcomeCardAdoptionService.getAffiliateOwner(pedestal)).isEqualTo("marko");
+        assertThat(WelcomeCardAdoptionService.getAffiliateGroup(section)).isNull();
     }
 
     @Test
