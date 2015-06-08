@@ -311,6 +311,181 @@ SELECT v.ID
  ORDER BY v.PLUG_OUT, v.ID
 ]]></entry>
 
+    <!-- ===== Consumption reports (management reports of the campsites) ===== -->
+
+    <!--
+      Records of the consumption reports with plug-out in [:from, :to]: the scope of the reader (SITE subtree OR ISSUER
+      subtree, a missing group id makes its side empty), optionally only the sockets of one power section. Rejected
+      records and records without plug-in or energy are no consumption. The averages are computed from these rows.
+    -->
+    <entry key="findConsumptionReportRecords"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT cr.SOCKET_CODE, cr.PEDESTAL_CODE, cr.PLUG_IN, cr.PLUG_OUT, cr.KWH
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT <= :to
+   AND cr.PLUG_IN IS NOT NULL
+   AND cr.KWH IS NOT NULL
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+   AND (CAST(:powerSectionId AS BIGINT) IS NULL
+        OR cr.SOCKET_ID IN (SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :powerSectionId))
+ ORDER BY cr.PLUG_IN, cr.ID
+]]></entry>
+
+    <!--
+      Consumption per month of plug-out ("2026_07"): kWh, records and supply hours. Same scope as
+      findConsumptionReportRecords; year and month are optional filters (null = all), bound like everything else.
+    -->
+    <entry key="getMonthlyConsumptions"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT EXTRACT(YEAR FROM cr.PLUG_OUT) || '_' || TO_CHAR(EXTRACT(MONTH FROM cr.PLUG_OUT), 'FM00') AS TIME_PERIOD,
+       SUM(cr.KWH) AS KWH,
+       COUNT(cr.ID) AS RECORDS,
+       SUM(EXTRACT(EPOCH FROM (cr.PLUG_OUT - cr.PLUG_IN))) / 3600 AS HOURS
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_IN IS NOT NULL
+   AND cr.KWH IS NOT NULL
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+   AND (CAST(:powerSectionId AS BIGINT) IS NULL
+        OR cr.SOCKET_ID IN (SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :powerSectionId))
+   AND (CAST(:year AS INTEGER) IS NULL OR EXTRACT(YEAR FROM cr.PLUG_OUT) = :year)
+   AND (CAST(:month AS INTEGER) IS NULL OR EXTRACT(MONTH FROM cr.PLUG_OUT) = :month)
+ GROUP BY EXTRACT(YEAR FROM cr.PLUG_OUT) || '_' || TO_CHAR(EXTRACT(MONTH FROM cr.PLUG_OUT), 'FM00')
+ ORDER BY EXTRACT(YEAR FROM cr.PLUG_OUT) || '_' || TO_CHAR(EXTRACT(MONTH FROM cr.PLUG_OUT), 'FM00') ASC
+]]></entry>
+
+    <!-- Copy of getMonthlyConsumptions per quarter of plug-out ("2026_Q3"), optional year. -->
+    <entry key="getQuarterlyConsumptions"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT EXTRACT(YEAR FROM cr.PLUG_OUT) || '_Q' || EXTRACT(QUARTER FROM cr.PLUG_OUT) AS TIME_PERIOD,
+       SUM(cr.KWH) AS KWH,
+       COUNT(cr.ID) AS RECORDS,
+       SUM(EXTRACT(EPOCH FROM (cr.PLUG_OUT - cr.PLUG_IN))) / 3600 AS HOURS
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_IN IS NOT NULL
+   AND cr.KWH IS NOT NULL
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+   AND (CAST(:powerSectionId AS BIGINT) IS NULL
+        OR cr.SOCKET_ID IN (SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :powerSectionId))
+   AND (CAST(:year AS INTEGER) IS NULL OR EXTRACT(YEAR FROM cr.PLUG_OUT) = :year)
+ GROUP BY EXTRACT(YEAR FROM cr.PLUG_OUT) || '_Q' || EXTRACT(QUARTER FROM cr.PLUG_OUT)
+ ORDER BY EXTRACT(YEAR FROM cr.PLUG_OUT) || '_Q' || EXTRACT(QUARTER FROM cr.PLUG_OUT) ASC
+]]></entry>
+
+    <!-- kWh and stay nights per campsite of the records with plug-out in [:from, :to] (records without nights left out). -->
+    <entry key="getConsumptionPerStayNight"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT COALESCE(cr.CAMPSITE_CODE, 'N/A') AS CAMPSITE_CODE,
+       SUM(cr.KWH) AS KWH,
+       SUM(cr.NIGHTS) AS NIGHTS
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT <= :to
+   AND cr.KWH IS NOT NULL
+   AND cr.NIGHTS > 0
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+   AND (CAST(:powerSectionId AS BIGINT) IS NULL
+        OR cr.SOCKET_ID IN (SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :powerSectionId))
+ GROUP BY COALESCE(cr.CAMPSITE_CODE, 'N/A')
+ ORDER BY COALESCE(cr.CAMPSITE_CODE, 'N/A')
+]]></entry>
+
+    <!--
+      The pitches drawing the most kWh with plug-out in [:from, :to]: pitch number and campsite, kWh and records,
+      at most :maxRows rows. Records without pitch are left out.
+    -->
+    <entry key="getTopPitches"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT cr.PITCH_NO, COALESCE(cr.CAMPSITE_CODE, 'N/A') AS CAMPSITE_CODE, SUM(cr.KWH) AS KWH, COUNT(cr.ID) AS RECORDS
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT <= :to
+   AND cr.KWH IS NOT NULL
+   AND cr.PITCH_NO IS NOT NULL
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+   AND (CAST(:powerSectionId AS BIGINT) IS NULL
+        OR cr.SOCKET_ID IN (SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :powerSectionId))
+ GROUP BY cr.PITCH_NO, COALESCE(cr.CAMPSITE_CODE, 'N/A')
+ ORDER BY SUM(cr.KWH) DESC, cr.PITCH_NO
+ LIMIT :maxRows
+]]></entry>
+
+    <!--
+      kWh and records per pedestal of the given codes with plug-out in [:from, :to)(end exclusive: one month, quarter
+      or year of the accumulated report). Same scope as the other reports.
+    -->
+    <entry key="sumKwhPerPedestal"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT cr.PEDESTAL_CODE, SUM(cr.KWH) AS KWH, COUNT(cr.ID) AS RECORDS
+  FROM CONSUMPTION_RECORD cr
+ WHERE cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT < :to
+   AND cr.KWH IS NOT NULL
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND cr.PEDESTAL_CODE IN (:pedestalCodes)
+   AND (cr.SITE_GROUP_ID IN (SELECT id FROM site_tree) OR cr.ISSUER_GROUP_ID IN (SELECT id FROM issuer_tree))
+ GROUP BY cr.PEDESTAL_CODE
+]]></entry>
+
     <!-- Next number of the natural record id (never cut to a fixed width). -->
     <entry key="nextConsumptionRecordNumber"><![CDATA[
 SELECT nextval('CONSUMPTION_RECORD_NO_SEQ')
