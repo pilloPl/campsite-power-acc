@@ -143,6 +143,16 @@ class ConsumptionRecordDaoIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void issuerExportGetsTheRecordsOfHisGuestsAtEveryCampsite() {
+        ConsumptionRecord atLake = record("LAKE-1", lake, clubJunior, DAY.plusHours(9));
+        ConsumptionRecord atBay = record("BAY-1", bay, club, DAY.plusHours(10));
+        record("BAY-2", bay, otherClub, DAY.plusHours(11));
+
+        assertThat(consumptionRecordDao.findConsumptionRecordIdsForExport(DAY, DAY.plusDays(1), null, club.getId()))
+                .containsExactly(atLake.getId(), atBay.getId());
+    }
+
+    @Test
     void recordNumbersIncrease() {
         long first = consumptionRecordDao.nextRecordNumber();
 
