@@ -1,5 +1,7 @@
 package io.pillopl.infrastructure.supplier;
 
+import java.util.Locale;
+
 /**
  * Accessibility column of the supplier's pedestal file.
  */
@@ -17,7 +19,7 @@ public enum SupplierAccessibility {
             return UNSPECIFIED;
         }
         try {
-            return valueOf(value.trim().toUpperCase().replace(' ', '_'));
+            return valueOf(value.trim().toUpperCase(Locale.ROOT).replace(' ', '_'));
         } catch (IllegalArgumentException e) {
             return UNSPECIFIED;
         }
