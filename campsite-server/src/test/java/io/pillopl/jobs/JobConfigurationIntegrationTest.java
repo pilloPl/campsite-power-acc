@@ -24,4 +24,12 @@ class JobConfigurationIntegrationTest extends IntegrationTest {
         assertThat(trigger.getRepeatInterval()).isEqualTo(300_000L);
         assertThat(scheduler.isStarted()).isFalse();
     }
+
+    @Test
+    void qrPaymentArchiveJobRunsHourlyByDefault() throws SchedulerException {
+        assertThat(scheduler.checkExists(JobKey.jobKey(JobConfiguration.ARCHIVE_QRPAY_PROCESS))).isTrue();
+        SimpleTrigger trigger = (SimpleTrigger) scheduler.getTrigger(
+                TriggerKey.triggerKey(JobConfiguration.ARCHIVE_QRPAY_PROCESS + "Trigger"));
+        assertThat(trigger.getRepeatInterval()).isEqualTo(3_600_000L);
+    }
 }

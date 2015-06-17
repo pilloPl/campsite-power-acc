@@ -18,6 +18,8 @@ public class JobConfiguration {
 
     static final String CLOSE_SESSIONS_ON_CHECKOUT = "closeSessionsOnCheckoutJob";
 
+    static final String ARCHIVE_QRPAY_PROCESS = "archiveQrPayProcessJob";
+
     @Bean
     public JobDetail closeSessionsOnCheckoutJobDetail() {
         return JobBuilder.newJob(CloseSessionsOnCheckoutJob.class)
@@ -34,6 +36,27 @@ public class JobConfiguration {
                 .withIdentity(CLOSE_SESSIONS_ON_CHECKOUT + "Trigger")
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(systemPropertyService.getCloseSessionsOnCheckoutJobIntervalInSeconds())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
+                .build();
+    }
+
+    @Bean
+    public JobDetail archiveQrPayProcessJobDetail() {
+        return JobBuilder.newJob(ArchiveQrPayProcessJob.class)
+                .withIdentity(ARCHIVE_QRPAY_PROCESS)
+                .storeDurably()
+                .build();
+    }
+
+    @Bean
+    public Trigger archiveQrPayProcessJobTrigger(JobDetail archiveQrPayProcessJobDetail,
+                                                 SystemPropertyService systemPropertyService) {
+        return TriggerBuilder.newTrigger()
+                .forJob(archiveQrPayProcessJobDetail)
+                .withIdentity(ARCHIVE_QRPAY_PROCESS + "Trigger")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInSeconds(systemPropertyService.getArchiveQrPayProcessJobIntervalInSeconds())
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithRemainingCount())
                 .build();
