@@ -153,7 +153,7 @@ public class CommissioningApiService implements CommissioningApi {
             for (PedestalId pedestalId : pedestalIds) {
                 Pedestal pedestal = pedestalService.findActive(pedestalId.value());
                 if (pedestal == null) {
-                    LOG.warn("Pedestal to commission not found: " + pedestalId);
+                    LOG.warn("Pedestal {} to commission by {} not found", pedestalId, installerUsername);
                     failed.add(pedestalId.value());
                 } else {
                     pedestals.add(pedestal);
@@ -164,6 +164,10 @@ public class CommissioningApiService implements CommissioningApi {
                         token.value())) {
                     failed.add(pedestal.getId());
                 }
+            }
+            if (!failed.isEmpty()) {
+                LOG.info("Commissioning by {}: {} of {} pedestals not commissioned: {}",
+                        installerUsername, failed.size(), pedestalIds.size(), failed);
             }
             return failed;
         } catch (RuntimeException e) {
