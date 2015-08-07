@@ -24,6 +24,8 @@ public final class WebServicePaths {
 
     public static final String CONSUMPTION_RECORD = CONSOLE + "/consumptionRecord";
 
+    public static final String GUEST = CONSOLE + "/guest";
+
     /**
      * Messages of the pedestal controllers on link v1: {@code <path>/<pedestal code>/<message>}.
      */
