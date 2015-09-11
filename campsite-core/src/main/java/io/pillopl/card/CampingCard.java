@@ -222,6 +222,27 @@ public class CampingCard {
         return true;
     }
 
+    /**
+     * The card wants the change {@code partnerSyncState} towards the issuer partners; what is exported depends on
+     * what the partners got last ({@link PartnerSyncState#getByTargetPartnerSyncState}). No change means UNKNOWN.
+     */
+    public void calculatePartnerSyncState(PartnerSyncState partnerSyncState) {
+        if (partnerSyncState == null) {
+            this.partnerSyncState = PartnerSyncState.UNKNOWN;
+        } else {
+            this.partnerSyncState = partnerSyncState.getByTargetPartnerSyncState(targetPartnerSyncState);
+        }
+    }
+
+    /**
+     * The partners got the card's state with the export at {@code uploadDate}: nothing more to export.
+     */
+    public void partnerSyncExported(LocalDateTime uploadDate) {
+        this.targetPartnerSyncState = this.partnerSyncState;
+        this.partnerSyncState = PartnerSyncState.NOT;
+        this.uploadDate = uploadDate;
+    }
+
     public boolean isActive() {
         return !deleted && activation == CardActivation.ACTIVATED;
     }
