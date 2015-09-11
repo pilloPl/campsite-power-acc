@@ -48,7 +48,8 @@ public enum EventAttribute {
     CHANGE_TYPE(String.class),
     TARIFF_ID(Long.class),
     STOP_REASON(String.class),
-    BILLABLE(Boolean.class);
+    BILLABLE(Boolean.class),
+    ERROR_MESSAGE(String.class);
 
     private final Class<?> clazz;
 

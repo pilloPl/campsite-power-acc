@@ -1,5 +1,7 @@
 package io.pillopl.group.attribute;
 
+import io.pillopl.infrastructure.InfrastructureFixture;
+import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.NotificationDao;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ class NotificationIntegrationTest extends GroupAttributeIntegrationTestBase {
 
     @Autowired NotificationService notificationService;
     @Autowired NotificationDao notificationDao;
+    @Autowired InfrastructureFixture fixture;
 
     @Test
     void nearestNotificationOfTheRequestedTypeIsTheRecipient() {
@@ -45,5 +48,18 @@ class NotificationIntegrationTest extends GroupAttributeIntegrationTestBase {
         notificationService.deleteById(notification.getId());
 
         assertThat(notificationService.fetchNotification(section.getId(), NotificationType.PEDESTAL_STATUS)).isNull();
+    }
+
+    @Test
+    void pedestalGetsTheNotificationNearestToItsGroup() {
+        notificationService.persist(on(campsite, new Notification("Bay service", "service@bay.example",
+                NotificationType.PEDESTAL_STATUS)));
+        Pedestal atSection = fixture.pedestal("HR-BAY-P001", section, 1);
+        Pedestal withoutGroup = fixture.pedestal("HR-BAY-P002", null, 1);
+
+        assertThat(notificationService.fetchNotification(atSection, NotificationType.PEDESTAL_STATUS).getEmail())
+                .isEqualTo("service@bay.example");
+        assertThat(notificationService.fetchNotification(atSection, NotificationType.FIRMWARE_STATUS)).isNull();
+        assertThat(notificationService.fetchNotification(withoutGroup, NotificationType.PEDESTAL_STATUS)).isNull();
     }
 }

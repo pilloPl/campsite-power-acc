@@ -1,0 +1,32 @@
+-- Archive of the finished QR payment processes (current row CLOSED or ERROR and older than the archive delay):
+-- the whole chain is copied with its row ids and links, then removed from QRPAY_PROCESS by the archive job.
+
+CREATE TABLE QRPAY_PROCESS_ARCHIVE
+(
+    ID                  BIGINT         NOT NULL,
+    PROCESS_ID          BIGINT         NOT NULL,
+    ORDER_REFERENCE     VARCHAR(64)    NOT NULL,
+    STATE               VARCHAR(40)    NOT NULL,
+    SOCKET_ID           BIGINT         NOT NULL,
+    CLIENT_USERNAME     VARCHAR(255)   NOT NULL,
+    APP_USER_ID         VARCHAR(255)   NOT NULL,
+    REQUEST_DATE        TIMESTAMP      NOT NULL,
+    START_TIME          TIMESTAMP      NOT NULL,
+    STOP_TIME           TIMESTAMP,
+    PRICE_INFORMATION   VARCHAR(255),
+    SUPPLY_SESSION_ID   BIGINT,
+    TRANSACTION_ID      INTEGER,
+    KWH                 NUMERIC(19, 4),
+    DURATION_SECONDS    BIGINT,
+    COST                NUMERIC(19, 2),
+    CURRENCY            VARCHAR(3),
+    ERROR_CODE          VARCHAR(40),
+    ERROR_MESSAGE       VARCHAR(1024),
+    PREVIOUS_PROCESS_ID BIGINT,
+    NEXT_PROCESS_ID     BIGINT,
+    ARCHIVE_DATE        TIMESTAMP      NOT NULL,
+    CONSTRAINT PK_QRPAY_PROCESS_ARCHIVE PRIMARY KEY (ID)
+);
+
+CREATE INDEX IDX_QRPAY_PROCESS_ARCHIVE_PROCESS ON QRPAY_PROCESS_ARCHIVE (PROCESS_ID);
+CREATE INDEX IDX_QRPAY_PROCESS_ARCHIVE_ORDER ON QRPAY_PROCESS_ARCHIVE (ORDER_REFERENCE);

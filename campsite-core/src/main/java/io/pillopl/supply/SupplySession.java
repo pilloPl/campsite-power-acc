@@ -3,6 +3,7 @@ package io.pillopl.supply;
 import io.pillopl.card.CampingCard;
 import io.pillopl.card.HouseCard;
 import io.pillopl.infrastructure.Socket;
+import io.pillopl.value.QrPayAuthTag;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -85,6 +86,12 @@ public class SupplySession {
     @Column(name = "UNIT_PLATE", length = 32)
     private String unitPlate;
 
+    /**
+     * Process of the QR payment that started the supply remotely (session without card).
+     */
+    @Column(name = "QRPAY_PROCESS_ID")
+    private Long qrPayProcessId;
+
     public SupplySession() {
     }
 
@@ -92,12 +99,20 @@ public class SupplySession {
         return houseCard != null;
     }
 
+    public boolean isForQrPay() {
+        return qrPayProcessId != null;
+    }
+
     /**
-     * UID of the card the session was started with (camping card or house card).
+     * UID of the card the session was started with (camping card or house card), or the id tag of the QR payment's
+     * remote start.
      */
     public String getCardRfid() {
         if (houseCard != null) {
             return houseCard.getRfid();
+        }
+        if (card == null && qrPayProcessId != null) {
+            return QrPayAuthTag.of(qrPayProcessId).value();
         }
         return card != null ? card.getCardRfid() : null;
     }

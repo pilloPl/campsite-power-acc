@@ -134,7 +134,8 @@ public final class PedestalMapper {
 
     public static SupplierStockEntryDTO toDTO(SupplierStockEntry entry) {
         return new SupplierStockEntryDTO(entry.id(), entry.pedestalCode(), entry.pedestalType(),
-                entry.numberOfSockets(), entry.modemIccid(), entry.serialNumber());
+                entry.numberOfSockets(), entry.modemIccid(), entry.serialNumber(), entry.lastBoot(),
+                entry.lastConsumptionRecord());
     }
 
     /**

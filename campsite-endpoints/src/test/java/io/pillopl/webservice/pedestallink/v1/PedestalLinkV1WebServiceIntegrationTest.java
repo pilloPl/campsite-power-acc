@@ -3,6 +3,8 @@ package io.pillopl.webservice.pedestallink.v1;
 import io.pillopl.card.CardFixture;
 import io.pillopl.dto.pedestallink.v1.AuthorizeRequest;
 import io.pillopl.dto.pedestallink.v1.BootRequest;
+import io.pillopl.dto.pedestallink.v1.DiagnosticsStatusRequest;
+import io.pillopl.dto.pedestallink.v1.FirmwareStatusRequest;
 import io.pillopl.dto.pedestallink.v1.MeterReading;
 import io.pillopl.dto.pedestallink.v1.MeterReadingsRequest;
 import io.pillopl.dto.pedestallink.v1.SocketStatusRequest;
@@ -11,13 +13,18 @@ import io.pillopl.dto.pedestallink.v1.SupplyStoppedRequest;
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupManager;
 import io.pillopl.group.GroupType;
+import io.pillopl.group.attribute.Notification;
+import io.pillopl.group.attribute.NotificationService;
+import io.pillopl.group.attribute.NotificationType;
 import io.pillopl.infrastructure.InfrastructureFixture;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.infrastructure.SocketStatus;
+import io.pillopl.monitoring.SocketStatusLog;
 import io.pillopl.persistence.dao.PedestalDao;
 import io.pillopl.persistence.dao.PedestalStateDao;
 import io.pillopl.persistence.dao.SocketDao;
+import io.pillopl.persistence.dao.SocketStatusLogDao;
 import io.pillopl.persistence.dao.SupplyIncidentDao;
 import io.pillopl.persistence.dao.SupplySessionDao;
 import io.pillopl.supply.StopReason;
@@ -28,6 +35,8 @@ import io.pillopl.webservice.console.common.WebServicePaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
@@ -56,14 +65,17 @@ class PedestalLinkV1WebServiceIntegrationTest extends WebServiceIntegrationTest 
     @Autowired SocketDao socketDao;
     @Autowired SupplySessionDao supplySessionDao;
     @Autowired SupplyIncidentDao supplyIncidentDao;
+    @Autowired SocketStatusLogDao socketStatusLogDao;
+    @Autowired NotificationService notificationService;
+    @Autowired JdbcTemplate jdbc;
 
     final LocalDateTime plugIn = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusHours(3);
     Pedestal pedestal;
-    Group club;
+    Group bay, club;
 
     @BeforeEach
     void setUp() {
-        Group bay = groupManager.createChildGroup(console.site("HR SITES"), "BAY LINK", "Bay", GroupType.SITE);
+        bay = groupManager.createChildGroup(console.site("HR SITES"), "BAY LINK", "Bay", GroupType.SITE);
         club = groupManager.createChildGroup(console.issuer("HR ISSUERS"), "LINK CLUB", "Club",
                 GroupType.ISSUER);
         groupManager.addAcceptanceAgreement(club, bay);
@@ -180,6 +192,67 @@ class PedestalLinkV1WebServiceIntegrationTest extends WebServiceIntegrationTest 
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentTime").exists());
         assertThat(pedestalStateDao.findByPedestalId(pedestal.getId())).isNotNull();
+    }
+
+    @Test
+    void trippedBreakerIsMonitoredAndMailedOnceToTheServiceOfTheCampsite() throws Exception {
+        serviceRecipient("service@bay.test", NotificationType.PEDESTAL_STATUS);
+
+        call(PATH + "/socketStatus", new SocketStatusRequest(1, "FAULTED", "BREAKER_TRIPPED", null))
+                .andExpect(status().isOk());
+        call(PATH + "/socketStatus", new SocketStatusRequest(1, "FAULTED", "BREAKER_TRIPPED", null))
+                .andExpect(status().isOk());
+
+        assertThat(socket(1).getStatus()).isEqualTo(SocketStatus.BREAKER_TRIPPED);
+        SocketStatusLog log = socketStatusLogDao.findLastBySocketId(socket(1).getId());
+        assertThat(log.getStatus()).isEqualTo(SocketStatus.BREAKER_TRIPPED);
+        assertThat(log.getErrorFlags()).isEqualTo(1L);
+        assertThat(mailSubjectsTo("service@bay.test"))
+                .containsExactly("Socket HR-BAY-P201_1 of pedestal HR-BAY-P201: BRK");
+    }
+
+    @Test
+    void meterReadingsMoveTheMonitoringLogOfASupplyingSocket() throws Exception {
+        call(PATH + "/socketStatus", new SocketStatusRequest(2, "OCCUPIED", "NO_ERROR", null))
+                .andExpect(status().isOk());
+        call(PATH + "/meterReadings", new MeterReadingsRequest(2, null, List.of(
+                new MeterReading(plugIn.plusMinutes(5), 1251000), new MeterReading(plugIn.plusMinutes(6), -5))))
+                .andExpect(status().isOk());
+
+        assertThat(socket(2).getMeterKwh()).isEqualByComparingTo("1251.000");
+        assertThat(socketStatusLogDao.findLastsBySocketId(socket(2).getId(), Pageable.unpaged()))
+                .singleElement().satisfies(log -> {
+                    assertThat(log.getStatus()).isEqualTo(SocketStatus.SUPPLYING);
+                    assertThat(log.getMeterKwh()).isEqualByComparingTo("1251.000");
+                });
+    }
+
+    @Test
+    void firmwareAndDiagnosticsStatusAreOnlyMailedAndAlwaysAcknowledged() throws Exception {
+        serviceRecipient("firmware@bay.test", NotificationType.FIRMWARE_STATUS);
+
+        call(PATH + "/firmwareStatus", new FirmwareStatusRequest("INSTALLED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentTime").exists());
+        call(PATH + "/diagnosticsStatus", new DiagnosticsStatusRequest("UPLOAD_FAILED"))
+                .andExpect(status().isOk());
+        call(WebServicePaths.PEDESTAL_LINK_V1 + "/HR-NOWHERE-P9/firmwareStatus",
+                new FirmwareStatusRequest("INSTALLED"))
+                .andExpect(status().isOk());
+
+        assertThat(mailSubjectsTo("firmware@bay.test"))
+                .containsExactly("Firmware update of pedestal HR-BAY-P201: INSTALLED");
+    }
+
+    private void serviceRecipient(String email, NotificationType notificationType) {
+        Notification notification = new Notification("Bay service", email, notificationType);
+        notification.setGroup(bay);
+        notificationService.persist(notification);
+    }
+
+    private List<String> mailSubjectsTo(String recipient) {
+        return jdbc.queryForList("SELECT INFO_FIELD_1 FROM AUDIT WHERE ACTION_TYPE = 'EMAIL' AND ACTION_NAME = ?"
+                + " ORDER BY ID", String.class, recipient);
     }
 
     private Socket socket(int socketNo) {

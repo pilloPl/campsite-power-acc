@@ -3,8 +3,8 @@ package io.pillopl.infrastructure;
 import java.util.Locale;
 
 /**
- * Tells the affiliate owner that a pedestal went back to the supplier. The mail implementation comes with the
- * mail templates (monitoring and mails); until then the default bean only logs.
+ * Tells the affiliate owner that a pedestal went back to the supplier. Implemented by the pedestal mails
+ * ({@code io.pillopl.monitoring.PedestalMailService}).
  */
 public interface DecommissioningNotifier {
 

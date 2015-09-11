@@ -25,6 +25,12 @@ public final class WebServicePaths {
     public static final String CONSUMPTION_RECORD = CONSOLE + "/consumptionRecord";
 
     public static final String GUEST = CONSOLE + "/guest";
+    public static final String REPORT = CONSOLE + "/report";
+
+    /**
+     * Calls of the payment app (QR payment at the socket), not of the console.
+     */
+    public static final String QR_PAY = "/api/qrpay";
 
     /**
      * Messages of the pedestal controllers on link v1: {@code <path>/<pedestal code>/<message>}.

@@ -2,6 +2,7 @@ package io.pillopl.card;
 
 import io.pillopl.config.SystemPropertyService;
 import io.pillopl.infrastructure.Pedestal;
+import io.pillopl.mail.MailService;
 import io.pillopl.persistence.dao.PedestalDao;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class LocalCardListDistributionServiceTest {
@@ -19,8 +21,9 @@ class LocalCardListDistributionServiceTest {
     final LocalCardListService localCardListService = mock(LocalCardListService.class);
     final LocalCardListSender sender = mock(LocalCardListSender.class);
     final SystemPropertyService systemPropertyService = mock(SystemPropertyService.class);
+    final MailService mailService = mock(MailService.class);
     final LocalCardListDistributionService service = new LocalCardListDistributionService(pedestalDao,
-            localCardListService, sender, systemPropertyService);
+            localCardListService, sender, systemPropertyService, mailService);
 
     final Pedestal sent = pedestal("HR-BAY-P001");
     final Pedestal withoutList = pedestal("HR-BAY-P002");
@@ -48,6 +51,16 @@ class LocalCardListDistributionServiceTest {
         assertThat(result).isEqualTo(new LocalCardListDistributionResult(3, 1, 1, true));
         verify(sender).deleteLocalList(sent);
         verify(sender).deleteLocalList(offline);
+        verify(mailService).sendErrorMail("Local card list distribution error",
+                "1 of 3 pedestals did not get their local card list, see the log for the codes.");
+    }
+
+    @Test
+    void distributionWithoutFailuresSendsNoMail() {
+        when(pedestalDao.findPedestalsForLocalCardListDistribution()).thenReturn(List.of(sent, withoutList));
+
+        assertThat(service.distribute()).isEqualTo(new LocalCardListDistributionResult(2, 1, 0, true));
+        verifyNoInteractions(mailService);
     }
 
     @Test

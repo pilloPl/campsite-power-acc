@@ -43,6 +43,14 @@ class GroupValidityIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void validityErrorsNameTheWronglyAttachedObject() {
+        fixture.pedestal("HR-BAY-P001", null, 1);
+
+        assertThat(groupService.collectValidityErrors()).singleElement()
+                .satisfies(error -> assertThat(error).startsWith("No group attached to Pedestal"));
+    }
+
+    @Test
     void pedestalInAnIssuerGroupMakesTheTreesInvalid() {
         fixture.pedestal("HR-BAY-P001", groupService.fetchNetworkCardIssuerGroup(), 1);
 

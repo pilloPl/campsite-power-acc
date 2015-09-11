@@ -10,6 +10,7 @@ import io.pillopl.persistence.dao.StayDao;
 import io.pillopl.persistence.dao.SupplySessionDao;
 import io.pillopl.power.PowerSection;
 import io.pillopl.util.DateService;
+import io.pillopl.value.QrPayAuthTag;
 import io.pillopl.value.SocketLinkId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,8 +106,11 @@ public class SupplySessionManager implements SupplySessionRegistry {
     public SupplySession findSessionFor(SocketLinkId socketLinkId, String cardRfid, Integer transactionId,
                                         boolean forHouseCard) {
         final Socket socket = getSocket(socketLinkId);
+        final Long qrPayProcessId = QrPayAuthTag.parse(cardRfid);
         final SupplySession session = forHouseCard
                 ? supplySessionDao.findHouseCardSessionBy(socket, cardRfid, transactionId)
+                : qrPayProcessId != null
+                ? supplySessionDao.findQrPaySessionBy(socket, qrPayProcessId, transactionId)
                 : supplySessionDao.findBy(socket, cardRfid, transactionId);
         LOG.debug(String.format("For socket (%s), card (%s) and transaction id (%s) found session (%s)",
                 socketLinkId, cardRfid, transactionId, session));
@@ -121,8 +125,11 @@ public class SupplySessionManager implements SupplySessionRegistry {
     public SupplySession findSessionFor(SocketLinkId socketLinkId, String cardRfid, BigDecimal startMeterKwh,
                                         LocalDateTime remoteDate, boolean forHouseCard) {
         final Socket socket = getSocket(socketLinkId);
+        final Long qrPayProcessId = QrPayAuthTag.parse(cardRfid);
         final List<SupplySession> sessions = forHouseCard
                 ? supplySessionDao.findHouseCardSessionsBy(socket, cardRfid, startMeterKwh, remoteDate)
+                : qrPayProcessId != null
+                ? supplySessionDao.findQrPaySessionsBy(socket, qrPayProcessId, startMeterKwh, remoteDate)
                 : supplySessionDao.findBy(socket, cardRfid, startMeterKwh, remoteDate);
         final SupplySession session = sessions.isEmpty() ? null : sessions.get(0);
         LOG.debug(String.format("Found session (%s) for socket (%s), card (%s), start meter (%s) and remote date (%s).",
@@ -162,6 +169,9 @@ public class SupplySessionManager implements SupplySessionRegistry {
         // set the right card
         if (validationResult.isHouseCardAccepted()) {
             session.setHouseCard(houseCard);
+        } else if (validationResult.isQrPayAccepted()) {
+            // remote start of a QR payment: no card
+            session.setQrPayProcessId(validationResult.getQrPayProcessId());
         } else {
             session.setCard(card);
             // the stay of the guest: its check-out closes the session, its unit is the one supplied

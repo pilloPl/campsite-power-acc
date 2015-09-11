@@ -274,15 +274,6 @@ public class PedestalService {
     }
 
     /**
-     * The pedestal reported the status of a socket.
-     */
-    public Socket updateSocketStatus(Socket socket, SocketStatus status, LocalDateTime at) {
-        Objects.requireNonNull(socket);
-        socket.updateStatus(status, at);
-        return socketDao.save(socket);
-    }
-
-    /**
      * The pedestal booted: stores what its controller reports about itself.
      *
      * @return the pedestal, or null when the code is unknown or the pedestal is deleted (the boot is rejected)

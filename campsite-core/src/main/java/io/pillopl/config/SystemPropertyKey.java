@@ -17,6 +17,7 @@ public enum SystemPropertyKey {
     PedestalHeartbeatTimeoutJobIntervalInSeconds,
     UnknownStateTimeoutInMinutes,
     UnknownStateEventTriggerJobIntervalInSeconds,
+    GroupValidityControlJobIntervalInSeconds,
 
     // commissioning
     DecommissioningMailExcludedMarkets,
@@ -26,8 +27,13 @@ public enum SystemPropertyKey {
     CheckoutSessionCloseDelayInMinutes,
     CloseSessionsOnCheckoutJobIntervalInSeconds,
 
+    // QR payment
+    QrPayArchiveDelayInHours,
+    ArchiveQrPayProcessJobIntervalInSeconds,
+
     // consumption records
     SuspectRecordKwhPerNightThreshold,
+    ReportTopPitchesMaxRows,
 
     // local card lists
     LocalCardListDefaultMaxEntries,
@@ -46,5 +52,6 @@ public enum SystemPropertyKey {
 
     // audit
     AuditErrorEventsExpiryPeriodInDays,
-    AuditSuccessEventsExpiryPeriodInDays
+    AuditSuccessEventsExpiryPeriodInDays,
+    AuditCleanupJobIntervalInSeconds
 }

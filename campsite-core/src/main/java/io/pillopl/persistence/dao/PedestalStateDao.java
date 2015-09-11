@@ -15,4 +15,8 @@ public interface PedestalStateDao extends JpaRepository<PedestalState, Long> {
 
     @Query("select s from PedestalState s where s.timeout = false and s.approxLastIncoming < :before")
     List<PedestalState> findAliveWithLastIncomingBefore(@Param("before") LocalDateTime before);
+
+    @Query("select s from PedestalState s where s.approxLastIncoming < :before and s.pedestal.deleted = false"
+            + " order by s.approxLastIncoming")
+    List<PedestalState> findWithLastIncomingBefore(@Param("before") LocalDateTime before);
 }
