@@ -4,10 +4,13 @@ import io.pillopl.card.LocalCardListEntry;
 import io.pillopl.card.LocalCardListSendResult;
 import io.pillopl.card.LocalCardListSender;
 import io.pillopl.dto.card.LocalCardListEntryDTO;
+import io.pillopl.dto.pedestallink.v1.RemoteCommandRequest;
+import io.pillopl.dto.pedestallink.v1.RemoteCommandResponse;
 import io.pillopl.dto.pedestallink.v1.SendLocalListRequest;
 import io.pillopl.dto.pedestallink.v1.SendLocalListResponse;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.PedestalLinkVersion;
+import io.pillopl.supply.RemoteSupplyControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -27,17 +30,21 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Link v1 from the pedestal backend to the pedestal: posts local card lists to the controller's link address. A list
- * that cannot be delivered is queued when the caller asks for it and sent with the next boot or heartbeat of the
- * pedestal; a later list for the same pedestal is merged into the queued one.
+ * Link v1 from the pedestal backend to the pedestal: posts local card lists and remote starts and stops to the
+ * controller's link address. A list that cannot be delivered is queued when the caller asks for it and sent with the
+ * next boot or heartbeat of the pedestal; a later list for the same pedestal is merged into the queued one.
  */
 @Primary
 @Component
-public class PedestalLinkClientV1 implements LocalCardListSender {
+public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyControl {
 
     private static final Logger LOG = LoggerFactory.getLogger(PedestalLinkClientV1.class);
 
     static final String SEND_LOCAL_LIST = "/sendLocalList";
+
+    static final String REMOTE_SUPPLY_START = "/remoteSupplyStart";
+
+    static final String REMOTE_SUPPLY_STOP = "/remoteSupplyStop";
 
     static final int CONNECT_TIMEOUT_IN_MILLIS = 5_000;
 
@@ -101,6 +108,47 @@ public class PedestalLinkClientV1 implements LocalCardListSender {
         } catch (RestClientException e) {
             LOG.warn(String.format("Local card list of %s not deleted: %s", pedestal, e.getMessage()));
             return LocalCardListSendResult.failed("Pedestal not reachable: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Remote start of a socket with an id tag. Not queued: a start the pedestal does not get now is refused.
+     */
+    @Override
+    public boolean remoteSupplyStart(Pedestal pedestal, int socketNo, String authTag) {
+        return sendRemoteCommand(pedestal, REMOTE_SUPPLY_START, RemoteCommandRequest.start(socketNo, authTag));
+    }
+
+    /**
+     * Remote stop of a transaction. Not queued: the caller decides what an unreachable pedestal means.
+     */
+    @Override
+    public boolean remoteSupplyStop(Pedestal pedestal, int transactionId) {
+        return sendRemoteCommand(pedestal, REMOTE_SUPPLY_STOP, RemoteCommandRequest.stop(transactionId));
+    }
+
+    private boolean sendRemoteCommand(Pedestal pedestal, String command, RemoteCommandRequest request) {
+        String notSendable = checkSendable(pedestal);
+        if (notSendable != null) {
+            LOG.warn(String.format("%s %s for %s not sent: %s", command, request, pedestal, notSendable));
+            return false;
+        }
+        try {
+            RemoteCommandResponse response = restClient.post()
+                    .uri(pedestal.getLinkUrl() + command)
+                    .body(request)
+                    .retrieve()
+                    .body(RemoteCommandResponse.class);
+            if (response == null || !response.isAccepted()) {
+                LOG.warn(String.format("Pedestal %s did not accept %s %s: %s", pedestal, command, request,
+                        response != null ? response.status() : "no answer"));
+                return false;
+            }
+            LOG.info(String.format("Pedestal %s accepted %s %s", pedestal, command, request));
+            return true;
+        } catch (RestClientException e) {
+            LOG.warn(String.format("%s %s for %s failed: %s", command, request, pedestal, e.getMessage()));
+            return false;
         }
     }
 
@@ -181,7 +229,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender {
     private static String checkSendable(Pedestal pedestal) {
         if (pedestal.getPedestalType() != null
                 && pedestal.getPedestalType().getLinkVersion() != PedestalLinkVersion.V1) {
-            return "Pedestal link " + pedestal.getPedestalType().getLinkVersion() + " cannot send local card lists";
+            return "Pedestal link " + pedestal.getPedestalType().getLinkVersion() + " is not served by link v1";
         }
         if (pedestal.getLinkUrl() == null || pedestal.getLinkUrl().isBlank()) {
             return "Pedestal has no link address";

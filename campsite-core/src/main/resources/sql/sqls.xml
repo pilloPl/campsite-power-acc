@@ -491,4 +491,42 @@ SELECT cr.PEDESTAL_CODE, SUM(cr.KWH) AS KWH, COUNT(cr.ID) AS RECORDS
 SELECT nextval('CONSUMPTION_RECORD_NO_SEQ')
 ]]></entry>
 
+    <!-- QR payment: archive of the finished process chains -->
+
+    <!--
+      Rows of the finished QR payment processes: from every current row (no successor) in CLOSED or ERROR whose state
+      began before :finishedBefore, walk the chain back over PREVIOUS_PROCESS_ID to the first row.
+    -->
+    <entry key="findFinishedQrPayProcessRowIds"><![CDATA[
+WITH RECURSIVE chain (id, previous_id) AS (
+    SELECT p.ID, p.PREVIOUS_PROCESS_ID
+      FROM QRPAY_PROCESS p
+     WHERE p.NEXT_PROCESS_ID IS NULL
+       AND p.STATE IN ('CLOSED', 'ERROR')
+       AND p.START_TIME < :finishedBefore
+    UNION ALL
+    SELECT prev.ID, prev.PREVIOUS_PROCESS_ID
+      FROM QRPAY_PROCESS prev
+      JOIN chain c ON prev.ID = c.previous_id
+)
+SELECT id FROM chain ORDER BY id
+]]></entry>
+
+    <!-- Copy of the given rows into the archive, with their ids and links. -->
+    <entry key="archiveQrPayProcessRows"><![CDATA[
+INSERT INTO QRPAY_PROCESS_ARCHIVE (ID, PROCESS_ID, ORDER_REFERENCE, STATE, SOCKET_ID, CLIENT_USERNAME, APP_USER_ID, REQUEST_DATE, START_TIME,
+       STOP_TIME, PRICE_INFORMATION, SUPPLY_SESSION_ID, TRANSACTION_ID, KWH, DURATION_SECONDS, COST, CURRENCY,
+       ERROR_CODE, ERROR_MESSAGE, PREVIOUS_PROCESS_ID, NEXT_PROCESS_ID, ARCHIVE_DATE)
+SELECT ID, PROCESS_ID, ORDER_REFERENCE, STATE, SOCKET_ID, CLIENT_USERNAME, APP_USER_ID, REQUEST_DATE, START_TIME,
+       STOP_TIME, PRICE_INFORMATION, SUPPLY_SESSION_ID, TRANSACTION_ID, KWH, DURATION_SECONDS, COST, CURRENCY,
+       ERROR_CODE, ERROR_MESSAGE, PREVIOUS_PROCESS_ID, NEXT_PROCESS_ID, :archiveDate
+  FROM QRPAY_PROCESS
+ WHERE ID IN (:ids)
+]]></entry>
+
+    <!-- The archived rows; the links inside the deleted chains are checked at the end of the statement. -->
+    <entry key="deleteQrPayProcessRows"><![CDATA[
+DELETE FROM QRPAY_PROCESS WHERE ID IN (:ids)
+]]></entry>
+
 </properties>

@@ -1,0 +1,12 @@
+-- The payment app calls the QR payment web service as a technical user with role QRPAY_APP_CLIENT (right
+-- QRPAY_APP). Linked by name, the ids come from the sequence.
+
+INSERT INTO USERRIGHT (NAME) VALUES ('QRPAY_APP');
+
+INSERT INTO USERROLE (NAME, GROUP_TYPES, SORT_KEY, SELF_SERVICE) VALUES ('QRPAY_APP_CLIENT', 'STAFF', 160, FALSE);
+
+INSERT INTO USERROLE_USERRIGHT (ROLE_ID, RIGHT_ID)
+SELECT r.ID, ur.ID
+  FROM USERROLE r, USERRIGHT ur
+ WHERE r.NAME = 'QRPAY_APP_CLIENT'
+   AND ur.NAME = 'QRPAY_APP';

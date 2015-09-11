@@ -210,6 +210,19 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.CloseSessionsOnCheckoutJobIntervalInSeconds, 300);
     }
 
+    // ---------------------------------------------------------------- QR payment
+
+    /**
+     * A QR payment process CLOSED or in ERROR since longer than this is moved to the archive.
+     */
+    public int getQrPayArchiveDelayInHours() {
+        return getPropertyInt(SystemPropertyKey.QrPayArchiveDelayInHours, 24);
+    }
+
+    public int getArchiveQrPayProcessJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.ArchiveQrPayProcessJobIntervalInSeconds, 3600);
+    }
+
     // ---------------------------------------------------------------- consumption records
 
     /**

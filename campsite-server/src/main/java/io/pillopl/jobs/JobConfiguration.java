@@ -35,6 +35,8 @@ public class JobConfiguration {
 
     static final String LOCAL_CARD_LIST_DISTRIBUTION = "localCardListDistributionJob";
 
+    static final String ARCHIVE_QRPAY_PROCESS = "archiveQrPayProcessJob";
+
     /**
      * Hour of the night of the first run of the nightly jobs.
      */
@@ -152,6 +154,20 @@ public class JobConfiguration {
                                                        SystemPropertyService systemPropertyService) {
         return trigger(localCardListDistributionJobDetail,
                 systemPropertyService.getLocalCardListDistributionJobIntervalInSeconds()).build();
+    }
+
+    // ---------------------------------------------------------------- QR payment
+
+    @Bean
+    public JobDetail archiveQrPayProcessJobDetail() {
+        return jobDetail(ArchiveQrPayProcessJob.class, ARCHIVE_QRPAY_PROCESS);
+    }
+
+    @Bean
+    public Trigger archiveQrPayProcessJobTrigger(JobDetail archiveQrPayProcessJobDetail,
+                                                 SystemPropertyService systemPropertyService) {
+        return trigger(archiveQrPayProcessJobDetail,
+                systemPropertyService.getArchiveQrPayProcessJobIntervalInSeconds()).build();
     }
 
     private static JobDetail jobDetail(Class<? extends Job> jobClass, String name) {
