@@ -27,6 +27,17 @@ class EventServiceTest {
     }
 
     @Test
+    void offerTellsWhetherEveryQueueTookTheEvent() {
+        eventService.registerQueue("full", EventType.SOCKET_STATE_NOTIFICATION);
+        for (int i = 0; i < EventService.QUEUE_MAX_SIZE; i++) {
+            eventService.send(new Event(EventType.SOCKET_STATE_NOTIFICATION));
+        }
+
+        assertThat(eventService.offer(new Event(EventType.SOCKET_STATE_NOTIFICATION))).isFalse();
+        assertThat(eventService.offer(new Event(EventType.CHECK_URL))).isTrue();
+    }
+
+    @Test
     void eventWithoutListenerIsDropped() {
         eventService.send(new Event(EventType.CHECK_URL));
 
