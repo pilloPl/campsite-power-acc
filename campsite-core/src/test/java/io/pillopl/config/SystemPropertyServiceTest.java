@@ -34,6 +34,8 @@ class SystemPropertyServiceTest {
         assertThat(service.getStaleSessionTimeoutInHours()).isEqualTo(24);
         assertThat(service.getSuspectRecordKwhPerNightThreshold()).isEqualByComparingTo("300");
         assertThat(service.getErpArticleTaxClass()).isEqualTo("A1");
+        assertThat(service.getErpMinimumBillAmount()).isEqualByComparingTo("5.00");
+        assertThat(service.getErpPowerArticleNo()).isEqualTo("ART-POWER-KWH");
     }
 
     @Test

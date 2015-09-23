@@ -48,7 +48,20 @@ public enum SystemPropertyKey {
 
     // ERP
     ErpArticleTaxClass,
+    ErpArticleClassification,
+    ErpSalesOffice,
+    ErpSalesGroup,
+    ErpAssignee,
+    ErpOrderType,
+    ErpAlternateTextOrganisation,
+    ErpAlternateTextPrivate,
+    ErpPowerArticleNo,
+    ErpMinimumBillAmount,
+    ErpOutboundDirectory,
+    ErpInboundDirectory,
     ErpExportJobIntervalInSeconds,
+    ErpAccountExportJobIntervalInSeconds,
+    ErpAccountImportJobIntervalInSeconds,
 
     // audit
     AuditErrorEventsExpiryPeriodInDays,
