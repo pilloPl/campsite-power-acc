@@ -38,6 +38,7 @@ class JobConfigurationIntegrationTest extends IntegrationTest {
         assertThat(repeatIntervalInSeconds(JobConfiguration.AUDIT_CLEANUP)).isEqualTo(86400);
         assertThat(repeatIntervalInSeconds(JobConfiguration.GROUP_VALIDITY_CONTROL)).isEqualTo(86400);
         assertThat(repeatIntervalInSeconds(JobConfiguration.ARCHIVE_QRPAY_PROCESS)).isEqualTo(3600);
+        assertThat(repeatIntervalInSeconds(JobConfiguration.EVENT_RETRY)).isEqualTo(60);
     }
 
     @Test
