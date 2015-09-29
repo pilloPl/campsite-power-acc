@@ -186,6 +186,17 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.UnknownStateEventTriggerJobIntervalInSeconds, 300);
     }
 
+    public int getEventRetryJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.EventRetryJobIntervalInSeconds, 60);
+    }
+
+    /**
+     * A failed event is sent again at most this many times, then it stays in EVENT_RETRY as FAILED.
+     */
+    public int getEventRetryMaxAttempts() {
+        return getPropertyInt(SystemPropertyKey.EventRetryMaxAttempts, 10);
+    }
+
     /**
      * Interval of the control job checking the group trees (nightly by default, the first run in the night).
      */
