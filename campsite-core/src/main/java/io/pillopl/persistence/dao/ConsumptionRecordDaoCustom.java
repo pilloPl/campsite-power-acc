@@ -1,9 +1,12 @@
 package io.pillopl.persistence.dao;
 
 import io.pillopl.consumption.ConsumptionRecord;
+import io.pillopl.consumption.ExportStatus;
 import io.pillopl.consumption.RecordValidationState;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -39,4 +42,40 @@ public interface ConsumptionRecordDaoCustom {
      * Next number of the natural record id, from CONSUMPTION_RECORD_NO_SEQ.
      */
     long nextRecordNumber();
+
+    /**
+     * Consumption of a billing account of the network in a month of plug-out, for the ERP billing.
+     *
+     * @param tariffId     tariff the records were priced with (the contract's tariff marks supplies on its pitch)
+     * @param billed       billed by an earlier run (with a billing period); false for the records not billed yet
+     * @param supplyPeriod month of plug-out, "2026_07"
+     */
+    record ErpConsumption(String billingAccountNo, Long tariffId, boolean billed, String supplyPeriod,
+                          BigDecimal kwh, BigDecimal cost, long records) {
+    }
+
+    /**
+     * @param to exclusive
+     * @return the not billed (EXPORT_STATUS NEW) and the billed records of the network's billing accounts with
+     * plug-out in [from, to), per account, tariff, billed or not and month of plug-out
+     */
+    List<ErpConsumption> findErpConsumptionPerMonth(LocalDateTime from, LocalDateTime to);
+
+    /**
+     * The not billed records of the accounts with plug-out in [from, to) are billed in the period (EXPORT_STATUS
+     * WORK until the ERP file is written).
+     *
+     * @return number of records marked
+     */
+    int markRecordsForErpBilling(Collection<String> billingAccountNos, LocalDateTime from, LocalDateTime to,
+                                 String period);
+
+    /**
+     * The records billed in the period follow their ERP lines.
+     *
+     * @param billingAccountNo null for every account of the period
+     * @return number of records moved
+     */
+    int updateErpBilledRecords(String period, String billingAccountNo, Collection<ExportStatus> fromStatuses,
+                               ExportStatus exportStatus);
 }
