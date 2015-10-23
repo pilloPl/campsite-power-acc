@@ -23,4 +23,18 @@ public interface CampingCardDaoCustom {
      */
     Long upsertCard(String cardRfidHex, String cardNumber, LocalDate validFrom, LocalDate validTo,
                     String billingAccountNo, Long guestId);
+
+    /**
+     * Nightly sync state of the cards towards the issuer partners: cards whose stay or season covers {@code today}
+     * want an ADD, cards whose stay or season is over want a DELETE; the matrix of
+     * {@link io.pillopl.issuer.PartnerSyncState} turns the wish into what is exported.
+     *
+     * @return the number of cards looked at
+     */
+    int updateExpiredCardsPartnerSyncState(LocalDate today);
+
+    /**
+     * Cards of the guests in the subtree of the ISSUER group whose sync state asks for an export, oldest first.
+     */
+    List<CampingCard> findCardsForPartnerExport(Long issuerGroupId);
 }
