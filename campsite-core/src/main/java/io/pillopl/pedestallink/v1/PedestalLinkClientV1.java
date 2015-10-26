@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -32,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Link v1 from the pedestal backend to the pedestal: posts local card lists and remote starts and stops to the
  * controller's link address. A list that cannot be delivered is queued when the caller asks for it and sent with the
- * next boot or heartbeat of the pedestal; a later list for the same pedestal is merged into the queued one.
+ * next boot or heartbeat of the pedestal; a later list for the same pedestal is merged into the queued one. Card lists
+ * and remote control reach it through the PedestalLinkClientDispatcher for v1 pedestals.
  */
-@Primary
 @Component
 public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyControl {
 
