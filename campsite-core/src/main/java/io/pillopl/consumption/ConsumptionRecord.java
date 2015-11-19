@@ -43,8 +43,23 @@ public class ConsumptionRecord {
     @Column(name = "RECORD_NO", length = 64, nullable = false, unique = true)
     private String recordNo;
 
-    @Column(name = "SUPPLY_SESSION_ID", nullable = false, unique = true)
+    /**
+     * The network's supply session; null for a record imported from an issuer partner.
+     */
+    @Column(name = "SUPPLY_SESSION_ID", unique = true)
     private Long supplySessionId;
+
+    /**
+     * Name of the issuer partner an imported record comes from, null for the network's own records.
+     */
+    @Column(name = "SOURCE_NAME", length = 100)
+    private String sourceName;
+
+    /**
+     * The partner's number of an imported record.
+     */
+    @Column(name = "EXTERNAL_RECORD_NO", length = 64)
+    private String externalRecordNo;
 
     @Column(name = "TRANSACTION_ID")
     private Integer transactionId;
@@ -248,6 +263,10 @@ public class ConsumptionRecord {
 
     public boolean isSuspect() {
         return validationState == RecordValidationState.SUSPECT;
+    }
+
+    public boolean isImported() {
+        return sourceName != null;
     }
 
     public boolean isForHouseCard() {
