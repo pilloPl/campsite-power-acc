@@ -29,6 +29,8 @@ public enum EventAttribute {
     PEDESTAL_ERROR_CODE(String.class),
     PEDESTAL_VENDOR_ERROR_CODE(String.class),
     PEDESTAL_INFO(String.class),
+    VENDOR_MESSAGE_ID(String.class),
+    VENDOR_DATA(String.class),
     CAMPSITE_NAME(String.class),
     CAMPSITE_ADDRESS(String.class),
     GROUP_ID(Long.class),
