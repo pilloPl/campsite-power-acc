@@ -37,6 +37,10 @@ public final class WebServicePaths {
      */
     public static final String PEDESTAL_LINK_V1 = "/api/pedestal-link/v1";
 
+    public static final String PEDESTAL_LINK_V2 = "/api/pedestal-link/v2";
+
+    public static final String PEDESTAL_LINK_V3 = "/api/pedestal-link/v3";
+
     private WebServicePaths() {
         throw new AssertionError();
     }
