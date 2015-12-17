@@ -11,4 +11,9 @@ public interface ConsumptionRecordDao extends JpaRepository<ConsumptionRecord, L
     ConsumptionRecord findBySupplySessionId(Long supplySessionId);
 
     ConsumptionRecord findByRecordNo(String recordNo);
+
+    /**
+     * A record imported from an issuer partner, by the partner's name and record number.
+     */
+    ConsumptionRecord findBySourceNameAndExternalRecordNo(String sourceName, String externalRecordNo);
 }
