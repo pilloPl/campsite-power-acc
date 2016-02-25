@@ -37,6 +37,12 @@ public class JobConfiguration {
 
     static final String ARCHIVE_QRPAY_PROCESS = "archiveQrPayProcessJob";
 
+    static final String ERP_ACCOUNT_EXPORT = "erpAccountExportJob";
+
+    static final String ERP_ACCOUNT_IMPORT = "erpAccountImportJob";
+
+    static final String ERP_BILLING_EXPORT = "erpBillingExportJob";
+
     /**
      * Hour of the night of the first run of the nightly jobs.
      */
@@ -168,6 +174,43 @@ public class JobConfiguration {
                                                  SystemPropertyService systemPropertyService) {
         return trigger(archiveQrPayProcessJobDetail,
                 systemPropertyService.getArchiveQrPayProcessJobIntervalInSeconds()).build();
+    }
+
+    // ---------------------------------------------------------------- ERP
+
+    @Bean
+    public JobDetail erpAccountExportJobDetail() {
+        return jobDetail(ErpAccountExportJob.class, ERP_ACCOUNT_EXPORT);
+    }
+
+    @Bean
+    public Trigger erpAccountExportJobTrigger(JobDetail erpAccountExportJobDetail,
+                                              SystemPropertyService systemPropertyService) {
+        return trigger(erpAccountExportJobDetail,
+                systemPropertyService.getErpAccountExportJobIntervalInSeconds()).build();
+    }
+
+    @Bean
+    public JobDetail erpAccountImportJobDetail() {
+        return jobDetail(ErpAccountImportJob.class, ERP_ACCOUNT_IMPORT);
+    }
+
+    @Bean
+    public Trigger erpAccountImportJobTrigger(JobDetail erpAccountImportJobDetail,
+                                              SystemPropertyService systemPropertyService) {
+        return trigger(erpAccountImportJobDetail,
+                systemPropertyService.getErpAccountImportJobIntervalInSeconds()).build();
+    }
+
+    @Bean
+    public JobDetail erpBillingExportJobDetail() {
+        return jobDetail(ErpBillingExportJob.class, ERP_BILLING_EXPORT);
+    }
+
+    @Bean
+    public Trigger erpBillingExportJobTrigger(JobDetail erpBillingExportJobDetail,
+                                              SystemPropertyService systemPropertyService) {
+        return trigger(erpBillingExportJobDetail, systemPropertyService.getErpExportJobIntervalInSeconds()).build();
     }
 
     private static JobDetail jobDetail(Class<? extends Job> jobClass, String name) {
