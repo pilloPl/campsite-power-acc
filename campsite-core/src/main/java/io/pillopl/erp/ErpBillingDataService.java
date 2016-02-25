@@ -302,12 +302,16 @@ public class ErpBillingDataService {
     }
 
     /**
-     * The run of the month before today, unless done already.
+     * The run of the month before today, from the configured day of the month on, unless done already.
      *
-     * @return the lines created, empty when the month was billed before
+     * @return the lines created, empty before the day or when the month was billed before
      */
     public List<ErpBillingLine> createErpBillingLinesOfLastMonth() {
-        BillingPeriod period = BillingPeriod.before(dateService.getToday());
+        LocalDate today = dateService.getToday();
+        if (today.getDayOfMonth() < systemPropertyService.getErpBillingRunDayOfMonth()) {
+            return List.of();
+        }
+        BillingPeriod period = BillingPeriod.before(today);
         if (erpBillingLineDao.existsByBillingPeriod(period.getCode())) {
             return List.of();
         }

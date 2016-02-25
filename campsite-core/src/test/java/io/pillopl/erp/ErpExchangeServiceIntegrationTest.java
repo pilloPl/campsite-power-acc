@@ -56,7 +56,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ErpExchangeServiceIntegrationTest extends IntegrationTest {
 
     static final String ACCOUNT = "400088880001";
-    static final LocalDateTime OCTOBER_RUN = LocalDateTime.of(2026, 10, 2, 3, 0);
+    static final LocalDateTime OCTOBER_RUN = LocalDateTime.of(2026, 10, 3, 3, 0);
 
     @Autowired ErpExchangeService erpExchangeService;
     @Autowired ErpBillingDataService erpBillingDataService;
@@ -116,13 +116,13 @@ class ErpExchangeServiceIntegrationTest extends IntegrationTest {
         assertThat(erpExchangeService.exportPartnerRequests()).isEqualTo(1);
         assertThat(erpExchangeService.exportPartnerRequests()).isZero();
 
-        Path file = outbound.resolve("partner-requests-20261002030000.csv");
+        Path file = outbound.resolve("partner-requests-20261003030000.csv");
         List<String> lines = Files.readAllLines(file);
         assertThat(lines).hasSize(2);
         assertThat(lines.get(0)).startsWith("ORDER_NUMBER;GUEST_TYPE;NAME");
         assertThat(lines.get(1)).startsWith(order.getOrderNumber() + ";SEASONAL;Babic;Mia;Mia, Sailing;");
         assertThat(lines.get(1).split(";", -1)).hasSize(17);
-        assertThat(files(outbound)).containsExactly("partner-requests-20261002030000.csv");
+        assertThat(files(outbound)).containsExactly("partner-requests-20261003030000.csv");
     }
 
     @Test
@@ -162,7 +162,7 @@ class ErpExchangeServiceIntegrationTest extends IntegrationTest {
         assertThat(erpExchangeService.exportBillingLines()).isEqualTo(2);
         assertThat(erpExchangeService.exportBillingLines()).isZero();
 
-        List<String> lines = Files.readAllLines(outbound.resolve("billing-lines-20261002030000.csv"));
+        List<String> lines = Files.readAllLines(outbound.resolve("billing-lines-20261003030000.csv"));
         assertThat(lines).hasSize(3);
         assertThat(lines.get(1)).startsWith("2026_09;P-7801;" + ACCOUNT + ";" + order.getOrderNumber()
                 + ";ART-SEASON-FIX;");

@@ -331,11 +331,26 @@ class ErpBillingDataServiceTest {
     }
 
     @Test
+    void lastMonthIsNotBilledBeforeTheRunDayOfTheMonth() {
+        // NOW is the 2nd, the run day defaults to the 3rd
+        assertThat(service.createErpBillingLinesOfLastMonth()).isEmpty();
+        verify(lineDao, never()).existsByBillingPeriod(anyString());
+    }
+
+    @Test
     void lastMonthIsBilledOnlyWhenNotBilledYet() {
+        dateService.setClock(Clock.fixed(NOW.plusDays(1).atZone(ZoneId.systemDefault()).toInstant(),
+                ZoneId.systemDefault()));
         when(lineDao.existsByBillingPeriod("2026_07")).thenReturn(true);
 
         assertThat(service.createErpBillingLinesOfLastMonth()).isEmpty();
         verify(recordDao, never()).findErpConsumptionPerMonth(any(), any());
+
+        when(lineDao.existsByBillingPeriod("2026_07")).thenReturn(false);
+        when(lineDao.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        service.createErpBillingLinesOfLastMonth();
+        verify(recordDao).findErpConsumptionPerMonth(LocalDateTime.of(2025, 7, 1, 0, 0),
+                LocalDateTime.of(2026, 8, 1, 0, 0));
     }
 
     @Test

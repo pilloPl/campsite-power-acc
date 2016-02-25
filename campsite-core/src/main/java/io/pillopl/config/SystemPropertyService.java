@@ -323,6 +323,13 @@ public class SystemPropertyService {
     }
 
     /**
+     * Day of the month from which the month before is billed (supplies ending at the month's end are recorded first).
+     */
+    public int getErpBillingRunDayOfMonth() {
+        return getPropertyInt(SystemPropertyKey.ErpBillingRunDayOfMonth, 3);
+    }
+
+    /**
      * Directory the files for the ERP are written to (partner requests, billing lines).
      */
     public String getErpOutboundDirectory() {

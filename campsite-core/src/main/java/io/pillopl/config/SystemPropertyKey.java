@@ -57,6 +57,7 @@ public enum SystemPropertyKey {
     ErpAlternateTextPrivate,
     ErpPowerArticleNo,
     ErpMinimumBillAmount,
+    ErpBillingRunDayOfMonth,
     ErpOutboundDirectory,
     ErpInboundDirectory,
     ErpExportJobIntervalInSeconds,
