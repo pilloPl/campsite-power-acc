@@ -41,6 +41,13 @@ class JobConfigurationIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void erpJobsRunInTheirConfiguredIntervals() throws SchedulerException {
+        assertThat(repeatIntervalInSeconds(JobConfiguration.ERP_ACCOUNT_EXPORT)).isEqualTo(900);
+        assertThat(repeatIntervalInSeconds(JobConfiguration.ERP_ACCOUNT_IMPORT)).isEqualTo(900);
+        assertThat(repeatIntervalInSeconds(JobConfiguration.ERP_BILLING_EXPORT)).isEqualTo(3600);
+    }
+
+    @Test
     void nightlyJobsStartInTheNight() throws SchedulerException {
         Date start = scheduler.getTrigger(TriggerKey.triggerKey(JobConfiguration.GROUP_VALIDITY_CONTROL + "Trigger"))
                 .getStartTime();

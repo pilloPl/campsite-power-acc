@@ -491,6 +491,65 @@ SELECT cr.PEDESTAL_CODE, SUM(cr.KWH) AS KWH, COUNT(cr.ID) AS RECORDS
 SELECT nextval('CONSUMPTION_RECORD_NO_SEQ')
 ]]></entry>
 
+    <!-- ===== ERP billing: the consumption of the network's billing accounts ===== -->
+
+    <!--
+      Consumption of the billing accounts of the network (BILLING_ACCOUNT) with plug-out in [:from, :to): the records
+      not billed yet (EXPORT_STATUS NEW, no billing period) and the records billed by an earlier run (with a period),
+      per account, tariff of the record and month of plug-out. Only priced, billable card supplies the network bills
+      itself; rejected records are never billed, records in REVIEW wait.
+    -->
+    <entry key="findErpConsumptionPerMonth"><![CDATA[
+SELECT cr.BILLING_ACCOUNT_NO,
+       cr.TARIFF_ID,
+       CASE WHEN cr.ERP_BILLING_PERIOD IS NULL THEN FALSE ELSE TRUE END AS BILLED,
+       TO_CHAR(cr.PLUG_OUT, 'YYYY') || '_' || TO_CHAR(cr.PLUG_OUT, 'MM') AS SUPPLY_PERIOD,
+       SUM(cr.KWH) AS KWH,
+       SUM(cr.COST) AS COST,
+       COUNT(cr.ID) AS RECORDS
+  FROM CONSUMPTION_RECORD cr
+  JOIN BILLING_ACCOUNT ba ON ba.ERP_ACCOUNT_NO = cr.BILLING_ACCOUNT_NO
+ WHERE cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT < :to
+   AND cr.PAYMENT_CHANNEL = 'CARD'
+   AND cr.BILLABLE = TRUE
+   AND cr.SETTLED_BY_CAMPSITE = FALSE
+   AND cr.PRICING_STATUS = 'PRICED'
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND cr.KWH IS NOT NULL
+   AND ((cr.EXPORT_STATUS = 'NEW' AND cr.ERP_BILLING_PERIOD IS NULL) OR cr.ERP_BILLING_PERIOD IS NOT NULL)
+ GROUP BY cr.BILLING_ACCOUNT_NO, cr.TARIFF_ID, CASE WHEN cr.ERP_BILLING_PERIOD IS NULL THEN FALSE ELSE TRUE END,
+          TO_CHAR(cr.PLUG_OUT, 'YYYY') || '_' || TO_CHAR(cr.PLUG_OUT, 'MM')
+ ORDER BY cr.BILLING_ACCOUNT_NO, TO_CHAR(cr.PLUG_OUT, 'YYYY') || '_' || TO_CHAR(cr.PLUG_OUT, 'MM'), cr.TARIFF_ID
+]]></entry>
+
+    <!-- The not billed records of findErpConsumptionPerMonth of the given accounts are billed in :period (WORK). -->
+    <entry key="markRecordsForErpBilling"><![CDATA[
+UPDATE CONSUMPTION_RECORD cr
+   SET ERP_BILLING_PERIOD = :period,
+       EXPORT_STATUS = 'WORK'
+ WHERE cr.BILLING_ACCOUNT_NO IN (:billingAccountNos)
+   AND cr.PLUG_OUT >= :from
+   AND cr.PLUG_OUT < :to
+   AND cr.PAYMENT_CHANNEL = 'CARD'
+   AND cr.BILLABLE = TRUE
+   AND cr.SETTLED_BY_CAMPSITE = FALSE
+   AND cr.PRICING_STATUS = 'PRICED'
+   AND cr.VALIDATION_STATE <> 'REJECTED'
+   AND cr.KWH IS NOT NULL
+   AND cr.EXPORT_STATUS = 'NEW'
+   AND cr.ERP_BILLING_PERIOD IS NULL
+]]></entry>
+
+    <!-- The records of an account billed in :period follow the ERP lines of the account (export status). -->
+    <entry key="updateErpBilledRecords"><![CDATA[
+UPDATE CONSUMPTION_RECORD
+   SET EXPORT_STATUS = :exportStatus
+ WHERE ERP_BILLING_PERIOD = :period
+   AND (CAST(:billingAccountNo AS VARCHAR) IS NULL OR BILLING_ACCOUNT_NO = :billingAccountNo)
+   AND EXPORT_STATUS IN (:fromStatuses)
+]]></entry>
+
     <!-- QR payment: archive of the finished process chains -->
 
     <!--

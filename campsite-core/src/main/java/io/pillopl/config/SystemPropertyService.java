@@ -280,8 +280,82 @@ public class SystemPropertyService {
         return getProperty(SystemPropertyKey.ErpArticleTaxClass, "A1");
     }
 
+    public String getErpArticleClassification() {
+        return getProperty(SystemPropertyKey.ErpArticleClassification, "EL");
+    }
+
+    public String getErpSalesOffice() {
+        return getProperty(SystemPropertyKey.ErpSalesOffice, "CS01");
+    }
+
+    public String getErpSalesGroup() {
+        return getProperty(SystemPropertyKey.ErpSalesGroup, "PWR");
+    }
+
+    public String getErpAssignee() {
+        return getProperty(SystemPropertyKey.ErpAssignee, "CAMPSITE-POWER");
+    }
+
+    public String getErpOrderType() {
+        return getProperty(SystemPropertyKey.ErpOrderType, "ZPW");
+    }
+
+    public String getErpAlternateTextOrganisation() {
+        return getProperty(SystemPropertyKey.ErpAlternateTextOrganisation, "Pitch power of your organisation");
+    }
+
+    public String getErpAlternateTextPrivate() {
+        return getProperty(SystemPropertyKey.ErpAlternateTextPrivate, "Pitch power of your stay");
+    }
+
+    /**
+     * ERP article of the power of supplies outside a seasonal contract (transit stays, other pitches).
+     */
+    public String getErpPowerArticleNo() {
+        return getProperty(SystemPropertyKey.ErpPowerArticleNo, "ART-POWER-KWH");
+    }
+
+    /**
+     * Bills of an account below this amount are not sent to the ERP; the power waits for the next run.
+     */
+    public BigDecimal getErpMinimumBillAmount() {
+        return getPropertyBigDecimal(SystemPropertyKey.ErpMinimumBillAmount, new BigDecimal("5.00"));
+    }
+
+    /**
+     * Day of the month from which the month before is billed (supplies ending at the month's end are recorded first).
+     */
+    public int getErpBillingRunDayOfMonth() {
+        return getPropertyInt(SystemPropertyKey.ErpBillingRunDayOfMonth, 3);
+    }
+
+    /**
+     * Directory the files for the ERP are written to (partner requests, billing lines).
+     */
+    public String getErpOutboundDirectory() {
+        return getProperty(SystemPropertyKey.ErpOutboundDirectory, "/var/campsite-power/erp/out");
+    }
+
+    /**
+     * Directory the ERP puts its answer files in (partner and account numbers, booked billing lines).
+     */
+    public String getErpInboundDirectory() {
+        return getProperty(SystemPropertyKey.ErpInboundDirectory, "/var/campsite-power/erp/in");
+    }
+
+    /**
+     * Interval of the billing job: the run of the month before, the billing file, the ERP's billing answers.
+     */
     public int getErpExportJobIntervalInSeconds() {
         return getPropertyInt(SystemPropertyKey.ErpExportJobIntervalInSeconds, 3600);
+    }
+
+    public int getErpAccountExportJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.ErpAccountExportJobIntervalInSeconds, 900);
+    }
+
+    public int getErpAccountImportJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.ErpAccountImportJobIntervalInSeconds, 900);
     }
 
     // ---------------------------------------------------------------- audit

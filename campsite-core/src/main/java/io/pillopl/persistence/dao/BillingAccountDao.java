@@ -10,4 +10,9 @@ public interface BillingAccountDao extends JpaRepository<BillingAccount, Long> {
     BillingAccount findByErpAccountNo(String erpAccountNo);
 
     List<BillingAccount> findByGuestIdOrderById(Long guestId);
+
+    /**
+     * The accounts the ERP knows (the monthly ERP billing).
+     */
+    List<BillingAccount> findByErpAccountNoIsNotNullOrderById();
 }

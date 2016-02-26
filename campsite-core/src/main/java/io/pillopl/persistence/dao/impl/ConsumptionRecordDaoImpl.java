@@ -1,6 +1,7 @@
 package io.pillopl.persistence.dao.impl;
 
 import io.pillopl.consumption.ConsumptionRecord;
+import io.pillopl.consumption.ExportStatus;
 import io.pillopl.consumption.RecordValidationState;
 import io.pillopl.persistence.dao.ConsumptionRecordDaoCustom;
 import jakarta.persistence.EntityManager;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +35,15 @@ public class ConsumptionRecordDaoImpl implements ConsumptionRecordDaoCustom {
 
     @Value("#{sqls['nextConsumptionRecordNumber']}")
     private String nextConsumptionRecordNumber;
+
+    @Value("#{sqls['findErpConsumptionPerMonth']}")
+    private String findErpConsumptionPerMonth;
+
+    @Value("#{sqls['markRecordsForErpBilling']}")
+    private String markRecordsForErpBilling;
+
+    @Value("#{sqls['updateErpBilledRecords']}")
+    private String updateErpBilledRecords;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -75,6 +86,45 @@ public class ConsumptionRecordDaoImpl implements ConsumptionRecordDaoCustom {
     public long nextRecordNumber() {
         Long next = jdbcTemplate.queryForObject(nextConsumptionRecordNumber, new MapSqlParameterSource(), Long.class);
         return Objects.requireNonNull(next, "CONSUMPTION_RECORD_NO_SEQ");
+    }
+
+    @Override
+    public List<ErpConsumption> findErpConsumptionPerMonth(LocalDateTime from, LocalDateTime to) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("from", Objects.requireNonNull(from, "from"), Types.TIMESTAMP)
+                .addValue("to", Objects.requireNonNull(to, "to"), Types.TIMESTAMP);
+        return jdbcTemplate.query(findErpConsumptionPerMonth, params, (rs, rowNum) -> new ErpConsumption(
+                rs.getString("BILLING_ACCOUNT_NO"), rs.getObject("TARIFF_ID", Long.class),
+                rs.getBoolean("BILLED"), rs.getString("SUPPLY_PERIOD"), rs.getBigDecimal("KWH"),
+                rs.getBigDecimal("COST"), rs.getLong("RECORDS")));
+    }
+
+    @Override
+    public int markRecordsForErpBilling(Collection<String> billingAccountNos, LocalDateTime from, LocalDateTime to,
+                                        String period) {
+        if (billingAccountNos == null || billingAccountNos.isEmpty()) {
+            return 0;
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("billingAccountNos", billingAccountNos)
+                .addValue("from", Objects.requireNonNull(from, "from"), Types.TIMESTAMP)
+                .addValue("to", Objects.requireNonNull(to, "to"), Types.TIMESTAMP)
+                .addValue("period", Objects.requireNonNull(period, "period"));
+        return jdbcTemplate.update(markRecordsForErpBilling, params);
+    }
+
+    @Override
+    public int updateErpBilledRecords(String period, String billingAccountNo, Collection<ExportStatus> fromStatuses,
+                                      ExportStatus exportStatus) {
+        if (fromStatuses == null || fromStatuses.isEmpty()) {
+            return 0;
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("period", Objects.requireNonNull(period, "period"))
+                .addValue("billingAccountNo", billingAccountNo, Types.VARCHAR)
+                .addValue("fromStatuses", fromStatuses.stream().map(ExportStatus::name).toList())
+                .addValue("exportStatus", exportStatus.name());
+        return jdbcTemplate.update(updateErpBilledRecords, params);
     }
 
     private static MapSqlParameterSource visibility(LocalDateTime from, LocalDateTime to, Long siteGroupId,
