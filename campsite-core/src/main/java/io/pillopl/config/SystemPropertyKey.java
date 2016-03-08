@@ -42,6 +42,10 @@ public enum SystemPropertyKey {
     LocalCardListDistributionWaitTimeAfterDeleteInSeconds,
     LocalCardListDistributionJobIntervalInSeconds,
 
+    // issuer exchange
+    IssuerExchangeJobIntervalInSeconds,
+    IssuerRecordExportLookBackInDays,
+
     // materialized views
     UserinfoSummaryRefreshJobIntervalInSeconds,
     SocketUtilizationRefreshJobIntervalInSeconds,
