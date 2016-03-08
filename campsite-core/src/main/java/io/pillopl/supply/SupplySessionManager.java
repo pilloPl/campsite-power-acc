@@ -198,10 +198,11 @@ public class SupplySessionManager implements SupplySessionRegistry {
 
     @Transactional
     public boolean deactivate(final SupplySession session, final StopReason stopReason, final LocalDateTime at) {
-        LOG.debug(String.format("Deactivate session: %s (%s)", session, stopReason));
         if (session == null) {
+            LOG.warn(String.format("No session to deactivate with %s", stopReason));
             return false;
         }
+        LOG.debug(String.format("Deactivate session: %s (%s)", session, stopReason));
         session.close(stopReason, at);
         supplySessionDao.save(session);
         return true;
