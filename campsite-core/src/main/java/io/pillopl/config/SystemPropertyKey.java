@@ -17,6 +17,8 @@ public enum SystemPropertyKey {
     PedestalHeartbeatTimeoutJobIntervalInSeconds,
     UnknownStateTimeoutInMinutes,
     UnknownStateEventTriggerJobIntervalInSeconds,
+    EventRetryJobIntervalInSeconds,
+    EventRetryMaxAttempts,
     GroupValidityControlJobIntervalInSeconds,
 
     // commissioning

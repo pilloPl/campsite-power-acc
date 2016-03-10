@@ -33,14 +33,24 @@ public class EventService {
     }
 
     public void send(final Event event) {
+        offer(event);
+    }
+
+    /**
+     * Like {@link #send(Event)}, but tells whether every queue registered for the type took the event. No registered
+     * queue is no failure: nobody listens to the type.
+     */
+    public boolean offer(final Event event) {
         Set<String> queueNames = queueNamesByType.get(event.getType());
         if (queueNames == null || queueNames.isEmpty()) {
             LOG.debug(String.format("No queue registered for %s, event %s dropped", event.getType(), event.getId()));
-            return;
+            return true;
         }
+        boolean allTaken = true;
         for (String queueName : queueNames) {
-            putEventToQueue(event, queueName);
+            allTaken &= putEventToQueue(event, queueName);
         }
+        return allTaken;
     }
 
     public BlockingQueue<Event> getQueueAndRegisterListener(final String name) {
@@ -63,7 +73,7 @@ public class EventService {
         return queue != null ? queue.size() : 0;
     }
 
-    private void putEventToQueue(Event event, String queueName) {
+    private boolean putEventToQueue(Event event, String queueName) {
         BlockingQueue<Event> queue = getQueueAndRegisterListener(queueName);
         boolean successful = queue.offer(event);
         if (LOG.isDebugEnabled()) {
@@ -72,5 +82,6 @@ public class EventService {
         if (!successful) {
             LOG.warn(String.format("Can not offer event %s to queue %s. Probably the queue is full?", event, queueName));
         }
+        return successful;
     }
 }

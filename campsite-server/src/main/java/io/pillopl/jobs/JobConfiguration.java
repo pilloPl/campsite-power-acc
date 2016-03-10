@@ -25,6 +25,8 @@ public class JobConfiguration {
 
     static final String UNKNOWN_STATE_EVENT_TRIGGER = "unknownStateEventTriggerJob";
 
+    static final String EVENT_RETRY = "eventRetryJob";
+
     static final String GROUP_VALIDITY_CONTROL = "groupValidityControlJob";
 
     static final String USERINFO_SUMMARY_REFRESH = "userinfoSummaryRefreshJob";
@@ -93,6 +95,16 @@ public class JobConfiguration {
                                                       SystemPropertyService systemPropertyService) {
         return trigger(unknownStateEventTriggerJobDetail,
                 systemPropertyService.getUnknownStateEventTriggerJobIntervalInSeconds()).build();
+    }
+
+    @Bean
+    public JobDetail eventRetryJobDetail() {
+        return jobDetail(EventRetryJob.class, EVENT_RETRY);
+    }
+
+    @Bean
+    public Trigger eventRetryJobTrigger(JobDetail eventRetryJobDetail, SystemPropertyService systemPropertyService) {
+        return trigger(eventRetryJobDetail, systemPropertyService.getEventRetryJobIntervalInSeconds()).build();
     }
 
     @Bean
