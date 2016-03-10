@@ -118,7 +118,7 @@ public class ConsumptionRecordApiService implements ConsumptionRecordApi {
         return group != null ? group.getId() : null;
     }
 
-    static ConsumptionRecordDTO toDTO(ConsumptionRecord r) {
+    public static ConsumptionRecordDTO toDTO(ConsumptionRecord r) {
         SettlementFlags flags = r.getSettlementFlags();
         return new ConsumptionRecordDTO(r.getId(), r.getRecordNo(), r.getPedestalCode(), r.getSocketCode(),
                 r.getPitchNo(), r.getCampsiteCode(), r.getCampsiteName(), r.getSiteTenant(), r.getIssuerTenant(),
