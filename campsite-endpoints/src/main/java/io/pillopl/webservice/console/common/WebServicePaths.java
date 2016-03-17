@@ -25,6 +25,8 @@ public final class WebServicePaths {
     public static final String CONSUMPTION_RECORD = CONSOLE + "/consumptionRecord";
 
     public static final String GUEST = CONSOLE + "/guest";
+
+    public static final String ISSUER = CONSOLE + "/issuer";
     public static final String REPORT = CONSOLE + "/report";
 
     /**

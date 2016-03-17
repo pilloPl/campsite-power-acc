@@ -45,6 +45,8 @@ public class JobConfiguration {
 
     static final String ERP_BILLING_EXPORT = "erpBillingExportJob";
 
+    static final String ISSUER_EXCHANGE = "issuerExchangeJob";
+
     /**
      * Hour of the night of the first run of the nightly jobs.
      */
@@ -172,6 +174,20 @@ public class JobConfiguration {
                                                        SystemPropertyService systemPropertyService) {
         return trigger(localCardListDistributionJobDetail,
                 systemPropertyService.getLocalCardListDistributionJobIntervalInSeconds()).build();
+    }
+
+    // ---------------------------------------------------------------- issuer exchange
+
+    @Bean
+    public JobDetail issuerExchangeJobDetail() {
+        return jobDetail(IssuerExchangeJob.class, ISSUER_EXCHANGE);
+    }
+
+    @Bean
+    public Trigger issuerExchangeJobTrigger(JobDetail issuerExchangeJobDetail,
+                                            SystemPropertyService systemPropertyService) {
+        return trigger(issuerExchangeJobDetail, systemPropertyService.getIssuerExchangeJobIntervalInSeconds())
+                .build();
     }
 
     // ---------------------------------------------------------------- QR payment

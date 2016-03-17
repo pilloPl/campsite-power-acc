@@ -49,6 +49,11 @@ class JobConfigurationIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void issuerExchangeJobRunsHourlyByDefault() throws SchedulerException {
+        assertThat(repeatIntervalInSeconds(JobConfiguration.ISSUER_EXCHANGE)).isEqualTo(3600);
+    }
+
+    @Test
     void nightlyJobsStartInTheNight() throws SchedulerException {
         Date start = scheduler.getTrigger(TriggerKey.triggerKey(JobConfiguration.GROUP_VALIDITY_CONTROL + "Trigger"))
                 .getStartTime();

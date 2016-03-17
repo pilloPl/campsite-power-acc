@@ -1,6 +1,7 @@
 package io.pillopl.persistence.dao.impl;
 
 import io.pillopl.card.CampingCard;
+import io.pillopl.issuer.PartnerSyncState;
 import io.pillopl.persistence.dao.CampingCardDaoCustom;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -21,6 +22,15 @@ public class CampingCardDaoImpl implements CampingCardDaoCustom {
 
     @Value("#{sqls['findValidCardsForLocalCardList']}")
     private String findValidCardsForLocalCardList;
+
+    @Value("#{sqls['findCardIdsValidForPartners']}")
+    private String findCardIdsValidForPartners;
+
+    @Value("#{sqls['findCardIdsExpiredForPartners']}")
+    private String findCardIdsExpiredForPartners;
+
+    @Value("#{sqls['findCardIdsForPartnerExport']}")
+    private String findCardIdsForPartnerExport;
 
     private static final String UPSERT_CARD = "SELECT CARD_UTILS.UPSERT_CARD(:cardRfidHex, :cardNumber, :validFrom,"
             + " :validTo, :billingAccountNo, :guestId)";
@@ -61,6 +71,36 @@ public class CampingCardDaoImpl implements CampingCardDaoCustom {
         Long id = jdbcTemplate.queryForObject(UPSERT_CARD, params, Long.class);
         entityManager.clear();
         return id;
+    }
+
+    @Override
+    public int updateExpiredCardsPartnerSyncState(LocalDate today) {
+        Objects.requireNonNull(today, "today");
+        MapSqlParameterSource params = new MapSqlParameterSource().addValue("today", today);
+
+        // the stay or season runs: the partners shall have the card
+        List<CampingCard> cards = toCards(jdbcTemplate.queryForList(findCardIdsValidForPartners, params, Long.class));
+        for (CampingCard card : cards) {
+            card.calculatePartnerSyncState(PartnerSyncState.ADD);
+        }
+        int count = cards.size();
+
+        // the stay or season is over: the partners shall delete the card
+        cards = toCards(jdbcTemplate.queryForList(findCardIdsExpiredForPartners, params, Long.class));
+        for (CampingCard card : cards) {
+            card.calculatePartnerSyncState(PartnerSyncState.DELETE);
+        }
+        entityManager.flush();
+        return count + cards.size();
+    }
+
+    @Override
+    public List<CampingCard> findCardsForPartnerExport(Long issuerGroupId) {
+        if (issuerGroupId == null) {
+            return new ArrayList<>();
+        }
+        MapSqlParameterSource params = new MapSqlParameterSource().addValue("issuerGroupId", issuerGroupId);
+        return toCards(jdbcTemplate.queryForList(findCardIdsForPartnerExport, params, Long.class));
     }
 
     private List<CampingCard> toCards(List<Long> ids) {

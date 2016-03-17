@@ -1,11 +1,13 @@
 package io.pillopl.group.attribute;
 
 import io.pillopl.group.GroupService;
+import io.pillopl.issuer.IssuerPartner;
 import io.pillopl.persistence.dao.WhitelistFilterDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Whether the cards of an ISSUER group take part in the card exchange with issuer partners. Per direction the
@@ -39,6 +41,38 @@ public class WhitelistFilterService {
             return whitelistFilter.isSynchronizable();
         }
         return true;
+    }
+
+    /**
+     * The gate of the card import from one partner: the nearest import filter that targets the partner (or every
+     * partner) decides; no filter means synchronisable.
+     */
+    @Transactional(readOnly = true)
+    public boolean isSynchronizableForImport(Long issuerGroupIdFromCard, IssuerPartner partner) {
+        WhitelistFilter whitelistFilter = findNearest(issuerGroupIdFromCard,
+                filter -> WhitelistFilterType.isImportWhitelistFilterType(filter.getWhitelistFilterType())
+                        && filter.isTargeting(partner));
+        return whitelistFilter == null || whitelistFilter.isSynchronizable();
+    }
+
+    /**
+     * The gate of the card list export to one partner, same rule as the import.
+     */
+    @Transactional(readOnly = true)
+    public boolean isSynchronizableForExport(Long issuerGroupIdFromCard, IssuerPartner partner) {
+        WhitelistFilter whitelistFilter = findNearest(issuerGroupIdFromCard,
+                filter -> WhitelistFilterType.isExportWhitelistFilterType(filter.getWhitelistFilterType())
+                        && filter.isTargeting(partner));
+        return whitelistFilter == null || whitelistFilter.isSynchronizable();
+    }
+
+    private WhitelistFilter findNearest(Long issuerGroupIdFromCard, Predicate<WhitelistFilter> applies) {
+        List<Long> parentLineIds = groupService.fetchParentLineIds(issuerGroupIdFromCard, true);
+        if (parentLineIds.isEmpty()) {
+            return null;
+        }
+        return GroupAttributeHelper.findNearest(parentLineIds, whitelistFilterDao.findByGroupIds(parentLineIds),
+                applies);
     }
 
     @Transactional(readOnly = true)

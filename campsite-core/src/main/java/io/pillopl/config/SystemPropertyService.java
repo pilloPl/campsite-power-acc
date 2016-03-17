@@ -275,6 +275,19 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.LocalCardListDistributionJobIntervalInSeconds, 3600);
     }
 
+    // ---------------------------------------------------------------- issuer exchange
+
+    public int getIssuerExchangeJobIntervalInSeconds() {
+        return getPropertyInt(SystemPropertyKey.IssuerExchangeJobIntervalInSeconds, 3600);
+    }
+
+    /**
+     * How far back the record export to the issuer partners looks for records still waiting (by plug-out).
+     */
+    public int getIssuerRecordExportLookBackInDays() {
+        return getPropertyInt(SystemPropertyKey.IssuerRecordExportLookBackInDays, 365);
+    }
+
     // ---------------------------------------------------------------- materialized views
 
     public int getUserinfoSummaryRefreshJobIntervalInSeconds() {

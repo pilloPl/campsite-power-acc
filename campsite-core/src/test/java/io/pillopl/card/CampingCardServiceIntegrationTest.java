@@ -120,6 +120,26 @@ class CampingCardServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void changesOfACardThePartnersHaveAreExportedToThem() {
+        CampingCard card = cards.card("6666", "HR-514", member, TODAY, TODAY.plusDays(2));
+        card.setTargetPartnerSyncState(io.pillopl.issuer.PartnerSyncState.ADD);
+        card.setPartnerSyncState(io.pillopl.issuer.PartnerSyncState.NOT);
+
+        assertThat(campingCardService.changeValidity(clubReception, card.getId(), TODAY, TODAY.plusDays(9))
+                .getPartnerSyncState()).isEqualTo(io.pillopl.issuer.PartnerSyncState.MODIFY);
+        assertThat(campingCardService.changeActivation(clubReception, card.getId(), CardActivation.DEACTIVATED)
+                .getPartnerSyncState()).isEqualTo(io.pillopl.issuer.PartnerSyncState.DELETE);
+    }
+
+    @Test
+    void blockingACardThePartnersNeverGotIsNothingToExport() {
+        CampingCard card = cards.card("7777", "HR-515", member, TODAY, TODAY.plusDays(2));
+
+        assertThat(campingCardService.changeActivation(clubReception, card.getId(), CardActivation.DEACTIVATED)
+                .getPartnerSyncState()).isEqualTo(io.pillopl.issuer.PartnerSyncState.NOT);
+    }
+
+    @Test
     void cardOutsideTheScopeCannotBeChanged() {
         CampingCard card = cards.card("5555", "HR-513", outsider, null, null);
 

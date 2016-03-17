@@ -2,6 +2,7 @@ package io.pillopl.card;
 
 import io.pillopl.group.AccessDeniedException;
 import io.pillopl.guest.Guest;
+import io.pillopl.issuer.PartnerSyncState;
 import io.pillopl.persistence.dao.CampingCardDao;
 import io.pillopl.persistence.dao.GuestDao;
 import io.pillopl.user.Userinfo;
@@ -123,6 +124,9 @@ public class CampingCardService {
         CampingCard card = getCard(cardId);
         checkIsManageable(principal, card);
         card.setActivation(activation);
+        // the issuer partners learn about a blocked card (DELETE) or an unblocked one (ADD)
+        card.calculatePartnerSyncState(activation == CardActivation.DEACTIVATED ? PartnerSyncState.DELETE
+                : PartnerSyncState.ADD);
         return campingCardDao.save(card);
     }
 
@@ -136,6 +140,7 @@ public class CampingCardService {
         checkValidity(validFrom, validTo);
         card.setValidFrom(validFrom);
         card.setValidTo(validTo);
+        card.calculatePartnerSyncState(PartnerSyncState.MODIFY);
         return campingCardDao.save(card);
     }
 

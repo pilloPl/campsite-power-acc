@@ -213,6 +213,63 @@ SELECT c.ID
  ORDER BY c.ID DESC
 ]]></entry>
 
+    <!-- Card list exchange with the issuer partners -->
+
+    <!--
+      Living, activated cards whose validity covers :today (days inclusive): the stay or season has begun and not
+      ended (from <= today <= to), or it has begun and has no end (from <= today, no to).
+      Cards without any validity are left alone. The partners shall have these cards. Cards with an ADD or MODIFY
+      waiting for the export keep it.
+    -->
+    <entry key="findCardIdsValidForPartners"><![CDATA[
+SELECT c.ID
+  FROM CAMPING_CARD c
+ WHERE c.DELETED = FALSE
+   AND c.STATUS = 'ACTIVATED'
+   AND c.PARTNER_SYNC_STATE NOT IN ('ADD', 'MODIFY')
+   AND ((c.VALID_FROM IS NOT NULL AND c.VALID_TO IS NOT NULL
+         AND c.VALID_FROM <= :today AND c.VALID_TO >= :today)
+     OR (c.VALID_FROM IS NOT NULL AND c.VALID_TO IS NULL
+         AND c.VALID_FROM <= :today))
+ ORDER BY c.ID
+]]></entry>
+
+    <!--
+      Living, activated cards whose stay or season is over before :today (from, to < today), or which have only an
+      end and it has passed (no from, to < today). The partners shall delete these cards.
+    -->
+    <entry key="findCardIdsExpiredForPartners"><![CDATA[
+SELECT c.ID
+  FROM CAMPING_CARD c
+ WHERE c.DELETED = FALSE
+   AND c.STATUS = 'ACTIVATED'
+   AND ((c.VALID_FROM IS NOT NULL AND c.VALID_TO IS NOT NULL
+         AND c.VALID_FROM < :today AND c.VALID_TO < :today)
+     OR (c.VALID_FROM IS NULL AND c.VALID_TO IS NOT NULL
+         AND c.VALID_TO < :today))
+ ORDER BY c.ID
+]]></entry>
+
+    <!--
+      Cards of the card list export: living cards whose guest hangs in the subtree of :issuerGroupId (the network's
+      own cards) and whose sync state asks for an export (ADD, MODIFY, DELETE). Deactivated cards are exported too:
+      their DELETE has to reach the partners.
+    -->
+    <entry key="findCardIdsForPartnerExport"><![CDATA[
+WITH RECURSIVE issuer_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :issuerGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN issuer_tree t ON c.PARENT_ID = t.id
+)
+SELECT c.ID
+  FROM CAMPING_CARD c
+  JOIN GUEST g ON g.ID = c.GUEST_ID
+ WHERE c.DELETED = FALSE
+   AND c.PARTNER_SYNC_STATE IN ('ADD', 'MODIFY', 'DELETE')
+   AND g.GROUP_ID IN (SELECT id FROM issuer_tree)
+ ORDER BY c.ID
+]]></entry>
+
     <!-- ===== Consumption records seen by a user: operator side UNION issuer side ===== -->
 
     <!--

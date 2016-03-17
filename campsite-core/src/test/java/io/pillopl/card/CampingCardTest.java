@@ -5,6 +5,7 @@ import io.pillopl.group.GroupType;
 import io.pillopl.guest.Guest;
 import io.pillopl.guest.GuestStatus;
 import io.pillopl.guest.GuestType;
+import io.pillopl.issuer.PartnerSyncState;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -126,5 +127,48 @@ class CampingCardTest {
         assertThat(guest.getBillingAccounts()).isEmpty();
 
         assertThat(stayCard().build().validate(NOON_JULY_10)).isEqualTo(CardStatus.VALID);
+    }
+
+    @Test
+    void newCardNeverExportedIsAddedForThePartners() {
+        CampingCard card = stayCard().build();
+
+        card.calculatePartnerSyncState(PartnerSyncState.ADD);
+
+        assertThat(card.getPartnerSyncState()).isEqualTo(PartnerSyncState.ADD);
+    }
+
+    @Test
+    void exportedCardIsNothingToDoUntilItChanges() {
+        CampingCard card = stayCard().build();
+        card.calculatePartnerSyncState(PartnerSyncState.ADD);
+
+        card.partnerSyncExported(NOON_JULY_10);
+
+        assertThat(card.getTargetPartnerSyncState()).isEqualTo(PartnerSyncState.ADD);
+        assertThat(card.getPartnerSyncState()).isEqualTo(PartnerSyncState.NOT);
+        assertThat(card.getUploadDate()).isEqualTo(NOON_JULY_10);
+        card.calculatePartnerSyncState(PartnerSyncState.ADD);
+        assertThat(card.getPartnerSyncState()).isEqualTo(PartnerSyncState.NOT);
+    }
+
+    @Test
+    void cardOfAnEndedStayIsDeletedAtThePartnersThatHaveIt() {
+        CampingCard card = stayCard().build();
+        card.calculatePartnerSyncState(PartnerSyncState.ADD);
+        card.partnerSyncExported(NOON_JULY_10);
+
+        card.calculatePartnerSyncState(PartnerSyncState.DELETE);
+
+        assertThat(card.getPartnerSyncState()).isEqualTo(PartnerSyncState.DELETE);
+    }
+
+    @Test
+    void noWantedChangeMakesTheSyncStateUnknown() {
+        CampingCard card = stayCard().build();
+
+        card.calculatePartnerSyncState(null);
+
+        assertThat(card.getPartnerSyncState()).isEqualTo(PartnerSyncState.UNKNOWN);
     }
 }
