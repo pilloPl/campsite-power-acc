@@ -173,7 +173,8 @@ public class ConsumptionRecordWriteService {
 
     /**
      * Confirms a record of the review queue: a suspect record becomes CONFIRMED, and the record is priced again
-     * (it is exported when the price is known, else it stays in review).
+     * (it is exported when the price is known, else it stays in review). An imported record keeps its partner's
+     * price and is never priced with the network tariff.
      *
      * @return the record or null when there is none with this id
      * @throws IllegalStateException when the record does not wait for a review
@@ -186,7 +187,11 @@ public class ConsumptionRecordWriteService {
         if (record.isSuspect()) {
             record.confirm(reviewer, dateService.getNow(), comment);
         }
-        record.applyPrice(price(record));
+        if (record.isImported()) {
+            record.applyPartnerPrice();
+        } else {
+            record.applyPrice(price(record));
+        }
         LOGGER.info(String.format("Consumption record %s confirmed by %s: %s", record.getRecordNo(), reviewer,
                 record));
         return record;

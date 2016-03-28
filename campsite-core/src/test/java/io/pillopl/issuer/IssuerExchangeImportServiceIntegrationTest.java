@@ -3,6 +3,7 @@ package io.pillopl.issuer;
 import io.pillopl.card.CampingCard;
 import io.pillopl.card.CardFixture;
 import io.pillopl.consumption.ConsumptionRecord;
+import io.pillopl.consumption.ConsumptionRecordWriteService;
 import io.pillopl.consumption.ExportStatus;
 import io.pillopl.consumption.PaymentChannel;
 import io.pillopl.consumption.RecordValidationState;
@@ -44,6 +45,7 @@ class IssuerExchangeImportServiceIntegrationTest extends IntegrationTest {
     @Autowired GroupManager groupManager;
     @Autowired InfrastructureFixture infrastructure;
     @Autowired CardFixture cards;
+    @Autowired ConsumptionRecordWriteService consumptionRecordWriteService;
 
     IssuerPartner partner;
     CampingCard networkCard;
@@ -141,12 +143,43 @@ class IssuerExchangeImportServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    void implausibleImportedRecordIsSuspectAndNotPriced() {
-        importLines(line("CLUB-85", "8101", "CLUB-P001-1", "900", "300.00"));
+    void implausibleImportedRecordIsSuspectAndKeepsThePartnersCostForTheReview() {
+        importLines(line("CLUB-85", "8101", "CLUB-P001-1", "900", "300.004"));
 
         ConsumptionRecord record = consumptionRecordDao.findBySourceNameAndExternalRecordNo("RECORD CLUB", "CLUB-85");
         assertThat(record.getValidationState()).isEqualTo(RecordValidationState.SUSPECT);
         assertThat(record.getPricingStatus()).isNull();
+        assertThat(record.getCost()).isEqualByComparingTo("300.00");
+        assertThat(record.getCurrency()).isEqualTo("EUR");
+        assertThat(record.getExportStatus()).isEqualTo(ExportStatus.REVIEW);
+    }
+
+    @Test
+    void confirmedSuspectImportIsExportedWithThePartnersPriceNotTheNetworkTariff() {
+        importLines(line("CLUB-86", "8101", "CLUB-P001-1", "900", "300.00"));
+        ConsumptionRecord record = consumptionRecordDao.findBySourceNameAndExternalRecordNo("RECORD CLUB", "CLUB-86");
+
+        consumptionRecordWriteService.confirmRecord(record.getId(), "admin", "pool heater at the partner");
+
+        assertThat(record.getValidationState()).isEqualTo(RecordValidationState.CONFIRMED);
+        assertThat(record.getPricingStatus()).isEqualTo(PricingStatus.PRICED);
+        assertThat(record.getCost()).isEqualByComparingTo("300.00");
+        assertThat(record.getTariffName()).isEqualTo("Club tariff");
+        assertThat(record.getTariffId()).isNull();
+        assertThat(record.getExportStatus()).isEqualTo(ExportStatus.NEW);
+    }
+
+    @Test
+    void confirmedImportWithoutThePartnersCostStaysInReviewInsteadOfBeingPricedByTheNetwork() {
+        importLines(line("CLUB-87", "8101", "CLUB-P001-1", "3", null));
+        ConsumptionRecord record = consumptionRecordDao.findBySourceNameAndExternalRecordNo("RECORD CLUB", "CLUB-87");
+
+        consumptionRecordWriteService.confirmRecord(record.getId(), "admin", "asked the partner");
+
+        assertThat(record.getPricingStatus()).isEqualTo(PricingStatus.PRICING_FAILED);
+        assertThat(record.getCost()).isNull();
+        assertThat(record.getTariffId()).isNull();
+        assertThat(record.getPricingFailureReason()).isEqualTo(ConsumptionRecord.IMPORTED_WITHOUT_COST);
         assertThat(record.getExportStatus()).isEqualTo(ExportStatus.REVIEW);
     }
 

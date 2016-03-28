@@ -258,6 +258,8 @@ public class ConsumptionRecord {
     @Column(name = "CREATE_DATE", nullable = false)
     private LocalDateTime createDate;
 
+    public static final String IMPORTED_WITHOUT_COST = "Imported without cost";
+
     public ConsumptionRecord() {
     }
 
@@ -285,6 +287,23 @@ public class ConsumptionRecord {
         this.tariffName = calculation.getTariffName();
         this.pricingFailureReason = calculation.getFailureReason();
         this.exportStatus = pricingStatus == PricingStatus.PRICING_FAILED ? ExportStatus.REVIEW : ExportStatus.NEW;
+    }
+
+    /**
+     * An imported record keeps the price its partner sent ({@link #cost} and {@link #currency}, stored at the import
+     * even for a suspect record); the network tariff never re-prices it. Without a partner cost it waits in review.
+     */
+    public void applyPartnerPrice() {
+        if (cost == null || currency == null || currency.isBlank()) {
+            this.pricingStatus = PricingStatus.PRICING_FAILED;
+            this.cost = null;
+            this.pricingFailureReason = IMPORTED_WITHOUT_COST;
+            this.exportStatus = ExportStatus.REVIEW;
+            return;
+        }
+        this.pricingStatus = PricingStatus.PRICED;
+        this.pricingFailureReason = null;
+        this.exportStatus = ExportStatus.NEW;
     }
 
     /**

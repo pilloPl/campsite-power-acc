@@ -3,7 +3,6 @@ package io.pillopl.issuer;
 import io.pillopl.card.CampingCard;
 import io.pillopl.consumption.ConsumptionRecord;
 import io.pillopl.consumption.ConsumptionRecordFactory;
-import io.pillopl.consumption.ExportStatus;
 import io.pillopl.consumption.PaymentChannel;
 import io.pillopl.consumption.SettlementFlags;
 import io.pillopl.dto.consumption.ConsumptionRecordDTO;
@@ -20,7 +19,6 @@ import io.pillopl.persistence.dao.ConsumptionRecordDao;
 import io.pillopl.persistence.dao.IssuerPartnerDao;
 import io.pillopl.persistence.dao.SocketDao;
 import io.pillopl.pricing.PricingInput;
-import io.pillopl.pricing.PricingStatus;
 import io.pillopl.util.DateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +43,6 @@ import java.util.Set;
 public class IssuerExchangeImportService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IssuerExchangeImportService.class);
-
-    static final String IMPORTED_WITHOUT_COST = "Imported without cost";
 
     private final ConsumptionRecordDao consumptionRecordDao;
 
@@ -236,28 +232,22 @@ public class IssuerExchangeImportService {
         record.setNights(line.plugIn() != null ? PricingInput.nightsBetween(line.plugIn(), line.plugOut())
                 : Math.max(1, line.nights()));
 
+        // the partner's price is kept even on a suspect record: a confirmation must not re-price it
+        storePartnerCost(record, line);
         boolean suspect = consumptionRecordFactory.completeNewRecord(record);
         if (!suspect) {
-            applyPartnerPrice(record, line);
+            record.applyPartnerPrice();
         }
         return record;
     }
 
     /**
-     * The partner priced the supply at its campsite; without a cost the record waits for a review.
+     * The partner priced the supply at its campsite: its cost, currency and tariff name stay on the record.
      */
-    static void applyPartnerPrice(ConsumptionRecord record, ConsumptionRecordDTO line) {
-        if (line.cost() == null || isEmpty(line.currency())) {
-            record.setPricingStatus(PricingStatus.PRICING_FAILED);
-            record.setPricingFailureReason(IMPORTED_WITHOUT_COST);
-            record.setExportStatus(ExportStatus.REVIEW);
-            return;
-        }
-        record.setPricingStatus(PricingStatus.PRICED);
-        record.setCost(line.cost().setScale(2, RoundingMode.HALF_UP));
-        record.setCurrency(line.currency());
+    static void storePartnerCost(ConsumptionRecord record, ConsumptionRecordDTO line) {
+        record.setCost(line.cost() != null ? line.cost().setScale(2, RoundingMode.HALF_UP) : null);
+        record.setCurrency(isEmpty(line.currency()) ? null : line.currency());
         record.setTariffName(line.tariffName());
-        record.setExportStatus(ExportStatus.NEW);
     }
 
     private static boolean isEmpty(String value) {
