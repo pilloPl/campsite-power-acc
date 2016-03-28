@@ -107,6 +107,12 @@ public class IssuerExchangeService {
         LOG.info(String.format("Partner sync state of %s cards calculated", cards));
 
         List<IssuerPartner> partners = issuerPartnerDao.findExchanging();
+        if (partners.isEmpty()) {
+            LOG.info("No active issuer partner, nothing to exchange");
+        } else {
+            LOG.info(String.format("Exchange with %s issuer partners: %s", partners.size(),
+                    partners.stream().map(IssuerPartner::getName).toList()));
+        }
         for (IssuerPartner partner : partners) {
             if (partner.isCardImport()) {
                 runDirection(partner.getId(), Direction.CARD_IMPORT, this::importCards);
