@@ -67,9 +67,16 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
     SupplySession findByPedestalCodeAndTransactionId(@Param("pedestalCode") String pedestalCode,
                                                      @Param("transactionId") Integer transactionId);
 
-    @Query("select s from SupplySession s where s.active = true and coalesce(s.remoteDate, s.createDate) < :startedBefore"
+    /**
+     * Active sessions with no sign of life since the given time: started before it, the socket's last meter reading
+     * or status is older, and the pedestal sent no message since (its heartbeat row, when it has one).
+     */
+    @Query("select s from SupplySession s where s.active = true and coalesce(s.remoteDate, s.createDate) < :silentSince"
+            + " and s.socket.modDate < :silentSince"
+            + " and not exists (select ps from PedestalState ps where ps.pedestal = s.socket.pedestal"
+            + " and ps.approxLastIncoming >= :silentSince)"
             + " order by s.id")
-    List<SupplySession> findActiveStartedBefore(@Param("startedBefore") LocalDateTime startedBefore);
+    List<SupplySession> findActiveSilentSince(@Param("silentSince") LocalDateTime silentSince);
 
     @Query("select s from SupplySession s where s.active = true and s.stayId is not null order by s.id")
     List<SupplySession> findActiveWithStay();

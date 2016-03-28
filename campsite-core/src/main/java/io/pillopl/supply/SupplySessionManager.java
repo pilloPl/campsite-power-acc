@@ -209,11 +209,12 @@ public class SupplySessionManager implements SupplySessionRegistry {
     }
 
     /**
-     * Active sessions started before the timeout: the pedestal never stopped them.
+     * Active sessions whose socket and pedestal have been silent for the timeout: no meter reading, no status and
+     * no message from the pedestal. A supply over several nights keeps reporting, so it is never stale.
      */
     @Transactional(readOnly = true)
     public List<SupplySession> findStaleSessions(LocalDateTime now, int timeoutInHours) {
-        return supplySessionDao.findActiveStartedBefore(now.minusHours(timeoutInHours));
+        return supplySessionDao.findActiveSilentSince(now.minusHours(timeoutInHours));
     }
 
     @Transactional(readOnly = true)

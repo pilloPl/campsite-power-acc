@@ -8,7 +8,10 @@ import io.pillopl.group.GroupManager;
 import io.pillopl.group.GroupService;
 import io.pillopl.infrastructure.InfrastructureFixture;
 import io.pillopl.infrastructure.Pedestal;
+import io.pillopl.infrastructure.PedestalService;
+import io.pillopl.infrastructure.PedestalState;
 import io.pillopl.infrastructure.Socket;
+import io.pillopl.persistence.dao.PedestalStateDao;
 import io.pillopl.persistence.dao.SocketDao;
 import io.pillopl.persistence.dao.SupplyIncidentDao;
 import io.pillopl.persistence.dao.SupplySessionDao;
@@ -30,7 +33,8 @@ import java.time.temporal.ChronoUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Supply sessions on the database: start, repeated start, stop, incidents, occupied sockets and stale sessions.
+ * Supply sessions on the database: start, repeated start, stop, incidents, occupied sockets and stale sessions
+ * (stale = socket and pedestal silent for the timeout, not merely started long ago).
  */
 @Transactional
 class SupplySessionIntegrationTest extends IntegrationTest {
@@ -46,6 +50,8 @@ class SupplySessionIntegrationTest extends IntegrationTest {
     @Autowired InfrastructureFixture infrastructure;
     @Autowired CardFixture cards;
     @Autowired DateService dateService;
+    @Autowired PedestalService pedestalService;
+    @Autowired PedestalStateDao pedestalStateDao;
 
     final SocketLinkId socket1 = SocketLinkId.of("HR-BAY-P101", 1);
     final LocalDateTime plugIn = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusHours(2);
@@ -162,6 +168,7 @@ class SupplySessionIntegrationTest extends IntegrationTest {
         LocalDateTime longAgo = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusHours(30);
         Integer transactionId = controlUnit.startSupply(socket1, "8101",
                 SupplyRequest.start(new BigDecimal("100.5"), longAgo)).getTransactionId();
+        silentSince(socket("HR-BAY-P101", 1), longAgo);
         controlUnit.closeStaleSessions();
 
         SupplyResponse response = controlUnit.stopSupply("HR-BAY-P101", "8101", SupplyRequest.stop(transactionId,
@@ -170,6 +177,53 @@ class SupplySessionIntegrationTest extends IntegrationTest {
         assertThat(response.getStatus()).isEqualTo(ValidationStatus.ACCEPTED);
         assertThat(supplyIncidentDao.findByPedestalCodeOrderByCreateDateDesc("HR-BAY-P101"))
                 .extracting(SupplyIncident::getIncidentType).containsExactly(IncidentType.SESSION_ALREADY_CLOSED);
+    }
+
+    @Test
+    void multiNightSupplyThatKeepsSendingMeterReadingsIsNotClosedByTheTimeout() {
+        LocalDateTime threeDaysAgo = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusDays(3);
+        Integer transactionId = controlUnit.startSupply(socket1, "8101",
+                SupplyRequest.start(new BigDecimal("100"), threeDaysAgo)).getTransactionId();
+        Socket socket = socket("HR-BAY-P101", 1);
+        for (int hour = 1; hour < 72; hour++) {
+            pedestalService.updateMeterReading(socket, new BigDecimal(100 + hour), threeDaysAgo.plusHours(hour));
+        }
+        socketDao.flush();
+
+        assertThat(controlUnit.closeStaleSessions()).isZero();
+        assertThat(sessionManager.findSessionFor("HR-BAY-P101", transactionId).isActive()).isTrue();
+    }
+
+    @Test
+    void sessionWithoutStayOnASilentSocketIsKeptOpenWhileThePedestalStillSendsMessages() {
+        LocalDateTime twoDaysAgo = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusDays(2);
+        Integer transactionId = controlUnit.startSupply(socket1, "8101",
+                SupplyRequest.start(new BigDecimal("100"), twoDaysAgo)).getTransactionId();
+        silentSince(socket("HR-BAY-P101", 1), twoDaysAgo);
+        pedestalStateDao.saveAndFlush(new PedestalState(pedestal, LocalDateTime.now().minusMinutes(10)));
+
+        assertThat(controlUnit.closeStaleSessions()).isZero();
+        SupplySession session = sessionManager.findSessionFor("HR-BAY-P101", transactionId);
+        assertThat(session.isActive()).isTrue();
+        assertThat(session.getStayId()).isNull();
+    }
+
+    @Test
+    void sessionOfASocketAndPedestalSilentForTheTimeoutIsClosed() {
+        LocalDateTime twoDaysAgo = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusDays(2);
+        Integer transactionId = controlUnit.startSupply(socket1, "8101",
+                SupplyRequest.start(new BigDecimal("100"), twoDaysAgo)).getTransactionId();
+        silentSince(socket("HR-BAY-P101", 1), twoDaysAgo.plusHours(20));
+        pedestalStateDao.saveAndFlush(new PedestalState(pedestal, twoDaysAgo.plusHours(20)));
+
+        assertThat(controlUnit.closeStaleSessions()).isEqualTo(1);
+        assertThat(sessionManager.findSessionFor("HR-BAY-P101", transactionId).getStopReason())
+                .isEqualTo(StopReason.TIMEOUT);
+    }
+
+    private void silentSince(Socket socket, LocalDateTime lastSignOfLife) {
+        socket.setModDate(lastSignOfLife);
+        socketDao.saveAndFlush(socket);
     }
 
     private Socket socket(String pedestalCode, int socketNo) {

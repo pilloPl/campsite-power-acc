@@ -212,8 +212,9 @@ public class SupplyControlUnitImpl {
 
     /**
      * Closes the sessions the pedestals never stopped: sessions of stays checked out (after the configured delay)
-     * with CHECKOUT, then sessions older than the configured timeout with TIMEOUT. The stop reading is the socket's
-     * last meter reading. Every session is closed in its own transaction.
+     * with CHECKOUT, then sessions whose socket and pedestal were silent for longer than the configured timeout
+     * with TIMEOUT. The stop reading is the socket's last meter reading. Every session is closed in its own
+     * transaction.
      *
      * @return number of closed sessions
      */
