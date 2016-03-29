@@ -149,6 +149,17 @@ class PedestalLinkClientV1Test {
     }
 
     @Test
+    void deleteForAnUnreachablePedestalFailsAndIsNotQueued() {
+        server.expect(requestTo(URL + "/sendLocalList")).andRespond(withException(new IOException("timeout")));
+
+        LocalCardListSendResult result = client.deleteLocalList(pedestal);
+
+        assertThat(result.success()).isFalse();
+        assertThat(result.errorMessage()).startsWith("Pedestal not reachable");
+        assertThat(client.hasQueuedLocalList(pedestal)).isFalse();
+    }
+
+    @Test
     void pedestalWithoutLinkAddressCannotGetAList() {
         pedestal.setLinkUrl(null);
 
