@@ -66,8 +66,8 @@ public class EventRetryService {
             try {
                 failure = trySend(retry.toEvent());
             } catch (RuntimeException e) {
-                // attributes that can not be read back fail every time
-                failure = e.getMessage();
+                // attributes that can not be read back fail every time; a failure without message is no success
+                failure = describe(e);
             }
             if (failure == null) {
                 retry.sent(dateService.getNow());
@@ -91,7 +91,11 @@ public class EventRetryService {
         try {
             return eventService.offer(event) ? null : QUEUE_REFUSED;
         } catch (RuntimeException e) {
-            return e.getMessage() != null ? e.getMessage() : e.getClass().getName();
+            return describe(e);
         }
+    }
+
+    private static String describe(RuntimeException e) {
+        return e.getMessage() != null ? e.getMessage() : e.getClass().getName();
     }
 }

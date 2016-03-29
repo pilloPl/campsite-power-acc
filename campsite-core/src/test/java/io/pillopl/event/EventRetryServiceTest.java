@@ -109,6 +109,22 @@ class EventRetryServiceTest {
         verify(eventService, never()).offer(any());
     }
 
+    @Test
+    void readBackFailureWithoutMessageIsNotTakenForASend() {
+        EventRetry broken = new EventRetry() {
+            @Override
+            public Event toEvent() {
+                throw new IllegalStateException();
+            }
+        };
+        when(eventRetryDao.findByStatusOrderByIdAsc(EventRetry.Status.OPEN)).thenReturn(List.of(broken));
+
+        assertThat(service.retryOpenEvents(3)).isZero();
+
+        assertThat(broken.getStatus()).isEqualTo(EventRetry.Status.OPEN);
+        assertThat(broken.getFailure()).isEqualTo(IllegalStateException.class.getName());
+    }
+
     private EventRetry savedRetry() {
         ArgumentCaptor<EventRetry> captor = ArgumentCaptor.forClass(EventRetry.class);
         verify(eventRetryDao).save(captor.capture());
