@@ -175,6 +175,18 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
                 .isEqualTo(ExportStatus.WORK);
     }
 
+    @Test
+    void previousSeasonRecordOnTheSharedSeasonalTariffConfirmedLateIsNotMarkedBilledWithoutALine() {
+        ConsumptionRecord june = record("100", LocalDateTime.of(2026, 6, 20, 10, 0), SEASONAL_TARIFF);
+        ConsumptionRecord lastSeason = record("40", LocalDateTime.of(2025, 9, 20, 10, 0), SEASONAL_TARIFF);
+
+        List<ErpBillingLine> lines = erpBillingDataService.createErpBillingLines(6, 2026);
+
+        assertThat(lines).extracting(ErpBillingLine::getLineType).containsExactly(LineType.FIXED_FEE);
+        assertThat(exportStatus(june)).isEqualTo(ExportStatus.WORK);
+        assertThat(exportStatus(lastSeason)).isEqualTo(ExportStatus.NEW);
+    }
+
     private ExportStatus exportStatus(ConsumptionRecord record) {
         entityManager.flush();
         entityManager.clear();

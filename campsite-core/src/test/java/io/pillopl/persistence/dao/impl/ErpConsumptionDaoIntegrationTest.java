@@ -117,14 +117,16 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
         inReview.setExportStatus(ExportStatus.REVIEW);
         consumptionRecordDao.flush();
 
-        assertThat(consumptionRecordDao.markRecordsForErpBilling(List.of(RESIDENT), JULY.minusMonths(1), AUGUST,
-                "2026_07")).isEqualTo(1);
+        record(RESIDENT, "4", "1.80", JULY, 1L); // another tariff of the account, not on the lines
+        assertThat(consumptionRecordDao.markRecordsForErpBilling(List.of(billedRow(RESIDENT, 4L, "2026_07")),
+                JULY.minusMonths(1), AUGUST, "2026_07")).isEqualTo(1);
         assertThat(consumptionRecordDao.markRecordsForErpBilling(List.of(), JULY.minusMonths(1), AUGUST,
                 "2026_07")).isZero();
 
         assertThat(consumptionRecordDao.findErpConsumptionPerMonth(JULY.minusMonths(1), AUGUST))
                 .extracting(ErpConsumption::billingAccountNo, ErpConsumption::billed, ErpConsumption::kwh)
-                .containsExactly(tuple(RESIDENT, true, new BigDecimal("20.0000")),
+                .containsExactly(tuple(RESIDENT, false, new BigDecimal("4.0000")),
+                        tuple(RESIDENT, true, new BigDecimal("20.0000")),
                         tuple(TRANSIT, false, new BigDecimal("8.0000")));
 
         assertThat(consumptionRecordDao.updateErpBilledRecords("2026_07", RESIDENT, List.of(ExportStatus.WORK),
@@ -138,6 +140,24 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
                 .isEqualTo(ExportStatus.NEW);
         assertThat(consumptionRecordDao.findById(inReview.getId()).orElseThrow().getExportStatus())
                 .isEqualTo(ExportStatus.REVIEW);
+    }
+
+    @Test
+    void nullTariffRowMarksOnlyRecordsWithoutTariff() {
+        ConsumptionRecord imported = record(TRANSIT, "6", "2.70", JULY, null);
+        ConsumptionRecord priced = record(TRANSIT, "8", "3.60", JULY, 1L);
+
+        assertThat(consumptionRecordDao.markRecordsForErpBilling(List.of(billedRow(TRANSIT, null, "2026_07")),
+                JULY.minusMonths(1), AUGUST, "2026_07")).isEqualTo(1);
+        entityManager.clear();
+        assertThat(consumptionRecordDao.findById(imported.getId()).orElseThrow().getExportStatus())
+                .isEqualTo(ExportStatus.WORK);
+        assertThat(consumptionRecordDao.findById(priced.getId()).orElseThrow().getExportStatus())
+                .isEqualTo(ExportStatus.NEW);
+    }
+
+    private static ErpConsumption billedRow(String accountNo, Long tariffId, String supplyPeriod) {
+        return new ErpConsumption(accountNo, tariffId, false, supplyPeriod, BigDecimal.ONE, BigDecimal.ONE, 1);
     }
 
     private void account(Group club, String name, String accountNo) {

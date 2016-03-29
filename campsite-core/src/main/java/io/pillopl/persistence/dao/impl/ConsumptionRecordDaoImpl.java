@@ -100,17 +100,29 @@ public class ConsumptionRecordDaoImpl implements ConsumptionRecordDaoCustom {
     }
 
     @Override
-    public int markRecordsForErpBilling(Collection<String> billingAccountNos, LocalDateTime from, LocalDateTime to,
-                                        String period) {
-        if (billingAccountNos == null || billingAccountNos.isEmpty()) {
+    public int markRecordsForErpBilling(Collection<ErpConsumption> billedConsumption, LocalDateTime from,
+                                        LocalDateTime to, String period) {
+        if (billedConsumption == null || billedConsumption.isEmpty()) {
             return 0;
         }
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("billingAccountNos", billingAccountNos)
-                .addValue("from", Objects.requireNonNull(from, "from"), Types.TIMESTAMP)
-                .addValue("to", Objects.requireNonNull(to, "to"), Types.TIMESTAMP)
-                .addValue("period", Objects.requireNonNull(period, "period"));
-        return jdbcTemplate.update(markRecordsForErpBilling, params);
+        Objects.requireNonNull(from, "from");
+        Objects.requireNonNull(to, "to");
+        Objects.requireNonNull(period, "period");
+        MapSqlParameterSource[] batch = billedConsumption.stream()
+                .filter(consumption -> !consumption.billed())
+                .map(consumption -> new MapSqlParameterSource()
+                        .addValue("billingAccountNo", consumption.billingAccountNo())
+                        .addValue("tariffId", consumption.tariffId(), Types.BIGINT)
+                        .addValue("supplyPeriod", consumption.supplyPeriod())
+                        .addValue("from", from, Types.TIMESTAMP)
+                        .addValue("to", to, Types.TIMESTAMP)
+                        .addValue("period", period))
+                .toArray(MapSqlParameterSource[]::new);
+        int marked = 0;
+        for (int rows : jdbcTemplate.batchUpdate(markRecordsForErpBilling, batch)) {
+            marked += Math.max(rows, 0);
+        }
+        return marked;
     }
 
     @Override

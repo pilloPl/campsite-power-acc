@@ -320,13 +320,14 @@ class ErpBillingDataServiceTest {
 
     @Test
     void billingRunSavesTheLinesAndMarksTheRecordsOfTheBilledAccounts() {
-        consumption.add(new ErpConsumption(ACCOUNT, 1L, false, "2026_07", new BigDecimal("16"),
-                new BigDecimal("7.20"), 3));
+        ErpConsumption power = new ErpConsumption(ACCOUNT, 1L, false, "2026_07", new BigDecimal("16"),
+                new BigDecimal("7.20"), 3);
+        consumption.add(power);
         when(lineDao.saveAll(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         assertThat(service.createErpBillingLines(7, 2026)).hasSize(1);
 
-        verify(recordDao).markRecordsForErpBilling(eq(Set.of(ACCOUNT)),
+        verify(recordDao).markRecordsForErpBilling(eq(Set.of(power)),
                 eq(LocalDateTime.of(2025, 7, 1, 0, 0)), eq(LocalDateTime.of(2026, 8, 1, 0, 0)), eq("2026_07"));
     }
 

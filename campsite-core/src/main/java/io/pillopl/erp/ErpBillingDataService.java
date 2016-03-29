@@ -93,6 +93,15 @@ public class ErpBillingDataService {
      */
     @Transactional(readOnly = true)
     public List<ErpBillingLine> findAndCalculateErpBillingLines(int month, int year) {
+        return findAndCalculateErpBillingLines(month, year, new LinkedHashSet<>());
+    }
+
+    /**
+     * @param billedConsumption receives the consumption the lines bill (power lines and the supplies counted against a
+     *                          package); only these records are marked billed by the run
+     */
+    List<ErpBillingLine> findAndCalculateErpBillingLines(int month, int year,
+                                                         Collection<ErpConsumption> billedConsumption) {
 
         // constant data from SYSTEM_PROPERTY
         String c_articleTaxClass = systemPropertyService.getErpArticleTaxClass();
@@ -133,6 +142,7 @@ public class ErpBillingDataService {
             List<ErpConsumption> accountConsumption = consumptionPerAccount.getOrDefault(account.getErpAccountNo(),
                     List.of());
             SortedMap<String, ErpBillingLine> linesPerArticleNo = new TreeMap<>();
+            Set<ErpConsumption> accountBilledConsumption = new LinkedHashSet<>();
             Set<Long> contractTariffIds = new HashSet<>();
             String orderNumber = null;
             boolean accountFailed = false;
@@ -183,6 +193,7 @@ public class ErpBillingDataService {
                     }
                     if (!consumption.billed()) {
                         newKwh = newKwh.add(consumption.kwh());
+                        accountBilledConsumption.add(consumption);
                     } else if (contract.getFeePeriod() == SeasonalContract.FeePeriod.SEASONAL) {
                         // the package of a season is used up across its months; a monthly package starts anew
                         billedKwh = billedKwh.add(consumption.kwh());
@@ -229,6 +240,7 @@ public class ErpBillingDataService {
                 ErpBillingLine line = linesPerArticleNo.computeIfAbsent(c_powerArticleNo,
                         articleNo -> new ErpBillingLine(period.getCode(), account, LineType.POWER, articleNo));
                 line.add(consumption.kwh(), consumption.cost());
+                accountBilledConsumption.add(consumption);
                 powerPeriods.add(consumption.supplyPeriod());
                 line.setDescription("Power " + String.join(", ", powerPeriods));
             }
@@ -274,6 +286,7 @@ public class ErpBillingDataService {
                 line.setCreateDate(now);
                 erpBillingLines.add(line);
             }
+            billedConsumption.addAll(accountBilledConsumption);
         }
 
         return erpBillingLines;
@@ -281,19 +294,22 @@ public class ErpBillingDataService {
 
     /**
      * The billing run of a month: the lines are saved and the records they bill carry the period (WORK until the
-     * ERP file is written). A month is billed once.
+     * ERP file is written). Records no line took (e.g. a supply on a contract tariff before the contract's season)
+     * stay NEW. A month is billed once.
      */
     public List<ErpBillingLine> createErpBillingLines(int month, int year) {
         BillingPeriod period = BillingPeriod.of(month, year);
         if (erpBillingLineDao.existsByBillingPeriod(period.getCode())) {
             throw new IllegalStateException("Period " + period + " is billed already");
         }
-        List<ErpBillingLine> lines = erpBillingLineDao.saveAll(findAndCalculateErpBillingLines(month, year));
+        Set<ErpConsumption> billedConsumption = new LinkedHashSet<>();
+        List<ErpBillingLine> lines = erpBillingLineDao.saveAll(findAndCalculateErpBillingLines(month, year,
+                billedConsumption));
         Set<String> billedAccountNos = new LinkedHashSet<>();
         for (ErpBillingLine line : lines) {
             billedAccountNos.add(line.getBillingAccountNo());
         }
-        int records = consumptionRecordDao.markRecordsForErpBilling(billedAccountNos,
+        int records = consumptionRecordDao.markRecordsForErpBilling(billedConsumption,
                 period.getFirstDay().minusMonths(CONSUMPTION_MONTHS_BACK).atStartOfDay(),
                 period.getLastDay().plusDays(1).atStartOfDay(), period.getCode());
         LOG.info(String.format("ERP billing %s: %s lines of %s accounts, %s consumption records", period,

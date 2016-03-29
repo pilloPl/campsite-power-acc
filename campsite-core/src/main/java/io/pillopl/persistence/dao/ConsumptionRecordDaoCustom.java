@@ -62,12 +62,13 @@ public interface ConsumptionRecordDaoCustom {
     List<ErpConsumption> findErpConsumptionPerMonth(LocalDateTime from, LocalDateTime to);
 
     /**
-     * The not billed records of the accounts with plug-out in [from, to) are billed in the period (EXPORT_STATUS
-     * WORK until the ERP file is written).
+     * The not billed records of the given consumption (account, tariff, month of plug-out) with plug-out in
+     * [from, to) are billed in the period (EXPORT_STATUS WORK until the ERP file is written).
      *
+     * @param billedConsumption the consumption that went into ERP lines
      * @return number of records marked
      */
-    int markRecordsForErpBilling(Collection<String> billingAccountNos, LocalDateTime from, LocalDateTime to,
+    int markRecordsForErpBilling(Collection<ErpConsumption> billedConsumption, LocalDateTime from, LocalDateTime to,
                                  String period);
 
     /**

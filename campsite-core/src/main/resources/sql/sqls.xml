@@ -580,12 +580,17 @@ SELECT cr.BILLING_ACCOUNT_NO,
  ORDER BY cr.BILLING_ACCOUNT_NO, TO_CHAR(cr.PLUG_OUT, 'YYYY') || '_' || TO_CHAR(cr.PLUG_OUT, 'MM'), cr.TARIFF_ID
 ]]></entry>
 
-    <!-- The not billed records of findErpConsumptionPerMonth of the given accounts are billed in :period (WORK). -->
+    <!--
+      The not billed records of one row of findErpConsumptionPerMonth (account, tariff, month of plug-out) that went
+      into the ERP lines are billed in :period (WORK). Run once per billed row: records no line took stay NEW.
+    -->
     <entry key="markRecordsForErpBilling"><![CDATA[
 UPDATE CONSUMPTION_RECORD cr
    SET ERP_BILLING_PERIOD = :period,
        EXPORT_STATUS = 'WORK'
- WHERE cr.BILLING_ACCOUNT_NO IN (:billingAccountNos)
+ WHERE cr.BILLING_ACCOUNT_NO = :billingAccountNo
+   AND ((CAST(:tariffId AS BIGINT) IS NULL AND cr.TARIFF_ID IS NULL) OR cr.TARIFF_ID = :tariffId)
+   AND TO_CHAR(cr.PLUG_OUT, 'YYYY') || '_' || TO_CHAR(cr.PLUG_OUT, 'MM') = :supplyPeriod
    AND cr.PLUG_OUT >= :from
    AND cr.PLUG_OUT < :to
    AND cr.PAYMENT_CHANNEL = 'CARD'
