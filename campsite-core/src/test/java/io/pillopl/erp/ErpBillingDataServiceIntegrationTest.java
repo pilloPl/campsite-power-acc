@@ -65,6 +65,7 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
     @Autowired EntityManager entityManager;
 
     Pedestal pedestal;
+    Order order;
 
     @BeforeEach
     void setUp() {
@@ -79,7 +80,7 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
         userinfoDao.saveAndFlush(office);
         CampingCard card = campingCardDao.saveAndFlush(new CampingCard.Builder("7701", "HR-7701").build());
 
-        Order order = orderService.createOrderForNewGuest(office, new Guest.Builder(club, GuestType.SEASONAL,
+        order = orderService.createOrderForNewGuest(office, new Guest.Builder(club, GuestType.SEASONAL,
                 "Kovac").firstName("Ivo").iban("HR1210010051863000160"));
         orderService.addItem(office, order.getId(), "HR-SEASON-PACKAGE", 1, bay.getId(), "S7", SEASON_START, null,
                 null);
@@ -209,6 +210,7 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
         record.setPitchNo("S7");
         record.setSiteGroupId(pedestal.getGroup().getId());
         record.setBillingAccountNo(ACCOUNT);
+        record.setGuestId(order.getGuest().getId());
         record.setErpPartnerNo("P-7701");
         record.setPaymentChannel(PaymentChannel.CARD);
         record.setSettlementFlags(new SettlementFlags(true, false, false));

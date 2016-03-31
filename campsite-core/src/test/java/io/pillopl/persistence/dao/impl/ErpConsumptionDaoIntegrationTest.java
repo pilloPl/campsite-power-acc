@@ -28,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,11 +60,13 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
     @Autowired EntityManager entityManager;
 
     Pedestal pedestal;
+    final Map<String, Long> guestIds = new HashMap<>();
+    Group club;
 
     @BeforeEach
     void setUp() {
         Group bay = groupManager.createChildGroup(groupService.fetchSiteGroup("HR SITES"), "BAY ERP SQL", "Bay");
-        Group club = groupManager.createChildGroup(groupService.fetchIssuerGroup("HR ISSUERS"), "ERP SQL CLUB",
+        club = groupManager.createChildGroup(groupService.fetchIssuerGroup("HR ISSUERS"), "ERP SQL CLUB",
                 "Club");
         pedestal = infrastructure.pedestal("HR-ERPSQL-P001", bay, 1);
         account(club, "Resident", RESIDENT);
@@ -156,6 +160,23 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
                 .isEqualTo(ExportStatus.NEW);
     }
 
+    @Test
+    void recordOfAnotherGuestCarryingTheSameAccountNumberIsNeitherBilledNorMarked() {
+        record(TRANSIT, "8", "3.60", JULY, 1L);
+        ConsumptionRecord partnerMember = record(TRANSIT, "5", "2.25", JULY, 1L);
+        partnerMember.setGuestId(guestDao.save(new Guest(club, GuestType.TRANSIT, "Partner member")).getId());
+        consumptionRecordDao.flush();
+
+        assertThat(consumptionRecordDao.findErpConsumptionPerMonth(JULY.minusMonths(1), AUGUST))
+                .extracting(ErpConsumption::billingAccountNo, ErpConsumption::kwh)
+                .containsExactly(tuple(TRANSIT, new BigDecimal("8.0000")));
+        assertThat(consumptionRecordDao.markRecordsForErpBilling(List.of(billedRow(TRANSIT, 1L, "2026_07")),
+                JULY.minusMonths(1), AUGUST, "2026_07")).isEqualTo(1);
+        entityManager.clear();
+        assertThat(consumptionRecordDao.findById(partnerMember.getId()).orElseThrow().getExportStatus())
+                .isEqualTo(ExportStatus.NEW);
+    }
+
     private static ErpConsumption billedRow(String accountNo, Long tariffId, String supplyPeriod) {
         return new ErpConsumption(accountNo, tariffId, false, supplyPeriod, BigDecimal.ONE, BigDecimal.ONE, 1);
     }
@@ -163,6 +184,7 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
     private void account(Group club, String name, String accountNo) {
         Guest guest = guestDao.save(new Guest(club, GuestType.SEASONAL, name));
         billingAccountDao.saveAndFlush(new BillingAccount(guest, accountNo, name));
+        guestIds.put(accountNo, guest.getId());
     }
 
     private ConsumptionRecord record(String accountNo, String kwh, String cost, LocalDateTime plugOut,
@@ -179,6 +201,7 @@ class ErpConsumptionDaoIntegrationTest extends IntegrationTest {
         record.setSupplySessionId(session.getId());
         record.setSiteGroupId(pedestal.getGroup().getId());
         record.setBillingAccountNo(accountNo);
+        record.setGuestId(guestIds.get(accountNo));
         record.setPaymentChannel(PaymentChannel.CARD);
         record.setSettlementFlags(new SettlementFlags(true, false, false));
         record.setKwh(new BigDecimal(kwh));

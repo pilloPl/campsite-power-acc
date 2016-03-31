@@ -200,6 +200,7 @@ class ErpExchangeServiceIntegrationTest extends IntegrationTest {
         record.setSiteGroupId(bay.getId());
         record.setPitchNo("S9");
         record.setBillingAccountNo(ACCOUNT);
+        record.setGuestId(order.getGuest().getId());
         record.setPaymentChannel(PaymentChannel.CARD);
         record.setSettlementFlags(new SettlementFlags(true, false, false));
         record.setKwh(new BigDecimal(kwh));
