@@ -240,7 +240,7 @@ public class IssuerExchangeService {
     }
 
     private void runDirection(Long partnerId, Direction direction, Function<IssuerPartner, ExchangeResult> step) {
-        IssuerPartner partner = issuerPartnerDao.findById(partnerId).orElseThrow();
+        IssuerPartner partner = findPartner(partnerId);
         ExchangeResult result = null;
         String failure = null;
         try {
@@ -257,9 +257,14 @@ public class IssuerExchangeService {
                 saveStatus(partnerId, direction, finalResult, finalFailure, now));
     }
 
+    private IssuerPartner findPartner(Long partnerId) {
+        return issuerPartnerDao.findById(partnerId).orElseThrow(() ->
+                new IssuerExchangeException("Issuer partner " + partnerId + " no longer exists"));
+    }
+
     private void saveStatus(Long partnerId, Direction direction, ExchangeResult result, String failure,
                             LocalDateTime now) {
-        IssuerPartner partner = issuerPartnerDao.findById(partnerId).orElseThrow();
+        IssuerPartner partner = findPartner(partnerId);
         IssuerSyncStatus status = partner.getSyncStatus(direction);
         if (failure != null) {
             status.failed(now, failure);
