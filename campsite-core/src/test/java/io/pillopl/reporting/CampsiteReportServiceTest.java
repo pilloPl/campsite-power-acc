@@ -79,6 +79,18 @@ class CampsiteReportServiceTest {
     }
 
     @Test
+    void recordsWithoutSocketCodeCountAsTheirPedestalInTheHourAverage() {
+        records(record(null, FRIDAY.plusHours(10), FRIDAY.plusHours(11), "2"),
+                record(null, FRIDAY.plusHours(10), FRIDAY.plusHours(11), "4"));
+
+        ReportLineDTO ten = perHour().get(10);
+
+        // both records fall back to pedestal P1: one socket drew 6 kWh
+        assertThat(ten.kwh()).isEqualByComparingTo("6");
+        assertThat(ten.count()).isEqualTo(1);
+    }
+
+    @Test
     void recordWithoutSupplyTimeOrPlugInIsLeftOutOfTheHourReport() {
         records(record("S1", FRIDAY.plusHours(10), FRIDAY.plusHours(10), "5"),
                 record("S2", FRIDAY.plusHours(11), FRIDAY.plusHours(10), "5"),
