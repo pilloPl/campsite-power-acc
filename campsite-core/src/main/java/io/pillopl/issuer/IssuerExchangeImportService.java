@@ -222,7 +222,8 @@ public class IssuerExchangeImportService {
         record.setIssuerGroupId(issuerGroup != null ? issuerGroup.getId() : null);
         record.setIssuerTenant(issuerTenantService.findIssuerTenantNameFor(issuerGroup));
         record.setPaymentChannel(PaymentChannel.CARD);
-        record.setSettlementFlags(SettlementFlags.forCampingCard(true, pedestal.isSettledByCampsite()));
+        // the network pays the partner and bills its own guest: never settled by the partner's campsite
+        record.setSettlementFlags(SettlementFlags.forCampingCard(true, false));
 
         record.setKwh(line.kwh());
         record.setPlugIn(line.plugIn());
