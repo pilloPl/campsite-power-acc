@@ -54,10 +54,7 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
     @Override
     public List<ReportRecord> findReportRecords(LocalDateTime from, LocalDateTime to, Long siteGroupId,
                                                 Long issuerGroupId, Long powerSectionId) {
-        MapSqlParameterSource params = period(from, to)
-                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
-                .addValue("issuerGroupId", issuerGroupId, Types.BIGINT)
-                .addValue("powerSectionId", powerSectionId, Types.BIGINT);
+        MapSqlParameterSource params = scopedPeriod(from, to, siteGroupId, issuerGroupId, powerSectionId);
         return jdbcTemplate.query(findConsumptionReportRecords, params, (rs, rowNum) -> new ReportRecord(
                 rs.getString("SOCKET_CODE"), rs.getString("PEDESTAL_CODE"), toLocal(rs.getTimestamp("PLUG_IN")),
                 toLocal(rs.getTimestamp("PLUG_OUT")), rs.getBigDecimal("KWH")));
@@ -83,10 +80,7 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
     @Override
     public List<ReportLineDTO> getConsumptionPerStayNight(LocalDateTime from, LocalDateTime to, Long siteGroupId,
                                                           Long issuerGroupId, Long powerSectionId) {
-        MapSqlParameterSource params = period(from, to)
-                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
-                .addValue("issuerGroupId", issuerGroupId, Types.BIGINT)
-                .addValue("powerSectionId", powerSectionId, Types.BIGINT);
+        MapSqlParameterSource params = scopedPeriod(from, to, siteGroupId, issuerGroupId, powerSectionId);
         return jdbcTemplate.query(getConsumptionPerStayNight, params, (rs, rowNum) -> new ReportLineDTO(
                 rs.getString("CAMPSITE_CODE"), null, rs.getBigDecimal("KWH"), rs.getLong("NIGHTS"), null));
     }
@@ -94,10 +88,7 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
     @Override
     public List<ReportLineDTO> getTopPitches(LocalDateTime from, LocalDateTime to, Long siteGroupId,
                                              Long issuerGroupId, Long powerSectionId, int maxRows) {
-        MapSqlParameterSource params = period(from, to)
-                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
-                .addValue("issuerGroupId", issuerGroupId, Types.BIGINT)
-                .addValue("powerSectionId", powerSectionId, Types.BIGINT)
+        MapSqlParameterSource params = scopedPeriod(from, to, siteGroupId, issuerGroupId, powerSectionId)
                 .addValue("maxRows", maxRows);
         return jdbcTemplate.query(getTopPitches, params, (rs, rowNum) -> new ReportLineDTO(rs.getString("PITCH_NO"),
                 rs.getString("CAMPSITE_CODE"), rs.getBigDecimal("KWH"), rs.getLong("RECORDS"), null));
@@ -131,8 +122,18 @@ public class ConsumptionReportDaoImpl implements ConsumptionReportDao {
                 .addValue("to", to, Types.TIMESTAMP);
     }
 
+    private static MapSqlParameterSource scopedPeriod(LocalDateTime from, LocalDateTime to, Long siteGroupId,
+                                                      Long issuerGroupId, Long powerSectionId) {
+        return withScope(period(from, to), siteGroupId, issuerGroupId, powerSectionId);
+    }
+
     private static MapSqlParameterSource scope(Long siteGroupId, Long issuerGroupId, Long powerSectionId) {
-        return new MapSqlParameterSource()
+        return withScope(new MapSqlParameterSource(), siteGroupId, issuerGroupId, powerSectionId);
+    }
+
+    private static MapSqlParameterSource withScope(MapSqlParameterSource params, Long siteGroupId,
+                                                   Long issuerGroupId, Long powerSectionId) {
+        return params
                 .addValue("siteGroupId", siteGroupId, Types.BIGINT)
                 .addValue("issuerGroupId", issuerGroupId, Types.BIGINT)
                 .addValue("powerSectionId", powerSectionId, Types.BIGINT);
