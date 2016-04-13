@@ -195,8 +195,10 @@ SELECT DISTINCT p.ID, p.CODE
 
     <!--
       Cards for the local card list of a pedestal controller: living, activated cards of active guests, valid on :day,
-      with a billing account, whose guest hangs in one of the ISSUER groups accepted at the pedestal's campsite
-      (findGroupIdsAcceptedAt, same agreement semantics). Newest cards first: a full list keeps the newest.
+      with a well-formed billing account (6 to 20 digits) that is an open account of the guest when the network keeps
+      the guest's accounts (the rule of CampingCard.validate), whose guest hangs in one of the ISSUER groups accepted
+      at the pedestal's campsite (findGroupIdsAcceptedAt, same agreement semantics). Newest cards first: a full list
+      keeps the newest.
     -->
     <entry key="findValidCardsForLocalCardList"><![CDATA[
 SELECT c.ID
@@ -208,7 +210,12 @@ SELECT c.ID
    AND g.STATUS = 'ACTIVE'
    AND (c.VALID_FROM IS NULL OR c.VALID_FROM <= :day)
    AND (c.VALID_TO IS NULL OR c.VALID_TO >= :day)
-   AND c.BILLING_ACCOUNT_NO IS NOT NULL
+   AND c.BILLING_ACCOUNT_NO ~ '^[0-9]{6,20}$'
+   AND (NOT EXISTS (SELECT 1 FROM BILLING_ACCOUNT ba WHERE ba.GUEST_ID = g.ID)
+        OR EXISTS (SELECT 1 FROM BILLING_ACCOUNT ba
+                    WHERE ba.GUEST_ID = g.ID
+                      AND ba.ERP_ACCOUNT_NO = c.BILLING_ACCOUNT_NO
+                      AND ba.CLOSED = FALSE))
    AND g.GROUP_ID IN (:issuerGroupIds)
  ORDER BY c.ID DESC
 ]]></entry>

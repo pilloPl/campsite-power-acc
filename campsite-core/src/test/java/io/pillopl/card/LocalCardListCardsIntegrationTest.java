@@ -78,6 +78,34 @@ class LocalCardListCardsIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void cardsTheOnlineValidationRefusesForTheirBillingAccountAreLeftOut() {
+        Guest member = cards.guest("Kovac", clubJunior);
+        CampingCard malformed = cards.card("9201", "N9201", member, null, null);
+        malformed.setBillingAccountNo("40-0012");
+        CampingCard tooShort = cards.card("9202", "N9202", member, null, null);
+        tooShort.setBillingAccountNo("40001");
+        Guest resident = cards.guest("Horvat", clubJunior);
+        resident.openBillingAccount("400077001", "Season");
+        CampingCard ownAccount = cards.card("9203", "N9203", resident, null, null);
+        ownAccount.setBillingAccountNo("400077001");
+        CampingCard foreignAccount = cards.card("9204", "N9204", resident, null, null);
+        foreignAccount.setBillingAccountNo("400099009");
+        Guest closedResident = cards.guest("Babic", clubJunior);
+        closedResident.openBillingAccount("400077002", "Last season").close(TODAY.minusMonths(2).atStartOfDay());
+        CampingCard closedAccount = cards.card("9205", "N9205", closedResident, null, null);
+        closedAccount.setBillingAccountNo("400077002");
+        entityManager.flush();
+
+        List<CampingCard> list = findForBayBeach();
+
+        assertThat(list).containsExactly(ownAccount);
+        for (CampingCard refused : List.of(malformed, tooShort, foreignAccount, closedAccount)) {
+            assertThat(refused.validate(TODAY.atTime(12, 0))).isEqualTo(CardStatus.BILLING_ACCOUNT_INVALID);
+        }
+        assertThat(ownAccount.validate(TODAY.atTime(12, 0))).isEqualTo(CardStatus.VALID);
+    }
+
+    @Test
     void cardsOfDeactivatedOrDeletedGuestsAreLeftOut() {
         Guest deactivated = cards.guest("Kovac", clubJunior);
         cards.card("9101", deactivated);
