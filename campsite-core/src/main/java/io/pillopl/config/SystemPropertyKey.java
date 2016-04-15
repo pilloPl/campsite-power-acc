@@ -47,6 +47,7 @@ public enum SystemPropertyKey {
     // issuer exchange
     IssuerExchangeJobIntervalInSeconds,
     IssuerRecordExportLookBackInDays,
+    RecordWithoutExportAfterDays,
 
     // materialized views
     UserinfoSummaryRefreshJobIntervalInSeconds,

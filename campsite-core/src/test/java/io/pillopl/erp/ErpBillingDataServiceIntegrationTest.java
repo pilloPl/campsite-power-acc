@@ -186,6 +186,26 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
         assertThat(lines).extracting(ErpBillingLine::getLineType).containsExactly(LineType.FIXED_FEE);
         assertThat(exportStatus(june)).isEqualTo(ExportStatus.WORK);
         assertThat(exportStatus(lastSeason)).isEqualTo(ExportStatus.NEW);
+        assertThat(erpBillingDataService.findRecordsWithoutExport()).extracting(ConsumptionRecord::getId)
+                .contains(lastSeason.getId()).doesNotContain(june.getId());
+    }
+
+    @Test
+    void billableRecordNoExportTakesIsListedOnceItIsOlderThanTheConfiguredDays() {
+        LocalDateTime now = LocalDateTime.now();
+        ConsumptionRecord withoutAccount = record("12", now.minusDays(41), STANDARD_TARIFF);
+        withoutAccount.setBillingAccountNo("400099990001");
+        ConsumptionRecord recent = record("12", now.minusDays(5), STANDARD_TARIFF);
+        recent.setBillingAccountNo("400099990001");
+        ConsumptionRecord notBillable = record("12", now.minusDays(41), STANDARD_TARIFF);
+        notBillable.setSettlementFlags(new SettlementFlags(false, false, false));
+        ConsumptionRecord settledByCampsite = record("12", now.minusDays(41), STANDARD_TARIFF);
+        settledByCampsite.setSettlementFlags(new SettlementFlags(true, true, false));
+        consumptionRecordDao.flush();
+
+        assertThat(erpBillingDataService.findRecordsWithoutExport()).extracting(ConsumptionRecord::getId)
+                .contains(withoutAccount.getId())
+                .doesNotContain(recent.getId(), notBillable.getId(), settledByCampsite.getId());
     }
 
     private ExportStatus exportStatus(ConsumptionRecord record) {

@@ -288,6 +288,13 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.IssuerRecordExportLookBackInDays, 365);
     }
 
+    /**
+     * A billable record still waiting for export this many days after its plug-out has no export that takes it.
+     */
+    public int getRecordWithoutExportAfterDays() {
+        return getPropertyInt(SystemPropertyKey.RecordWithoutExportAfterDays, 40);
+    }
+
     // ---------------------------------------------------------------- materialized views
 
     public int getUserinfoSummaryRefreshJobIntervalInSeconds() {

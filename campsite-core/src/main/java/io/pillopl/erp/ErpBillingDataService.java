@@ -1,6 +1,7 @@
 package io.pillopl.erp;
 
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.consumption.ConsumptionRecord;
 import io.pillopl.consumption.ExportStatus;
 import io.pillopl.erp.ErpBillingLine.LineType;
 import io.pillopl.guest.BillingAccount;
@@ -60,6 +61,8 @@ public class ErpBillingDataService {
     static final int FRACTION_SCALE = 6;
 
     static final String DEFAULT_CURRENCY = "EUR";
+
+    static final int MAX_RECORDS_IN_WARNING = 10;
 
     private final SystemPropertyService systemPropertyService;
 
@@ -314,7 +317,26 @@ public class ErpBillingDataService {
                 period.getLastDay().plusDays(1).atStartOfDay(), period.getCode());
         LOG.info(String.format("ERP billing %s: %s lines of %s accounts, %s consumption records", period,
                 lines.size(), billedAccountNos.size(), records));
+        List<ConsumptionRecord> withoutExport = findRecordsWithoutExport();
+        if (!withoutExport.isEmpty()) {
+            LOG.warn(String.format("%s billable consumption records have no export (oldest: %s)",
+                    withoutExport.size(), withoutExport.stream().limit(MAX_RECORDS_IN_WARNING)
+                            .map(ConsumptionRecord::getRecordNo).toList()));
+        }
         return lines;
+    }
+
+    /**
+     * Billable records nobody exports: priced card records the network bills itself, still NEW long after their
+     * plug-out ({@code RecordWithoutExportAfterDays}). The ERP run takes the records of the guests' own billing
+     * accounts every month and the issuer exchange those of the partners' members, so a record left over has no
+     * owner: its guest has no billing account, its issuer is no partner taking records, or no ERP line takes it
+     * (a supply on a contract tariff before the contract's season). They wait here for a decision.
+     */
+    @Transactional(readOnly = true)
+    public List<ConsumptionRecord> findRecordsWithoutExport() {
+        return consumptionRecordDao.findBillableRecordsWaitingForExportSince(dateService.getNow()
+                .minusDays(systemPropertyService.getRecordWithoutExportAfterDays()));
     }
 
     /**
