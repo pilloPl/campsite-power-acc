@@ -244,6 +244,13 @@ public class SystemPropertyService {
     }
 
     /**
+     * Who reviews the suspect consumption records; null sends their mail to the developer address.
+     */
+    public String getSuspectRecordEmail() {
+        return getProperty(SystemPropertyKey.SuspectRecordEmail, null);
+    }
+
+    /**
      * Rows of the top pitches report.
      */
     public int getReportTopPitchesMaxRows() {

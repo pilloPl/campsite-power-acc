@@ -35,6 +35,7 @@ public enum SystemPropertyKey {
 
     // consumption records
     SuspectRecordKwhPerNightThreshold,
+    SuspectRecordEmail,
     ReportTopPitchesMaxRows,
 
     // local card lists
