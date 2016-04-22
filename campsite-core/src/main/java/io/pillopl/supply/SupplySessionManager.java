@@ -235,6 +235,10 @@ public class SupplySessionManager implements SupplySessionRegistry {
             LOG.debug(String.format("No open stay of card %s on %s", card, at));
             return null;
         }
+        if (stays.size() > 1) {
+            LOG.info(String.format("Card %s has %d open stays on %s, the session belongs to stay %s", card,
+                    stays.size(), at.toLocalDate(), stays.get(0).getId()));
+        }
         return stays.get(0);
     }
 
