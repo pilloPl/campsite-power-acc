@@ -215,6 +215,18 @@ class SupplyControlUnitImplTest {
         SupplyIncident incident = loggedIncident();
         assertThat(incident.getIncidentType()).isEqualTo(IncidentType.SESSION_ALREADY_CLOSED);
         assertThat(incident.getSupplySessionId()).isEqualTo(31L);
+        assertThat(incident.getMessage()).contains("closed by the system (TIMEOUT)");
+    }
+
+    @Test
+    void repeatedStopOfASessionThePedestalClosedNamesThePedestal() {
+        SupplySession closed = session(card, null, false);
+        closed.setStopReason(StopReason.UNPLUGGED);
+        when(sessionManager.findSessionFor(PEDESTAL, 1001)).thenReturn(closed);
+
+        controlUnit.stopSupply(PEDESTAL, RFID, stop(1001));
+
+        assertThat(loggedIncident().getMessage()).contains("closed by the pedestal (UNPLUGGED)");
     }
 
     @Test

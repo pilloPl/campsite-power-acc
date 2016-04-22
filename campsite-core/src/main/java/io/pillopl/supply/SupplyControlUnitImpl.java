@@ -468,8 +468,9 @@ public class SupplyControlUnitImpl {
             return String.format("Can't find session of transaction %s on pedestal %s!", transactionId,
                     pedestalCode);
         }
-        return String.format("Session %s of transaction %s already closed by the system (%s)!", session.getId(),
-                transactionId, session.getStopReason());
+        final StopReason stopReason = session.getStopReason();
+        return String.format("Session %s of transaction %s already closed by the %s (%s)!", session.getId(),
+                transactionId, stopReason != null && stopReason.isClosedBySystem() ? "system" : "pedestal", stopReason);
     }
 
     private static boolean wasDifferentCardUsage(String cardRfid, String sessionCardRfid, Integer transactionId) {
