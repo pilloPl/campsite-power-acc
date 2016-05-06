@@ -310,6 +310,9 @@ public class ConsumptionRecord {
      * The record's values are implausible: it waits for a review, not priced and not exported.
      */
     public void markSuspect(String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Suspect consumption record " + recordNo + " needs a reason");
+        }
         this.validationState = RecordValidationState.SUSPECT;
         this.suspectReason = reason;
         this.exportStatus = ExportStatus.REVIEW;
