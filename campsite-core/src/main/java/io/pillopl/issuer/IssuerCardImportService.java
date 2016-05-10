@@ -185,29 +185,34 @@ public class IssuerCardImportService {
      * Is the card a network card, i.e. its guest hangs in the subtree of {@code NETWORK CARD}?
      */
     boolean isNetworkCard(CampingCard card) {
-        if (card != null && card.getGuest() != null && card.getGuest().getGroup() != null) {
-            Group networkCardGroup = groupService.fetchNetworkCardIssuerGroup();
-            if (networkCardGroup != null) {
-                List<Long> networkGroupIds = groupService.findManageable(networkCardGroup);
-                return networkGroupIds.contains(card.getGuest().getGroup().getId());
-            }
+        if (!hasGuestGroup(card)) {
+            return false;
         }
-        return false;
+        List<Long> networkGroupIds = findNetworkCardGroupIds();
+        return networkGroupIds != null && networkGroupIds.contains(card.getGuest().getGroup().getId());
     }
 
     /**
      * Is the card a card of an issuer, i.e. its guest hangs in an ISSUER group outside the network card's subtree?
      */
     boolean isIssuerCard(CampingCard card) {
-        if (card != null && card.getGuest() != null && card.getGuest().getGroup() != null) {
-            Group networkCardGroup = groupService.fetchNetworkCardIssuerGroup();
-            if (networkCardGroup != null) {
-                List<Long> networkGroupIds = groupService.findManageable(networkCardGroup);
-                return !networkGroupIds.contains(card.getGuest().getGroup().getId());
-            }
-            return true;
+        if (!hasGuestGroup(card)) {
+            return false;
         }
-        return false;
+        List<Long> networkGroupIds = findNetworkCardGroupIds();
+        return networkGroupIds == null || !networkGroupIds.contains(card.getGuest().getGroup().getId());
+    }
+
+    private static boolean hasGuestGroup(CampingCard card) {
+        return card != null && card.getGuest() != null && card.getGuest().getGroup() != null;
+    }
+
+    /**
+     * The groups of the {@code NETWORK CARD} subtree, null when the network has no such group.
+     */
+    private List<Long> findNetworkCardGroupIds() {
+        Group networkCardGroup = groupService.fetchNetworkCardIssuerGroup();
+        return networkCardGroup != null ? groupService.findManageable(networkCardGroup) : null;
     }
 
     private static String toDecimalUid(String cardRfidHex) {
