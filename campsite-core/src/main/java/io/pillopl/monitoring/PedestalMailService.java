@@ -8,11 +8,14 @@ import io.pillopl.infrastructure.DecommissioningNotifier;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.mail.MailService;
+import io.pillopl.persistence.dao.PedestalDao;
+import io.pillopl.persistence.dao.SocketDao;
 import io.pillopl.persistence.dao.SocketStatusLogDao;
 import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -21,8 +24,8 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Service mails of the pedestals: socket errors, link timeouts, firmware and diagnostics status, and the mail to the
- * affiliate owner when a pedestal goes back to the supplier. The recipient is the {@link Notification} of the type
+ * Service mails of the pedestals: socket errors, link timeouts, firmware and diagnostics status, power section and QR
+ * payment alerts, and the mail to the affiliate owner when a pedestal goes back to the supplier. The recipient is the {@link Notification} of the type
  * nearest above the pedestal; without one the mail goes to the developer with a configuration warning.
  */
 @Service
@@ -36,6 +39,10 @@ public class PedestalMailService implements DecommissioningNotifier {
 
     static final String TEMPLATE_BACK_TO_SUPPLIER = "mail/pedestal-back-to-supplier.ftl";
 
+    static final String TEMPLATE_POWER_SECTION_MISCONFIGURED = "mail/power-section-misconfigured.ftl";
+
+    static final String TEMPLATE_QRPAY_ERROR = "mail/qrpay-error.ftl";
+
     private final MailService mailService;
 
     private final NotificationService notificationService;
@@ -44,12 +51,19 @@ public class PedestalMailService implements DecommissioningNotifier {
 
     private final SystemPropertyService systemPropertyService;
 
+    private final PedestalDao pedestalDao;
+
+    private final SocketDao socketDao;
+
     public PedestalMailService(MailService mailService, NotificationService notificationService,
-                               SocketStatusLogDao socketStatusLogDao, SystemPropertyService systemPropertyService) {
+                               SocketStatusLogDao socketStatusLogDao, SystemPropertyService systemPropertyService,
+                               PedestalDao pedestalDao, SocketDao socketDao) {
         this.mailService = mailService;
         this.notificationService = notificationService;
         this.socketStatusLogDao = socketStatusLogDao;
         this.systemPropertyService = systemPropertyService;
+        this.pedestalDao = pedestalDao;
+        this.socketDao = socketDao;
     }
 
     /**
@@ -154,6 +168,66 @@ public class PedestalMailService implements DecommissioningNotifier {
         } catch (MessagingException e) {
             LOGGER.error(String.format("Back to supplier mail for pedestal %s to %s failed", pedestalCode, email), e);
         }
+    }
+
+    /**
+     * Alert of the power budget: a section's budget could not be checked, so its sockets refuse every start. Goes to
+     * the service recipient of the pedestal (else the developer).
+     */
+    @Transactional(readOnly = true)
+    public void sendPowerSectionMisconfiguredMail(String pedestalCode, Long powerSectionId, Integer socketNo,
+                                                  String problem) throws MessagingException {
+        LOGGER.error(String.format("Sending out power section alert for section %s at pedestal %s: %s",
+                powerSectionId, pedestalCode, problem));
+        Pedestal pedestal = pedestalCode != null ? pedestalDao.findByCode(pedestalCode) : null;
+        Map<String, Object> model = pedestal != null ? model(pedestal) : unknownPedestal(pedestalCode);
+        model.put("powerSectionId", orNa(powerSectionId));
+        model.put("socketNo", orNa(socketNo));
+        model.put("problem", orNa(problem));
+
+        mailService.sendTemplateMail(MailService.DEFAULT_LOCALE, recipient(statusNotification(pedestal)),
+                "Power section " + orNa(powerSectionId) + " refuses supplies: " + orNa(problem),
+                TEMPLATE_POWER_SECTION_MISCONFIGURED, model);
+    }
+
+    /**
+     * A QR payment went to ERROR. Goes to the service recipient of the socket's pedestal (else the developer).
+     */
+    @Transactional(readOnly = true)
+    public void sendQrPayErrorMail(Long socketId, Long processId, String errorCode, String message)
+            throws MessagingException {
+        Socket socket = socketId != null ? socketDao.findById(socketId).orElse(null) : null;
+        Pedestal pedestal = socket != null ? socket.getPedestal() : null;
+        Map<String, Object> model = pedestal != null ? model(pedestal) : unknownPedestal(null);
+        model.put("processId", orNa(processId));
+        model.put("errorCode", orNa(errorCode));
+        model.put("message", orNa(message));
+
+        mailService.sendTemplateMail(MailService.DEFAULT_LOCALE, recipient(statusNotification(pedestal)),
+                "QR payment " + orNa(processId) + " failed: " + orNa(errorCode), TEMPLATE_QRPAY_ERROR, model);
+    }
+
+    private Notification statusNotification(Pedestal pedestal) {
+        if (pedestal == null) {
+            return null;
+        }
+        try {
+            return notificationService.fetchNotification(pedestal, NotificationType.PEDESTAL_STATUS);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Notification couldn't be fetched for pedestal '%s'", pedestal.getCode()), e);
+            return null;
+        }
+    }
+
+    private static Map<String, Object> unknownPedestal(String pedestalCode) {
+        Map<String, Object> model = new HashMap<>();
+        model.put("pedestalCode", orNa(pedestalCode));
+        model.put("campsite", "N/A");
+        return model;
+    }
+
+    private static String orNa(Object value) {
+        return value != null ? value.toString() : "N/A";
     }
 
     private String recipient(Notification notification) {

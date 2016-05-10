@@ -10,6 +10,8 @@ import io.pillopl.infrastructure.PedestalLinkVersion;
 import io.pillopl.infrastructure.PedestalType;
 import io.pillopl.infrastructure.Socket;
 import io.pillopl.mail.MailService;
+import io.pillopl.persistence.dao.PedestalDao;
+import io.pillopl.persistence.dao.SocketDao;
 import io.pillopl.persistence.dao.SocketStatusLogDao;
 import jakarta.mail.MessagingException;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,8 +42,11 @@ class PedestalMailServiceTest {
     final SocketStatusLogDao socketStatusLogDao = mock(SocketStatusLogDao.class);
     final SystemPropertyService systemPropertyService = mock(SystemPropertyService.class);
 
+    final PedestalDao pedestalDao = mock(PedestalDao.class);
+    final SocketDao socketDao = mock(SocketDao.class);
+
     final PedestalMailService pedestalMailService = new PedestalMailService(mailService, notificationService,
-            socketStatusLogDao, systemPropertyService);
+            socketStatusLogDao, systemPropertyService, pedestalDao, socketDao);
 
     Pedestal pedestal;
     Socket socket;
@@ -140,6 +145,54 @@ class PedestalMailServiceTest {
                 .sendTemplateMail(any(), anyString(), anyString(), anyString(), anyMap());
 
         pedestalMailService.pedestalBackToSupplier(Locale.ENGLISH, "HR-BAY-P001", "owner@bay.test");
+    }
+
+    @Test
+    void powerSectionAlertGoesToTheServiceRecipientOfThePedestal() throws MessagingException {
+        when(pedestalDao.findByCode("HR-BAY-P001")).thenReturn(pedestal);
+        when(notificationService.fetchNotification(pedestal, NotificationType.PEDESTAL_STATUS))
+                .thenReturn(new Notification("Bay service", "service@bay.test", NotificationType.PEDESTAL_STATUS));
+
+        pedestalMailService.sendPowerSectionMisconfiguredMail("HR-BAY-P001", 1001L, 2, "No budget algorithm");
+
+        Map<String, Object> model = sentModel("service@bay.test",
+                "Power section 1001 refuses supplies: No budget algorithm",
+                PedestalMailService.TEMPLATE_POWER_SECTION_MISCONFIGURED);
+        assertThat(model).containsEntry("powerSectionId", "1001").containsEntry("socketNo", "2")
+                .containsEntry("problem", "No budget algorithm").containsEntry("campsite", "Bay campsite");
+    }
+
+    @Test
+    void powerSectionAlertOfAnUnknownPedestalGoesToTheDeveloper() throws MessagingException {
+        pedestalMailService.sendPowerSectionMisconfiguredMail("HR-BAY-P001", 1001L, null, "Unknown algorithm");
+
+        Map<String, Object> model = sentModel("dev@campsite.test",
+                "Power section 1001 refuses supplies: Unknown algorithm",
+                PedestalMailService.TEMPLATE_POWER_SECTION_MISCONFIGURED);
+        assertThat(model).containsEntry("socketNo", "N/A").containsEntry("campsite", "N/A");
+    }
+
+    @Test
+    void qrPaymentErrorGoesToTheServiceRecipientOfTheSocketsPedestal() throws MessagingException {
+        when(socketDao.findById(77L)).thenReturn(java.util.Optional.of(socket));
+        when(notificationService.fetchNotification(pedestal, NotificationType.PEDESTAL_STATUS))
+                .thenReturn(new Notification("Bay service", "service@bay.test", NotificationType.PEDESTAL_STATUS));
+
+        pedestalMailService.sendQrPayErrorMail(77L, 5005L, "CALCULATION_FAILED", "no tariff");
+
+        Map<String, Object> model = sentModel("service@bay.test", "QR payment 5005 failed: CALCULATION_FAILED",
+                PedestalMailService.TEMPLATE_QRPAY_ERROR);
+        assertThat(model).containsEntry("processId", "5005").containsEntry("message", "no tariff");
+    }
+
+    @Test
+    void qrPaymentErrorWithoutSocketGoesToTheDeveloper() throws MessagingException {
+        pedestalMailService.sendQrPayErrorMail(null, 5006L, "UNSUPPORTED_OPERATION", null);
+
+        verify(mailService).sendTemplateMail(eq(MailService.DEFAULT_LOCALE), eq("dev@campsite.test"),
+                eq("QR payment 5006 failed: UNSUPPORTED_OPERATION"), eq(PedestalMailService.TEMPLATE_QRPAY_ERROR),
+                eq(Map.of("pedestalCode", "N/A", "campsite", "N/A", "processId", "5006",
+                        "errorCode", "UNSUPPORTED_OPERATION", "message", "N/A")));
     }
 
     @SuppressWarnings("unchecked")

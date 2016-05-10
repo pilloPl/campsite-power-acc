@@ -88,6 +88,46 @@ class MailTemplatesIntegrationTest extends IntegrationTest {
                 .contains("Group validity check failed");
     }
 
+    @Test
+    void suspectRecordMailNamesTheReasonAndThePartnerOfAnImport() throws MessagingException {
+        Map<String, Object> model = new HashMap<>();
+        model.put("recordNo", "BAY-20260711-000042");
+        model.put("reason", "Consumption 900 kWh in 1 night(s) is above 300 kWh per night");
+        model.put("campsite", "Bay campsite");
+        model.put("pedestalCode", "HR-BAY-P001");
+        model.put("pitchNo", "A12");
+        model.put("guestName", "Ivo Kovac");
+        model.put("kwh", "900");
+        model.put("plugIn", AT);
+        model.put("nights", 1);
+
+        assertThat(render("mail/consumption-record-suspect.ftl", model)).contains("BAY-20260711-000042")
+                .contains("above 300 kWh per night").contains("to unknown, 1 night(s), 900 kWh")
+                .doesNotContain("partner");
+
+        model.put("source", "RECORD CLUB");
+        assertThat(render("mail/consumption-record-suspect.ftl", model))
+                .contains("Imported from partner RECORD CLUB");
+    }
+
+    @Test
+    void powerSectionAndQrPaymentAlertMails() throws MessagingException {
+        Map<String, Object> model = pedestal();
+        model.put("powerSectionId", "1001");
+        model.put("socketNo", "2");
+        model.put("problem", "No budget algorithm");
+        assertThat(render("mail/power-section-misconfigured.ftl", model)).contains("section 1001")
+                .contains("socket 2 of pedestal\nHR-BAY-P001 (Bay campsite)")
+                .contains("No budget algorithm");
+
+        model = pedestal();
+        model.put("processId", "5005");
+        model.put("errorCode", "CALCULATION_FAILED");
+        model.put("message", "no tariff");
+        assertThat(render("mail/qrpay-error.ftl", model)).contains("QR payment 5005 went to ERROR")
+                .contains("CALCULATION_FAILED: no tariff");
+    }
+
     private String render(String template, Map<String, Object> model) throws MessagingException {
         return mailService.render(Locale.ENGLISH, template, model);
     }
