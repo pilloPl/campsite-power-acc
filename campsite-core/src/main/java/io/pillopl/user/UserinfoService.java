@@ -75,11 +75,11 @@ public class UserinfoService {
     public Market determineMarket(String username) {
         Userinfo userinfo = userinfoDao.findByUsername(username);
         if (userinfo == null) {
-            LOG.error(String.format("User with username '%s' not exists", username));
+            LOG.error(String.format("No console user is registered as '%s'", username));
             return null;
         }
         if (userinfo.getGroup() == null) {
-            LOG.error(String.format("For user with username '%s' no group is set", username));
+            LOG.error(String.format("Console user '%s' belongs to no organisation group", username));
             return null;
         }
 
@@ -174,12 +174,12 @@ public class UserinfoService {
     public Userinfo createUser(Userinfo principal, String email, String name, Market market) {
         Userinfo userinfoToCreate = createUserinfo(email, name);
 
-        LOG.info("Check if user does not exists");
+        LOG.info("Looking for a console user with the same e-mail");
         if (emailExists(email)) {
-            throw new IllegalStateException(String.format("User with email '%s' already exists", email));
+            throw new IllegalStateException(String.format("The e-mail '%s' is taken by another console user", email));
         }
 
-        LOG.info("Get group user should belong to from principal if not specified");
+        LOG.info("No campsite network given, taking the one of the creating user");
         if (market == null || Market.UNKNOWN == market) {
             market = determineMarket(principal.getUsername());
         }
@@ -198,7 +198,7 @@ public class UserinfoService {
         Userrole selfServiceUser = userroleDao.findByName(UserroleName.SELF_SERVICE_USER.name());
         userinfoToCreate.getRoles().add(selfServiceUser);
 
-        // At last we generate the username
+        // the login name is derived only now, from the e-mail
         return saveWithGeneratedUsername(userinfoToCreate);
     }
 
@@ -210,13 +210,13 @@ public class UserinfoService {
         Objects.requireNonNull(userinfo);
         String email = userinfo.getEmail();
         if (userinfo.getUsername() != null) {
-            throw new IllegalArgumentException("Because the username will be generated, we explicitly do not want one set");
+            throw new IllegalArgumentException("A new console user must come without a login name, it is derived from the e-mail");
         }
         if (!isEmail(email)) {
-            throw new IllegalArgumentException(String.format("Not an email address: %s", email));
+            throw new IllegalArgumentException(String.format("'%s' is no valid e-mail", email));
         }
         if (userinfo.getId() != null) {
-            throw new IllegalArgumentException(String.format("Userinfo already has an id, (email: %s)", email));
+            throw new IllegalArgumentException(String.format("Console user with e-mail %s is stored already", email));
         }
 
         String localPart = getLocalPartOfEmail(email);
@@ -230,7 +230,7 @@ public class UserinfoService {
             username = localPart + USERNAME_SUFFIX_SEPARATOR + i;
         }
 
-        // If the limit is exceeded we take the db id as suffix.
+        // too many namesakes: the database id makes the login name unique
         if (null == userinfo.getId()) {
             LOG.warn(String.format("Usernames exceeding limit of %s, taking the db id as suffix.", USERNAME_SUFFIX_LIMIT));
             userinfo.setUsername(UUID.randomUUID().toString());
@@ -247,7 +247,7 @@ public class UserinfoService {
         }
         Userinfo user = userinfoDao.findByUsername(username);
         if (emailExists(email)) {
-            String message = String.format("Already existing email for '%s', cannot change email", email);
+            String message = String.format("The e-mail '%s' is taken, the e-mail stays unchanged", email);
             LOG.error(message);
             throw new IllegalStateException(message);
         }
@@ -324,7 +324,7 @@ public class UserinfoService {
 
         Group affiliateGroup = affiliateGroupService.findAffiliateSiteGroup(ownerUsername);
         Group ownersSiteGroup = owner.getGroup(GroupType.SITE);
-        if (ownersSiteGroup == null && affiliateGroup == null) { // only this case is a valid state
+        if (ownersSiteGroup == null && affiliateGroup == null) { // neither group set yet: the expected starting point
             LOG.error("Seems that the affiliate owner's group setup is not done yet. There is no affiliate group.");
             return null;
         }

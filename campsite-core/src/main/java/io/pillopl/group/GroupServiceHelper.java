@@ -192,7 +192,7 @@ public final class GroupServiceHelper {
      */
     public static void checkParent(Group g, List<String> errors, Set<Long> checked) {
         Group parent = g.getParent();
-        // found the top of the hierarchy
+        // reached the root
         if (parent == null) {
             return;
         }
@@ -226,7 +226,7 @@ public final class GroupServiceHelper {
 
     public static String groupToPrettyString(Group group) {
         if (group == null) {
-            return "Argument 'group' is null, nothing to pretty up!";
+            return "<no group>";
         }
         return concatWithDelim(", with TYPE:", group.getName(), group.getType());
     }

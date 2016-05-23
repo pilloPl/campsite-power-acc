@@ -48,7 +48,7 @@ public class SupplierMarkerService {
     @Transactional(readOnly = true)
     public boolean isInSupplierStock(Group group) {
         if (group == null || group.getId() == null) {
-            throw new IllegalArgumentException("Group or Group.id can't be null");
+            throw new IllegalArgumentException("A stored group is required");
         }
         return isInSupplierStock(group.getId());
     }

@@ -45,13 +45,13 @@ class MonitoringAndMaintenanceJobsTest {
     @Test
     void groupValidityErrorsAreMailedToTheDeveloper() {
         when(groupService.collectValidityErrors()).thenReturn(List.of("No group attached to Pedestal X",
-                "Guest Y is attached to the wrong group SITE"));
+                "Guest Y belongs to a SITE group instead of a staff group"));
 
         new GroupValidityControlJob(groupService, mailService).executeInternal(null);
 
         verify(mailService).sendErrorMail("Group validity check found 2 error(s)",
                 "No group attached to Pedestal X" + System.lineSeparator()
-                        + "Guest Y is attached to the wrong group SITE");
+                        + "Guest Y belongs to a SITE group instead of a staff group");
     }
 
     @Test

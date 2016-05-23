@@ -127,7 +127,7 @@ public class Userinfo implements IsLinkedToGroup {
     }
 
     public boolean containsRole(String roleName) {
-        return roles != null && roles.contains(new Userrole(roleName)); // it's enough to compare role names
+        return roles != null && roles.contains(new Userrole(roleName)); // Userrole equality is by name
     }
 
     public boolean containsRole(UserroleName roleName) {

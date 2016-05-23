@@ -33,7 +33,7 @@ public class LocalListAttributeService {
     @Transactional(readOnly = true)
     public boolean isLocalListGroup(Group group) {
         if (group == null || group.getId() == null) {
-            throw new IllegalArgumentException("Group or Group.id can't be null");
+            throw new IllegalArgumentException("A stored group is required");
         }
         return isLocalListGroup(group.getId());
     }
@@ -44,7 +44,7 @@ public class LocalListAttributeService {
     @Transactional(readOnly = true)
     public LocalListAttribute getLocalListAttribute(Group group) {
         if (group == null || group.getId() == null) {
-            throw new IllegalArgumentException("Group or Group.id can't be null");
+            throw new IllegalArgumentException("A stored group is required");
         }
         LocalListAttribute nearest = findNearest(group.getId());
         if (nearest != null && nearest.isLocalListAllowed()) {

@@ -22,7 +22,7 @@ public interface UserinfoDao extends JpaRepository<Userinfo, Long> {
     /**
      * All users with this username ignoring case (deleted ones too): a generated username must not collide.
      */
-    @Query("select u from Userinfo u where lower(u.username) = lower(:username)")
+    @Query("select ui from Userinfo ui where lower(ui.username) = lower(:username)")
     List<Userinfo> findAllByUsernameIgnoreCase(@Param("username") String username);
 
     @Query("select u from Userinfo u where lower(u.email) = lower(:email) and u.deleted = false order by u.id")

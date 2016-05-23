@@ -71,7 +71,7 @@ public class GroupService {
         List<String> errors = new ArrayList<>();
         List<Group> all = groupDao.findAll();
 
-        // check for valid type-hierarchy
+        // a child type must fit under its parent type
         for (Group g : all) {
             GroupServiceHelper.checkParent(g, errors, checked);
         }
@@ -94,7 +94,7 @@ public class GroupService {
             }
 
             if (!GroupType.STAFF.isGroupType(user.getGroup())) {
-                errors.add(String.format("User %s is attached to the wrong group %s", user,
+                errors.add(String.format("Console user %s belongs to a %s group instead of a staff group", user,
                         user.getGroup().getType()));
             }
         }
@@ -138,7 +138,7 @@ public class GroupService {
         if (isManageable(group, groupIsManageable)) {
             return true;
         }
-        throw new AccessDeniedException(String.format("Group '%s' has no access to group '%s'",
+        throw new AccessDeniedException(String.format("Group '%s' may not manage group '%s'",
                 GroupServiceHelper.groupToPrettyString(group),
                 GroupServiceHelper.groupToPrettyString(groupIsManageable)));
     }
@@ -149,17 +149,17 @@ public class GroupService {
     @Transactional(readOnly = true)
     public boolean isManageable(Group group, Group groupIsManageable) {
         if (group == null) {
-            LOG.error("Admins group is null");
+            LOG.error("No admin group configured for this network");
             return false;
         }
 
-        // traverse referenced groups
+        // then the groups this one references
         List<Long> ids = groupDao.findManageable(group.getId());
         if (groupIsManageable != null && ids.contains(groupIsManageable.getId())) {
             return true;
         }
 
-        LOG.info(String.format("Group '%s' has no access to group '%s'", GroupServiceHelper.groupToPrettyString(group),
+        LOG.info(String.format("Group '%s' may not manage group '%s'", GroupServiceHelper.groupToPrettyString(group),
                 GroupServiceHelper.groupToPrettyString(groupIsManageable)));
         return false;
     }
@@ -234,39 +234,39 @@ public class GroupService {
     }
 
     /**
-     * This method creates a list of the groups starting at the child node going up to the root.
+     * Ancestors of a group including the group itself.
      *
-     * @param id                the child node to start
-     * @param order_ChildToRoot true = ordered from child to root, false = ordered from root to child
-     * @return a list of groups representing the line to or from the root
+     * @param id           group whose ancestors are wanted
+     * @param leafFirst    true starts the list with the group and ends with its root, false the other way round
+     * @return the group and all its ancestors, empty for an unknown id
      */
     @Transactional(readOnly = true)
-    public List<Group> fetchParentLine(Long id, boolean order_ChildToRoot) {
-        List<Group> parentLineGroupList = new ArrayList<>();
+    public List<Group> fetchParentLine(Long id, boolean leafFirst) {
+        List<Group> ancestors = new ArrayList<>();
 
         if (id != null) {
-            Group childGroup = groupDao.findById(id).orElse(null);
-            if (childGroup != null) {
-                parentLineGroupList.add(childGroup);
+            Group current = groupDao.findById(id).orElse(null);
+            if (current != null) {
+                ancestors.add(current);
 
-                while (childGroup.getParent() != null) {
-                    childGroup = childGroup.getParent();
-                    parentLineGroupList.add(childGroup);
+                while (current.getParent() != null) {
+                    current = current.getParent();
+                    ancestors.add(current);
                 }
 
-                if (!order_ChildToRoot) Collections.reverse(parentLineGroupList);
+                if (!leafFirst) Collections.reverse(ancestors);
             }
         }
-        return parentLineGroupList;
+        return ancestors;
     }
 
     @Transactional(readOnly = true)
-    public List<Long> fetchParentLineIds(Long id, boolean order_ChildToRoot) {
-        List<Long> parentLineIdList = new ArrayList<>();
-        for (Group group : fetchParentLine(id, order_ChildToRoot)) {
-            parentLineIdList.add(group.getId());
+    public List<Long> fetchParentLineIds(Long id, boolean leafFirst) {
+        List<Long> ancestorIds = new ArrayList<>();
+        for (Group group : fetchParentLine(id, leafFirst)) {
+            ancestorIds.add(group.getId());
         }
-        return parentLineIdList;
+        return ancestorIds;
     }
 
     @Transactional(readOnly = true)
@@ -357,31 +357,31 @@ public class GroupService {
         return pedestal != null;
     }
 
-    /*NON_TRANSACTIONAL*/
+    // runs in the caller's transaction, if any
     public List<Group> findManageableGroups(Group group) {
         Objects.requireNonNull(group);
         return groupDao.findManageableGroups(group.getId());
     }
 
-    /*NON_TRANSACTIONAL*/
+    // runs in the caller's transaction, if any
     public List<Long> findManageable(Group group) {
         Objects.requireNonNull(group);
         return groupDao.findManageable(group.getId());
     }
 
-    /*NON_TRANSACTIONAL*/
+    // runs in the caller's transaction, if any
     public List<Group> findParentGroups(Group group) {
         Objects.requireNonNull(group);
         return groupDao.findParentGroups(group.getId());
     }
 
-    /*NON_TRANSACTIONAL*/
+    // runs in the caller's transaction, if any
     public List<Long> findParents(Group group) {
         Objects.requireNonNull(group);
         return groupDao.findParents(group.getId());
     }
 
-    /*NON_TRANSACTIONAL*/
+    // runs in the caller's transaction, if any
     public MarketExtension<Market> getExtensionByMarket(final Market market) {
         return new MarketExtension<>(market, this);
     }
