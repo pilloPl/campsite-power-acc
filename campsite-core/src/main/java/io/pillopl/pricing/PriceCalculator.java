@@ -51,14 +51,14 @@ public abstract class PriceCalculator<T extends PricingInput> {
             throw new PriceCalculationException("Pricing context is missing");
         }
         if (price.getDimensionType() != getDimensionType()) {
-            throw new PriceCalculationException("price is of the wrong type: " + price.getDimensionType());
+            throw new PriceCalculationException("tariff component does not fit this calculator, it prices " + price.getDimensionType());
         }
         if (price.getPrice() == null) {
             throw new PriceCalculationException("price is not set");
         }
         checkPositiveValue(price.getPrice());
         if (price.getStepSize() == null || price.getStepSize() < 1) {
-            throw new PriceCalculationException("stepSize is not set");
+            throw new PriceCalculationException("tariff component has no step size");
         }
     }
 
@@ -66,7 +66,7 @@ public abstract class PriceCalculator<T extends PricingInput> {
         if (null == value) {
             return BigDecimal.ZERO;
         } else if (value.signum() == -1) {
-            throw new PriceCalculationException("Values for price calculation must not be negative! Value was: "
+            throw new PriceCalculationException("Negative amount cannot be priced: "
                     + value);
         }
         return value;

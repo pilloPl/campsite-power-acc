@@ -35,7 +35,7 @@ public class PriceByEnergyCalculator extends PriceCalculator<PricingInput> {
     public void validateContext() throws PriceCalculationException {
         super.validateContext();
         if (pricingContext.getKwh() == null) {
-            throw new PriceCalculationException("consumption is not set");
+            throw new PriceCalculationException("no metered energy to price");
         }
     }
 }

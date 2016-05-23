@@ -45,7 +45,7 @@ public class TariffService {
     }
 
     public List<Tariff> getAllTariffs(Userinfo principal) {
-        LOGGER.debug("Getting all tariffs for: " + principal.getUsername());
+        LOGGER.debug("Tariff list requested by " + principal.getUsername());
         return tariffDao.findAllForMarket(evaluateMarket(principal));
     }
 
@@ -67,10 +67,10 @@ public class TariffService {
     }
 
     public Tariff getDefaultTariff(Market market) {
-        LOGGER.debug("Getting default tariff for: " + market);
+        LOGGER.debug("Looking up the fallback tariff of " + market);
         Tariff defaultTariffForMarket = tariffDao.findDefaultTariffForMarket(market);
         if (defaultTariffForMarket == null) {
-            LOGGER.debug("Could not find default tariff for: " + market);
+            LOGGER.debug("No fallback tariff in " + market);
         }
         return defaultTariffForMarket;
     }
@@ -87,7 +87,7 @@ public class TariffService {
     }
 
     public boolean existsTariff(Market market, String tariffName) {
-        LOGGER.debug(String.format("Checking if tariff %s is unique for %s", tariffName, market));
+        LOGGER.debug(String.format("Is tariff name %s free in %s?", tariffName, market));
         return tariffDao.findForNameAndMarket(market, tariffName) != null;
     }
 
@@ -105,7 +105,7 @@ public class TariffService {
      */
     @Transactional
     public Tariff saveTariff(Userinfo principal, Tariff tariff) {
-        LOGGER.debug(String.format("Saving tariff %s for %s", tariff.getName(), principal.getUsername()));
+        LOGGER.debug(String.format("Tariff %s stored by %s", tariff.getName(), principal.getUsername()));
         if (tariff.getMarket() == null) {
             tariff.setMarket(evaluateMarket(principal));
         } else if (tariff.getMarket() != evaluateMarket(principal)) {
@@ -114,13 +114,13 @@ public class TariffService {
         }
         validateTariff(tariff);
         if (existsTariff(tariff.getMarket(), tariff.getName())) {
-            logAndThrowException(String.format("Tariff with name %s already exists for %s", tariff.getName(),
+            logAndThrowException(String.format("Tariff name %s is already used by another tariff of %s", tariff.getName(),
                     tariff.getMarket()));
         }
         if (tariff.isDefaultTariff()) {
             Tariff defaultTariffForMarket = tariffDao.findDefaultTariffForMarket(tariff.getMarket());
             if (defaultTariffForMarket != null) {
-                logAndThrowException(String.format("Default tariff for %s already defined", tariff.getMarket()));
+                logAndThrowException(String.format("%s has a fallback tariff already", tariff.getMarket()));
             }
         }
         tariff.fillTariffDetails();

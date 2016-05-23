@@ -100,7 +100,7 @@ public final class PriceCalculatorFactory {
             case FLAT:
                 return new PriceByFlatRateCalculator(pricingInput, priceComponent);
             default:
-                throw new IllegalArgumentException("Unsupported tariff dimension type "
+                throw new IllegalArgumentException("No calculator for tariff component kind "
                         + priceComponent.getDimensionType());
         }
     }

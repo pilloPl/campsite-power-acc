@@ -60,7 +60,7 @@ class PriceCalculatorTest {
                 PriceComponent.energy("0.50", 1), null);
 
         assertThatThrownBy(calculator::calculate).isInstanceOf(PriceCalculationException.class)
-                .hasMessageContaining("negative");
+                .hasMessageContaining("Negative");
     }
 
     @Test
@@ -68,7 +68,7 @@ class PriceCalculatorTest {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply(null, 60),
                 PriceComponent.energy("0.50", 1), null);
 
-        assertThatThrownBy(calculator::calculate).hasMessage("consumption is not set");
+        assertThatThrownBy(calculator::calculate).hasMessage("no metered energy to price");
     }
 
     @Test
@@ -76,7 +76,7 @@ class PriceCalculatorTest {
         PriceByEnergyCalculator calculator = new PriceByEnergyCalculator(supply("1", 60),
                 PriceComponent.flat("1.00"), null);
 
-        assertThatThrownBy(calculator::calculate).hasMessageContaining("wrong type");
+        assertThatThrownBy(calculator::calculate).hasMessageContaining("does not fit this calculator");
     }
 
     @Test
@@ -85,7 +85,7 @@ class PriceCalculatorTest {
         energy.setStepSize(null);
 
         assertThatThrownBy(() -> new PriceByEnergyCalculator(supply("1", 60), energy, null).calculate())
-                .hasMessage("stepSize is not set");
+                .hasMessage("tariff component has no step size");
     }
 
     @Test

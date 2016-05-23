@@ -36,7 +36,7 @@ public class PriceByTimeCalculator extends PriceCalculator<PricingInput> {
     public void validateContext() throws PriceCalculationException {
         super.validateContext();
         if (pricingContext.getDurationSeconds() == null) {
-            throw new PriceCalculationException("duration is not set");
+            throw new PriceCalculationException("no supply duration to price");
         }
     }
 }

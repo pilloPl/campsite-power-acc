@@ -187,8 +187,8 @@ public class TariffApplicabilityService {
 
     private static void checkStartDate(Long tariffId, LocalDateTime startDate) {
         if ((startDate == null) && (tariffId != null)) {
-            LOGGER.error("StartDate for a tariff applicability must not be null");
-            throw new IllegalArgumentException("StartDate for a tariff applicability must not be null");
+            LOGGER.error("A tariff assignment needs a first day");
+            throw new IllegalArgumentException("A tariff assignment needs a first day");
         }
     }
 

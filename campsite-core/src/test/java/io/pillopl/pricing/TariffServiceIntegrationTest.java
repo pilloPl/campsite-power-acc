@@ -61,7 +61,7 @@ class TariffServiceIntegrationTest extends IntegrationTest {
         tariffService.saveTariff(hrManager, energyTariff("BAY"));
 
         assertThatThrownBy(() -> tariffService.saveTariff(hrManager, energyTariff("BAY")))
-                .isInstanceOf(TariffOperationException.class).hasMessageContaining("already exists");
+                .isInstanceOf(TariffOperationException.class).hasMessageContaining("is already used");
     }
 
     @Test
@@ -70,7 +70,7 @@ class TariffServiceIntegrationTest extends IntegrationTest {
         second.setDefaultTariff(true);
 
         assertThatThrownBy(() -> tariffService.saveTariff(hrManager, second))
-                .isInstanceOf(TariffOperationException.class).hasMessageContaining("Default tariff for HR");
+                .isInstanceOf(TariffOperationException.class).hasMessageContaining("HR has a fallback tariff");
     }
 
     @Test

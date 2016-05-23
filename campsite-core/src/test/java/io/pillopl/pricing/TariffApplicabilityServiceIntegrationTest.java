@@ -76,7 +76,7 @@ class TariffApplicabilityServiceIntegrationTest extends IntegrationTest {
     @Test
     void assignmentWithoutStartDateIsRefused() {
         assertThatThrownBy(() -> tariffApplicabilityService.applyTariffToPedestal(first.getId(), bayTariff.getId(),
-                null, "manager")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("StartDate");
+                null, "manager")).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("first day");
     }
 
     @Test
