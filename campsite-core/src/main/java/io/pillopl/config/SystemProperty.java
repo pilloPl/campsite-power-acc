@@ -46,6 +46,6 @@ public class SystemProperty {
 
     @Override
     public String toString() {
-        return String.format("%s [id=%s, key=%s, value=%s]", getClass().getSimpleName(), id, key, value);
+        return String.format("%s(%s) %s=%s", getClass().getSimpleName(), id, key, value);
     }
 }

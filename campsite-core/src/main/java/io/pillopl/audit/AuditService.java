@@ -104,7 +104,7 @@ public class AuditService {
             }
             insert(audit);
         } catch (RuntimeException e) {
-            LOG.warn("Failed to audit EMAIL: " + e.getMessage(), e);
+            LOG.warn("Audit entry of a sent mail not written: " + e.getMessage(), e);
         }
     }
 

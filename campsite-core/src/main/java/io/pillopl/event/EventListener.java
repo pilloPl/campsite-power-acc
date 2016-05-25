@@ -127,15 +127,15 @@ public abstract class EventListener {
 
     protected String getTaskExecutorState(AsyncTaskExecutor e) {
         if (e instanceof ThreadPoolTaskExecutor tpte) {
-            return String.format("Executor '%s': %d threads, %d active, %d tasks in queue", getClass().getName(),
+            return String.format("%s pool: size %d, busy %d, waiting %d", getClass().getName(),
                     tpte.getPoolSize(), tpte.getActiveCount(), tpte.getThreadPoolExecutor().getQueue().size());
         }
-        return "Unknown task executor type: " + e;
+        return "No pool statistics for executor " + e;
     }
 
     @PreDestroy
     public void tryShutdown() {
-        LOG.info(String.format("Shutting down listener %s on %s (%s)", getName(), getType(), getClass().getName()));
+        LOG.info(String.format("Stopping event listener %s for %s (%s)", getName(), getType(), getClass().getName()));
         alive.set(false);
         eventService.unregisterQueue(EventService.createEventSystemName(getName()), getType());
         takeFromQueueExecutor.shutdown();

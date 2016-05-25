@@ -41,7 +41,7 @@ public class SystemPropertyService {
     }
 
     /**
-     * Lazy initialization, don't access the field systemProperties directly.
+     * Loaded on first use; always read through this getter, never the cache field.
      *
      * @return read-only map of the keys present in the database and their raw values
      */

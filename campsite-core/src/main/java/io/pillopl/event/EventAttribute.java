@@ -71,7 +71,7 @@ public enum EventAttribute {
         if (Integer.class.equals(clazz) && value instanceof Number number) {
             return number.intValue();
         }
-        throw new ClassCastException(name() + " is not of type Integer but of class " + clazz.getName());
+        throw new ClassCastException(name() + " holds no Integer, it holds a " + clazz.getName());
     }
 
     public Long getLongValue(Event event) {
@@ -82,7 +82,7 @@ public enum EventAttribute {
         if (Long.class.equals(clazz) && value instanceof Number number) {
             return number.longValue();
         }
-        throw new ClassCastException(name() + " is not of type Long but of class " + clazz.getName());
+        throw new ClassCastException(name() + " holds no Long, it holds a " + clazz.getName());
     }
 
     public String getStringValue(Event event) {

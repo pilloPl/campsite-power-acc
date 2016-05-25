@@ -29,13 +29,13 @@ public abstract class EventTask implements Runnable {
         try {
             handleEvent();
         } catch (Exception e) {
-            LOG.warn(String.format("Handling of %s failed with %s", event, e.getMessage()));
+            LOG.warn(String.format("Event %s not handled: %s", event, e.getMessage()));
         }
         long duration = System.currentTimeMillis() - startTimeInMillis;
         if (duration > DURATION_THRESHOLD_IN_MILLIS) {
-            LOG.warn(String.format("Processing time for %s too high: %s ms!", event, duration));
+            LOG.warn(String.format("Slow event handling of %s: %s ms", event, duration));
         }
-        LOG.debug(String.format("Event handling of event: %s took %s ms.", event, duration));
+        LOG.debug(String.format("Handled %s in %s ms", event, duration));
     }
 
     public Event getEvent() {

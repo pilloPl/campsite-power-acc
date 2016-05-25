@@ -97,7 +97,7 @@ public class MailService {
     }
 
     public void sendErrorMail(Throwable cause) {
-        sendErrorMail("Unhandled exception - " + cause.getMessage(), String.valueOf(cause));
+        sendErrorMail("Backend failure: " + cause.getMessage(), String.valueOf(cause));
     }
 
     public void sendErrorMail(String subject, String template, Map<String, Object> parameters) {
@@ -110,7 +110,7 @@ public class MailService {
         try {
             sendTemplateMail(DEFAULT_LOCALE, developerEmail, subject, template, parameters);
         } catch (Exception ex) {
-            LOG.error("Unable to send error mail due to technical problems!", ex);
+            LOG.error("The error report mail itself failed", ex);
         }
     }
 

@@ -134,7 +134,7 @@ class MailServiceTest {
 
         mailService.sendErrorMail(new IllegalStateException("boom"));
 
-        verify(auditService).auditSendEmail(eq("dev@campsite.test"), eq("Unhandled exception - boom"), anyString(),
+        verify(auditService).auditSendEmail(eq("dev@campsite.test"), eq("Backend failure: boom"), anyString(),
                 eq("down"));
     }
 }

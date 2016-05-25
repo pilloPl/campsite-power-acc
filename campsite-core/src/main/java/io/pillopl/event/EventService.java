@@ -77,10 +77,10 @@ public class EventService {
         BlockingQueue<Event> queue = getQueueAndRegisterListener(queueName);
         boolean successful = queue.offer(event);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(String.format("%s Offered %s into the queue %s", successful, event, queueName));
+            LOG.debug(String.format("queued=%s event %s on %s", successful, event, queueName));
         }
         if (!successful) {
-            LOG.warn(String.format("Can not offer event %s to queue %s. Probably the queue is full?", event, queueName));
+            LOG.warn(String.format("Event %s rejected by queue %s, it is likely full", event, queueName));
         }
         return successful;
     }
