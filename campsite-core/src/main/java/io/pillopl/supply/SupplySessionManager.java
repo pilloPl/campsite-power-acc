@@ -160,7 +160,7 @@ public class SupplySessionManager implements SupplySessionRegistry {
                 "Creating new session for socket (%s), card (%s), house card (%s), transaction id (%s), start meter (%s), remote date (%s)",
                 socket, card, houseCard, transactionId, startMeterKwh, remoteDate));
         final SupplySession session = new SupplySession();
-        // set current system time
+        // the backend clock, not the pedestal one
         session.setCreateDate(dateService.getNow());
         // set the pedestal's values
         session.setRemoteDate(remoteDate);
@@ -181,7 +181,7 @@ public class SupplySessionManager implements SupplySessionRegistry {
                 session.setUnitPlate(stay.getUnitPlate());
             }
         }
-        // set transaction id
+        // session number for the pedestal
         if (transactionId == null) {
             session.setTransactionId(supplySessionDao.nextTransactionId().intValue());
         } else {

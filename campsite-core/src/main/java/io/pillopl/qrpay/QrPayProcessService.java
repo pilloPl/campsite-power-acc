@@ -52,7 +52,7 @@ public class QrPayProcessService implements QrPaySupplyAuthorizer {
      */
     @Transactional
     public QrPayState transAndSave(QrPayStateName stateName, QrPayProcess process) {
-        LOG.debug(String.format("Going to transfer %s to state %s", process, stateName));
+        LOG.debug(String.format("QR payment %s moves to %s", process, stateName));
         QrPayProcess oldRow = qrPayProcessDao.findById(process.getId())
                 .orElseThrow(() -> new IllegalStateException("QR payment row " + process.getId() + " not found"));
         if (!oldRow.isCurrent()) {
@@ -65,7 +65,7 @@ public class QrPayProcessService implements QrPaySupplyAuthorizer {
         oldRow.setNextProcessId(newRow.getId());
         oldRow.setStopTime(now);
         qrPayProcessDao.saveAndFlush(oldRow);
-        LOG.debug(String.format("Done with transfer from %s to %s", oldRow, newRow));
+        LOG.debug(String.format("QR payment state %s replaced by %s", oldRow, newRow));
         return stateFactory.getState(newRow.detachedCopy());
     }
 

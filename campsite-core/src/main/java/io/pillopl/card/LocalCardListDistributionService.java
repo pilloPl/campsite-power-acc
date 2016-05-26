@@ -101,7 +101,7 @@ public class LocalCardListDistributionService {
         int maxMinutes = systemPropertyService.getLocalCardListDistributionMaximumDurationInMinutes();
         long waitAfterDelete = systemPropertyService.getLocalCardListDistributionWaitTimeAfterDeleteInMillis();
         ExecutorService threadPool = Executors.newFixedThreadPool(Math.max(1, poolSize));
-        LOG.info("created new threadPool with " + poolSize + " threads.");
+        LOG.info("local card list distribution runs on " + poolSize + " threads.");
 
         AtomicInteger sent = new AtomicInteger();
         AtomicInteger failed = new AtomicInteger();
@@ -129,12 +129,12 @@ public class LocalCardListDistributionService {
             LOG.error("Local card list distribution was stopped after " + maxMinutes + " minutes."
                     + " Please check for mobile network problems or adjust thread pool or timeout.");
             threadPool.shutdownNow();
-            // send error mail
+            // tell the service team by mail
             mailService.sendErrorMail("Local card list distribution error", "Local card list distribution was"
                     + " stopped after " + maxMinutes + " minutes (" + sent.get() + " of " + pedestals.size()
                     + " pedestals sent). Please check for mobile network problems or adjust thread pool or timeout.");
         } else if (failed.get() > 0) {
-            // send error mail
+            // tell the service team by mail
             mailService.sendErrorMail("Local card list distribution error", failed.get() + " of "
                     + pedestals.size() + " pedestals did not get their local card list, see the log for the codes.");
         }

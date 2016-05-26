@@ -114,7 +114,7 @@ public class PedestalStateService {
             eventService.send(statusEvent);
             report.sentEvents++;
         } catch (RuntimeException e) {
-            LOGGER.error("Could not send event. " + e.getMessage(), e);
+            LOGGER.error("Pedestal state event lost: " + e.getMessage(), e);
         }
     }
 
@@ -123,7 +123,7 @@ public class PedestalStateService {
             pedestalMailService.sendTimeoutMail(state.getPedestal(), state.getApproxLastIncoming());
             report.sentMails++;
         } catch (MessagingException | RuntimeException e) {
-            LOGGER.error("Could not send email. " + e.getMessage(), e);
+            LOGGER.error("Pedestal state mail lost: " + e.getMessage(), e);
         }
     }
 

@@ -102,7 +102,7 @@ public class SupplierPedestalImportService {
         }
         if (pedestal == null) {
             isNew = true;
-            // otherwise create it
+            // pedestal unknown so far: new row
             pedestal = new Pedestal();
             pedestal.setListedInApp(true);
         }
@@ -185,7 +185,7 @@ public class SupplierPedestalImportService {
             pedestal = pedestalDao.save(pedestal);
         }
 
-        // set delete flags and register as existing
+        // mark as removed but keep it known
         Map<String, Socket> existingSockets = new HashMap<>();
         if (pedestal.getSockets() != null && !pedestal.getSockets().isEmpty()) {
             for (Socket socket : pedestal.getSockets()) {
@@ -234,7 +234,7 @@ public class SupplierPedestalImportService {
             }
         }
 
-        // save at the end
+        // one save for the whole import
         return pedestalDao.save(pedestal);
     }
 

@@ -373,7 +373,7 @@ public class SupplyControlUnitImpl {
         if (startMeterOk && stopMeterOk) {
             consumptionKwh = stopMeterKwh.subtract(startMeterKwh, MathContext.DECIMAL64);
             if (consumptionKwh.signum() == -1) {
-                LOG.error("Consumption must not be negative, but was: " + consumptionKwh);
+                LOG.error("Meter went backwards, energy delta " + consumptionKwh);
             } else {
                 LOG.info(String.format("Consumption: %s kWh", consumptionKwh));
             }

@@ -77,7 +77,7 @@ public class PedestalMailService implements DecommissioningNotifier {
         List<String> errorCodes = socketStatusLogDao.findErrorAbbreviations(
                 pedestal.getPedestalType().getManufacturer(), errorFlags);
 
-        // fetch notification settings
+        // who gets mail for this pedestal
         Notification notification = null;
         try {
             notification = notificationService.fetchNotification(pedestal, NotificationType.PEDESTAL_STATUS);
@@ -127,7 +127,7 @@ public class PedestalMailService implements DecommissioningNotifier {
      */
     public void sendStatusMail(Pedestal pedestal, NotificationType notificationType, String status,
                                LocalDateTime at) throws MessagingException {
-        // fetch notification settings
+        // who gets mail for this pedestal
         Notification notification;
         try {
             notification = notificationService.fetchNotification(pedestal, notificationType);

@@ -241,7 +241,7 @@ public class OrderService {
         Order order = getOrder(orderId);
         OrderStatus actualStatus = order.getStatus();
 
-        // is the order handled already?
+        // skip orders that left NEW
         if (actualStatus == OrderStatus.ACTIVE) {
             LOG.info(String.format("Skipped order %s already active with partner '%s' and account '%s'",
                     order.getOrderNumber(), order.getErpPartnerNo(), order.getErpAccountNo()));

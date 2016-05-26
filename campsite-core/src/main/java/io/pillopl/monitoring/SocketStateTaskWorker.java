@@ -64,14 +64,14 @@ public class SocketStateTaskWorker {
             return;
         }
 
-        // update firmware version
+        // remember the firmware the pedestal reports
         if (params.firmwareVersion() != null && !params.firmwareVersion().equals(socket.getFirmwareVersion())) {
             socket.setFirmwareVersion(params.firmwareVersion());
             LOGGER.debug(String.format("Set firmware version %s for socket %s", socket.getFirmwareVersion(),
                     socket.getName()));
         }
 
-        // if fixed turn monitoring on again
+        // error gone: watch the pedestal again
         if (params.status() == SocketStatus.AVAILABLE && (socket.getStatus() == SocketStatus.FAULTED
                 || socket.getStatus() == SocketStatus.BREAKER_TRIPPED || socket.getStatus() == SocketStatus.UNKNOWN)) {
             socket.setMonitoring(true);
@@ -166,7 +166,7 @@ public class SocketStateTaskWorker {
 
     private void createAndSaveStatusLog(SocketStateParams params, Socket socket, SocketStatusLog lastLog,
                                         long formerErrorFlags, LocalDateTime serverDate) {
-        // check monitoring flag!
+        // pedestals out of monitoring raise no alarm
         if (!socket.isMonitoring()) {
             return;
         }

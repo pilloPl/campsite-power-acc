@@ -257,17 +257,17 @@ public class HouseCardService {
 
         Group group = user.getGroup(GroupType.STAFF);
         if (group == null) {
-            throw new AccessDeniedException("User " + username + " is not allowed to administer users");
+            throw new AccessDeniedException("User " + username + " may not manage console users");
         }
         List<Long> allGroupIds = new ArrayList<>(GroupServiceHelper.extractAllManageableGroupIDsForGroup(group, null));
 
         Group ownerGroup = owner.getGroup();
         if (ownerGroup == null) {
-            throw new AccessDeniedException("User " + username + " is not allowed to administer user " + ownerUsername);
+            throw new AccessDeniedException("User " + username + " may not manage the house cards of owner " + ownerUsername);
         }
 
         if (!allGroupIds.contains(ownerGroup.getId())) {
-            throw new AccessDeniedException("User " + username + " is not allowed to administer user " + ownerUsername);
+            throw new AccessDeniedException("User " + username + " may not manage the house cards of owner " + ownerUsername);
         }
 
         return owner;

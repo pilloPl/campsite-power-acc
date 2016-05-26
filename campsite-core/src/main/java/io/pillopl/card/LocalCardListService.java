@@ -144,7 +144,7 @@ public class LocalCardListService {
             houseCards = houseCardService.getHouseCardsForPedestal(pedestal.getCode());
         }
 
-        // ... fetch cards if necessary
+        // load the card rows only when the list is sent in full
         List<CampingCard> cards = new ArrayList<>();
         if (lla.isIncludeCards()) {
             cards = campingCardDao.findValidCardsForLocalCardList(
@@ -157,7 +157,7 @@ public class LocalCardListService {
         if (cards.size() + houseCards.size() > capacity) {
             // house cards alone already above the limit?
             if (houseCards.size() > capacity) {
-                // ... forget the cards
+                // a delta needs no card rows
                 cards = new ArrayList<>();
                 // ... cut
                 houseCards = sortAndCutHouseCards(houseCards, capacity);
