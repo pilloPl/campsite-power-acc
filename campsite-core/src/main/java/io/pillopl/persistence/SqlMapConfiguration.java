@@ -13,7 +13,7 @@ import java.util.Properties;
 
 /**
  * The map of hand-written SQL, loaded from {@code classpath:sql/sqls.xml}. DAOs pick their statements by name:
- * {@code @Value("#{sqls['findManageableGroupIds']}")}.
+ * {@code @Value("#{sqls['findSubtreeGroupIds']}")}.
  */
 @Configuration(proxyBeanMethods = false)
 public class SqlMapConfiguration {

@@ -25,21 +25,21 @@ class GroupValidityIntegrationTest extends IntegrationTest {
         user(null);
         fixture.pedestal("HR-BAY-P001", groupService.fetchSiteGroup("HR SITES"), 1);
 
-        assertThat(groupService.checkAllGroupsForValidity()).isTrue();
+        assertThat(groupService.validateGroupTree()).isTrue();
     }
 
     @Test
     void userAttachedToASiteGroupMakesTheTreesInvalid() {
         user(groupService.fetchSiteGroup("HR SITES"));
 
-        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+        assertThat(groupService.validateGroupTree()).isFalse();
     }
 
     @Test
     void pedestalWithoutGroupMakesTheTreesInvalid() {
         fixture.pedestal("HR-BAY-P001", null, 1);
 
-        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+        assertThat(groupService.validateGroupTree()).isFalse();
     }
 
     @Test
@@ -54,21 +54,21 @@ class GroupValidityIntegrationTest extends IntegrationTest {
     void pedestalInAnIssuerGroupMakesTheTreesInvalid() {
         fixture.pedestal("HR-BAY-P001", groupService.fetchNetworkCardIssuerGroup(), 1);
 
-        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+        assertThat(groupService.validateGroupTree()).isFalse();
     }
 
     @Test
     void guestsInIssuerGroupsAreValid() {
         cards.guest("Horvat", groupService.fetchNetworkCardIssuerGroup());
 
-        assertThat(groupService.checkAllGroupsForValidity()).isTrue();
+        assertThat(groupService.validateGroupTree()).isTrue();
     }
 
     @Test
     void guestInASiteGroupMakesTheTreesInvalid() {
         cards.guest("Horvat", groupService.fetchSiteGroup("HR SITES"));
 
-        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+        assertThat(groupService.validateGroupTree()).isFalse();
     }
 
     private void user(Group group) {

@@ -131,7 +131,7 @@ public class SupplierPedestalImportService {
             pedestal.setGroup(group);
         } else if (isNew) {
             // a new delivery goes into the stock of its manufacturer
-            Group stock = groupDao.findByNotCaseSensitiveNameAndType(
+            Group stock = groupDao.findByNameIgnoringCaseAndType(
                     GroupServiceHelper.getSupplierGroupName(row.getManufacturer()), GroupType.SITE.name());
             if (stock != null && supplierMarkerService.isInSupplierStock(stock)) {
                 pedestal.setGroup(stock);
@@ -244,7 +244,7 @@ public class SupplierPedestalImportService {
      */
     Group findPedestalGroup(Long groupId, String ownerName, SupplierAccessibility accessibility) {
         Group group = groupId != null ? groupDao.findById(groupId).orElse(null)
-                : groupDao.findByNotCaseSensitiveNameAndType(ownerName, GroupType.SITE.name());
+                : groupDao.findByNameIgnoringCaseAndType(ownerName, GroupType.SITE.name());
         if (group == null) {
             throw new IllegalArgumentException(String.format("No SITE group %s / '%s' for the import", groupId,
                     ownerName));

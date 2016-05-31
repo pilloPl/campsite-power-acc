@@ -64,7 +64,7 @@ public class CommissioningService {
         // check access
         if (!allOpen.isEmpty()) {
             Group staffGroup = userinfo.getGroup(GroupType.STAFF);
-            List<Group> manageableGroups = GroupServiceHelper.extractAllManageableGroupsForGroup(staffGroup);
+            List<Group> manageableGroups = GroupServiceHelper.collectSubtree(staffGroup);
             for (Commissioning commissioning : allOpen) {
                 if (manageableGroups.contains(commissioning.getAffiliateOwner().getGroup())) {
                     commissionings.add(commissioning);
@@ -100,7 +100,7 @@ public class CommissioningService {
      */
     @Transactional(readOnly = true)
     public boolean checkInstallerRights(Userinfo installer, Userinfo affiliateOwner) {
-        List<Group> manageableGroups = GroupServiceHelper.extractAllManageableGroupsForGroup(
+        List<Group> manageableGroups = GroupServiceHelper.collectSubtree(
                 installer.getGroup(GroupType.STAFF));
         return manageableGroups.contains(affiliateOwner.getGroup());
     }

@@ -74,7 +74,7 @@ class AcceptanceAgreementIntegrationTest extends IntegrationTest {
 
     @Test
     void javaAndSqlGiveTheSameAcceptingSitesForEveryIssuerGroup() {
-        for (Group issuerGroup : groupService.fetchAllGroupsByType(GroupType.ISSUER)) {
+        for (Group issuerGroup : groupService.loadGroupsOfType(GroupType.ISSUER)) {
             assertThat(groupService.findAcceptingSiteGroupIds(issuerGroup))
                     .as("accepting sites of %s", issuerGroup.getName())
                     .containsExactlyInAnyOrderElementsOf(groupService.extractAllAcceptingSiteGroupIds(issuerGroup));
@@ -83,8 +83,8 @@ class AcceptanceAgreementIntegrationTest extends IntegrationTest {
 
     @Test
     void reverseSqlListsExactlyTheIssuersWhoseJavaAnswerContainsTheSite() {
-        List<Group> issuerGroups = groupService.fetchAllGroupsByType(GroupType.ISSUER);
-        for (Group siteGroup : groupService.fetchAllGroupsByType(GroupType.SITE)) {
+        List<Group> issuerGroups = groupService.loadGroupsOfType(GroupType.ISSUER);
+        for (Group siteGroup : groupService.loadGroupsOfType(GroupType.SITE)) {
             List<Long> expected = new ArrayList<>();
             for (Group issuerGroup : issuerGroups) {
                 if (groupService.extractAllAcceptingSiteGroupIds(issuerGroup).contains(siteGroup.getId())) {
@@ -133,6 +133,6 @@ class AcceptanceAgreementIntegrationTest extends IntegrationTest {
 
     @Test
     void agreementsOfTheSeedAndOfTheTreeAreValid() {
-        assertThat(groupService.checkAllGroupsForValidity()).isTrue();
+        assertThat(groupService.validateGroupTree()).isTrue();
     }
 }

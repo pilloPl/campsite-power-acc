@@ -25,14 +25,14 @@ class GroupServiceIntegrationTest extends IntegrationTest {
 
     @Test
     void seededTreesAreValid() {
-        assertThat(groupService.checkAllGroupsForValidity()).isTrue();
+        assertThat(groupService.validateGroupTree()).isTrue();
     }
 
     @Test
     void childOfAnotherTypeThanItsParentMakesTheTreesInvalid() {
         jdbcTemplate.update("INSERT INTO TBL_GROUP (PARENT_ID, NAME, TYPENAME, DISPLAYNAME) VALUES (11, 'X', 'STAFF', 'X')");
 
-        assertThat(groupService.checkAllGroupsForValidity()).isFalse();
+        assertThat(groupService.validateGroupTree()).isFalse();
     }
 
     @Test
@@ -102,7 +102,7 @@ class GroupServiceIntegrationTest extends IntegrationTest {
 
     @Test
     void manageableIdsOfSeveralGroupsAreMerged() {
-        assertThat(groupService.findAllManageableGroupIDsForGroupIDs(new Long[]{51L, 61L, 999_999L}))
+        assertThat(groupService.collectSubtreeIdsOfAll(new Long[]{51L, 61L, 999_999L}))
                 .containsExactly(51L, 61L);
     }
 }

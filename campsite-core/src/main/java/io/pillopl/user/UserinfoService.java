@@ -372,7 +372,7 @@ public class UserinfoService {
             while (siteParentLineIterator.hasNext() && settlementPartnerNo == null) {
                 final Long groupId = siteParentLineIterator.next();
                 final Group siteGroup = groupService.fetchByGroupId(groupId);
-                for (Userinfo userinfo : findByAssociatedGroup(siteGroup)) {
+                for (Userinfo userinfo : findWithScopeGroup(siteGroup)) {
                     if (userinfo.getSettlementPartnerNo() == null) {
                         continue;
                     }
@@ -391,8 +391,8 @@ public class UserinfoService {
         return settlementPartnerNo;
     }
 
-    public List<Userinfo> findByAssociatedGroup(Group searchGroup) {
-        return userinfoDao.findByAssociatedGroup(searchGroup);
+    public List<Userinfo> findWithScopeGroup(Group searchGroup) {
+        return userinfoDao.findWithScopeGroup(searchGroup);
     }
 
     /**
@@ -410,7 +410,7 @@ public class UserinfoService {
         }
         List<Group> groups = groupService.findManageableGroups(staffGroup);
         if (!groups.isEmpty()) {
-            users = userinfoDao.findByGroupsAndUserroles(groups, roles);
+            users = userinfoDao.findInGroupsWithRoles(groups, roles);
         }
         return users;
     }

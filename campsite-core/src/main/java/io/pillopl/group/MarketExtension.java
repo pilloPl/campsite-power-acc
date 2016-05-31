@@ -46,12 +46,12 @@ public class MarketExtension<M extends Enum<Market>> {
     }
 
     public Group findWelcomeCardPoolIssuerGroup() {
-        List<Group> groups = GroupServiceHelper.extractAllManageableGroupsForGroup(findIssuerRoot());
+        List<Group> groups = GroupServiceHelper.collectSubtree(findIssuerRoot());
         return GroupServiceHelper.getGroupByName(getWelcomeCardPoolGroupName(), groups);
     }
 
     public Group findReceptionStaffGroup() {
-        List<Group> groups = GroupServiceHelper.extractAllManageableGroupsForGroup(findStaffRoot());
+        List<Group> groups = GroupServiceHelper.collectSubtree(findStaffRoot());
         return GroupServiceHelper.getGroupByName(getReceptionGroupName(), groups);
     }
 

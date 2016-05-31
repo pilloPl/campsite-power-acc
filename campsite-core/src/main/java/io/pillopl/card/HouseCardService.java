@@ -106,7 +106,7 @@ public class HouseCardService {
         Userinfo owner = checkUserPrivileges(username, ownerUsername);
         Group group = getOwnerSiteGroup(owner);
 
-        List<Long> groupIds = GroupServiceHelper.extractAllManageableGroupIDsForGroup(group, null);
+        List<Long> groupIds = GroupServiceHelper.collectSubtreeIds(group, null);
 
         return getHouseCardsForGroupIdList(groupIds);
     }
@@ -259,7 +259,7 @@ public class HouseCardService {
         if (group == null) {
             throw new AccessDeniedException("User " + username + " may not manage console users");
         }
-        List<Long> allGroupIds = new ArrayList<>(GroupServiceHelper.extractAllManageableGroupIDsForGroup(group, null));
+        List<Long> allGroupIds = new ArrayList<>(GroupServiceHelper.collectSubtreeIds(group, null));
 
         Group ownerGroup = owner.getGroup();
         if (ownerGroup == null) {
@@ -309,7 +309,7 @@ public class HouseCardService {
             return;
         }
         Group ownerGroup = getOwnerSiteGroup(owner);
-        if (!GroupServiceHelper.extractAllManageableGroupIDsForGroup(ownerGroup, null)
+        if (!GroupServiceHelper.collectSubtreeIds(ownerGroup, null)
                 .contains(houseCard.getGroupId())) {
             throw new AccessDeniedException(String.format("House card %s does not belong to the campsite of %s",
                     houseCard.getId(), owner.getUsername()));

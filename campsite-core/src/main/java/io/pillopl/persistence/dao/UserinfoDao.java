@@ -32,11 +32,11 @@ public interface UserinfoDao extends JpaRepository<Userinfo, Long> {
      * Users having the group in their scope groups.
      */
     @Query("select u from Userinfo u join u.groups g where g = :group and u.deleted = false order by u.id")
-    List<Userinfo> findByAssociatedGroup(@Param("group") Group group);
+    List<Userinfo> findWithScopeGroup(@Param("group") Group group);
 
     @Query("select distinct u from Userinfo u join u.roles r where u.group in (:groups) and r in (:roles) "
             + "and u.deleted = false order by u.username")
-    List<Userinfo> findByGroupsAndUserroles(@Param("groups") Collection<Group> groups,
+    List<Userinfo> findInGroupsWithRoles(@Param("groups") Collection<Group> groups,
                                             @Param("roles") Collection<Userrole> roles);
 
     @Query(value = "select distinct u from Userinfo u join u.roles r where u.group in (:groups) and r in (:roles) "
@@ -47,7 +47,7 @@ public interface UserinfoDao extends JpaRepository<Userinfo, Long> {
                     + "and r in (:roles) and u.deleted = false and (lower(u.username) like lower(concat('%', :search, '%')) "
                     + "or lower(u.name) like lower(concat('%', :search, '%')) "
                     + "or lower(u.email) like lower(concat('%', :search, '%')))")
-    Page<Userinfo> findByGroupsAndSearchAndUserroles(@Param("groups") Collection<Group> groups,
+    Page<Userinfo> searchInGroupsWithRoles(@Param("groups") Collection<Group> groups,
                                                      @Param("roles") Collection<Userrole> roles,
                                                      @Param("search") String search, Pageable pageable);
 }

@@ -18,8 +18,8 @@ import java.util.Objects;
  */
 public class GroupDaoImpl implements GroupDaoCustom {
 
-    @Value("#{sqls['findManageableGroupIds']}")
-    private String findManageableGroupIds;
+    @Value("#{sqls['findSubtreeGroupIds']}")
+    private String findSubtreeGroupIds;
 
     @Value("#{sqls['findParentGroupIds']}")
     private String findParentGroupIds;
@@ -42,7 +42,7 @@ public class GroupDaoImpl implements GroupDaoCustom {
     @Override
     public List<Long> findManageable(Long groupId) {
         Objects.requireNonNull(groupId, "groupId");
-        return jdbcTemplate.queryForList(findManageableGroupIds,
+        return jdbcTemplate.queryForList(findSubtreeGroupIds,
                 new MapSqlParameterSource("groupId", groupId), Long.class);
     }
 

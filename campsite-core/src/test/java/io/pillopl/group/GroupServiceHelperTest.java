@@ -91,17 +91,17 @@ class GroupServiceHelperTest {
 
     @Test
     void subtreeIdsCanBeFilteredByDisplayNameIgnoringCase() {
-        assertThat(GroupServiceHelper.extractAllManageableGroupIDsForGroup(adriatic, "campsite"))
+        assertThat(GroupServiceHelper.collectSubtreeIds(adriatic, "campsite"))
                 .containsExactlyInAnyOrder(adriatic.getId(), bayCampsite.getId(), pineCampsite.getId());
-        assertThat(GroupServiceHelper.extractAllManageableGroupIDsForGroup(adriatic, null))
+        assertThat(GroupServiceHelper.collectSubtreeIds(adriatic, null))
                 .hasSize(4);
     }
 
     @Test
     void subtreeStartsWithTheGroupItself() {
-        assertThat(GroupServiceHelper.extractAllManageableGroupsForGroup(bayCampsite))
+        assertThat(GroupServiceHelper.collectSubtree(bayCampsite))
                 .containsExactly(bayCampsite, bayBeachSection);
-        assertThat(GroupServiceHelper.extractAllManageableGroupsForGroup(null)).isEmpty();
+        assertThat(GroupServiceHelper.collectSubtree(null)).isEmpty();
     }
 
     @Test

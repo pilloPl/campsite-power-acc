@@ -28,8 +28,8 @@ class UserinfoDaoIntegrationTest extends IntegrationTest {
         Userinfo ana = user("ana", "ana@bay.example", reception, receptionRole);
         user("ivo", "ivo@bay.example", reception, userroleDao.findByName("SERVICE_TECHNICIAN"));
 
-        assertThat(userinfoDao.findByGroupsAndUserroles(List.of(reception), List.of(receptionRole))).containsExactly(ana);
-        assertThat(userinfoDao.findByGroupsAndSearchAndUserroles(List.of(reception), userroleDao.findAll(), "IVO",
+        assertThat(userinfoDao.findInGroupsWithRoles(List.of(reception), List.of(receptionRole))).containsExactly(ana);
+        assertThat(userinfoDao.searchInGroupsWithRoles(List.of(reception), userroleDao.findAll(), "IVO",
                 PageRequest.of(0, 10)).getTotalElements()).isEqualTo(1);
     }
 
@@ -49,7 +49,7 @@ class UserinfoDaoIntegrationTest extends IntegrationTest {
         ana.getGroups().add(hrSites);
         userinfoDao.saveAndFlush(ana);
 
-        assertThat(userinfoDao.findByAssociatedGroup(hrSites)).containsExactly(ana);
+        assertThat(userinfoDao.findWithScopeGroup(hrSites)).containsExactly(ana);
     }
 
     private Userinfo user(String username, String email, Group staffGroup, Userrole role) {

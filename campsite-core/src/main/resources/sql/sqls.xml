@@ -9,7 +9,7 @@
     <comment>Group trees: subtrees, parent lines, acceptance agreements, nearest attributes</comment>
 
     <!-- Subtree of a group including the group itself, ordered hierarchically (level, then id). -->
-    <entry key="findManageableGroupIds"><![CDATA[
+    <entry key="findSubtreeGroupIds"><![CDATA[
 WITH RECURSIVE tree (id, lvl) AS (
     SELECT g.ID, 1 FROM TBL_GROUP g WHERE g.ID = :groupId
     UNION ALL

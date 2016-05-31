@@ -58,12 +58,12 @@ public class GroupService {
      * @return true when no error was found (errors are logged)
      */
     @Transactional(readOnly = true)
-    public boolean checkAllGroupsForValidity() {
+    public boolean validateGroupTree() {
         return collectValidityErrors().isEmpty();
     }
 
     /**
-     * The checks of {@link #checkAllGroupsForValidity()}, with the errors found (also logged) for the control mail.
+     * The checks of {@link #validateGroupTree()}, with the errors found (also logged) for the control mail.
      */
     @Transactional(readOnly = true)
     public List<String> collectValidityErrors() {
@@ -200,7 +200,7 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Group fetchIssuerGroup(String groupName) {
-        return groupDao.findByNotCaseSensitiveNameAndType(groupName, GroupType.ISSUER.name());
+        return groupDao.findByNameIgnoringCaseAndType(groupName, GroupType.ISSUER.name());
     }
 
     @Transactional(readOnly = true)
@@ -210,7 +210,7 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public Group fetchStaffGroup(String groupName) {
-        return groupDao.findByNotCaseSensitiveNameAndType(groupName, GroupType.STAFF.name());
+        return groupDao.findByNameIgnoringCaseAndType(groupName, GroupType.STAFF.name());
     }
 
     @Transactional(readOnly = true)
@@ -219,10 +219,10 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public List<Group> fetchAllGroupsByType(GroupType type) {
+    public List<Group> loadGroupsOfType(GroupType type) {
         List<Group> result = new ArrayList<>();
         for (Group root : groupDao.findRoots(type.name())) {
-            result.addAll(GroupServiceHelper.extractAllManageableGroupsForGroup(root));
+            result.addAll(GroupServiceHelper.collectSubtree(root));
         }
         return result;
     }
@@ -230,7 +230,7 @@ public class GroupService {
     @Transactional(readOnly = true)
     public List<Long> fetchSiteGroupIds(Market market, String searchString) {
         Group root = getExtensionByMarket(market).findSiteRoot();
-        return GroupServiceHelper.extractAllManageableGroupIDsForGroup(root, searchString);
+        return GroupServiceHelper.collectSubtreeIds(root, searchString);
     }
 
     /**
@@ -270,7 +270,7 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Long> findAllManageableGroupIDsForGroupIDs(Long[] groupIds) {
+    public Set<Long> collectSubtreeIdsOfAll(Long[] groupIds) {
         Set<Long> result = new LinkedHashSet<>();
         if (groupIds != null) {
             for (Long groupId : groupIds) {

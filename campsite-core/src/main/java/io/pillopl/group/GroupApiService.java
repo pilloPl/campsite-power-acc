@@ -103,9 +103,9 @@ public class GroupApiService implements GroupApi {
                 LOG.info(String.format("User '%s' has no %s scope", authUsername, type));
                 return new ArrayList<>();
             }
-            Set<Long> matching = new HashSet<>(GroupServiceHelper.extractAllManageableGroupIDsForGroup(scope, search));
+            Set<Long> matching = new HashSet<>(GroupServiceHelper.collectSubtreeIds(scope, search));
             List<Group> result = new ArrayList<>();
-            for (Group group : GroupServiceHelper.extractAllManageableGroupsForGroup(scope)) {
+            for (Group group : GroupServiceHelper.collectSubtree(scope)) {
                 if (matching.contains(group.getId())) {
                     result.add(group);
                 }
@@ -221,7 +221,7 @@ public class GroupApiService implements GroupApi {
     public boolean checkGroupValidity(Username authUsername) {
         try {
             principalResolver.resolve(authUsername, UserrightName.CONFIG_EDIT);
-            return groupService.checkAllGroupsForValidity();
+            return groupService.validateGroupTree();
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }

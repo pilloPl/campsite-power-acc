@@ -124,7 +124,7 @@ public class AffiliatePedestalService {
         Set<Group> allGroups = new LinkedHashSet<>();
         if (group != null) {
             allGroups.add(group);
-            allGroups.addAll(GroupServiceHelper.extractAllManageableGroupsForGroup(group));
+            allGroups.addAll(GroupServiceHelper.collectSubtree(group));
         }
 
         List<Long> groupIds = new ArrayList<>();
@@ -277,7 +277,7 @@ public class AffiliatePedestalService {
                     groupIds.add(marker.getGroup().getId());
                 }
             }
-            Set<Long> ids = groupService.findAllManageableGroupIDsForGroupIDs(groupIds.toArray(new Long[0]));
+            Set<Long> ids = groupService.collectSubtreeIdsOfAll(groupIds.toArray(new Long[0]));
             pedestals = pedestalService.getByGroupIds(new ArrayList<>(ids));
         }
         return pedestals;
@@ -324,7 +324,7 @@ public class AffiliatePedestalService {
 
     Group findSupplierGroupForPedestal(Pedestal pedestal) {
         String name = GroupServiceHelper.getSupplierGroupName(pedestal.getManufacturer());
-        return groupDao.findByNotCaseSensitiveNameAndType(name, GroupType.SITE.name());
+        return groupDao.findByNameIgnoringCaseAndType(name, GroupType.SITE.name());
     }
 
     private Collection<Market> excludedMarkets() {

@@ -56,7 +56,7 @@ public final class GroupServiceHelper {
         }
         List<Long> allAcceptingGroupIds = new ArrayList<>();
         for (Group agreement : agreements) {
-            for (Long id : extractAllManageableGroupIDsForGroup(agreement, null)) {
+            for (Long id : collectSubtreeIds(agreement, null)) {
                 if (!allAcceptingGroupIds.contains(id)) {
                     allAcceptingGroupIds.add(id);
                 }
@@ -72,7 +72,7 @@ public final class GroupServiceHelper {
         }
         List<Group> allAcceptingGroups = new ArrayList<>();
         for (Group agreement : agreements) {
-            for (Group accepting : extractAllManageableGroupsForGroup(agreement)) {
+            for (Group accepting : collectSubtree(agreement)) {
                 if (!allAcceptingGroups.contains(accepting)) {
                     allAcceptingGroups.add(accepting);
                 }
@@ -111,7 +111,7 @@ public final class GroupServiceHelper {
         return getAcceptanceAgreements(parent, targetGroupType);
     }
 
-    public static List<Long> extractAllManageableGroupIDsForGroup(Group group, String searchString) {
+    public static List<Long> collectSubtreeIds(Group group, String searchString) {
         List<Long> result = new ArrayList<>();
         if (group != null) {
             addGroupIdIfMatches(result, group, searchString);
@@ -126,7 +126,7 @@ public final class GroupServiceHelper {
         return result;
     }
 
-    public static List<Group> extractAllManageableGroupsForGroup(Group group) {
+    public static List<Group> collectSubtree(Group group) {
         List<Group> result = new ArrayList<>();
         if (group == null) {
             return result;
@@ -138,7 +138,7 @@ public final class GroupServiceHelper {
             return result;
         }
 
-        addAllChildrenGroups(result, group);
+        addDescendants(result, group);
 
         return result;
     }
@@ -235,7 +235,7 @@ public final class GroupServiceHelper {
         return concatWithDelim(" ", s, ss);
     }
 
-    private static void addAllChildrenGroups(List<Group> list, Group group) {
+    private static void addDescendants(List<Group> list, Group group) {
         if (group == null || group.getChildren() == null || group.getChildren().isEmpty()) {
             return;
         }
@@ -244,7 +244,7 @@ public final class GroupServiceHelper {
             if (!list.contains(child)) {
                 list.add(child);
             }
-            addAllChildrenGroups(list, child);
+            addDescendants(list, child);
         }
     }
 

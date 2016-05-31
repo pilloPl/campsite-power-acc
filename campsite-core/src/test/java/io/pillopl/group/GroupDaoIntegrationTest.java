@@ -71,7 +71,7 @@ class GroupDaoIntegrationTest extends IntegrationTest {
         assertThat(groupDao.findRoots(GroupType.ISSUER.name()))
                 .extracting(Group::getName)
                 .containsExactly("HR ISSUERS", "IT ISSUERS", "FR ISSUERS");
-        assertThat(groupDao.findByNotCaseSensitiveNameAndType("network card", GroupType.ISSUER.name()).getId())
+        assertThat(groupDao.findByNameIgnoringCaseAndType("network card", GroupType.ISSUER.name()).getId())
                 .isEqualTo(31L);
     }
 
