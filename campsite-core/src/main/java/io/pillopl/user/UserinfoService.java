@@ -199,14 +199,14 @@ public class UserinfoService {
         userinfoToCreate.getRoles().add(selfServiceUser);
 
         // the login name is derived only now, from the e-mail
-        return saveWithGeneratedUsername(userinfoToCreate);
+        return saveWithDerivedLogin(userinfoToCreate);
     }
 
     /**
      * Saves a new user with the local part of its email as username. When taken, "-1" ... "-998" is appended; when
      * all are taken, the database id becomes the suffix.
      */
-    public Userinfo saveWithGeneratedUsername(Userinfo userinfo) {
+    public Userinfo saveWithDerivedLogin(Userinfo userinfo) {
         Objects.requireNonNull(userinfo);
         String email = userinfo.getEmail();
         if (userinfo.getUsername() != null) {

@@ -23,5 +23,5 @@ public interface HouseCardDao extends JpaRepository<HouseCard, Long> {
     List<HouseCard> findForGroupList(@Param("groupIds") Collection<Long> groupIds);
 
     @Query("select h from HouseCard h where h.deleted = false and h.rfid = :rfid and (:cardNumber is null or h.cardNumber = :cardNumber)")
-    List<HouseCard> findByRfidAndCardNumber(@Param("rfid") String rfid, @Param("cardNumber") String cardNumber);
+    List<HouseCard> findActiveByRfidAndNumber(@Param("rfid") String rfid, @Param("cardNumber") String cardNumber);
 }

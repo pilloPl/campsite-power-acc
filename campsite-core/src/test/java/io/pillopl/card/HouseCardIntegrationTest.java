@@ -35,8 +35,8 @@ class HouseCardIntegrationTest extends IntegrationTest {
         HouseCard rental = save(new HouseCard(HouseCardType.RENTAL, "5002", "BAY-R1"));
 
         assertThat(houseCardDao.findActiveByGroupIds(List.of(bay.getId()))).containsExactlyInAnyOrder(staff, rental);
-        assertThat(houseCardDao.findByRfidAndCardNumber("5002", "BAY-R1")).containsExactly(rental);
-        assertThat(houseCardDao.findByRfidAndCardNumber("5002", null)).containsExactly(rental);
+        assertThat(houseCardDao.findActiveByRfidAndNumber("5002", "BAY-R1")).containsExactly(rental);
+        assertThat(houseCardDao.findActiveByRfidAndNumber("5002", null)).containsExactly(rental);
         assertThat(rental.isRental()).isTrue();
     }
 
@@ -57,7 +57,7 @@ class HouseCardIntegrationTest extends IntegrationTest {
         houseCardDao.saveAndFlush(card);
 
         assertThat(houseCardDao.findForGroupList(List.of(bay.getId()))).isEmpty();
-        assertThat(houseCardDao.findByRfidAndCardNumber("5004", null)).isEmpty();
+        assertThat(houseCardDao.findActiveByRfidAndNumber("5004", null)).isEmpty();
         assertThat(houseCardDao.findById(card.getId()).orElseThrow().getDeletedDate()).isNotNull();
     }
 
