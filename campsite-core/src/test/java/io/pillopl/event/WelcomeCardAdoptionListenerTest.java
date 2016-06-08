@@ -23,7 +23,7 @@ class WelcomeCardAdoptionListenerTest {
         listener = new WelcomeCardAdoptionListener(new EventService(), new EventTaskExecutorFactory(),
                 welcomeCardAdoptionService) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };

@@ -119,7 +119,7 @@ class PowerSectionIntegrationTest extends IntegrationTest {
         try {
             assertThat(authorize("8201", 1)).isEqualTo(ValidationStatus.UNAVAILABLE);
 
-            Event alert = eventService.getQueueAndRegisterListener("test-power-section").poll();
+            Event alert = eventService.subscribeToQueue("test-power-section").poll();
             assertThat(PowerSectionMisconfiguredEvent.getPowerSectionId(alert)).isEqualTo(meadow.getId());
             assertThat(PowerSectionMisconfiguredEvent.getProblem(alert))
                     .isEqualTo(PowerSectionService.UNKNOWN_ALGORITHM);

@@ -31,7 +31,7 @@ class UserinfoSummaryRefreshListenerTest {
         listener = new UserinfoSummaryRefreshListener(new EventService(), new EventTaskExecutorFactory(),
                 userinfoSummaryService) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(collecting);
             }
         };

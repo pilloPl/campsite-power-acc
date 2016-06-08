@@ -28,7 +28,7 @@ public class EventService {
 
     private final Map<String, BlockingQueue<Event>> queues = new ConcurrentHashMap<>();
 
-    public static String createEventSystemName(final String postfix) {
+    public static String eventSourceName(final String postfix) {
         return PREFIX + postfix;
     }
 
@@ -53,7 +53,7 @@ public class EventService {
         return allTaken;
     }
 
-    public BlockingQueue<Event> getQueueAndRegisterListener(final String name) {
+    public BlockingQueue<Event> subscribeToQueue(final String name) {
         return queues.computeIfAbsent(name, n -> new LinkedBlockingQueue<>(QUEUE_MAX_SIZE));
     }
 
@@ -74,7 +74,7 @@ public class EventService {
     }
 
     private boolean putEventToQueue(Event event, String queueName) {
-        BlockingQueue<Event> queue = getQueueAndRegisterListener(queueName);
+        BlockingQueue<Event> queue = subscribeToQueue(queueName);
         boolean successful = queue.offer(event);
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format("queued=%s event %s on %s", successful, event, queueName));

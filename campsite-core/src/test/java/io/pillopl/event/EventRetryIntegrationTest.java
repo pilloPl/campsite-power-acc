@@ -24,7 +24,7 @@ import static org.mockito.Mockito.reset;
  */
 class EventRetryIntegrationTest extends IntegrationTest {
 
-    static final String QUEUE = EventService.createEventSystemName("eventRetryIntegrationTest");
+    static final String QUEUE = EventService.eventSourceName("eventRetryIntegrationTest");
 
     @MockitoSpyBean EventService eventService;
     @Autowired EventRetryService eventRetryService;
@@ -54,7 +54,7 @@ class EventRetryIntegrationTest extends IntegrationTest {
 
         reset(eventService);
         eventService.registerQueue(QUEUE, EventType.SOCKET_STATE_NOTIFICATION);
-        BlockingQueue<Event> queue = eventService.getQueueAndRegisterListener(QUEUE);
+        BlockingQueue<Event> queue = eventService.subscribeToQueue(QUEUE);
         queue.clear();
 
         assertThat(eventRetryService.retryOpenEvents(10)).isEqualTo(1);

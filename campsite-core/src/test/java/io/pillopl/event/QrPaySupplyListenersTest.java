@@ -24,14 +24,14 @@ class QrPaySupplyListenersTest {
         startedListener = new QrPaySupplyStartedListener(new EventService(), new EventTaskExecutorFactory(),
                 supervisor) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };
         stoppedListener = new QrPaySupplyStoppedListener(new EventService(), new EventTaskExecutorFactory(),
                 supervisor) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };

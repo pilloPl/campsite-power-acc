@@ -25,14 +25,14 @@ class AlertMailListenersTest {
         powerSectionListener = new PowerSectionMisconfiguredListener(new EventService(),
                 new EventTaskExecutorFactory(), pedestalMailService) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };
         qrPayErrorListener = new QrPayErrorListener(new EventService(), new EventTaskExecutorFactory(),
                 pedestalMailService) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };

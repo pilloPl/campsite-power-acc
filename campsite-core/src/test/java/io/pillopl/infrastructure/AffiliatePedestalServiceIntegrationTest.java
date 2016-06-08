@@ -191,8 +191,8 @@ class AffiliatePedestalServiceIntegrationTest extends IntegrationTest {
                     AccessMode.NETWORK_ACCESS);
             affiliatePedestalService.decommission(pedestal.getId(), marko.getId());
 
-            Event commissioned = eventService.getQueueAndRegisterListener("test-commissioned").poll();
-            Event decommissioned = eventService.getQueueAndRegisterListener("test-decommissioned").poll();
+            Event commissioned = eventService.subscribeToQueue("test-commissioned").poll();
+            Event decommissioned = eventService.subscribeToQueue("test-decommissioned").poll();
             assertThat(PedestalCommissionedEvent.getPedestalId(commissioned)).isEqualTo(pedestal.getId());
             assertThat(PedestalCommissionedEvent.getGroupId(commissioned))
                     .isEqualTo(affiliateGroupService.findAffiliateSiteGroup("marko").getId());

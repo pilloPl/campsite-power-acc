@@ -75,21 +75,21 @@ public abstract class EventListener {
 
     @PostConstruct
     public final void postcreate() {
-        final String eventSystemName = EventService.createEventSystemName(getName());
+        final String eventSystemName = EventService.eventSourceName(getName());
 
         eventService.registerQueue(eventSystemName, getType());
-        queue = eventService.getQueueAndRegisterListener(eventSystemName);
+        queue = eventService.subscribeToQueue(eventSystemName);
 
         LOG.info("Registered " + getName());
 
-        this.taskExecutor = createEventTaskExecutor(executorFactory);
+        this.taskExecutor = newListenerExecutor(executorFactory);
 
         // fire and forget: derived classes just handle the events
         takeFromQueueExecutor.execute(new TakeFromQueueTask());
     }
 
-    protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
-        return factory.singletonThreadPoolTaskExecutor(getName());
+    protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
+        return factory.singleWorkerExecutor(getName());
     }
 
     public Future<?> submitTask(final EventTask eventTask) {
@@ -116,7 +116,7 @@ public abstract class EventListener {
 
     protected String createLogStringFrom(final Event event) {
         StringBuilder builder = new StringBuilder();
-        builder.append("Queue: ").append(EventService.createEventSystemName(getName()));
+        builder.append("Queue: ").append(EventService.eventSourceName(getName()));
         if (null != event) {
             builder.append(event);
         } else {
@@ -137,7 +137,7 @@ public abstract class EventListener {
     public void tryShutdown() {
         LOG.info(String.format("Stopping event listener %s for %s (%s)", getName(), getType(), getClass().getName()));
         alive.set(false);
-        eventService.unregisterQueue(EventService.createEventSystemName(getName()), getType());
+        eventService.unregisterQueue(EventService.eventSourceName(getName()), getType());
         takeFromQueueExecutor.shutdown();
         if (taskExecutor instanceof ThreadPoolTaskExecutor tpte) {
             tpte.shutdown();

@@ -41,7 +41,7 @@ class EventServiceTest {
     void eventWithoutListenerIsDropped() {
         eventService.send(new Event(EventType.CHECK_URL));
 
-        assertThat(eventService.getQueueSize(EventService.createEventSystemName("x"))).isZero();
+        assertThat(eventService.getQueueSize(EventService.eventSourceName("x"))).isZero();
     }
 
     @Test

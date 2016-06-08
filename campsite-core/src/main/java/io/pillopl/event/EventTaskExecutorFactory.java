@@ -15,7 +15,7 @@ public class EventTaskExecutorFactory {
     /**
      * One thread: the events of a listener are handled in the order they arrive.
      */
-    public AsyncTaskExecutor singletonThreadPoolTaskExecutor(String name) {
+    public AsyncTaskExecutor singleWorkerExecutor(String name) {
         return threadPoolTaskExecutor(name, 1, 1);
     }
 

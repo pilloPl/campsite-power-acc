@@ -114,13 +114,13 @@ public class TariffService {
         }
         validateTariff(tariff);
         if (existsTariff(tariff.getMarket(), tariff.getName())) {
-            logAndThrowException(String.format("Tariff name %s is already used by another tariff of %s", tariff.getName(),
+            failWith(String.format("Tariff name %s is already used by another tariff of %s", tariff.getName(),
                     tariff.getMarket()));
         }
         if (tariff.isDefaultTariff()) {
             Tariff defaultTariffForMarket = tariffDao.findDefaultTariffForMarket(tariff.getMarket());
             if (defaultTariffForMarket != null) {
-                logAndThrowException(String.format("%s has a fallback tariff already", tariff.getMarket()));
+                failWith(String.format("%s has a fallback tariff already", tariff.getMarket()));
             }
         }
         tariff.fillTariffDetails();
@@ -138,7 +138,7 @@ public class TariffService {
             throw new NoSuchElementException("Tariff not found: " + tariffId);
         }
         if (isInUse(tariff)) {
-            logAndThrowException(String.format("Tariff %s is in use: create a new tariff and assign it from a start "
+            failWith(String.format("Tariff %s is in use: create a new tariff and assign it from a start "
                     + "date", tariff.getName()));
         }
         changes.setName(tariff.getName());
@@ -237,12 +237,12 @@ public class TariffService {
     private Market evaluateMarket(Userinfo principal) {
         Market market = userinfoService.determineMarket(principal.getUsername());
         if (market == null || !market.isPrefixMarket()) {
-            logAndThrowException(String.format("Cannot determine market for user %s", principal.getUsername()));
+            failWith(String.format("Cannot determine market for user %s", principal.getUsername()));
         }
         return market;
     }
 
-    private static void logAndThrowException(String message) {
+    private static void failWith(String message) {
         LOGGER.error(message);
         throw new TariffOperationException(message);
     }

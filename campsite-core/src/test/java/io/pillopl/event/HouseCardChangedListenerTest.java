@@ -21,7 +21,7 @@ class HouseCardChangedListenerTest {
         listener = new HouseCardChangedListener(new EventService(), new EventTaskExecutorFactory(),
                 localCardListService) {
             @Override
-            protected AsyncTaskExecutor createEventTaskExecutor(EventTaskExecutorFactory factory) {
+            protected AsyncTaskExecutor newListenerExecutor(EventTaskExecutorFactory factory) {
                 return new TaskExecutorAdapter(Runnable::run);
             }
         };

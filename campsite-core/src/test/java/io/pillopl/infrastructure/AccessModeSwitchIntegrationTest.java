@@ -86,7 +86,7 @@ class AccessModeSwitchIntegrationTest extends IntegrationTest {
                     AccessMode.HOUSE_CARDS_ONLY, false);
             affiliateGroupService.switchAccessMode(affiliate.getId(), AccessMode.NETWORK_ACCESS, true);
 
-            Event event = eventService.getQueueAndRegisterListener("test-switched").poll();
+            Event event = eventService.subscribeToQueue("test-switched").poll();
             assertThat(AccessModeSwitchedEvent.getGroupId(event)).isEqualTo(affiliate.getId());
             assertThat(AccessModeSwitchedEvent.getAccessMode(event)).isEqualTo("NETWORK_ACCESS");
             assertThat(eventService.getQueueSize("test-switched")).isZero();
