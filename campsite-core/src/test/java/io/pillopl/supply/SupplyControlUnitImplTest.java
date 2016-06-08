@@ -334,6 +334,25 @@ class SupplyControlUnitImplTest {
         assertThat(duration.durationInSeconds()).isEqualTo(8 * 3600 + 30 * 60);
     }
 
+    @Test
+    void plugOutBeforeThePlugInGivesANegativeDuration() {
+        SupplyDuration duration = controlUnit.determineDuration(SupplyRequest.stop(1001, BigDecimal.ONE,
+                PLUG_IN.minusMinutes(10), null), session(card, null, true), NOW);
+
+        assertThat(duration.durationInSeconds()).isEqualTo(-600L);
+        assertThat(duration.isNegative()).isTrue();
+    }
+
+    @Test
+    void stopWithoutSessionHasNoDuration() {
+        SupplyDuration duration = controlUnit.determineDuration(SupplyRequest.stop(1001, BigDecimal.ONE, NOW, null),
+                null, NOW);
+
+        assertThat(duration.plugIn()).isNull();
+        assertThat(duration.durationInSeconds()).isNull();
+        assertThat(duration.isNegative()).isFalse();
+    }
+
     // ------------------------------------------------------------------------------------------ stale sessions
 
     @Test
