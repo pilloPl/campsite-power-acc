@@ -42,7 +42,7 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
                                      @Param("transactionId") Integer transactionId);
 
     @Query("select s from SupplySession s where s.socket = :socket and s.qrPayProcessId = :qrPayProcessId"
-            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate")
+            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate order by s.id desc")
     List<SupplySession> findQrPaySessionsBy(@Param("socket") Socket socket,
                                             @Param("qrPayProcessId") Long qrPayProcessId,
                                             @Param("startMeterKwh") BigDecimal startMeterKwh,
@@ -51,13 +51,13 @@ public interface SupplySessionDao extends JpaRepository<SupplySession, Long> {
     SupplySession findFirstByQrPayProcessIdOrderByIdDesc(Long qrPayProcessId);
 
     @Query("select s from SupplySession s where s.socket = :socket and s.card.cardRfid = :rfid"
-            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate")
+            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate order by s.id desc")
     List<SupplySession> findBy(@Param("socket") Socket socket, @Param("rfid") String rfid,
                                @Param("startMeterKwh") BigDecimal startMeterKwh,
                                @Param("remoteDate") LocalDateTime remoteDate);
 
     @Query("select s from SupplySession s where s.socket = :socket and s.houseCard.rfid = :rfid"
-            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate")
+            + " and s.startMeterKwh = :startMeterKwh and s.remoteDate = :remoteDate order by s.id desc")
     List<SupplySession> findHouseCardSessionsBy(@Param("socket") Socket socket, @Param("rfid") String rfid,
                                                 @Param("startMeterKwh") BigDecimal startMeterKwh,
                                                 @Param("remoteDate") LocalDateTime remoteDate);
