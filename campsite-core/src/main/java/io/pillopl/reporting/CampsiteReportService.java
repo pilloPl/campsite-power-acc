@@ -45,6 +45,8 @@ public class CampsiteReportService {
 
     private static final int SLICE_SCALE = 6;
 
+    private static final int HOURS_PER_DAY = 24;
+
     private final ConsumptionReportDao consumptionReportDao;
 
     private final SupplyIncidentDao supplyIncidentDao;
@@ -186,7 +188,7 @@ public class CampsiteReportService {
         // Helper maps for each hour of the day: kWh total and the sockets that drew energy in that hour.
         Map<Integer, BigDecimal> totalConsumptionPerHour = new HashMap<>();
         Map<Integer, Set<String>> socketsPerHour = new HashMap<>();
-        for (int hour = 0; hour < 24; hour++) {
+        for (int hour = 0; hour < HOURS_PER_DAY; hour++) {
             totalConsumptionPerHour.put(hour, BigDecimal.ZERO);
             socketsPerHour.put(hour, new HashSet<>());
         }
@@ -252,7 +254,7 @@ public class CampsiteReportService {
             }
         }
 
-        for (int hour = 0; hour < 24; hour++) {
+        for (int hour = 0; hour < HOURS_PER_DAY; hour++) {
             lines.add(new ReportLineDTO(String.format("%02d", hour), null,
                     totalConsumptionPerHour.get(hour).setScale(KWH_SCALE, RoundingMode.HALF_UP),
                     socketsPerHour.get(hour).size(), null));
