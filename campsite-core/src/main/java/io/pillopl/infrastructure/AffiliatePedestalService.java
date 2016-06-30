@@ -318,7 +318,7 @@ public class AffiliatePedestalService {
             throw new IllegalStateException("No supplier stock for manufacturer " + pedestal.getManufacturer());
         }
         pedestal.setGroup(supplierGroup);
-        pedestal.setLocation(locationService.fetchOrCreateUnknownLocation());
+        pedestal.setLocation(locationService.placeholderLocation());
         defaultPedestal(pedestal);
     }
 

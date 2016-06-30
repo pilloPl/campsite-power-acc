@@ -61,8 +61,8 @@ class LocalCardListServiceIntegrationTest extends IntegrationTest {
 
     @Test
     void versionGrowsWithEveryList() {
-        assertThat(localCardListService.getNextLocalListVersion(pedestal)).isEqualTo(1);
-        assertThat(localCardListService.getNextLocalListVersion(pedestal)).isEqualTo(2);
+        assertThat(localCardListService.nextCardListVersion(pedestal)).isEqualTo(1);
+        assertThat(localCardListService.nextCardListVersion(pedestal)).isEqualTo(2);
         assertThat(localListVersionDao.findByPedestal(pedestal).getVersion()).isEqualTo(2);
     }
 

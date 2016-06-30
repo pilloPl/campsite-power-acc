@@ -59,7 +59,7 @@ class ReportApiServiceTest {
     void reportOfTheWholeScopeReadsBothSides() {
         api.getReport(CALLER, ReportApi.AVERAGE_PER_DAY_OF_WEEK, JULY, null, null, null, null, null, null);
 
-        verify(campsiteReportService).getAverageConsumptionPerDayOfWeek(FROM, TO, 10L, 20L, null);
+        verify(campsiteReportService).weekdayConsumptionProfile(FROM, TO, 10L, 20L, null);
     }
 
     @Test
@@ -68,7 +68,7 @@ class ReportApiServiceTest {
 
         api.getReport(CALLER, "average-per-hour-of-day", JULY, 11L, 5L, null, null, null, null);
 
-        verify(campsiteReportService).getAverageConsumptionPerHourOfDay(FROM, TO, 11L, null, 5L);
+        verify(campsiteReportService).hourlyConsumptionProfile(FROM, TO, 11L, null, 5L);
     }
 
     @Test

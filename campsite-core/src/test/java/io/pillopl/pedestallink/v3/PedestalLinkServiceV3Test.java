@@ -74,18 +74,18 @@ class PedestalLinkServiceV3Test {
 
     @Test
     void linkV3TellsTheGuestWhyTheCardIsRefused() {
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.CARD_NOT_ACCEPTED_AT_SITE))
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.CARD_NOT_ACCEPTED_AT_SITE))
                 .isEqualTo("NOT_ACCEPTED_HERE");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.UNAVAILABLE))
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.UNAVAILABLE))
                 .isEqualTo("UNAVAILABLE");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.SOCKET_OCCUPIED))
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.SOCKET_OCCUPIED))
                 .isEqualTo("OCCUPIED");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.ACCEPTED)).isEqualTo("ACCEPTED");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.EXPIRED)).isEqualTo("EXPIRED");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.BLOCKED)).isEqualTo("BLOCKED");
-        assertThat(TranslationHelper.translateFromValidationStatus(ValidationStatus.CARD_INVALID))
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.ACCEPTED)).isEqualTo("ACCEPTED");
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.EXPIRED)).isEqualTo("EXPIRED");
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.BLOCKED)).isEqualTo("BLOCKED");
+        assertThat(TranslationHelper.toLinkStatus(ValidationStatus.CARD_INVALID))
                 .isEqualTo("INVALID");
-        assertThat(TranslationHelper.translateFromValidationStatus(null)).isEqualTo("INVALID");
+        assertThat(TranslationHelper.toLinkStatus(null)).isEqualTo("INVALID");
     }
 
     @Test

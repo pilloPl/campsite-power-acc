@@ -86,7 +86,7 @@ public class LocalCardListService {
 
         // ... set constants
         boolean fullUpdate = true;
-        Integer version = getNextLocalListVersion(pedestal);
+        Integer version = nextCardListVersion(pedestal);
 
         LocalCardListSendResult result = localCardListSender.sendLocalList(pedestal, fullUpdate, list.entries(),
                 version, useCache);
@@ -104,7 +104,7 @@ public class LocalCardListService {
         Pedestal pedestal = getPedestal(pedestalCode);
 
         boolean fullUpdate = false;
-        Integer version = getNextLocalListVersion(pedestal);
+        Integer version = nextCardListVersion(pedestal);
 
         List<LocalCardListEntry> entries = new ArrayList<>();
         if (houseCards != null) {
@@ -182,7 +182,7 @@ public class LocalCardListService {
     }
 
     @Transactional
-    public Integer getNextLocalListVersion(Pedestal pedestal) {
+    public Integer nextCardListVersion(Pedestal pedestal) {
         if (pedestal == null || pedestal.getId() == null) {
             throw new IllegalArgumentException("Persistent pedestal required");
         }

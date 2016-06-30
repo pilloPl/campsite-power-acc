@@ -9,11 +9,11 @@ class WhitelistFilterTypeTest {
 
     @Test
     void whitelistFilterTypesCoverTheirDirections() {
-        assertThat(WhitelistFilterType.isImportWhitelistFilterType(WhitelistFilterType.IMPORT)).isTrue();
-        assertThat(WhitelistFilterType.isImportWhitelistFilterType(WhitelistFilterType.EXPORT)).isFalse();
-        assertThat(WhitelistFilterType.isExportWhitelistFilterType(WhitelistFilterType.IMPORT_EXPORT)).isTrue();
-        assertThat(WhitelistFilterType.isExportWhitelistFilterType(WhitelistFilterType.IMPORT)).isFalse();
-        assertThat(WhitelistFilterType.isExportWhitelistFilterType(null)).isFalse();
+        assertThat(WhitelistFilterType.isImportFilter(WhitelistFilterType.IMPORT)).isTrue();
+        assertThat(WhitelistFilterType.isImportFilter(WhitelistFilterType.EXPORT)).isFalse();
+        assertThat(WhitelistFilterType.isExportFilter(WhitelistFilterType.IMPORT_EXPORT)).isTrue();
+        assertThat(WhitelistFilterType.isExportFilter(WhitelistFilterType.IMPORT)).isFalse();
+        assertThat(WhitelistFilterType.isExportFilter(null)).isFalse();
     }
 
     @Test

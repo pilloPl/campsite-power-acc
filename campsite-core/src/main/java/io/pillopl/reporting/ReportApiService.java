@@ -83,11 +83,11 @@ public class ReportApiService implements ReportApi {
             switch (reportType.trim().replace(' ', '_').replace('-', '_').toUpperCase(Locale.ROOT)) {
                 case AVERAGE_PER_HOUR_OF_DAY:
                     requirePeriod(period);
-                    return campsiteReportService.getAverageConsumptionPerHourOfDay(period.from(), period.to(),
+                    return campsiteReportService.hourlyConsumptionProfile(period.from(), period.to(),
                             siteGroupId, issuerGroupId, powerSectionId);
                 case AVERAGE_PER_DAY_OF_WEEK:
                     requirePeriod(period);
-                    return campsiteReportService.getAverageConsumptionPerDayOfWeek(period.from(), period.to(),
+                    return campsiteReportService.weekdayConsumptionProfile(period.from(), period.to(),
                             siteGroupId, issuerGroupId, powerSectionId);
                 case MONTHLY_CONSUMPTION:
                     return campsiteReportService.getMonthlyConsumptions(siteGroupId, issuerGroupId, powerSectionId,

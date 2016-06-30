@@ -35,7 +35,7 @@ class MonitoringAndMaintenanceJobsTest {
 
     @Test
     void unknownStateJobSendsEventsWithTheConfiguredTimeout() {
-        when(systemPropertyService.getUnknownStateTimeoutInMinutes()).thenReturn(180);
+        when(systemPropertyService.getMinutesUntilUnknownState()).thenReturn(180);
 
         new UnknownStateEventTriggerJob(pedestalStateService, systemPropertyService).executeInternal(null);
 

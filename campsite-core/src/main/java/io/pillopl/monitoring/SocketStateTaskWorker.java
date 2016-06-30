@@ -117,7 +117,7 @@ public class SocketStateTaskWorker {
         createAndSaveStatusLog(params, socket, log, formerErrorFlags, serverDate);
 
         // mail in error case: only when the socket was not in error before with the same reason
-        if (isInDifferentErrorThanPreviously(params, socket, formerErrorFlags)) {
+        if (errorChangedSinceLastReport(params, socket, formerErrorFlags)) {
             try {
                 // send event
                 sendEvent(socket);
@@ -152,7 +152,7 @@ public class SocketStateTaskWorker {
         return mask;
     }
 
-    private static boolean isInDifferentErrorThanPreviously(SocketStateParams params, Socket socket,
+    private static boolean errorChangedSinceLastReport(SocketStateParams params, Socket socket,
                                                             long formerErrorFlags) {
         return (socket.getStatus() == SocketStatus.FAULTED || socket.getStatus() == SocketStatus.BREAKER_TRIPPED)
                 && params.errorFlags() != null

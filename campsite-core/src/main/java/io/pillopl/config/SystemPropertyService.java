@@ -146,7 +146,7 @@ public class SystemPropertyService {
         return getProperty(SystemPropertyKey.DeveloperEmail, null);
     }
 
-    public int getDbAvailabilityAlarmThreshold() {
+    public int getDatabaseAlarmThreshold() {
         return getPropertyInt(SystemPropertyKey.DbAvailabilityAlarmThreshold, 20);
     }
 
@@ -178,7 +178,7 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.PedestalHeartbeatTimeoutJobIntervalInSeconds, 60);
     }
 
-    public int getUnknownStateTimeoutInMinutes() {
+    public int getMinutesUntilUnknownState() {
         return getPropertyInt(SystemPropertyKey.UnknownStateTimeoutInMinutes, 180);
     }
 

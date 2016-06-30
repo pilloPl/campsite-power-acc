@@ -30,7 +30,7 @@ public interface OrderDao extends JpaRepository<Order, Long> {
 
     @Modifying
     @Query("update OrderHeader o set o.exported = true, o.exportDate = :at where o.id in (:orderIds)")
-    int updateOrdersSetExported(@Param("orderIds") Collection<Long> orderIds, @Param("at") LocalDateTime at);
+    int flagOrdersExported(@Param("orderIds") Collection<Long> orderIds, @Param("at") LocalDateTime at);
 
     @Query(value = "SELECT nextval('ORDER_NUMBER_SEQ')", nativeQuery = true)
     Long nextOrderNumber();

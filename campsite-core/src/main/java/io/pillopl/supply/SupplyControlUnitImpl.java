@@ -108,7 +108,7 @@ public class SupplyControlUnitImpl {
         final ValidationStatus status = validationResult.getStatus();
 
         startSupplyResponse.setStatus(status);
-        if (cardIsNotNullAndHasValidTo(validationResult)) {
+        if (hasCardWithExpiry(validationResult)) {
             startSupplyResponse.setExpiryDate(validationResult.getCard().getValidTo());
         }
 
@@ -163,7 +163,7 @@ public class SupplyControlUnitImpl {
         final SupplyResponse stopSupplyResponse = new SupplyResponse();
         final LocalDateTime systemDate = dateService.getNow();
         final Integer transactionId = supplyRequest.getTransactionId();
-        final ValidationResult validationResultOfSecondCard;
+        final ValidationResult otherCardCheck;
 
         if (transactionId == null) {
             return acceptWithIncident(IncidentType.NO_TRANSACTION_ID, pedestalCode, cardRfid, supplyRequest, null,
@@ -174,7 +174,7 @@ public class SupplyControlUnitImpl {
 
         if (session == null || !session.isActive()) {
             return acceptWithIncident(session == null ? IncidentType.NO_SESSION : IncidentType.SESSION_ALREADY_CLOSED,
-                    pedestalCode, cardRfid, supplyRequest, session, getErrorMessageForSession(pedestalCode,
+                    pedestalCode, cardRfid, supplyRequest, session, sessionFailureText(pedestalCode,
                             transactionId, session), stopSupplyResponse);
         }
         final String sessionCardRfid = session.getCardRfid();
@@ -186,15 +186,15 @@ public class SupplyControlUnitImpl {
         final ValidationStatus status;
 
         // another card stopped the supply: its answer is what the pedestal caches for that card
-        if (wasDifferentCardUsage(cardRfid, sessionCardRfid, transactionId)) {
-            validationResultOfSecondCard = validationService.validateFor(socketLinkId, cardRfid, null, false);
-            status = validationResultOfSecondCard.getStatus();
+        if (otherCardPresented(cardRfid, sessionCardRfid, transactionId)) {
+            otherCardCheck = validationService.validateFor(socketLinkId, cardRfid, null, false);
+            status = otherCardCheck.getStatus();
         } else {
             status = validationResult.getStatus();
         }
         stopSupplyResponse.setStatus(status);
 
-        if (cardIsNotNullAndHasValidTo(validationResult)) {
+        if (hasCardWithExpiry(validationResult)) {
             stopSupplyResponse.setExpiryDate(validationResult.getCard().getValidTo());
         }
         // the pedestal backend started the session, so it should know the socket and the card
@@ -462,7 +462,7 @@ public class SupplyControlUnitImpl {
         return supplyResponse;
     }
 
-    private static String getErrorMessageForSession(String pedestalCode, Integer transactionId,
+    private static String sessionFailureText(String pedestalCode, Integer transactionId,
                                                     SupplySession session) {
         if (session == null) {
             return String.format("Can't find session of transaction %s on pedestal %s!", transactionId,
@@ -473,7 +473,7 @@ public class SupplyControlUnitImpl {
                 transactionId, stopReason != null && stopReason.isClosedBySystem() ? "system" : "pedestal", stopReason);
     }
 
-    private static boolean wasDifferentCardUsage(String cardRfid, String sessionCardRfid, Integer transactionId) {
+    private static boolean otherCardPresented(String cardRfid, String sessionCardRfid, Integer transactionId) {
         boolean different = cardRfid != null && !cardRfid.isBlank() && !cardRfid.equals(sessionCardRfid);
         if (different) {
             LOG.info(String.format("Transaction %s started with card %s was stopped with card %s", transactionId,
@@ -482,7 +482,7 @@ public class SupplyControlUnitImpl {
         return different;
     }
 
-    private static boolean cardIsNotNullAndHasValidTo(ValidationResult validationResult) {
+    private static boolean hasCardWithExpiry(ValidationResult validationResult) {
         return validationResult.getCard() != null && validationResult.getCard().getValidTo() != null;
     }
 

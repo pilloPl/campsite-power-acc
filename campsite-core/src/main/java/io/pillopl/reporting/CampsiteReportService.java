@@ -68,7 +68,7 @@ public class CampsiteReportService {
      *
      * @return seven lines MONDAY..SUNDAY: kWh = average per socket, count = sockets
      */
-    public List<ReportLineDTO> getAverageConsumptionPerDayOfWeek(LocalDateTime from, LocalDateTime to,
+    public List<ReportLineDTO> weekdayConsumptionProfile(LocalDateTime from, LocalDateTime to,
                                                                  Long siteGroupId, Long issuerGroupId,
                                                                  Long powerSectionId) {
         List<ReportLineDTO> lines = new ArrayList<>();
@@ -174,7 +174,7 @@ public class CampsiteReportService {
      *
      * @return 24 lines "00".."23": kWh = average per socket, count = sockets
      */
-    public List<ReportLineDTO> getAverageConsumptionPerHourOfDay(LocalDateTime from, LocalDateTime to,
+    public List<ReportLineDTO> hourlyConsumptionProfile(LocalDateTime from, LocalDateTime to,
                                                                  Long siteGroupId, Long issuerGroupId,
                                                                  Long powerSectionId) {
         List<ReportLineDTO> lines = new ArrayList<>();

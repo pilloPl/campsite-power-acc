@@ -77,7 +77,7 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
                     SocketLinkId.of(pedestalCode, request.socketNo()))
                     : service.getAuthorization().authenticate(cardRfid, pedestalCode);
 
-            return new AuthorizeResponse(TranslationHelper.translateFromValidationStatus(
+            return new AuthorizeResponse(TranslationHelper.toLinkStatus(
                     authorizationResult.getStatus()), authorizationResult.getExpiryDate(),
                     authorizationResult.getGuestName());
         }
@@ -161,7 +161,7 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
                     SupplyRequest.start(TranslationHelper.toKwh(request.meterStartWh()), request.timestamp()));
 
             return new SupplyStartedResponse(supplyResponse.getTransactionId(),
-                    TranslationHelper.translateFromValidationStatus(supplyResponse.getStatus()),
+                    TranslationHelper.toLinkStatus(supplyResponse.getStatus()),
                     supplyResponse.getExpiryDate(), supplyResponse.getMaxCurrentA(),
                     supplyResponse.getPriceInformation(), supplyResponse.getGreeting());
         }
@@ -197,7 +197,7 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
                 }
             }
 
-            return new SupplyStoppedResponse(TranslationHelper.translateFromValidationStatus(
+            return new SupplyStoppedResponse(TranslationHelper.toLinkStatus(
                     supplyResponse.getStatus()), supplyResponse.getExpiryDate());
         }
     }

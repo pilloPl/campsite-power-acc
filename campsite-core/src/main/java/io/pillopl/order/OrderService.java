@@ -227,7 +227,7 @@ public class OrderService {
         if (orderIds == null || orderIds.isEmpty()) {
             return 0;
         }
-        return orderDao.updateOrdersSetExported(orderIds, dateService.getNow());
+        return orderDao.flagOrdersExported(orderIds, dateService.getNow());
     }
 
     /**

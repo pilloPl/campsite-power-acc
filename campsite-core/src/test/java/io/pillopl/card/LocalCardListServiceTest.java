@@ -141,8 +141,8 @@ class LocalCardListServiceTest {
 
     @Test
     void firstListOfAPedestalHasVersionOne() {
-        assertThat(service.getNextLocalListVersion(pedestal)).isEqualTo(1);
-        assertThatThrownBy(() -> service.getNextLocalListVersion(new Pedestal()))
+        assertThat(service.nextCardListVersion(pedestal)).isEqualTo(1);
+        assertThatThrownBy(() -> service.nextCardListVersion(new Pedestal()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

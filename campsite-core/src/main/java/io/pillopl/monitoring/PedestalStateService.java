@@ -56,17 +56,17 @@ public class PedestalStateService {
      * Times out the pedestals alive until now whose last message is older than the timeout.
      */
     @Transactional
-    public Report timeoutPedestals(final int timeoutIntervalInMinutes) {
+    public Report timeoutPedestals(final int silenceLimitMinutes) {
         LocalDateTime now = dateService.getNow();
-        LOGGER.info(String.format("Looking for timed out pedestals since %s minute(s)", timeoutIntervalInMinutes));
+        LOGGER.info(String.format("Looking for timed out pedestals since %s minute(s)", silenceLimitMinutes));
         List<PedestalState> states = pedestalStateDao.findAliveWithLastIncomingBefore(
-                now.minusMinutes(timeoutIntervalInMinutes));
+                now.minusMinutes(silenceLimitMinutes));
         logIfTooManyPedestals(states);
 
         Report report = new Report(Report.TIMEOUT_PEDESTALS);
         for (int i = 0; i < Math.min(states.size(), MAX_PEDESTALS_TO_TIMEOUT); i++) {
             PedestalState state = states.get(i);
-            if (state.checkTimeout(now, timeoutIntervalInMinutes)) {
+            if (state.checkTimeout(now, silenceLimitMinutes)) {
                 pedestalStateDao.save(state);
                 report.timedOutPedestals++;
                 sendEmail(state, report);
@@ -82,9 +82,9 @@ public class PedestalStateService {
      * Sends UNKNOWN events for the pedestals silent for longer than the unknown state timeout.
      */
     @Transactional(readOnly = true)
-    public Report sendUnknownEvents(final int timeoutIntervalInMinutes) {
+    public Report sendUnknownEvents(final int silenceLimitMinutes) {
         List<PedestalState> states = pedestalStateDao.findWithLastIncomingBefore(
-                dateService.getNow().minusMinutes(timeoutIntervalInMinutes));
+                dateService.getNow().minusMinutes(silenceLimitMinutes));
         logIfTooManyPedestals(states);
 
         Report report = new Report(Report.UNKNOWN_EVENTS);

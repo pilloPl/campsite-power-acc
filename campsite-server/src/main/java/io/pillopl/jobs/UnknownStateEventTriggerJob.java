@@ -24,6 +24,6 @@ public class UnknownStateEventTriggerJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
-        pedestalStateService.sendUnknownEvents(systemPropertyService.getUnknownStateTimeoutInMinutes());
+        pedestalStateService.sendUnknownEvents(systemPropertyService.getMinutesUntilUnknownState());
     }
 }

@@ -36,7 +36,7 @@ public class WhitelistFilterService {
 
     @Transactional(readOnly = true)
     public boolean isSynchronizableForExport(Long issuerGroupIdFromCard) {
-        WhitelistFilter whitelistFilter = getWhitelistFilterForExport(issuerGroupIdFromCard);
+        WhitelistFilter whitelistFilter = exportFilterOf(issuerGroupIdFromCard);
         if (whitelistFilter != null) {
             return whitelistFilter.isSynchronizable();
         }
@@ -50,7 +50,7 @@ public class WhitelistFilterService {
     @Transactional(readOnly = true)
     public boolean isSynchronizableForImport(Long issuerGroupIdFromCard, IssuerPartner partner) {
         WhitelistFilter whitelistFilter = findNearest(issuerGroupIdFromCard,
-                filter -> WhitelistFilterType.isImportWhitelistFilterType(filter.getWhitelistFilterType())
+                filter -> WhitelistFilterType.isImportFilter(filter.getWhitelistFilterType())
                         && filter.isTargeting(partner));
         return whitelistFilter == null || whitelistFilter.isSynchronizable();
     }
@@ -61,7 +61,7 @@ public class WhitelistFilterService {
     @Transactional(readOnly = true)
     public boolean isSynchronizableForExport(Long issuerGroupIdFromCard, IssuerPartner partner) {
         WhitelistFilter whitelistFilter = findNearest(issuerGroupIdFromCard,
-                filter -> WhitelistFilterType.isExportWhitelistFilterType(filter.getWhitelistFilterType())
+                filter -> WhitelistFilterType.isExportFilter(filter.getWhitelistFilterType())
                         && filter.isTargeting(partner));
         return whitelistFilter == null || whitelistFilter.isSynchronizable();
     }
@@ -83,17 +83,17 @@ public class WhitelistFilterService {
         }
         List<WhitelistFilter> whitelistFilters = whitelistFilterDao.findByGroupIds(parentLineIds);
         return GroupAttributeHelper.findNearest(parentLineIds, whitelistFilters,
-                filter -> WhitelistFilterType.isImportWhitelistFilterType(filter.getWhitelistFilterType()));
+                filter -> WhitelistFilterType.isImportFilter(filter.getWhitelistFilterType()));
     }
 
     @Transactional(readOnly = true)
-    public WhitelistFilter getWhitelistFilterForExport(Long issuerGroupIdFromCard) {
+    public WhitelistFilter exportFilterOf(Long issuerGroupIdFromCard) {
         List<Long> parentLineIds = groupService.fetchParentLineIds(issuerGroupIdFromCard, true);
         if (parentLineIds.isEmpty()) {
             return null;
         }
         List<WhitelistFilter> whitelistFilters = whitelistFilterDao.findByGroupIds(parentLineIds);
         return GroupAttributeHelper.findNearest(parentLineIds, whitelistFilters,
-                filter -> WhitelistFilterType.isExportWhitelistFilterType(filter.getWhitelistFilterType()));
+                filter -> WhitelistFilterType.isExportFilter(filter.getWhitelistFilterType()));
     }
 }

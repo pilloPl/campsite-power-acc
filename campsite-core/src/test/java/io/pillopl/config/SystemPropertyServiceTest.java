@@ -57,7 +57,7 @@ class SystemPropertyServiceTest {
 
         assertThat(service.getLocalCardListDefaultMaxEntries()).isEqualTo(100);
         assertThat(service.getSuspectRecordKwhPerNightThreshold()).isEqualByComparingTo("300");
-        assertThat(service.getDbAvailabilityAlarmThreshold()).isEqualTo(20);
+        assertThat(service.getDatabaseAlarmThreshold()).isEqualTo(20);
     }
 
     @Test

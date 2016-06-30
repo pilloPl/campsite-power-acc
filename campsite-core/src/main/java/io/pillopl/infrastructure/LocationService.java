@@ -20,7 +20,7 @@ public class LocationService {
      * The location of pedestals in the supplier stock.
      */
     @Transactional
-    public Location fetchOrCreateUnknownLocation() {
+    public Location placeholderLocation() {
         Location unknown = locationDao.findFirstByNameAndDeletedFalseOrderById(Location.UNKNOWN);
         if (unknown == null) {
             unknown = new Location(Location.UNKNOWN, "00000", Location.UNKNOWN, "0");

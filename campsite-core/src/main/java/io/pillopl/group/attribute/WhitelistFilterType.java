@@ -6,14 +6,14 @@ package io.pillopl.group.attribute;
 public enum WhitelistFilterType {
     IMPORT_EXPORT, IMPORT, EXPORT;
 
-    public static boolean isImportWhitelistFilterType(WhitelistFilterType whitelistFilterType) {
+    public static boolean isImportFilter(WhitelistFilterType whitelistFilterType) {
         if (whitelistFilterType == null) {
             return false;
         }
         return IMPORT_EXPORT == whitelistFilterType || IMPORT == whitelistFilterType;
     }
 
-    public static boolean isExportWhitelistFilterType(WhitelistFilterType whitelistFilterType) {
+    public static boolean isExportFilter(WhitelistFilterType whitelistFilterType) {
         if (whitelistFilterType == null) {
             return false;
         }

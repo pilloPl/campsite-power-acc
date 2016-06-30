@@ -204,7 +204,7 @@ class ConsumptionReportIntegrationTest extends IntegrationTest {
     void averagePerHourReadsTheRecordsOfTheDatabase() {
         record(baySocket, "4", JULY.plusHours(12), "BAY", 1, null);
 
-        List<ReportLineDTO> lines = campsiteReportService.getAverageConsumptionPerHourOfDay(JULY, JULY.plusDays(1),
+        List<ReportLineDTO> lines = campsiteReportService.hourlyConsumptionProfile(JULY, JULY.plusDays(1),
                 bay.getId(), null, null);
 
         assertThat(lines.get(10).kwh()).isEqualByComparingTo("2");

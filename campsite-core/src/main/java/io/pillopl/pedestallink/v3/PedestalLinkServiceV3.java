@@ -61,7 +61,7 @@ public class PedestalLinkServiceV3 {
 
         static final String BREAKER_TRIPPED = "BREAKER_TRIPPED";
 
-        public static String translateFromValidationStatus(final ValidationStatus status) {
+        public static String toLinkStatus(final ValidationStatus status) {
             if (status == null) {
                 return INVALID;
             }

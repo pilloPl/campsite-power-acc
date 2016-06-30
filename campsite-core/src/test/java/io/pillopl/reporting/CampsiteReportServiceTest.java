@@ -187,11 +187,11 @@ class CampsiteReportServiceTest {
     }
 
     private List<ReportLineDTO> perHour() {
-        return service.getAverageConsumptionPerHourOfDay(FROM, TO, SITE, null, null);
+        return service.hourlyConsumptionProfile(FROM, TO, SITE, null, null);
     }
 
     private List<ReportLineDTO> perDay() {
-        return service.getAverageConsumptionPerDayOfWeek(FROM, TO, SITE, null, null);
+        return service.weekdayConsumptionProfile(FROM, TO, SITE, null, null);
     }
 
     private void records(ReportRecord... records) {
