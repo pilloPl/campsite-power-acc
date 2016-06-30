@@ -111,7 +111,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
     }
 
     /**
-     * Remote start of a socket with an id tag. Not queued: a start the pedestal does not get now is refused.
+     * Remote start of a socket with an auth tag. Not queued: a start the pedestal does not get now is refused.
      */
     @Override
     public boolean remoteSupplyStart(Pedestal pedestal, int socketNo, String authTag) {

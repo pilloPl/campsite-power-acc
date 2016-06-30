@@ -126,7 +126,7 @@ public class ValidationService {
         }
 
         /**
-         * The id tag was the remote start of this QR payment process (no card, no house card).
+         * The auth tag was the remote start of this QR payment process (no card, no house card).
          */
         public Long getQrPayProcessId() {
             return qrPayProcessId;
@@ -291,7 +291,7 @@ public class ValidationService {
                         validationResult));
             } else {
                 validationResult.setStatus(ValidationStatus.CARD_INVALID);
-                LOG.warn(String.format("QR payment id tag [%s] not valid at socket %s. Returning result (%s)",
+                LOG.warn(String.format("QR payment auth tag [%s] not valid at socket %s. Returning result (%s)",
                         cardRfid, socket, validationResult));
             }
             return validationResult;

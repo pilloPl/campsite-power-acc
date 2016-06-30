@@ -3,7 +3,7 @@ package io.pillopl.card;
 import io.pillopl.infrastructure.Socket;
 
 /**
- * Answers the validation of a QR payment id tag (implemented by the QR payment): the pedestal reports a supply
+ * Answers the validation of a QR payment auth tag (implemented by the QR payment): the pedestal reports a supply
  * started remotely for a payment process instead of a card.
  */
 public interface QrPaySupplyAuthorizer {

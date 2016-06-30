@@ -104,7 +104,7 @@ public class SupplySession {
     }
 
     /**
-     * UID of the card the session was started with (camping card or house card), or the id tag of the QR payment's
+     * UID of the card the session was started with (camping card or house card), or the auth tag of the QR payment's
      * remote start.
      */
     public String getCardRfid() {

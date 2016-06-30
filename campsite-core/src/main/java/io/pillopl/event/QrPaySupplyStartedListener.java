@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * A supply started with a QR payment id tag: the payment records the session and confirms the start to the app.
+ * A supply started with a QR payment auth tag: the payment records the session and confirms the start to the app.
  * Supplies of cards are not relevant for the QR payment.
  */
 @Component

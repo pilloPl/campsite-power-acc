@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * The app asked for the supply: the socket is started remotely with the process's id tag.
+ * The app asked for the supply: the socket is started remotely with the process's auth tag.
  */
 @Component
 @Scope("prototype")

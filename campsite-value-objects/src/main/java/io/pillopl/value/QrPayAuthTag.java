@@ -5,7 +5,7 @@ import io.pillopl.commons.TextUtil;
 import java.util.Locale;
 
 /**
- * Id tag of a QR payment supply: the pedestal backend starts the socket remotely with "QR" + process id, the
+ * Auth tag of a QR payment supply: the pedestal backend starts the socket remotely with "QR" + process id, the
  * pedestal reports the supply with it instead of a card UID.
  */
 public record QrPayAuthTag(long processId) {
@@ -23,7 +23,7 @@ public record QrPayAuthTag(long processId) {
     }
 
     /**
-     * @return the process id of a QR payment id tag, null for anything else (card UIDs are hex digits, they never
+     * @return the process id of a QR payment auth tag, null for anything else (card UIDs are hex digits, they never
      * start with the prefix followed by decimal digits only)
      */
     public static Long parse(String authTag) {

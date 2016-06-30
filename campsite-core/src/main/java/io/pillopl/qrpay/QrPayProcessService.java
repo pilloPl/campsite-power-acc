@@ -18,7 +18,7 @@ import java.util.List;
 
 /**
  * The row chain of the QR payment processes: every transition inserts the next row and closes the old one; the
- * finished chains go to the archive. Also tells the card validation whether a QR id tag may supply at a socket.
+ * finished chains go to the archive. Also tells the card validation whether a QR auth tag may supply at a socket.
  */
 @Service
 public class QrPayProcessService implements QrPaySupplyAuthorizer {
