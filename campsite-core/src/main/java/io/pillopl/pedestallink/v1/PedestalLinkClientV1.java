@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Link v1 from the pedestal backend to the pedestal: posts local card lists and remote starts and stops to the
+ * Link v1 from the pedestal backend to the pedestal: posts local card lists and remote supply starts and stops to the
  * controller's link address. A list that cannot be delivered is queued when the caller asks for it and sent with the
  * next boot or heartbeat of the pedestal; a later list for the same pedestal is merged into the queued one. Card lists
  * and remote control reach it through the PedestalLinkClientDispatcher for v1 pedestals.
@@ -111,7 +111,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
     }
 
     /**
-     * Remote start of a socket with an auth tag. Not queued: a start the pedestal does not get now is refused.
+     * Remote supply start of a socket with an auth tag. Not queued: a start the pedestal does not get now is refused.
      */
     @Override
     public boolean remoteSupplyStart(Pedestal pedestal, int socketNo, String authTag) {
@@ -119,7 +119,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
     }
 
     /**
-     * Remote stop of a transaction. Not queued: the caller decides what an unreachable pedestal means.
+     * Remote supply stop of a transaction. Not queued: the caller decides what an unreachable pedestal means.
      */
     @Override
     public boolean remoteSupplyStop(Pedestal pedestal, int transactionId) {

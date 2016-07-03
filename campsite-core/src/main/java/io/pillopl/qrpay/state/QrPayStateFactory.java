@@ -32,7 +32,7 @@ public class QrPayStateFactory implements ApplicationContextAware {
 
     /**
      * First row of a new process, committed at once when called outside a transaction (the pedestal must find the
-     * process when it reports the remote start).
+     * process when it reports the remote supply start).
      */
     @Transactional
     public QrPayState startProcess(String orderReference, Long socketId, String clientUsername, String appUserId,

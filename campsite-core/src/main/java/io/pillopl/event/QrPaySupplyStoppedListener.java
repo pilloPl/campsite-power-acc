@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * A supply of a QR payment stopped (pedestal, remote stop or the closing job): the payment takes the price of the
+ * A supply of a QR payment stopped (pedestal, remote supply stop or the closing job): the payment takes the price of the
  * consumption record and closes.
  */
 @Component

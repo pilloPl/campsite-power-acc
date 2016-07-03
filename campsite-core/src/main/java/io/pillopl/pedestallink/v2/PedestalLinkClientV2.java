@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Link v2 and v3 from the pedestal backend to the pedestal: a conscious copy of the v1 client with the v2 command names
- * (v3 controllers kept the v2 command set). Local card lists and remote starts and stops are posted to the
+ * (v3 controllers kept the v2 command set). Local card lists and remote supply starts and stops are posted to the
  * controller's link address. A list that cannot be delivered is queued when the caller asks for it and sent with the
  * next boot or heartbeat of the pedestal; a later list for the same pedestal is merged into the queued one.
  */
@@ -41,9 +41,9 @@ public class PedestalLinkClientV2 implements LocalCardListSender, RemoteSupplyCo
 
     static final String SEND_LOCAL_LIST = "/localList";
 
-    static final String REMOTE_SUPPLY_START = "/remoteSupplyStart";
+    static final String REMOTE_SUPPLY_START = "/requestSupplyStart";
 
-    static final String REMOTE_SUPPLY_STOP = "/remoteSupplyStop";
+    static final String REMOTE_SUPPLY_STOP = "/requestSupplyStop";
 
     static final int CONNECT_TIMEOUT_IN_MILLIS = 5_000;
 
@@ -111,7 +111,7 @@ public class PedestalLinkClientV2 implements LocalCardListSender, RemoteSupplyCo
     }
 
     /**
-     * Remote start of a socket with an auth tag. Not queued: a start the pedestal does not get now is refused.
+     * Remote supply start of a socket with an auth tag. Not queued: a start the pedestal does not get now is refused.
      */
     @Override
     public boolean remoteSupplyStart(Pedestal pedestal, int socketNo, String authTag) {
@@ -119,7 +119,7 @@ public class PedestalLinkClientV2 implements LocalCardListSender, RemoteSupplyCo
     }
 
     /**
-     * Remote stop of a transaction. Not queued: the caller decides what an unreachable pedestal means.
+     * Remote supply stop of a transaction. Not queued: the caller decides what an unreachable pedestal means.
      */
     @Override
     public boolean remoteSupplyStop(Pedestal pedestal, int transactionId) {

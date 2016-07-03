@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * The pedestal accepted the remote start; the supply begins when the guest plugs in.
+ * The pedestal accepted the remote supply start; the supply begins when the guest plugs in.
  */
 @Component
 @Scope("prototype")

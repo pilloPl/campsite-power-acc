@@ -3,7 +3,7 @@ package io.pillopl.supply;
 import io.pillopl.infrastructure.Pedestal;
 
 /**
- * Remote start and stop of the supply at a socket by the pedestal backend (the QR payment, later the console's remote
+ * Remote supply start and stop of the supply at a socket by the pedestal backend (the QR payment, later the console's remote
  * control). Implemented by the pedestal link client.
  */
 public interface RemoteSupplyControl {

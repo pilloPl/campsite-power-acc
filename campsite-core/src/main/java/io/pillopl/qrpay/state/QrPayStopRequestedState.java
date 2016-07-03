@@ -22,14 +22,14 @@ public class QrPayStopRequestedState extends QrPayState {
         }
         Pedestal pedestal = pedestalService.findBySocketId(process.getSocketId());
         if (pedestal == null || !remoteSupplyControl.remoteSupplyStop(pedestal, process.getTransactionId())) {
-            return handleError(QrPayErrorCode.REMOTE_SUPPLY_STOP_FAILED, "Pedestal did not accept the remote stop of "
+            return handleError(QrPayErrorCode.REMOTE_SUPPLY_STOP_FAILED, "Pedestal did not accept the remote supply stop of "
                     + "transaction " + process.getTransactionId());
         }
         return transitionTo(QrPayStateName.SOCKET_STOP_WAITING);
     }
 
     /**
-     * The pedestal answers the remote stop before its transition is committed.
+     * The pedestal answers the remote supply stop before its transition is committed.
      */
     @Override
     public boolean awaitsOwnTransition() {

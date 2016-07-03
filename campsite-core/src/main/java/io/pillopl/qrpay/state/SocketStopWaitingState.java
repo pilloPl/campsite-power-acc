@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * The pedestal accepted the remote stop; its supplyStopped follows.
+ * The pedestal accepted the remote supply stop; its supplyStopped follows.
  */
 @Component
 @Scope("prototype")

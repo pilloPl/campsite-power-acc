@@ -59,7 +59,7 @@ class PedestalLinkClientV2Test {
     @Test
     void v3PedestalIsServedWithTheV2Commands() {
         pedestal.setPedestalType(new PedestalType("ACME PEDESTALS", "P6", PedestalLinkVersion.V3));
-        server.expect(requestTo(URL + "/remoteSupplyStart")).andExpect(jsonPath("$.socketNo").value(2))
+        server.expect(requestTo(URL + "/requestSupplyStart")).andExpect(jsonPath("$.socketNo").value(2))
                 .andExpect(jsonPath("$.authTag").value("QR1005"))
                 .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
 
@@ -69,7 +69,7 @@ class PedestalLinkClientV2Test {
 
     @Test
     void remoteSupplyStopPostsTheTransaction() {
-        server.expect(requestTo(URL + "/remoteSupplyStop")).andExpect(jsonPath("$.transactionId").value(1007))
+        server.expect(requestTo(URL + "/requestSupplyStop")).andExpect(jsonPath("$.transactionId").value(1007))
                 .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
 
         assertThat(client.remoteSupplyStop(pedestal, 1007)).isTrue();
@@ -92,7 +92,7 @@ class PedestalLinkClientV2Test {
 
     @Test
     void remoteSupplyStartRejectedByThePedestalFails() {
-        server.expect(requestTo(URL + "/remoteSupplyStart"))
+        server.expect(requestTo(URL + "/requestSupplyStart"))
                 .andRespond(withSuccess("{\"status\":\"REJECTED\"}", MediaType.APPLICATION_JSON));
 
         assertThat(client.remoteSupplyStart(pedestal, 1, "QR1005")).isFalse();

@@ -42,7 +42,7 @@ public enum QrPayStateName {
     }
 
     /**
-     * The pedestal may (still) report the start of the supply for the process: the remote start is on its way or the
+     * The pedestal may (still) report the start of the supply for the process: the remote supply start is on its way or the
      * pedestal repeats a start it got no answer for.
      */
     public boolean isSupplyMayStart() {

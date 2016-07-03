@@ -68,7 +68,7 @@ public abstract class QrPayState {
     }
 
     /**
-     * Sends the remote start to the pedestal.
+     * Sends the remote supply start to the pedestal.
      */
     public QrPayState remoteSupplyStart() {
         return unsupported("remoteSupplyStart");
@@ -101,11 +101,11 @@ public abstract class QrPayState {
     }
 
     /**
-     * Sends the remote stop to the pedestal. Ignored where the supply already stops.
+     * Sends the remote supply stop to the pedestal. Ignored where the supply already stops.
      */
     public QrPayState remoteSupplyStop() {
         if (getStateName().isIgnoreStopRequest() && getStateName() != QrPayStateName.STOP_REQUESTED) {
-            LOG.warn(String.format("Ignoring remote stop of QR payment %s in %s", process.getProcessId(),
+            LOG.warn(String.format("Ignoring remote supply stop of QR payment %s in %s", process.getProcessId(),
                     getStateName()));
             return this;
         }

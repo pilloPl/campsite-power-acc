@@ -32,7 +32,7 @@ import java.util.Objects;
  * Flags: {@code billable} - consumption is billed through the network's ERP; {@code settledByCampsite} - the
  * affiliate campsite settles with its guests itself; {@code listedInApp} - shown in the guest app;
  * {@code automatedWhitelistUpdates} - card lists are pushed automatically; {@code managedExternally} - the pedestal
- * is connected through another operator's back office; {@code remoteControl} - remote start/stop allowed.
+ * is connected through another operator's back office; {@code remoteControl} - remote supply start/stop allowed.
  */
 @Entity
 @Table(name = "PEDESTAL")

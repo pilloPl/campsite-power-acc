@@ -126,7 +126,7 @@ public class ValidationService {
         }
 
         /**
-         * The auth tag was the remote start of this QR payment process (no card, no house card).
+         * The auth tag was the remote supply start of this QR payment process (no card, no house card).
          */
         public Long getQrPayProcessId() {
             return qrPayProcessId;
@@ -279,7 +279,7 @@ public class ValidationService {
             return validationResult;
         }
 
-        // Is it the remote start of a QR payment?
+        // Is it the remote supply start of a QR payment?
         Long qrPayProcessId = QrPayAuthTag.parse(cardRfid);
         if (qrPayProcessId != null) {
             QrPaySupplyAuthorizer authorizer = qrPaySupplyAuthorizer.getIfAvailable();

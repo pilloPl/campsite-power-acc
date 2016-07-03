@@ -170,7 +170,7 @@ public class SupplySessionManager implements SupplySessionRegistry {
         if (validationResult.isHouseCardAccepted()) {
             session.setHouseCard(houseCard);
         } else if (validationResult.isQrPayAccepted()) {
-            // remote start of a QR payment: no card
+            // remote supply start of a QR payment: no card
             session.setQrPayProcessId(validationResult.getQrPayProcessId());
         } else {
             session.setCard(card);
