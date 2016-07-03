@@ -56,6 +56,10 @@ public class ConsumptionRecordFactory {
         return suspectReasonFor(durationSeconds, kwh, nights) != null;
     }
 
+    private static String plain(BigDecimal kwh) {
+        return kwh.stripTrailingZeros().toPlainString();
+    }
+
     /**
      * Implausible values of a supply: negative duration, negative consumption, or more kWh per night of power use
      * than the configured threshold ({@code SuspectRecordKwhPerNightThreshold}). A supply within one day counts as
@@ -69,15 +73,15 @@ public class ConsumptionRecordFactory {
         }
 
         if (kwh != null && kwh.signum() < 0) {
-            return "Negative consumption: " + kwh.stripTrailingZeros().toPlainString() + " kWh";
+            return "Negative consumption: " + plain(kwh) + " kWh";
         }
 
         BigDecimal threshold = systemPropertyService.getSuspectRecordKwhPerNightThreshold();
         int countedNights = Math.max(1, nights);
         if (kwh != null && threshold != null
                 && kwh.compareTo(threshold.multiply(BigDecimal.valueOf(countedNights))) > 0) {
-            return "Consumption " + kwh.stripTrailingZeros().toPlainString() + " kWh in " + countedNights
-                    + " night(s) is above " + threshold.stripTrailingZeros().toPlainString() + " kWh per night";
+            return "Consumption " + plain(kwh) + " kWh in " + countedNights + " night(s) is above " + plain(threshold)
+                    + " kWh per night";
         }
 
         return null;
