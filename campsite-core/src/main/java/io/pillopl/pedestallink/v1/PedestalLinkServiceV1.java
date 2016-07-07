@@ -141,12 +141,11 @@ public class PedestalLinkServiceV1 {
         return bootResponse;
     }
 
+    /**
+     * Only a pedestal known to the backend is registered; an unknown controller is rejected.
+     */
     private static String createRegistrationStatus(final Pedestal pedestal) {
-        String status = REJECTED;
-        if (pedestal != null) {
-            status = ACCEPTED;
-        }
-        return status;
+        return pedestal != null ? ACCEPTED : REJECTED;
     }
 
     private void createBootEvent(Pedestal pedestal, BootRequest request, BootResponse response) {
