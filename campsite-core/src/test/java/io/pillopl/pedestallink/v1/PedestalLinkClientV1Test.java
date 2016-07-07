@@ -229,6 +229,16 @@ class PedestalLinkClientV1Test {
     }
 
     @Test
+    void listWithoutAnswerOfTheControllerIsAFailure() {
+        server.expect(requestTo(URL + "/sendLocalList")).andRespond(withSuccess());
+
+        LocalCardListSendResult result = client.sendLocalList(pedestal, true, List.of(guestCard), 3, false);
+
+        assertThat(result.success()).isFalse();
+        assertThat(result.errorMessage()).isEqualTo("Pedestal answered " + PedestalLinkClientV1.NO_ANSWER);
+    }
+
+    @Test
     void remoteCommandToAnUnreachablePedestalFailsAndIsNotQueued() {
         server.expect(requestTo(URL + "/remoteSupplyStop")).andRespond(withException(new IOException("timeout")));
 

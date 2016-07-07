@@ -49,6 +49,8 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
 
     static final int READ_TIMEOUT_IN_MILLIS = 15_000;
 
+    static final String NO_ANSWER = "no answer";
+
     private final RestClient restClient;
 
     private final Map<Long, SendLocalListRequest> queuedLists = new ConcurrentHashMap<>();
@@ -140,7 +142,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
                     .body(RemoteCommandResponse.class);
             if (response == null || !response.isAccepted()) {
                 LOG.warn(String.format("Pedestal %s did not accept %s %s: %s", pedestal, command, request,
-                        response != null ? response.status() : "no answer"));
+                        response != null ? response.status() : NO_ANSWER));
                 return false;
             }
             LOG.info(String.format("Pedestal %s accepted %s %s", pedestal, command, request));
@@ -184,7 +186,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
                 .retrieve()
                 .body(SendLocalListResponse.class);
         if (response == null || !response.isAccepted()) {
-            String status = response != null ? response.status() : "no answer";
+            String status = response != null ? response.status() : NO_ANSWER;
             LOG.warn(String.format("Pedestal %s did not accept local card list version %d (%s): %s", pedestal,
                     request.listVersion(), request.updateType(), status));
             return LocalCardListSendResult.failed("Pedestal answered " + status);
