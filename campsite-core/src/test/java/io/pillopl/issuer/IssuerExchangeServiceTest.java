@@ -41,6 +41,14 @@ class IssuerExchangeServiceTest {
         assertThat(service.getExchange(partner)).isInstanceOf(IssuerExchangeV1.class);
     }
 
+    @Test
+    void secondTransportForTheSameInterfaceVersionIsRefused() {
+        assertThatThrownBy(() -> new IssuerExchangeService(null, null, null, null, null, null, null, null, null,
+                List.of(new IssuerExchangeV1(null), new IssuerExchangeV1(null)), new NoTransactions()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Two exchanges for interface version V1: IssuerExchangeV1 and IssuerExchangeV1");
+    }
+
     static class NoTransactions extends AbstractPlatformTransactionManager {
 
         @Override

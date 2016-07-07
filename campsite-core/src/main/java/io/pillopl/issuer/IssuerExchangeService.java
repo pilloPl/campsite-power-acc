@@ -91,7 +91,12 @@ public class IssuerExchangeService {
         this.systemPropertyService = systemPropertyService;
         this.dateService = dateService;
         for (IssuerExchange exchange : issuerExchanges) {
-            this.exchanges.put(exchange.getInterfaceVersion(), exchange);
+            IssuerExchange other = this.exchanges.put(exchange.getInterfaceVersion(), exchange);
+            if (other != null) {
+                throw new IllegalStateException(String.format("Two exchanges for interface version %s: %s and %s",
+                        exchange.getInterfaceVersion(), other.getClass().getSimpleName(),
+                        exchange.getClass().getSimpleName()));
+            }
         }
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
