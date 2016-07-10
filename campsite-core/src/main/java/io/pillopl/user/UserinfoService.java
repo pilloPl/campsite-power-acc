@@ -8,11 +8,14 @@ import io.pillopl.group.GroupService;
 import io.pillopl.group.GroupType;
 import io.pillopl.group.IsLinkedToGroup;
 import io.pillopl.group.Market;
+import io.pillopl.api.exception.ObjectNotFoundException;
+import io.pillopl.config.SystemPropertyService;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.persistence.dao.UserroleDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +46,8 @@ public class UserinfoService {
 
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
+    static final int MIN_PASSWORD_LENGTH = 8;
+
     private final UserinfoDao userinfoDao;
 
     private final UserroleDao userroleDao;
@@ -51,12 +56,19 @@ public class UserinfoService {
 
     private final AffiliateGroupService affiliateGroupService;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final SystemPropertyService systemPropertyService;
+
     public UserinfoService(UserinfoDao userinfoDao, UserroleDao userroleDao, GroupService groupService,
-                           AffiliateGroupService affiliateGroupService) {
+                           AffiliateGroupService affiliateGroupService, PasswordEncoder passwordEncoder,
+                           SystemPropertyService systemPropertyService) {
         this.userinfoDao = userinfoDao;
         this.userroleDao = userroleDao;
         this.groupService = groupService;
         this.affiliateGroupService = affiliateGroupService;
+        this.passwordEncoder = passwordEncoder;
+        this.systemPropertyService = systemPropertyService;
     }
 
     public Userinfo find(Long id) {
@@ -152,14 +164,14 @@ public class UserinfoService {
     }
 
     /**
-     * New, not yet persisted user in status INVITED with a random password, no groups and no roles.
+     * New, not yet persisted user in status INVITED without a password (an administrator sets it), no groups and no
+     * roles.
      */
     public Userinfo createUserinfo(String email, String name) {
         Userinfo userinfoToCreate = new Userinfo();
         userinfoToCreate.setStatus(UserinfoStatus.INVITED);
         userinfoToCreate.setEmail(email);
         userinfoToCreate.setName(name != null && !name.isBlank() ? name : DEFAULT_NAME);
-        userinfoToCreate.setPasswordHash(UUID.randomUUID().toString());
         userinfoToCreate.setCreateDate(LocalDateTime.now());
         userinfoToCreate.setDeleted(false);
         userinfoToCreate.setGroups(new ArrayList<>());
@@ -433,5 +445,132 @@ public class UserinfoService {
 
     public boolean isEmail(String email) {
         return email != null && EMAIL.matcher(email).matches();
+    }
+
+    // ---------------------------------------------------------------- console login and user administration
+
+    /**
+     * A successful login resets the failed attempts and remembers the date.
+     */
+    public void recordSuccessfulLogin(String username) {
+        Userinfo userinfo = userinfoDao.findByUsername(username);
+        if (userinfo == null) {
+            return;
+        }
+        userinfo.setLastLoginDate(LocalDateTime.now());
+        userinfo.setFailedLogins(0);
+    }
+
+    /**
+     * Counts a failed login of a known user; the user is locked when MaxFailedLogins is reached.
+     *
+     * @return true when this attempt locked the user
+     */
+    public boolean recordFailedLogin(String username) {
+        Userinfo userinfo = userinfoDao.findByUsername(username);
+        if (userinfo == null || userinfo.isDeleted()) {
+            return false;
+        }
+        userinfo.setFailedLogins(userinfo.getFailedLogins() + 1);
+        if (userinfo.getStatus() == UserinfoStatus.ACTIVE
+                && userinfo.getFailedLogins() >= systemPropertyService.getMaxFailedLogins()) {
+            LOG.warn(String.format("Console user '%s' locked after %d failed logins", username,
+                    userinfo.getFailedLogins()));
+            userinfo.setStatus(UserinfoStatus.LOCKED);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets the password of a user the principal manages (or of the principal itself). An invited user becomes
+     * active with its first password.
+     */
+    public Userinfo setPassword(Userinfo principal, String username, String rawPassword) {
+        Userinfo userinfo = findManageable(principal, username, true);
+        if (rawPassword == null || rawPassword.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(String.format("A password needs at least %d characters",
+                    MIN_PASSWORD_LENGTH));
+        }
+        if (rawPassword.isBlank() || rawPassword.equalsIgnoreCase(userinfo.getUsername())) {
+            throw new IllegalArgumentException("The password must not be the username");
+        }
+        userinfo.setPasswordHash(passwordEncoder.encode(rawPassword));
+        if (userinfo.getStatus() == UserinfoStatus.INVITED) {
+            userinfo.setStatus(UserinfoStatus.ACTIVE);
+        }
+        userinfo.setFailedLogins(0);
+        return userinfo;
+    }
+
+    /**
+     * Locks, unlocks or deactivates a user the principal manages. Nobody changes its own status; unlocking resets the
+     * failed logins; an invited user stays invited until it has a password.
+     */
+    public Userinfo changeStatus(Userinfo principal, String username, UserinfoStatus status) {
+        Objects.requireNonNull(status);
+        Userinfo userinfo = findManageable(principal, username, false);
+        if (status == UserinfoStatus.INVITED) {
+            throw new IllegalArgumentException("A user cannot be set back to INVITED");
+        }
+        if (status == UserinfoStatus.ACTIVE && userinfo.getPasswordHash() == null) {
+            throw new IllegalArgumentException("A user without a password cannot be activated");
+        }
+        userinfo.setStatus(status);
+        if (status == UserinfoStatus.ACTIVE) {
+            userinfo.setFailedLogins(0);
+        }
+        return userinfo;
+    }
+
+    /**
+     * Replaces the direct roles of a user the principal manages. Only roles the principal holds itself can be given,
+     * and nobody changes its own roles.
+     */
+    public Userinfo replaceRoles(Userinfo principal, String username, List<String> roleNames) {
+        Userinfo userinfo = findManageable(principal, username, false);
+        List<Userrole> roles = new ArrayList<>();
+        for (String roleName : roleNames != null ? roleNames : List.<String>of()) {
+            Userrole role = userroleDao.findByName(roleName);
+            if (role == null) {
+                throw new IllegalArgumentException("Unknown role " + roleName);
+            }
+            if (!principal.getEffectiveRoles().contains(role)) {
+                throw new AccessDeniedException(String.format("Role %s cannot be given by %s", roleName,
+                        principal.getUsername()));
+            }
+            roles.add(role);
+        }
+        userinfo.getRoles().clear();
+        userinfo.getRoles().addAll(roles);
+        return userinfo;
+    }
+
+    /**
+     * Users whose own group lies in the STAFF scope of the principal, optionally filtered by a search text.
+     */
+    @Transactional(readOnly = true)
+    public List<Userinfo> findManageableUsers(Userinfo principal, String search) {
+        Group staffGroup = principal.getGroup(GroupType.STAFF);
+        if (staffGroup == null) {
+            return List.of();
+        }
+        List<Group> groups = groupService.findManageableGroups(staffGroup);
+        if (groups.isEmpty()) {
+            return List.of();
+        }
+        return userinfoDao.findInGroups(groups, search == null || search.isBlank() ? null : search.trim());
+    }
+
+    private Userinfo findManageable(Userinfo principal, String username, boolean introspection) {
+        Userinfo userinfo = userinfoDao.findByUsername(username);
+        if (userinfo == null || userinfo.isDeleted()) {
+            throw ObjectNotFoundException.of("User", username);
+        }
+        if (!introspection && principal.getUsername().equals(userinfo.getUsername())) {
+            throw new AccessDeniedException("Users do not change their own status or roles");
+        }
+        checkIsManageable(principal, userinfo, introspection);
+        return userinfo;
     }
 }

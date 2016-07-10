@@ -5,8 +5,11 @@ import io.pillopl.api.exception.AccessNotAllowedException;
 import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.commons.ListPage;
 import io.pillopl.commons.Pagination;
+import io.pillopl.dto.user.CurrentUserDTO;
 import io.pillopl.dto.user.UserinfoDTO;
 import io.pillopl.dto.user.UserinfoSummaryDTO;
+import io.pillopl.audit.AuditActionType;
+import io.pillopl.audit.AuditService;
 import io.pillopl.event.EventService;
 import io.pillopl.event.UserinfoChangedEvent;
 import io.pillopl.group.Market;
@@ -17,6 +20,7 @@ import io.pillopl.value.EmailAddress;
 import io.pillopl.value.Username;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,13 +46,61 @@ public class UserApiService implements UserApi {
 
     private final PrincipalResolver principalResolver;
 
+    private final PasswordEncoder passwordEncoder;
+
+    private final AuditService auditService;
+
     public UserApiService(UserinfoService userinfoService, UserinfoSummaryService userinfoSummaryService,
-                          UserroleDao userroleDao, EventService eventService, PrincipalResolver principalResolver) {
+                          UserroleDao userroleDao, EventService eventService, PrincipalResolver principalResolver,
+                          PasswordEncoder passwordEncoder, AuditService auditService) {
         this.userinfoService = userinfoService;
         this.userinfoSummaryService = userinfoSummaryService;
         this.userroleDao = userroleDao;
         this.eventService = eventService;
         this.principalResolver = principalResolver;
+        this.passwordEncoder = passwordEncoder;
+        this.auditService = auditService;
+        this.noUserHash = passwordEncoder.encode(java.util.UUID.randomUUID().toString());
+    }
+
+    /**
+     * Unknown users are checked against this hash too, so that the answer takes as long as for a known user.
+     */
+    private final String noUserHash;
+
+
+    private static final String LOGIN_REFUSED = "Wrong username or password";
+
+    @Override
+    @Transactional(noRollbackFor = AccessNotAllowedException.class)
+    public CurrentUserDTO authenticate(Username username, String password) {
+        Userinfo userinfo = userinfoService.findByUsername(username.value());
+        String hash = userinfo != null && userinfo.getPasswordHash() != null ? userinfo.getPasswordHash()
+                : noUserHash;
+        boolean passwordMatches = password != null && passwordEncoder.matches(password, hash);
+        if (userinfo == null) {
+            auditService.auditAction(AuditActionType.LOGIN, username.value(), "login", null, null, "unknown user");
+            throw new AccessNotAllowedException(LOGIN_REFUSED);
+        }
+        if (!passwordMatches) {
+            boolean locked = userinfoService.recordFailedLogin(userinfo.getUsername());
+            auditService.auditAction(AuditActionType.LOGIN, userinfo.getUsername(), "login", groupIdOf(userinfo),
+                    locked ? "user locked" : null, "wrong password");
+            throw new AccessNotAllowedException(LOGIN_REFUSED);
+        }
+        if (!userinfo.canLogIn()) {
+            auditService.auditAction(AuditActionType.LOGIN, userinfo.getUsername(), "login", groupIdOf(userinfo),
+                    null, "user is " + (userinfo.isDeleted() ? "deleted" : userinfo.getStatus()));
+            throw new AccessNotAllowedException(LOGIN_REFUSED);
+        }
+        userinfoService.recordSuccessfulLogin(userinfo.getUsername());
+        auditService.auditAction(AuditActionType.LOGIN, userinfo.getUsername(), "login", groupIdOf(userinfo), null,
+                null);
+        return UserinfoMapper.toCurrentUserDTO(userinfo);
+    }
+
+    private static String groupIdOf(Userinfo userinfo) {
+        return userinfo.getGroup() != null ? String.valueOf(userinfo.getGroup().getId()) : null;
     }
 
     @Override
@@ -156,6 +208,72 @@ public class UserApiService implements UserApi {
                 roles.add(role);
             }
             return UserinfoMapper.toDTOs(userinfoService.findByRoles(principal, roles));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CurrentUserDTO getCurrentUser(Username authUsername) {
+        try {
+            return UserinfoMapper.toCurrentUserDTO(principalResolver.resolve(authUsername));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserinfoDTO> findUsers(Username authUsername, String search) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.USER_ADMIN);
+            return UserinfoMapper.toDTOs(userinfoService.findManageableUsers(principal, search));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public UserinfoDTO setPassword(Username authUsername, Username username, String password) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername);
+            boolean self = principal.getUsername().equals(username.value());
+            if (!self && !principal.hasRight(UserrightName.USER_ADMIN.name())) {
+                throw new AccessNotAllowedException(String.format("User '%s' lacks right %s", authUsername,
+                        UserrightName.USER_ADMIN));
+            }
+            Userinfo user = userinfoService.setPassword(principal, username.value(), password);
+            eventService.send(new UserinfoChangedEvent(user.getId(), user.getUsername(),
+                    UserinfoChangeType.PASSWORD_CHANGED));
+            return UserinfoMapper.toDTO(user);
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public UserinfoDTO changeUserStatus(Username authUsername, Username username, String status) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.USER_ADMIN);
+            UserinfoStatus newStatus = ApiValues.parseEnum(UserinfoStatus.class, status, "status");
+            Userinfo user = userinfoService.changeStatus(principal, username.value(), newStatus);
+            eventService.send(new UserinfoChangedEvent(user.getId(), user.getUsername(),
+                    UserinfoChangeType.STATUS_CHANGED));
+            return UserinfoMapper.toDTO(user);
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public UserinfoDTO replaceUserRoles(Username authUsername, Username username, List<String> roleNames) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.USER_ADMIN);
+            Userinfo user = userinfoService.replaceRoles(principal, username.value(), roleNames);
+            eventService.send(new UserinfoChangedEvent(user.getId(), user.getUsername(),
+                    UserinfoChangeType.ROLES_CHANGED));
+            return UserinfoMapper.toDTO(user);
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }

@@ -23,4 +23,10 @@ public interface AdministrationApi {
     List<UserroleDTO> findRoles(Username authUsername);
 
     void refreshUserSummary(Username authUsername);
+
+    /**
+     * Audit row of a state-changing console call (never throws): who called which operation with which request, and
+     * the error when the call failed.
+     */
+    void auditConsoleAction(String username, String operation, String request, String errorReason);
 }

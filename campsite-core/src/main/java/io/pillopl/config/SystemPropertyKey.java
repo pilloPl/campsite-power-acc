@@ -49,6 +49,7 @@ public enum SystemPropertyKey {
     IssuerExchangeJobIntervalInSeconds,
     IssuerRecordExportLookBackInDays,
     RecordWithoutExportAfterDays,
+    MaxFailedLogins,
 
     // materialized views
     UserinfoSummaryRefreshJobIntervalInSeconds,

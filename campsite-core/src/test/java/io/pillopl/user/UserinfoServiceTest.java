@@ -7,7 +7,9 @@ import io.pillopl.group.GroupType;
 import io.pillopl.group.IsLinkedToGroup;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.persistence.dao.UserroleDao;
+import io.pillopl.config.SystemPropertyService;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
@@ -20,8 +22,11 @@ class UserinfoServiceTest {
 
     private final UserinfoDao userinfoDao = mock(UserinfoDao.class);
     private final GroupService groupService = mock(GroupService.class);
-    private final UserinfoService userinfoService = new UserinfoService(userinfoDao, mock(UserroleDao.class),
-            groupService, mock(io.pillopl.group.AffiliateGroupService.class));
+    private final UserroleDao userroleDao = mock(UserroleDao.class);
+    private final SystemPropertyService systemPropertyService = mock(SystemPropertyService.class);
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder(4);
+    private final UserinfoService userinfoService = new UserinfoService(userinfoDao, userroleDao,
+            groupService, mock(io.pillopl.group.AffiliateGroupService.class), passwordEncoder, systemPropertyService);
 
     private final Group hrStaff = group(GroupType.STAFF, 21L, "HR STAFF");
     private final Group reception = group(GroupType.STAFF, 71L, "HR RECEPTION");
@@ -105,6 +110,95 @@ class UserinfoServiceTest {
     void localPartOfAnEmailIsLowerCased() {
         assertThat(userinfoService.getLocalPartOfEmail("Ana.Horvat@Bay.example")).isEqualTo("ana.horvat");
         assertThat(userinfoService.getLocalPartOfEmail("not an email")).isNull();
+    }
+
+    @Test
+    void failedLoginsAreCountedAndTheMaximumLocksAnActiveUser() {
+        Userinfo ana = user("ana", reception, reception);
+        ana.setStatus(UserinfoStatus.ACTIVE);
+        when(userinfoDao.findByUsername("ana")).thenReturn(ana);
+        when(systemPropertyService.getMaxFailedLogins()).thenReturn(2);
+
+        assertThat(userinfoService.recordFailedLogin("ana")).isFalse();
+        assertThat(userinfoService.recordFailedLogin("ana")).isTrue();
+        assertThat(ana.getStatus()).isEqualTo(UserinfoStatus.LOCKED);
+        assertThat(userinfoService.recordFailedLogin("ana")).as("already locked").isFalse();
+        assertThat(ana.getFailedLogins()).isEqualTo(3);
+        assertThat(userinfoService.recordFailedLogin("nobody")).isFalse();
+
+        userinfoService.recordSuccessfulLogin("ana");
+        assertThat(ana.getFailedLogins()).isZero();
+        assertThat(ana.getLastLoginDate()).isNotNull();
+    }
+
+    @Test
+    void passwordIsStoredAsBcryptAndActivatesAnInvitedUser() {
+        Userinfo admin = user("admin", hrStaff, hrStaff);
+        Userinfo ana = user("ana", reception, reception);
+        when(userinfoDao.findByUsername("ana")).thenReturn(ana);
+        when(groupService.isManageable(hrStaff, reception)).thenReturn(true);
+
+        userinfoService.setPassword(admin, "ana", "long-enough");
+
+        assertThat(ana.getPasswordHash()).startsWith("$2a$");
+        assertThat(passwordEncoder.matches("long-enough", ana.getPasswordHash())).isTrue();
+        assertThat(ana.getStatus()).isEqualTo(UserinfoStatus.ACTIVE);
+        assertThat(ana.canLogIn()).isTrue();
+    }
+
+    @Test
+    void passwordsThatAreShortOrTheUsernameAreRefused() {
+        Userinfo ana = user("anastasia", reception, reception);
+        when(userinfoDao.findByUsername("anastasia")).thenReturn(ana);
+
+        assertThatThrownBy(() -> userinfoService.setPassword(ana, "anastasia", "short"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> userinfoService.setPassword(ana, "anastasia", "ANASTASIA"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> userinfoService.setPassword(ana, "nobody", "long-enough"))
+                .isInstanceOf(io.pillopl.api.exception.ObjectNotFoundException.class);
+    }
+
+    @Test
+    void statusChangesRefuseInvitedActivationWithoutPasswordAndOwnAccount() {
+        Userinfo admin = user("admin", hrStaff, hrStaff);
+        Userinfo ana = user("ana", reception, reception);
+        when(userinfoDao.findByUsername("ana")).thenReturn(ana);
+        when(userinfoDao.findByUsername("admin")).thenReturn(admin);
+        when(groupService.isManageable(hrStaff, reception)).thenReturn(true);
+
+        assertThatThrownBy(() -> userinfoService.changeStatus(admin, "ana", UserinfoStatus.INVITED))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> userinfoService.changeStatus(admin, "ana", UserinfoStatus.ACTIVE))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> userinfoService.changeStatus(admin, "admin", UserinfoStatus.LOCKED))
+                .isInstanceOf(AccessDeniedException.class);
+
+        ana.setPasswordHash(passwordEncoder.encode("long-enough"));
+        ana.setFailedLogins(4);
+        userinfoService.changeStatus(admin, "ana", UserinfoStatus.ACTIVE);
+        assertThat(ana.getStatus()).isEqualTo(UserinfoStatus.ACTIVE);
+        assertThat(ana.getFailedLogins()).isZero();
+    }
+
+    @Test
+    void onlyRolesTheAdministratorHoldsCanBeGiven() {
+        Userinfo admin = user("admin", hrStaff, hrStaff);
+        Userrole reception = new Userrole(UserroleName.RECEPTION);
+        Userrole marketAdmin = new Userrole(UserroleName.MARKET_ADMIN);
+        admin.getRoles().add(reception);
+        Userinfo ana = user("ana", this.reception, this.reception);
+        when(userinfoDao.findByUsername("ana")).thenReturn(ana);
+        when(groupService.isManageable(hrStaff, this.reception)).thenReturn(true);
+        when(userroleDao.findByName("RECEPTION")).thenReturn(reception);
+        when(userroleDao.findByName("MARKET_ADMIN")).thenReturn(marketAdmin);
+
+        userinfoService.replaceRoles(admin, "ana", java.util.List.of("RECEPTION"));
+        assertThat(ana.getRoles()).containsExactly(reception);
+        assertThatThrownBy(() -> userinfoService.replaceRoles(admin, "ana", java.util.List.of("MARKET_ADMIN")))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> userinfoService.replaceRoles(admin, "ana", java.util.List.of("NO_SUCH_ROLE")))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private static Group group(GroupType type, Long id, String name) {

@@ -302,6 +302,15 @@ public class SystemPropertyService {
         return getPropertyInt(SystemPropertyKey.RecordWithoutExportAfterDays, 40);
     }
 
+    // ---------------------------------------------------------------- console login
+
+    /**
+     * A console user is locked after this many failed logins in a row.
+     */
+    public int getMaxFailedLogins() {
+        return getPropertyInt(SystemPropertyKey.MaxFailedLogins, 5);
+    }
+
     // ---------------------------------------------------------------- materialized views
 
     public int getUserinfoSummaryRefreshJobIntervalInSeconds() {

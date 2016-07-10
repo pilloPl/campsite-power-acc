@@ -50,4 +50,14 @@ public interface UserinfoDao extends JpaRepository<Userinfo, Long> {
     Page<Userinfo> searchInGroupsWithRoles(@Param("groups") Collection<Group> groups,
                                                      @Param("roles") Collection<Userrole> roles,
                                                      @Param("search") String search, Pageable pageable);
+
+    /**
+     * Not deleted users whose own STAFF group is one of the groups, optionally matching a search in username, name
+     * or e-mail.
+     */
+    @Query("select u from Userinfo u where u.group in (:groups) and u.deleted = false and (:search is null "
+            + "or lower(u.username) like lower(concat('%', cast(:search as string), '%')) "
+            + "or lower(u.name) like lower(concat('%', cast(:search as string), '%')) "
+            + "or lower(u.email) like lower(concat('%', cast(:search as string), '%'))) order by u.username")
+    List<Userinfo> findInGroups(@Param("groups") Collection<Group> groups, @Param("search") String search);
 }

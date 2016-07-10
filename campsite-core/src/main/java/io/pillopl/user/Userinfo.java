@@ -101,6 +101,12 @@ public class Userinfo implements IsLinkedToGroup {
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
 
+    @Column(name = "LAST_LOGIN_DATE")
+    private LocalDateTime lastLoginDate;
+
+    @Column(name = "FAILED_LOGINS", nullable = false)
+    private int failedLogins;
+
     public Userinfo() {
     }
 
@@ -165,6 +171,13 @@ public class Userinfo implements IsLinkedToGroup {
             }
         }
         return false;
+    }
+
+    /**
+     * Only active, not deleted users with a password may log in to the console.
+     */
+    public boolean canLogIn() {
+        return !deleted && status == UserinfoStatus.ACTIVE && passwordHash != null;
     }
 
     public Locale getLocale() {

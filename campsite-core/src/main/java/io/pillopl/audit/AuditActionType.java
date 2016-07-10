@@ -11,5 +11,7 @@ public enum AuditActionType {
     SOCKET_OUT_OF_SERVICE,
     CARD_IMPORT,
     ERP_EXPORT,
-    CONFIG_CHANGE
+    CONFIG_CHANGE,
+    LOGIN,
+    CONSOLE_ACTION
 }

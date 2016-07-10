@@ -1,5 +1,6 @@
 package io.pillopl.user;
 
+import io.pillopl.dto.user.CurrentUserDTO;
 import io.pillopl.dto.user.UserinfoDTO;
 import io.pillopl.dto.user.UserinfoSummaryDTO;
 import io.pillopl.group.GroupMapper;
@@ -28,6 +29,23 @@ public final class UserinfoMapper {
                 userinfo.getStatus() != null ? userinfo.getStatus().name() : null, userinfo.getEmailLocale(),
                 GroupMapper.toDTO(userinfo.getGroup()), GroupMapper.toDTOs(userinfo.getGroups()), roles,
                 userinfo.getCreateDate());
+    }
+
+    /**
+     * The logged-in user with its effective roles and rights, sorted by name.
+     */
+    public static CurrentUserDTO toCurrentUserDTO(Userinfo userinfo) {
+        java.util.TreeSet<String> roles = new java.util.TreeSet<>();
+        java.util.TreeSet<String> rights = new java.util.TreeSet<>();
+        for (Userrole role : userinfo.getEffectiveRoles()) {
+            roles.add(role.getName());
+            for (Userright right : role.getRights()) {
+                rights.add(right.getName());
+            }
+        }
+        return new CurrentUserDTO(userinfo.getUsername(), userinfo.getName(), userinfo.getEmail(),
+                userinfo.getStatus() != null ? userinfo.getStatus().name() : null, new ArrayList<>(roles),
+                new ArrayList<>(rights), GroupMapper.toDTOs(userinfo.getGroups()), userinfo.getLastLoginDate());
     }
 
     public static List<UserinfoDTO> toDTOs(List<Userinfo> users) {

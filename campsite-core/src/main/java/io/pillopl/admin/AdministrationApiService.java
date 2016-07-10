@@ -13,6 +13,7 @@ import io.pillopl.dto.admin.AuditFilterDTO;
 import io.pillopl.dto.admin.SystemPropertyDTO;
 import io.pillopl.dto.user.UserroleDTO;
 import io.pillopl.persistence.dao.SystemPropertyDao;
+import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.persistence.dao.UserroleDao;
 import io.pillopl.user.PrincipalResolver;
 import io.pillopl.user.Userinfo;
@@ -46,10 +47,13 @@ public class AdministrationApiService implements AdministrationApi {
 
     private final PrincipalResolver principalResolver;
 
+    private final UserinfoDao userinfoDao;
+
     public AdministrationApiService(AuditService auditService, SystemPropertyService systemPropertyService,
                                     SystemPropertyDao systemPropertyDao, UserroleDao userroleDao,
                                     UserinfoSummaryService userinfoSummaryService,
-                                    PrincipalResolver principalResolver) {
+                                    PrincipalResolver principalResolver, UserinfoDao userinfoDao) {
+        this.userinfoDao = userinfoDao;
         this.auditService = auditService;
         this.systemPropertyService = systemPropertyService;
         this.systemPropertyDao = systemPropertyDao;
@@ -119,6 +123,19 @@ public class AdministrationApiService implements AdministrationApi {
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void auditConsoleAction(String username, String operation, String request, String errorReason) {
+        String groupId = null;
+        if (username != null) {
+            Userinfo userinfo = userinfoDao.findByUsername(username);
+            if (userinfo != null && userinfo.getGroup() != null) {
+                groupId = String.valueOf(userinfo.getGroup().getId());
+            }
+        }
+        auditService.auditAction(AuditActionType.CONSOLE_ACTION, username, operation, groupId, request, errorReason);
     }
 
     /**
