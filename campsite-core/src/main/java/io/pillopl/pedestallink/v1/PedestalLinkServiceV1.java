@@ -198,11 +198,7 @@ public class PedestalLinkServiceV1 {
         Integer meterStartWh = request.meterStartWh();
 
         // The socket must exist
-        Socket socket = pedestalService.findSocket(pedestalCode, socketNo);
-        if (socket == null) {
-            throw new IllegalArgumentException(String.format("Socket %s of pedestal %s not found", socketNo,
-                    pedestalCode));
-        }
+        getSocket(pedestalCode, socketNo);
 
         // Process by the pedestal backend
         SupplyRequest supplyRequest = SupplyRequest.start(toKwh(meterStartWh), request.timestamp());
@@ -303,11 +299,7 @@ public class PedestalLinkServiceV1 {
 
         Integer socketNo = request.socketNo();
 
-        Socket socket = pedestalService.findSocket(pedestalCode, socketNo);
-        if (socket == null) {
-            throw new IllegalArgumentException(String.format("Socket %s of pedestal %s not found", socketNo,
-                    pedestalCode));
-        }
+        Socket socket = getSocket(pedestalCode, socketNo);
 
         processMeterReadings(socket, request);
 
@@ -371,6 +363,15 @@ public class PedestalLinkServiceV1 {
             throw new IllegalArgumentException("Unknown pedestal " + pedestalCode);
         }
         return pedestal;
+    }
+
+    private Socket getSocket(String pedestalCode, Integer socketNo) {
+        Socket socket = pedestalService.findSocket(pedestalCode, socketNo);
+        if (socket == null) {
+            throw new IllegalArgumentException(String.format("Socket %s of pedestal %s not found", socketNo,
+                    pedestalCode));
+        }
+        return socket;
     }
 
     private void registerIncoming(String pedestalCode) {
