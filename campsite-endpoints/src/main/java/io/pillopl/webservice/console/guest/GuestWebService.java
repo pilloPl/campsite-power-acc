@@ -4,7 +4,6 @@ import io.pillopl.api.GuestApi;
 import io.pillopl.value.CardId;
 import io.pillopl.value.GroupId;
 import io.pillopl.value.PitchNo;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -26,7 +25,7 @@ public class GuestWebService extends AbstractWebService<GuestApi, GuestWebServic
 
     @PostMapping("/checkIn")
     public CheckInResponse checkIn(@RequestBody CheckInRequest request) throws GuestWebServiceFault {
-        return invoke("checkIn", () -> new CheckInResponse(getBean().checkIn(Username.of(request.authUsername()),
+        return invoke("checkIn", () -> new CheckInResponse(getBean().checkIn(caller(),
                 request.guestId(), request.campsiteGroupId() != null ? GroupId.of(request.campsiteGroupId()) : null,
                 PitchNo.ofNullable(request.pitchNo()), request.arrival(), request.departure(),
                 request.cardId() != null ? CardId.of(request.cardId()) : null, request.unitId(),
@@ -35,7 +34,7 @@ public class GuestWebService extends AbstractWebService<GuestApi, GuestWebServic
 
     @PostMapping("/checkOut")
     public CheckOutResponse checkOut(@RequestBody CheckOutRequest request) throws GuestWebServiceFault {
-        return invoke("checkOut", () -> new CheckOutResponse(getBean().checkOut(Username.of(request.authUsername()),
+        return invoke("checkOut", () -> new CheckOutResponse(getBean().checkOut(caller(),
                 request.stayId())));
     }
 

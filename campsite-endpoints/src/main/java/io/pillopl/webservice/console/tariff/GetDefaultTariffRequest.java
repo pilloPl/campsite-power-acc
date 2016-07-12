@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Reads the default tariff of the caller's market.
  */
-public record GetDefaultTariffRequest(String authUsername) implements Serializable {
+public record GetDefaultTariffRequest() implements Serializable {
 }

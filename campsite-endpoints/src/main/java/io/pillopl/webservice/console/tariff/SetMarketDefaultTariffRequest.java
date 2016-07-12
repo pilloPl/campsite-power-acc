@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Makes a tariff the default of its market.
  */
-public record SetMarketDefaultTariffRequest(String authUsername, Long tariffId) implements Serializable {
+public record SetMarketDefaultTariffRequest(Long tariffId) implements Serializable {
 }

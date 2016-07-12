@@ -50,36 +50,36 @@ class CommissioningWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void installerSeesTheSupplierStock() throws Exception {
-        call(PATH + "/getSupplierStock", new GetSupplierStockRequest("ivo"))
+        call("ivo", PATH + "/getSupplierStock", new GetSupplierStockRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestals[*].pedestalCode", contains("ACME-0001")))
                 .andExpect(jsonPath("$.pedestals[0].numberOfSockets").value(2));
-        call(PATH + "/getSupplierStock", new GetSupplierStockRequest("reception"))
+        call("reception", PATH + "/getSupplierStock", new GetSupplierStockRequest())
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void preparedCommissioningIsFoundByTokenAndMountsThePedestals() throws Exception {
-        String body = call(PATH + "/createCommissioning", new CreateCommissioningRequest("ivo", "marko", location(),
+        String body = call("ivo", PATH + "/createCommissioning", new CreateCommissioningRequest("marko", location(),
                 "two pedestals at the lake", true, "NETWORK_ACCESS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.commissioning.ownerUsername").value("marko"))
                 .andReturn().getResponse().getContentAsString();
         String token = JsonPath.read(body, "$.commissioning.token");
 
-        call(PATH + "/findCommissionings", new FindCommissioningsRequest("ivo"))
+        call("ivo", PATH + "/findCommissionings", new FindCommissioningsRequest())
                 .andExpect(jsonPath("$.commissionings", hasSize(1)));
-        call(PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest("ivo", token.toUpperCase()))
+        call("ivo", PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest(token.toUpperCase()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.commissioning.accessMode").value("NETWORK_ACCESS"));
 
-        call(PATH + "/commissionPedestals", new CommissionPedestalsRequest("ivo", token,
+        call("ivo", PATH + "/commissionPedestals", new CommissionPedestalsRequest(token,
                 List.of(inStock.getId(), 999_999L)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.failedPedestalIds", contains(999_999)));
         assertThat(inStock.getGroup().getName()).isEqualTo("AFFILIATE marko");
         assertThat(inStock.getSockets().get(0).getSocketCode()).isEqualTo("HRMARKO*ACME-0001*1");
-        call(PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest("ivo", token))
+        call("ivo", PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest(token))
                 .andExpect(status().isNotFound());
     }
 
@@ -87,46 +87,46 @@ class CommissioningWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void commissioningForAnOwnerNotSetUpIsAConflict() throws Exception {
         console.user("nina", null, console.staff("HR SELF SERVICE"));
 
-        call(PATH + "/createCommissioning", new CreateCommissioningRequest("ivo", "nina", location(), null, false,
+        call("ivo", PATH + "/createCommissioning", new CreateCommissioningRequest("nina", location(), null, false,
                 null))
                 .andExpect(status().isConflict());
-        call(PATH + "/createCommissioning", new CreateCommissioningRequest("ivo", "ghost", location(), null, false,
+        call("ivo", PATH + "/createCommissioning", new CreateCommissioningRequest("ghost", location(), null, false,
                 null))
                 .andExpect(status().isNotFound());
-        call(PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest("ivo", "no-token"))
+        call("ivo", PATH + "/findCommissioningByToken", new FindCommissioningByTokenRequest("no-token"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void directlyCommissionedPedestalGoesBackOnceToTheSupplier() throws Exception {
-        call(PATH + "/commissionPedestal", new CommissionPedestalRequest("ivo", "ACME-0001", "marko", location(),
+        call("ivo", PATH + "/commissionPedestal", new CommissionPedestalRequest("ACME-0001", "marko", location(),
                 false, "house cards only"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.commissioned").value(true));
-        call(PATH + "/commissionPedestal", new CommissionPedestalRequest("ivo", "ACME-0001", "marko", location(),
+        call("ivo", PATH + "/commissionPedestal", new CommissionPedestalRequest("ACME-0001", "marko", location(),
                 false, "HOUSE_CARDS_ONLY"))
                 .andExpect(status().isConflict());
 
-        call(PATH + "/decommissionPedestal", new DecommissionPedestalRequest("marko", inStock.getId()))
+        call("marko", PATH + "/decommissionPedestal", new DecommissionPedestalRequest(inStock.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.decommissioned").value(true));
         assertThat(inStock.getGroup()).isEqualTo(stock);
-        call(PATH + "/decommissionPedestal", new DecommissionPedestalRequest("marko", inStock.getId()))
+        call("marko", PATH + "/decommissionPedestal", new DecommissionPedestalRequest(inStock.getId()))
                 .andExpect(status().isConflict());
     }
 
     @Test
     void deliveryIsImportedIntoTheSupplierStock() throws Exception {
-        call(PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest("ivo", false,
+        call("ivo", PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest(false,
                 List.of(delivery("ACME-0100", "V2"), delivery("ACME-0101", null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestalCodes", contains("ACME-0100", "ACME-0101")));
-        call(PATH + "/getSupplierStock", new GetSupplierStockRequest("ivo"))
+        call("ivo", PATH + "/getSupplierStock", new GetSupplierStockRequest())
                 .andExpect(jsonPath("$.pedestals", hasSize(3)));
-        call(PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest("ivo", false,
+        call("ivo", PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest(false,
                 List.of(delivery("ACME-0102", "V7"))))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest("ivo", false, List.of()))
+        call("ivo", PATH + "/importSupplierPedestals", new ImportSupplierPedestalsRequest(false, List.of()))
                 .andExpect(status().isBadRequest());
     }
 

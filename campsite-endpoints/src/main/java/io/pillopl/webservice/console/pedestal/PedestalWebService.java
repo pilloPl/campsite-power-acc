@@ -32,7 +32,7 @@ public class PedestalWebService extends AbstractWebService<PedestalApi, Pedestal
     public FindPedestalsByStateResponse findPedestalsByState(@RequestBody FindPedestalsByStateRequest request)
             throws PedestalWebServiceFault {
         return invoke("findPedestalsByState", () -> {
-            ListPage<PedestalSummaryDTO> page = getBean().findPedestalsByState(Username.of(request.authUsername()),
+            ListPage<PedestalSummaryDTO> page = getBean().findPedestalsByState(caller(),
                     request.state(), Pagination.ofNullable(request.page(), request.rowsPerPage()));
             return new FindPedestalsByStateResponse(page.items(), page.total(), page.page(), page.rowsPerPage());
         });
@@ -41,14 +41,14 @@ public class PedestalWebService extends AbstractWebService<PedestalApi, Pedestal
     @PostMapping("/getPedestal")
     public GetPedestalResponse getPedestal(@RequestBody GetPedestalRequest request) throws PedestalWebServiceFault {
         return invoke("getPedestal", () -> new GetPedestalResponse(getBean().getPedestal(
-                Username.of(request.authUsername()), PedestalCode.of(request.pedestalCode()))));
+                caller(), PedestalCode.of(request.pedestalCode()))));
     }
 
     @PostMapping("/findPedestalBySocketCode")
     public FindPedestalBySocketCodeResponse findPedestalBySocketCode(
             @RequestBody FindPedestalBySocketCodeRequest request) throws PedestalWebServiceFault {
         return invoke("findPedestalBySocketCode", () -> new FindPedestalBySocketCodeResponse(
-                getBean().findPedestalBySocketCode(Username.of(request.authUsername()),
+                getBean().findPedestalBySocketCode(caller(),
                         SocketCode.parse(request.socketCode()))));
     }
 
@@ -57,7 +57,7 @@ public class PedestalWebService extends AbstractWebService<PedestalApi, Pedestal
             throws PedestalWebServiceFault {
         return invoke("deletePedestal", () -> {
             PedestalCode code = PedestalCode.of(request.pedestalCode());
-            getBean().deletePedestal(Username.of(request.authUsername()), Username.of(request.ownerUsername()), code);
+            getBean().deletePedestal(caller(), Username.of(request.ownerUsername()), code);
             return new DeletePedestalResponse(code.value(), true);
         });
     }
@@ -66,14 +66,14 @@ public class PedestalWebService extends AbstractWebService<PedestalApi, Pedestal
     public UpdateLocationResponse updateLocation(@RequestBody UpdateLocationRequest request)
             throws PedestalWebServiceFault {
         return invoke("updateLocation", () -> new UpdateLocationResponse(getBean().updateLocation(
-                Username.of(request.authUsername()), Username.of(request.ownerUsername()),
+                caller(), Username.of(request.ownerUsername()),
                 PedestalCode.of(request.pedestalCode()), request.location())));
     }
 
     @PostMapping("/assignPitch")
     public AssignPitchResponse assignPitch(@RequestBody AssignPitchRequest request) throws PedestalWebServiceFault {
         return invoke("assignPitch", () -> new AssignPitchResponse(getBean().assignPitch(
-                Username.of(request.authUsername()), SocketId.of(request.socketId()),
+                caller(), SocketId.of(request.socketId()),
                 PitchNo.ofNullable(request.pitchNo()))));
     }
 
@@ -81,7 +81,7 @@ public class PedestalWebService extends AbstractWebService<PedestalApi, Pedestal
     public SetFreeSocketResponse setFreeSocket(@RequestBody SetFreeSocketRequest request)
             throws PedestalWebServiceFault {
         return invoke("setFreeSocket", () -> new SetFreeSocketResponse(getBean().setFreeSocket(
-                Username.of(request.authUsername()), SocketId.of(request.socketId()),
+                caller(), SocketId.of(request.socketId()),
                 Boolean.TRUE.equals(request.freeSocket()))));
     }
 

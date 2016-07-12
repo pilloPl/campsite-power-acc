@@ -31,14 +31,14 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
     public FindCommissioningsResponse findCommissionings(@RequestBody FindCommissioningsRequest request)
             throws CommissioningWebServiceFault {
         return invoke("findCommissionings", () -> new FindCommissioningsResponse(
-                getBean().findCommissionings(Username.of(request.authUsername()))));
+                getBean().findCommissionings(caller())));
     }
 
     @PostMapping("/findCommissioningByToken")
     public FindCommissioningByTokenResponse findCommissioningByToken(
             @RequestBody FindCommissioningByTokenRequest request) throws CommissioningWebServiceFault {
         return invoke("findCommissioningByToken", () -> new FindCommissioningByTokenResponse(
-                getBean().findCommissioningByToken(Username.of(request.authUsername()),
+                getBean().findCommissioningByToken(caller(),
                         InstallerToken.of(request.token()))));
     }
 
@@ -46,7 +46,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
     public CreateCommissioningResponse createCommissioning(@RequestBody CreateCommissioningRequest request)
             throws CommissioningWebServiceFault {
         return invoke("createCommissioning", () -> new CreateCommissioningResponse(getBean().createCommissioning(
-                Username.of(request.authUsername()), Username.of(request.ownerUsername()), request.location(),
+                caller(), Username.of(request.ownerUsername()), request.location(),
                 request.comments(), Boolean.TRUE.equals(request.listedInApp()), request.accessMode())));
     }
 
@@ -54,7 +54,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
     public GetSupplierStockResponse getSupplierStock(@RequestBody GetSupplierStockRequest request)
             throws CommissioningWebServiceFault {
         return invoke("getSupplierStock", () -> new GetSupplierStockResponse(
-                getBean().getSupplierStock(Username.of(request.authUsername()))));
+                getBean().getSupplierStock(caller())));
     }
 
     @PostMapping("/commissionPedestals")
@@ -66,7 +66,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
                 ids.add(PedestalId.of(id));
             }
             return new CommissionPedestalsResponse(getBean().commissionPedestals(
-                    Username.of(request.authUsername()), InstallerToken.of(request.token()), ids));
+                    caller(), InstallerToken.of(request.token()), ids));
         });
     }
 
@@ -75,7 +75,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
             throws CommissioningWebServiceFault {
         return invoke("commissionPedestal", () -> {
             PedestalCode code = PedestalCode.of(request.pedestalCode());
-            getBean().commissionPedestal(Username.of(request.authUsername()), code,
+            getBean().commissionPedestal(caller(), code,
                     Username.of(request.ownerUsername()), request.location(),
                     Boolean.TRUE.equals(request.listedInApp()), request.accessMode());
             return new CommissionPedestalResponse(code.value(), true);
@@ -87,7 +87,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
             throws CommissioningWebServiceFault {
         return invoke("decommissionPedestal", () -> {
             PedestalId pedestalId = PedestalId.of(request.pedestalId());
-            getBean().decommissionPedestal(Username.of(request.authUsername()), pedestalId);
+            getBean().decommissionPedestal(caller(), pedestalId);
             return new DecommissionPedestalResponse(pedestalId.value(), true);
         });
     }
@@ -96,7 +96,7 @@ public class CommissioningWebService extends AbstractWebService<CommissioningApi
     public ImportSupplierPedestalsResponse importSupplierPedestals(
             @RequestBody ImportSupplierPedestalsRequest request) throws CommissioningWebServiceFault {
         return invoke("importSupplierPedestals", () -> new ImportSupplierPedestalsResponse(
-                getBean().importSupplierPedestals(Username.of(request.authUsername()), request.pedestals(),
+                getBean().importSupplierPedestals(caller(), request.pedestals(),
                         Boolean.TRUE.equals(request.networkOwned()))));
     }
 

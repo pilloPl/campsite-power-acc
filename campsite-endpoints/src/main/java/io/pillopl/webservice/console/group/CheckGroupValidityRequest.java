@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Runs the check that users, pedestals and groups hang in the right trees.
  */
-public record CheckGroupValidityRequest(String authUsername) implements Serializable {
+public record CheckGroupValidityRequest() implements Serializable {
 }

@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Pedestal detail by its code.
  */
-public record GetPedestalRequest(String authUsername, String pedestalCode) implements Serializable {
+public record GetPedestalRequest(String pedestalCode) implements Serializable {
 }

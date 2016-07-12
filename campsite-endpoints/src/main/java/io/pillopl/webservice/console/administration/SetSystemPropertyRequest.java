@@ -5,6 +5,6 @@ import java.io.Serializable;
 /**
  * Stores a configuration value (audited).
  */
-public record SetSystemPropertyRequest(String authUsername, String key, String value, String description)
+public record SetSystemPropertyRequest(String key, String value, String description)
         implements Serializable {
 }

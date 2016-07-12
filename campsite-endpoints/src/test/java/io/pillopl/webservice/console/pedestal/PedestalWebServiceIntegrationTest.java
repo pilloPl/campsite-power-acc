@@ -45,27 +45,27 @@ class PedestalWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void pedestalListOfTheScopeIsPagedWithTheTotal() throws Exception {
-        call(PATH + "/findPedestalsByState", new FindPedestalsByStateRequest("manager", null, 0, 1))
+        call("manager", PATH + "/findPedestalsByState", new FindPedestalsByStateRequest(null, 0, 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestals", hasSize(1)))
                 .andExpect(jsonPath("$.total").value(2))
                 .andExpect(jsonPath("$.rowsPerPage").value(1));
-        call(PATH + "/findPedestalsByState", new FindPedestalsByStateRequest("manager", "working", null, null))
+        call("manager", PATH + "/findPedestalsByState", new FindPedestalsByStateRequest("working", null, null))
                 .andExpect(status().isOk());
-        call(PATH + "/findPedestalsByState", new FindPedestalsByStateRequest("manager", null, 0, 10_000))
+        call("manager", PATH + "/findPedestalsByState", new FindPedestalsByStateRequest(null, 0, 10_000))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void pedestalOutsideTheScopeIsNotFound() throws Exception {
-        call(PATH + "/getPedestal", new GetPedestalRequest("manager", "HR-BAY-P001"))
+        call("manager", PATH + "/getPedestal", new GetPedestalRequest("HR-BAY-P001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestal.sockets", hasSize(2)))
                 .andExpect(jsonPath("$.pedestal.groupName").value("Bay"))
                 .andExpect(jsonPath("$.pedestal.linkTimeout").value(true));
-        call(PATH + "/getPedestal", new GetPedestalRequest("manager", "HR-COVE-P001"))
+        call("manager", PATH + "/getPedestal", new GetPedestalRequest("HR-COVE-P001"))
                 .andExpect(status().isNotFound());
-        call(PATH + "/getPedestal", new GetPedestalRequest("admin", "HR-COVE-P001"))
+        call("admin", PATH + "/getPedestal", new GetPedestalRequest("HR-COVE-P001"))
                 .andExpect(status().isOk());
     }
 
@@ -74,12 +74,12 @@ class PedestalWebServiceIntegrationTest extends WebServiceIntegrationTest {
         Socket socket = atBay.getSockets().get(1);
         socket.setSocketCode("HRBAY*P001*2");
 
-        call(PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("manager", "hrbay*p001*2"))
+        call("manager", PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("hrbay*p001*2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestal.code").value("HR-BAY-P001"));
-        call(PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("manager", "HRBAY*P001*9"))
+        call("manager", PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("HRBAY*P001*9"))
                 .andExpect(status().isNotFound());
-        call(PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("manager", "HRBAY-P001-2"))
+        call("manager", PATH + "/findPedestalBySocketCode", new FindPedestalBySocketCodeRequest("HRBAY-P001-2"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -88,15 +88,15 @@ class PedestalWebServiceIntegrationTest extends WebServiceIntegrationTest {
         Long first = atBay.getSockets().get(0).getId();
         Long second = atBay.getSockets().get(1).getId();
 
-        call(PATH + "/assignPitch", new AssignPitchRequest("manager", first, " a12 "))
+        call("manager", PATH + "/assignPitch", new AssignPitchRequest(first, " a12 "))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.socket.pitchNo").value("A12"));
-        call(PATH + "/assignPitch", new AssignPitchRequest("manager", second, "A12"))
+        call("manager", PATH + "/assignPitch", new AssignPitchRequest(second, "A12"))
                 .andExpect(status().isConflict());
-        call(PATH + "/assignPitch", new AssignPitchRequest("manager", first, ""))
+        call("manager", PATH + "/assignPitch", new AssignPitchRequest(first, ""))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.socket.pitchNo").doesNotExist());
-        call(PATH + "/assignPitch", new AssignPitchRequest("manager", 999_999L, "A1"))
+        call("manager", PATH + "/assignPitch", new AssignPitchRequest(999_999L, "A1"))
                 .andExpect(status().isNotFound());
     }
 
@@ -104,10 +104,10 @@ class PedestalWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void receptionMayLookButNotChangeSockets() throws Exception {
         Long socketId = atBay.getSockets().get(0).getId();
 
-        call(PATH + "/getPedestal", new GetPedestalRequest("reception", "HR-BAY-P001")).andExpect(status().isOk());
-        call(PATH + "/setFreeSocket", new SetFreeSocketRequest("reception", socketId, true))
+        call("reception", PATH + "/getPedestal", new GetPedestalRequest("HR-BAY-P001")).andExpect(status().isOk());
+        call("reception", PATH + "/setFreeSocket", new SetFreeSocketRequest(socketId, true))
                 .andExpect(status().isForbidden());
-        call(PATH + "/setFreeSocket", new SetFreeSocketRequest("manager", socketId, true))
+        call("manager", PATH + "/setFreeSocket", new SetFreeSocketRequest(socketId, true))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.socket.freeSocket").value(true));
     }
@@ -117,17 +117,17 @@ class PedestalWebServiceIntegrationTest extends WebServiceIntegrationTest {
         LocationDTO newAddress = new LocationDTO(null, "Bay north", "hrbay", "Obala", "40", "52210", "Rovinj", null,
                 "HR", null, null, null, null);
 
-        call(PATH + "/updateLocation", new UpdateLocationRequest("admin", "manager", "HR-BAY-P002", newAddress))
+        call("admin", PATH + "/updateLocation", new UpdateLocationRequest("manager", "HR-BAY-P002", newAddress))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pedestal.location.houseNumber").value("40"))
                 .andExpect(jsonPath("$.pedestal.location.campsiteCode").value("HRBAY"));
-        call(PATH + "/deletePedestal", new DeletePedestalRequest("admin", "manager", "HR-BAY-P001"))
+        call("admin", PATH + "/deletePedestal", new DeletePedestalRequest("manager", "HR-BAY-P001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deleted").value(true));
         assertThat(atBay.isDeleted()).isTrue();
-        call(PATH + "/deletePedestal", new DeletePedestalRequest("admin", "manager", "HR-COVE-P001"))
+        call("admin", PATH + "/deletePedestal", new DeletePedestalRequest("manager", "HR-COVE-P001"))
                 .andExpect(status().isForbidden());
-        call(PATH + "/deletePedestal", new DeletePedestalRequest("admin", "manager", "HR-NOPE"))
+        call("admin", PATH + "/deletePedestal", new DeletePedestalRequest("manager", "HR-NOPE"))
                 .andExpect(status().isNotFound());
     }
 }

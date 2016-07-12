@@ -64,7 +64,7 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
         record(baySocket, "12.5", DAY.plusHours(10));
         record(lakeSocket, "8", DAY.plusHours(11));
 
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("bayowner", "2026-07-10",
+        call("bayowner", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", null, null, null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.consumptionRecords", hasSize(1)))
@@ -81,14 +81,14 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
         suspect.markSuspect("400 kWh in one night");
         consumptionRecordDao.flush();
 
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("admin", "2026-07-10",
+        call("admin", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", null, null, null))
                 .andExpect(jsonPath("$.consumptionRecords", hasSize(3)));
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("admin", "2026-07-10",
+        call("admin", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", "suspect", null, null))
                 .andExpect(jsonPath("$.consumptionRecords", hasSize(1)))
                 .andExpect(jsonPath("$.consumptionRecords[0].exportStatus").value("REVIEW"));
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("admin", "2026-07-10",
+        call("admin", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", null, 1, 2))
                 .andExpect(jsonPath("$.consumptionRecords", hasSize(1)))
                 .andExpect(jsonPath("$.consumptionRecords[0].kwh").value(12.5));
@@ -100,7 +100,7 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
         suspect.markSuspect("400 kWh in one night");
         consumptionRecordDao.flush();
 
-        call(PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest("admin", suspect.getId(), true,
+        call("admin", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(suspect.getId(), true,
                 "heater of the sanitary block"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.consumptionRecord.validationState").value("CONFIRMED"))
@@ -116,7 +116,7 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
         suspect.markSuspect("Negative consumption");
         consumptionRecordDao.flush();
 
-        call(PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest("admin", suspect.getId(), false,
+        call("admin", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(suspect.getId(), false,
                 "meter replaced"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.consumptionRecord.validationState").value("REJECTED"))
@@ -127,21 +127,21 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
     void reviewNeedsTheRightAndARecordWaitingForReview() throws Exception {
         ConsumptionRecord valid = record(baySocket, "12.5", DAY.plusHours(10));
 
-        call(PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest("bayowner", valid.getId(), true,
+        call("bayowner", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(valid.getId(), true,
                 null)).andExpect(status().isForbidden());
-        call(PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest("admin", valid.getId(), true,
+        call("admin", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(valid.getId(), true,
                 null)).andExpect(status().isConflict());
-        call(PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest("admin", 987654321L, true,
+        call("admin", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(987654321L, true,
                 null)).andExpect(status().isNotFound());
     }
 
     @Test
     void listNeedsTheReportRightAndAPeriod() throws Exception {
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("technician", "2026-07-10",
+        call("technician", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", null, null, null)).andExpect(status().isForbidden());
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("admin", null, "2026-07-10",
+        call("admin", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest(null, "2026-07-10",
                 null, null, null)).andExpect(status().isBadRequest());
-        call(PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("admin", "2026-07-10",
+        call("admin", PATH + "/findConsumptionRecords", new FindConsumptionRecordsRequest("2026-07-10",
                 "2026-07-10", "LOST", null, null)).andExpect(status().isBadRequest());
     }
 

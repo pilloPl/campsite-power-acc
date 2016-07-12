@@ -3,7 +3,6 @@ package io.pillopl.webservice.console.consumption;
 import io.pillopl.api.ConsumptionRecordApi;
 import io.pillopl.commons.DateRange;
 import io.pillopl.commons.Pagination;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -28,7 +27,7 @@ public class ConsumptionRecordWebService
     public FindConsumptionRecordsResponse findConsumptionRecords(@RequestBody FindConsumptionRecordsRequest request)
             throws ConsumptionRecordWebServiceFault {
         return invoke("findConsumptionRecords", () -> new FindConsumptionRecordsResponse(
-                getBean().findConsumptionRecords(Username.of(request.authUsername()),
+                getBean().findConsumptionRecords(caller(),
                         DateRange.ofDays(request.from(), request.to()), request.validationState(),
                         Pagination.ofNullable(request.page(), request.rowsPerPage()))));
     }
@@ -37,7 +36,7 @@ public class ConsumptionRecordWebService
     public ReviewConsumptionRecordResponse reviewConsumptionRecord(
             @RequestBody ReviewConsumptionRecordRequest request) throws ConsumptionRecordWebServiceFault {
         return invoke("reviewConsumptionRecord", () -> new ReviewConsumptionRecordResponse(
-                getBean().reviewConsumptionRecord(Username.of(request.authUsername()), request.consumptionRecordId(),
+                getBean().reviewConsumptionRecord(caller(), request.consumptionRecordId(),
                         Boolean.TRUE.equals(request.confirmed()), request.comment())));
     }
 

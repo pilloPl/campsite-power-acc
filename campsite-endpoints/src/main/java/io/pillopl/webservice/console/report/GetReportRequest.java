@@ -11,7 +11,7 @@ import java.util.List;
  * month of the monthly and quarterly consumption, the time resolution (MONTH, QUARTER, YEAR) and the pedestals of
  * the accumulated kWh.
  */
-public record GetReportRequest(String authUsername, String reportType, String from, String to,
+public record GetReportRequest(String reportType, String from, String to,
                                Long campsiteGroupId, Long powerSectionId, Integer year, Integer month,
                                String timeResolution, List<String> pedestalCodes) implements Serializable {
 }

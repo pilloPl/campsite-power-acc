@@ -3,7 +3,6 @@ package io.pillopl.webservice.console.group;
 import io.pillopl.api.GroupApi;
 import io.pillopl.value.GroupId;
 import io.pillopl.value.GroupName;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -27,19 +26,19 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
     public FindManageableGroupsResponse findManageableGroups(@RequestBody FindManageableGroupsRequest request)
             throws GroupWebServiceFault {
         return invoke("findManageableGroups", () -> new FindManageableGroupsResponse(getBean().findManageableGroups(
-                Username.of(request.authUsername()), request.groupType(), request.search())));
+                caller(), request.groupType(), request.search())));
     }
 
     @PostMapping("/getGroupTree")
     public GetGroupTreeResponse getGroupTree(@RequestBody GetGroupTreeRequest request) throws GroupWebServiceFault {
         return invoke("getGroupTree", () -> new GetGroupTreeResponse(getBean().getGroupTree(
-                Username.of(request.authUsername()), request.groupType())));
+                caller(), request.groupType())));
     }
 
     @PostMapping("/createGroup")
     public CreateGroupResponse createGroup(@RequestBody CreateGroupRequest request) throws GroupWebServiceFault {
         return invoke("createGroup", () -> new CreateGroupResponse(getBean().createGroup(
-                Username.of(request.authUsername()), GroupId.of(request.parentGroupId()),
+                caller(), GroupId.of(request.parentGroupId()),
                 GroupName.of(request.name()), request.displayName())));
     }
 
@@ -47,7 +46,7 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
     public FindAcceptanceAgreementsResponse findAcceptanceAgreements(
             @RequestBody FindAcceptanceAgreementsRequest request) throws GroupWebServiceFault {
         return invoke("findAcceptanceAgreements", () -> new FindAcceptanceAgreementsResponse(
-                getBean().findAcceptanceAgreements(Username.of(request.authUsername()),
+                getBean().findAcceptanceAgreements(caller(),
                         GroupId.of(request.issuerGroupId()))));
     }
 
@@ -55,7 +54,7 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
     public AddAcceptanceAgreementResponse addAcceptanceAgreement(@RequestBody AddAcceptanceAgreementRequest request)
             throws GroupWebServiceFault {
         return invoke("addAcceptanceAgreement", () -> new AddAcceptanceAgreementResponse(
-                getBean().addAcceptanceAgreement(Username.of(request.authUsername()),
+                getBean().addAcceptanceAgreement(caller(),
                         GroupId.of(request.issuerGroupId()), GroupId.of(request.siteGroupId()))));
     }
 
@@ -63,7 +62,7 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
     public RemoveAcceptanceAgreementResponse removeAcceptanceAgreement(
             @RequestBody RemoveAcceptanceAgreementRequest request) throws GroupWebServiceFault {
         return invoke("removeAcceptanceAgreement", () -> new RemoveAcceptanceAgreementResponse(
-                getBean().removeAcceptanceAgreement(Username.of(request.authUsername()),
+                getBean().removeAcceptanceAgreement(caller(),
                         GroupId.of(request.issuerGroupId()), GroupId.of(request.siteGroupId()))));
     }
 
@@ -72,7 +71,7 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
             throws GroupWebServiceFault {
         return invoke("switchAccessMode", () -> {
             GroupId groupId = GroupId.of(request.affiliateGroupId());
-            String mode = getBean().switchAccessMode(Username.of(request.authUsername()), groupId,
+            String mode = getBean().switchAccessMode(caller(), groupId,
                     request.accessMode(), Boolean.TRUE.equals(request.listedInApp()));
             return new SwitchAccessModeResponse(groupId.value(), mode);
         });
@@ -82,14 +81,14 @@ public class GroupWebService extends AbstractWebService<GroupApi, GroupWebServic
     public CheckGroupValidityResponse checkGroupValidity(@RequestBody CheckGroupValidityRequest request)
             throws GroupWebServiceFault {
         return invoke("checkGroupValidity", () -> new CheckGroupValidityResponse(
-                getBean().checkGroupValidity(Username.of(request.authUsername()))));
+                getBean().checkGroupValidity(caller())));
     }
 
     @PostMapping("/getGroupAttributes")
     public GetGroupAttributesResponse getGroupAttributes(@RequestBody GetGroupAttributesRequest request)
             throws GroupWebServiceFault {
         return invoke("getGroupAttributes", () -> new GetGroupAttributesResponse(getBean().getGroupAttributes(
-                Username.of(request.authUsername()), GroupId.of(request.groupId()))));
+                caller(), GroupId.of(request.groupId()))));
     }
 
     @Override

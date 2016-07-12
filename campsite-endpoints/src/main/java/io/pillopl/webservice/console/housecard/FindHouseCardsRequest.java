@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * House cards of the owner's campsite.
  */
-public record FindHouseCardsRequest(String authUsername, String ownerUsername) implements Serializable {
+public record FindHouseCardsRequest(String ownerUsername) implements Serializable {
 }

@@ -7,5 +7,5 @@ import java.io.Serializable;
 /**
  * A card issued at the reception for a stay or a season.
  */
-public record IssueCardRequest(String authUsername, IssueCardDTO card) implements Serializable {
+public record IssueCardRequest(IssueCardDTO card) implements Serializable {
 }

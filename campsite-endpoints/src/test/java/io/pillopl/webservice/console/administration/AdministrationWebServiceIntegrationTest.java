@@ -24,15 +24,15 @@ class AdministrationWebServiceIntegrationTest extends WebServiceIntegrationTest 
 
     @Test
     void configurationChangeIsStoredAndAudited() throws Exception {
-        call(PATH + "/setSystemProperty", new SetSystemPropertyRequest("admin", "StaleSessionTimeoutInHours", "36",
+        call("admin", PATH + "/setSystemProperty", new SetSystemPropertyRequest("StaleSessionTimeoutInHours", "36",
                 "close stale sessions after"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.property.value").value("36"));
 
-        call(PATH + "/getSystemProperties", new GetSystemPropertiesRequest("admin"))
+        call("admin", PATH + "/getSystemProperties", new GetSystemPropertiesRequest())
                 .andExpect(jsonPath("$.properties", hasSize(SystemPropertyKey.values().length)))
                 .andExpect(jsonPath("$.properties[?(@.key == 'StaleSessionTimeoutInHours')].value", hasItem("36")));
-        call(PATH + "/findAuditEntries", new FindAuditEntriesRequest("admin", "StaleSessionTimeoutInHours",
+        call("admin", PATH + "/findAuditEntries", new FindAuditEntriesRequest("StaleSessionTimeoutInHours",
                 "CONFIG_CHANGE", null, "functional", null, null, null, "actionDate", "desc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.entries", hasSize(1)))
@@ -41,32 +41,32 @@ class AdministrationWebServiceIntegrationTest extends WebServiceIntegrationTest 
 
     @Test
     void unknownKeysAndUnreadableDatesAreWrongRequests() throws Exception {
-        call(PATH + "/setSystemProperty", new SetSystemPropertyRequest("admin", "stalesessiontimeoutinhours", "36",
+        call("admin", PATH + "/setSystemProperty", new SetSystemPropertyRequest("stalesessiontimeoutinhours", "36",
                 null))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/findAuditEntries", new FindAuditEntriesRequest("admin", null, null, null, null, "01.05.2016",
+        call("admin", PATH + "/findAuditEntries", new FindAuditEntriesRequest(null, null, null, null, "01.05.2016",
                 null, null, null, null))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/findAuditEntries", new FindAuditEntriesRequest("admin", null, null, null, null, "2016-05-02",
+        call("admin", PATH + "/findAuditEntries", new FindAuditEntriesRequest(null, null, null, null, "2016-05-02",
                 "2016-05-01", null, null, null))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void receptionSeesNeitherAuditNorConfigurationNorRoles() throws Exception {
-        call(PATH + "/findAuditEntries", new FindAuditEntriesRequest("reception", null, null, null, null, null, null,
+        call("reception", PATH + "/findAuditEntries", new FindAuditEntriesRequest(null, null, null, null, null, null,
                 null, null, null))
                 .andExpect(status().isForbidden());
-        call(PATH + "/getSystemProperties", new GetSystemPropertiesRequest("reception"))
+        call("reception", PATH + "/getSystemProperties", new GetSystemPropertiesRequest())
                 .andExpect(status().isForbidden());
-        call(PATH + "/findRoles", new FindRolesRequest("reception")).andExpect(status().isForbidden());
-        call(PATH + "/refreshUserSummary", new RefreshUserSummaryRequest("reception"))
+        call("reception", PATH + "/findRoles", new FindRolesRequest()).andExpect(status().isForbidden());
+        call("reception", PATH + "/refreshUserSummary", new RefreshUserSummaryRequest())
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void rightsMatrixListsTheRolesWithTheirRights() throws Exception {
-        call(PATH + "/findRoles", new FindRolesRequest("admin"))
+        call("admin", PATH + "/findRoles", new FindRolesRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.roles[0].name").value("RECEPTION"))
                 .andExpect(jsonPath("$.roles[0].rights", hasItem("STAY_CHECKOUT")))

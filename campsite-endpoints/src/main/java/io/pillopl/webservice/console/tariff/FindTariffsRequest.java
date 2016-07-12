@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Lists the tariffs of the caller's market.
  */
-public record FindTariffsRequest(String authUsername) implements Serializable {
+public record FindTariffsRequest() implements Serializable {
 }

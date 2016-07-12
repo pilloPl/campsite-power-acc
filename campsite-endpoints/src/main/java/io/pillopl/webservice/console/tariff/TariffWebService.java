@@ -34,45 +34,45 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
     @PostMapping("/findTariffs")
     public FindTariffsResponse findTariffs(@RequestBody FindTariffsRequest request) throws TariffWebServiceFault {
         return invoke("findTariffs", () -> new FindTariffsResponse(getBean().findTariffs(
-                Username.of(request.authUsername()))));
+                caller())));
     }
 
     @PostMapping("/getTariff")
     public GetTariffResponse getTariff(@RequestBody GetTariffRequest request) throws TariffWebServiceFault {
         return invoke("getTariff", () -> new GetTariffResponse(getBean().getTariff(
-                Username.of(request.authUsername()), TariffId.of(request.tariffId()))));
+                caller(), TariffId.of(request.tariffId()))));
     }
 
     @PostMapping("/getDefaultTariff")
     public GetDefaultTariffResponse getDefaultTariff(@RequestBody GetDefaultTariffRequest request)
             throws TariffWebServiceFault {
         return invoke("getDefaultTariff", () -> new GetDefaultTariffResponse(getBean().getDefaultTariff(
-                Username.of(request.authUsername()))));
+                caller())));
     }
 
     @PostMapping("/existsTariff")
     public ExistsTariffResponse existsTariff(@RequestBody ExistsTariffRequest request) throws TariffWebServiceFault {
         return invoke("existsTariff", () -> new ExistsTariffResponse(request.tariffName(), getBean().existsTariff(
-                Username.of(request.authUsername()), request.tariffName())));
+                caller(), request.tariffName())));
     }
 
     @PostMapping("/saveTariff")
     public SaveTariffResponse saveTariff(@RequestBody SaveTariffRequest request) throws TariffWebServiceFault {
         return invoke("saveTariff", () -> new SaveTariffResponse(getBean().saveTariff(
-                Username.of(request.authUsername()), request.tariff())));
+                caller(), request.tariff())));
     }
 
     @PostMapping("/updateTariff")
     public UpdateTariffResponse updateTariff(@RequestBody UpdateTariffRequest request) throws TariffWebServiceFault {
         return invoke("updateTariff", () -> new UpdateTariffResponse(getBean().updateTariff(
-                Username.of(request.authUsername()), TariffId.of(request.tariffId()), request.tariff())));
+                caller(), TariffId.of(request.tariffId()), request.tariff())));
     }
 
     @PostMapping("/setMarketDefaultTariff")
     public SetMarketDefaultTariffResponse setMarketDefaultTariff(@RequestBody SetMarketDefaultTariffRequest request)
             throws TariffWebServiceFault {
         return invoke("setMarketDefaultTariff", () -> new SetMarketDefaultTariffResponse(
-                getBean().setMarketDefaultTariff(Username.of(request.authUsername()),
+                getBean().setMarketDefaultTariff(caller(),
                         TariffId.of(request.tariffId()))));
     }
 
@@ -87,7 +87,7 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
                 }
             }
             return new ApplyTariffToPedestalsResponse(getBean().applyTariffToPedestals(
-                    Username.of(request.authUsername()), codes, TariffId.ofNullable(request.tariffId()),
+                    caller(), codes, TariffId.ofNullable(request.tariffId()),
                     request.startDate()));
         });
     }
@@ -97,7 +97,7 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
             throws TariffWebServiceFault {
         return invoke("applyTariffToSocket", () -> {
             SocketId socketId = SocketId.of(request.socketId());
-            TariffApplicabilityDTO assignment = getBean().applyTariffToSocket(Username.of(request.authUsername()),
+            TariffApplicabilityDTO assignment = getBean().applyTariffToSocket(caller(),
                     socketId, TariffId.ofNullable(request.tariffId()), request.startDate());
             return new ApplyTariffToSocketResponse(socketId.value(), assignment, assignment == null);
         });
@@ -109,7 +109,7 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
         return invoke("applyTariffToAffiliatePedestals", () -> {
             Username owner = Username.of(request.ownerUsername());
             return new ApplyTariffToAffiliatePedestalsResponse(owner.value(),
-                    getBean().applyTariffToAffiliatePedestals(Username.of(request.authUsername()), owner,
+                    getBean().applyTariffToAffiliatePedestals(caller(), owner,
                             TariffId.of(request.tariffId()), request.startDate()));
         });
     }
@@ -120,7 +120,7 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
         return invoke("setCampsiteDefaultTariff", () -> {
             GroupId groupId = GroupId.of(request.groupId());
             return new SetCampsiteDefaultTariffResponse(groupId.value(), getBean().setCampsiteDefaultTariff(
-                    Username.of(request.authUsername()), groupId, TariffId.ofNullable(request.tariffId())));
+                    caller(), groupId, TariffId.ofNullable(request.tariffId())));
         });
     }
 
@@ -128,14 +128,14 @@ public class TariffWebService extends AbstractWebService<TariffApi, TariffWebSer
     public FindSocketTariffResponse findSocketTariff(@RequestBody FindSocketTariffRequest request)
             throws TariffWebServiceFault {
         return invoke("findSocketTariff", () -> new FindSocketTariffResponse(getBean().findSocketTariff(
-                Username.of(request.authUsername()), SocketId.of(request.socketId()), request.at())));
+                caller(), SocketId.of(request.socketId()), request.at())));
     }
 
     @PostMapping("/simulatePrice")
     public SimulatePriceResponse simulatePrice(@RequestBody SimulatePriceRequest request)
             throws TariffWebServiceFault {
         return invoke("simulatePrice", () -> new SimulatePriceResponse(getBean().simulatePrice(
-                Username.of(request.authUsername()), SocketId.of(request.socketId()),
+                caller(), SocketId.of(request.socketId()),
                 TariffId.ofNullable(request.tariffId()), request.plugIn(), request.plugOut(),
                 request.kwh() != null ? Kwh.of(request.kwh()) : null, request.nights())));
     }

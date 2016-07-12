@@ -48,14 +48,14 @@ class GuestWebServiceIntegrationTest extends WebServiceIntegrationTest {
         console.user("otherdesk", UserroleName.RECEPTION, console.staff("HR RECEPTION"), bay);
     }
 
-    CheckInRequest checkIn(String username) {
-        return new CheckInRequest(username, guest.getId(), bay.getId(), "a12", ARRIVAL, DEPARTURE, card.getId(),
+    CheckInRequest checkIn() {
+        return new CheckInRequest(guest.getId(), bay.getId(), "a12", ARRIVAL, DEPARTURE, card.getId(),
                 null, "400012345678");
     }
 
     @Test
     void receptionChecksTheGuestInWithTheCardValidForTheStay() throws Exception {
-        call(PATH + "/checkIn", checkIn("desk"))
+        call("desk", PATH + "/checkIn", checkIn())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stay.pitchNo").value("A12"))
                 .andExpect(jsonPath("$.stay.campsiteName").value("Bay"))
@@ -68,34 +68,34 @@ class GuestWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void receptionChecksTheStayOutAndTheCardEndsToday() throws Exception {
-        String body = call(PATH + "/checkIn", checkIn("desk")).andReturn().getResponse().getContentAsString();
+        String body = call("desk", PATH + "/checkIn", checkIn()).andReturn().getResponse().getContentAsString();
         Long stayId = objectMapper.readTree(body).path("stay").path("id").asLong();
 
-        call(PATH + "/checkOut", new CheckOutRequest("desk", stayId))
+        call("desk", PATH + "/checkOut", new CheckOutRequest(stayId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.stay.checkedOutBy").value("desk"))
                 .andExpect(jsonPath("$.stay.cardValidTo").value(LocalDate.now().toString()));
-        call(PATH + "/checkOut", new CheckOutRequest("desk", stayId)).andExpect(status().isConflict());
+        call("desk", PATH + "/checkOut", new CheckOutRequest(stayId)).andExpect(status().isConflict());
     }
 
     @Test
     void checkOutNeedsItsOwnRight() throws Exception {
-        String body = call(PATH + "/checkIn", checkIn("service")).andExpect(status().isOk()).andReturn()
+        String body = call("service", PATH + "/checkIn", checkIn()).andExpect(status().isOk()).andReturn()
                 .getResponse().getContentAsString();
         Long stayId = objectMapper.readTree(body).path("stay").path("id").asLong();
 
-        call(PATH + "/checkOut", new CheckOutRequest("service", stayId)).andExpect(status().isForbidden());
+        call("service", PATH + "/checkOut", new CheckOutRequest(stayId)).andExpect(status().isForbidden());
     }
 
     @Test
     void checkInIsRefusedForGuestsOutsideTheScopeIncompleteRequestsAndOccupiedPitches() throws Exception {
-        call(PATH + "/checkIn", checkIn("otherdesk")).andExpect(status().isForbidden());
-        call(PATH + "/checkIn", new CheckInRequest("desk", guest.getId(), bay.getId(), "A12", null, DEPARTURE, null,
+        call("otherdesk", PATH + "/checkIn", checkIn()).andExpect(status().isForbidden());
+        call("desk", PATH + "/checkIn", new CheckInRequest(guest.getId(), bay.getId(), "A12", null, DEPARTURE, null,
                 null, null)).andExpect(status().isBadRequest());
-        call(PATH + "/checkIn", new CheckInRequest("desk", 999_999L, bay.getId(), "A12", ARRIVAL, DEPARTURE, null,
+        call("desk", PATH + "/checkIn", new CheckInRequest(999_999L, bay.getId(), "A12", ARRIVAL, DEPARTURE, null,
                 null, null)).andExpect(status().isNotFound());
-        call(PATH + "/checkIn", checkIn("desk")).andExpect(status().isOk());
-        call(PATH + "/checkIn", new CheckInRequest("desk", guest.getId(), bay.getId(), "A12", ARRIVAL, DEPARTURE,
+        call("desk", PATH + "/checkIn", checkIn()).andExpect(status().isOk());
+        call("desk", PATH + "/checkIn", new CheckInRequest(guest.getId(), bay.getId(), "A12", ARRIVAL, DEPARTURE,
                 null, null, null)).andExpect(status().isConflict());
     }
 }

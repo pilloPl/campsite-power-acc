@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * The open commissioning the installer was given the token of.
  */
-public record FindCommissioningByTokenRequest(String authUsername, String token) implements Serializable {
+public record FindCommissioningByTokenRequest(String token) implements Serializable {
 }

@@ -6,6 +6,7 @@ package io.pillopl.webservice.console.common;
 public enum WsErrorCode {
     OK(200),
     WRONG_REQUEST(400),
+    NOT_AUTHENTICATED(401),
     NOT_AUTHORIZED(403),
     NOT_EXISTS(404),
     ALREADY_EXISTS(409),

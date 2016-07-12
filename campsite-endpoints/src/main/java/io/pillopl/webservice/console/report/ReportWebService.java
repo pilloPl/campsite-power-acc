@@ -2,7 +2,6 @@ package io.pillopl.webservice.console.report;
 
 import io.pillopl.api.ReportApi;
 import io.pillopl.commons.DateRange;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -25,7 +24,7 @@ public class ReportWebService extends AbstractWebService<ReportApi, ReportWebSer
     @PostMapping("/getReport")
     public GetReportResponse getReport(@RequestBody GetReportRequest request) throws ReportWebServiceFault {
         return invoke("getReport", () -> new GetReportResponse(request.reportType(),
-                getBean().getReport(Username.of(request.authUsername()), request.reportType(),
+                getBean().getReport(caller(), request.reportType(),
                         DateRange.ofDays(request.from(), request.to()), request.campsiteGroupId(),
                         request.powerSectionId(), request.year(), request.month(), request.timeResolution(),
                         request.pedestalCodes())));

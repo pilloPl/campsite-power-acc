@@ -7,6 +7,11 @@ public final class WebServicePaths {
 
     public static final String CONSOLE = "/api/console";
 
+    /**
+     * Login, logout and the logged-in user of the console.
+     */
+    public static final String AUTH = CONSOLE + "/auth";
+
     public static final String GROUP = CONSOLE + "/group";
 
     public static final String PEDESTAL = CONSOLE + "/pedestal";
@@ -37,11 +42,13 @@ public final class WebServicePaths {
     /**
      * Messages of the pedestal controllers on link v1: {@code <path>/<pedestal code>/<message>}.
      */
-    public static final String PEDESTAL_LINK_V1 = "/api/pedestal-link/v1";
+    public static final String PEDESTAL_LINK = "/api/pedestal-link";
 
-    public static final String PEDESTAL_LINK_V2 = "/api/pedestal-link/v2";
+    public static final String PEDESTAL_LINK_V1 = PEDESTAL_LINK + "/v1";
 
-    public static final String PEDESTAL_LINK_V3 = "/api/pedestal-link/v3";
+    public static final String PEDESTAL_LINK_V2 = PEDESTAL_LINK + "/v2";
+
+    public static final String PEDESTAL_LINK_V3 = PEDESTAL_LINK + "/v3";
 
     private WebServicePaths() {
         throw new AssertionError();

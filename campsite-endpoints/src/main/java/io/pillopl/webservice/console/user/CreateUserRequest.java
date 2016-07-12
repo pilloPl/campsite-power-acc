@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * New self-service user; the username is made from the email.
  */
-public record CreateUserRequest(String authUsername, String email, String name, String market) implements Serializable {
+public record CreateUserRequest(String email, String name, String market) implements Serializable {
 }

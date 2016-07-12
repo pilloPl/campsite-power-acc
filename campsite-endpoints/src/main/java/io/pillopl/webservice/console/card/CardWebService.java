@@ -5,7 +5,6 @@ import io.pillopl.value.CardId;
 import io.pillopl.value.CardRfid;
 import io.pillopl.value.PedestalCode;
 import io.pillopl.value.SocketLinkId;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -29,27 +28,27 @@ public class CardWebService extends AbstractWebService<CardApi, CardWebServiceFa
     @PostMapping("/findCards")
     public FindCardsResponse findCards(@RequestBody FindCardsRequest request) throws CardWebServiceFault {
         return invoke("findCards", () -> new FindCardsResponse(getBean().findCards(
-                Username.of(request.authUsername()), request.rfidOrNumber())));
+                caller(), request.rfidOrNumber())));
     }
 
     @PostMapping("/issueCard")
     public IssueCardResponse issueCard(@RequestBody IssueCardRequest request) throws CardWebServiceFault {
         return invoke("issueCard", () -> new IssueCardResponse(getBean().issueCard(
-                Username.of(request.authUsername()), request.card())));
+                caller(), request.card())));
     }
 
     @PostMapping("/changeCardStatus")
     public ChangeCardStatusResponse changeCardStatus(@RequestBody ChangeCardStatusRequest request)
             throws CardWebServiceFault {
         return invoke("changeCardStatus", () -> new ChangeCardStatusResponse(getBean().changeCardStatus(
-                Username.of(request.authUsername()), CardId.of(request.cardId()), request.activation())));
+                caller(), CardId.of(request.cardId()), request.activation())));
     }
 
     @PostMapping("/changeCardValidity")
     public ChangeCardValidityResponse changeCardValidity(@RequestBody ChangeCardValidityRequest request)
             throws CardWebServiceFault {
         return invoke("changeCardValidity", () -> new ChangeCardValidityResponse(getBean().changeCardValidity(
-                Username.of(request.authUsername()), CardId.of(request.cardId()), request.validFrom(),
+                caller(), CardId.of(request.cardId()), request.validFrom(),
                 request.validTo())));
     }
 
@@ -57,7 +56,7 @@ public class CardWebService extends AbstractWebService<CardApi, CardWebServiceFa
     public CheckCardAtSocketResponse checkCardAtSocket(@RequestBody CheckCardAtSocketRequest request)
             throws CardWebServiceFault {
         return invoke("checkCardAtSocket", () -> new CheckCardAtSocketResponse(getBean().checkCardAtSocket(
-                Username.of(request.authUsername()), CardRfid.of(request.cardRfid()),
+                caller(), CardRfid.of(request.cardRfid()),
                 SocketLinkId.of(request.pedestalCode(), request.socketNo()))));
     }
 
@@ -65,7 +64,7 @@ public class CardWebService extends AbstractWebService<CardApi, CardWebServiceFa
     public GetLocalCardListResponse getLocalCardList(@RequestBody GetLocalCardListRequest request)
             throws CardWebServiceFault {
         return invoke("getLocalCardList", () -> new GetLocalCardListResponse(getBean().getLocalCardList(
-                Username.of(request.authUsername()), PedestalCode.of(request.pedestalCode()))));
+                caller(), PedestalCode.of(request.pedestalCode()))));
     }
 
     @PostMapping("/sendLocalCardList")
@@ -73,7 +72,7 @@ public class CardWebService extends AbstractWebService<CardApi, CardWebServiceFa
             throws CardWebServiceFault {
         return invoke("sendLocalCardList", () -> {
             PedestalCode code = PedestalCode.of(request.pedestalCode());
-            boolean sent = getBean().sendLocalCardList(Username.of(request.authUsername()), code);
+            boolean sent = getBean().sendLocalCardList(caller(), code);
             return new SendLocalCardListResponse(code.value(), sent);
         });
     }

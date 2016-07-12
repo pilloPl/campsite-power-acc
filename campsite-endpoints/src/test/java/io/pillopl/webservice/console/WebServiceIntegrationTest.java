@@ -12,6 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 /**
@@ -32,7 +34,7 @@ public abstract class WebServiceIntegrationTest extends IntegrationTest {
     protected ConsoleFixture console;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
 
     @Autowired
     SystemPropertyService systemPropertyService;
@@ -40,16 +42,28 @@ public abstract class WebServiceIntegrationTest extends IntegrationTest {
     @AfterTransaction
     void cleanUpCommittedRows() {
         jdbcTemplate.update("DELETE FROM AUDIT WHERE ACTION_TYPE IN ('PEDESTAL_IMPORT', 'PEDESTAL_COMMISSIONING', "
-                + "'PEDESTAL_DECOMMISSIONING', 'CONFIG_CHANGE', 'EMAIL')");
+                + "'PEDESTAL_DECOMMISSIONING', 'CONFIG_CHANGE', 'EMAIL', 'LOGIN', 'CONSOLE_ACTION')");
         systemPropertyService.reloadSystemProperties();
     }
 
+    /**
+     * Call without a login (pedestal link, refused console calls).
+     */
     protected ResultActions call(String path, Object request) throws Exception {
-        return mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON)
+        return mockMvc.perform(post(path).with(csrf()).contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
     }
 
-    protected ResultActions callRaw(String path, String json) throws Exception {
-        return mockMvc.perform(post(path).contentType(MediaType.APPLICATION_JSON).content(json));
+    /**
+     * Call of the logged-in console user (the caller of the operation), with the CSRF token of the console.
+     */
+    protected ResultActions call(String caller, String path, Object request) throws Exception {
+        return mockMvc.perform(post(path).with(user(caller)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+    }
+
+    protected ResultActions callRaw(String caller, String path, String json) throws Exception {
+        return mockMvc.perform(post(path).with(user(caller)).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                .content(json));
     }
 }

@@ -48,22 +48,22 @@ class QrPayWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void appStartsThePaymentAndTheSocketWaitsForTheGuest() throws Exception {
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-1", SOCKET_CODE, "guest-1"))
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-1", SOCKET_CODE, "guest-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.qrPayProcess.state").value("SOCKET_START_WAITING"))
                 .andExpect(jsonPath("$.qrPayProcess.socketCode").value(SOCKET_CODE))
                 .andExpect(jsonPath("$.qrPayProcess.orderReference").value("WS-1"));
 
-        call(PATH + "/getQrPayProcess", new QrPayProcessRequest("payapp", "WS-1", "guest-1"))
+        call("payapp", PATH + "/getQrPayProcess", new QrPayProcessRequest("WS-1", "guest-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.qrPayProcess.state").value("SOCKET_START_WAITING"));
     }
 
     @Test
     void stopBeforeTheSupplyIsAnErrorOfThePayment() throws Exception {
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-2", SOCKET_CODE, "guest-1"));
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-2", SOCKET_CODE, "guest-1"));
 
-        call(PATH + "/stopQrPay", new QrPayProcessRequest("payapp", "WS-2", "guest-1"))
+        call("payapp", PATH + "/stopQrPay", new QrPayProcessRequest("WS-2", "guest-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.qrPayProcess.state").value("ERROR"))
                 .andExpect(jsonPath("$.qrPayProcess.errorCode").value("SUPPLY_NOT_STARTED"));
@@ -71,25 +71,25 @@ class QrPayWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void anotherAppUserMayNotStopThePayment() throws Exception {
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-3", SOCKET_CODE, "guest-1"));
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-3", SOCKET_CODE, "guest-1"));
 
-        call(PATH + "/stopQrPay", new QrPayProcessRequest("payapp", "WS-3", "guest-2"))
+        call("payapp", PATH + "/stopQrPay", new QrPayProcessRequest("WS-3", "guest-2"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void refusedCallsGetTheirFaults() throws Exception {
-        call(PATH + "/startQrPay", new StartQrPayRequest("reception", "WS-4", SOCKET_CODE, "guest-1"))
+        call("reception", PATH + "/startQrPay", new StartQrPayRequest("WS-4", SOCKET_CODE, "guest-1"))
                 .andExpect(status().isForbidden());
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-4", "HRBAY*NONE*1", "guest-1"))
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-4", "HRBAY*NONE*1", "guest-1"))
                 .andExpect(status().isNotFound());
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-4", "no code", "guest-1"))
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-4", "no code", "guest-1"))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-5", SOCKET_CODE, "guest-1"))
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-5", SOCKET_CODE, "guest-1"))
                 .andExpect(status().isOk());
-        call(PATH + "/startQrPay", new StartQrPayRequest("payapp", "WS-5", SOCKET_CODE, "guest-1"))
+        call("payapp", PATH + "/startQrPay", new StartQrPayRequest("WS-5", SOCKET_CODE, "guest-1"))
                 .andExpect(status().isConflict());
-        call(PATH + "/getQrPayProcess", new QrPayProcessRequest("payapp", "WS-NONE", "guest-1"))
+        call("payapp", PATH + "/getQrPayProcess", new QrPayProcessRequest("WS-NONE", "guest-1"))
                 .andExpect(status().isNotFound());
     }
 }

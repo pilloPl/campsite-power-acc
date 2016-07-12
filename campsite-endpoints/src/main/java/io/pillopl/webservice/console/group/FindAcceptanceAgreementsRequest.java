@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Where the cards of an ISSUER group are accepted.
  */
-public record FindAcceptanceAgreementsRequest(String authUsername, Long issuerGroupId) implements Serializable {
+public record FindAcceptanceAgreementsRequest(Long issuerGroupId) implements Serializable {
 }

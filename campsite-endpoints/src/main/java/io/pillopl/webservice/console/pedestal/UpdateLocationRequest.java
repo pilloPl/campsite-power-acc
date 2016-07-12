@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * New address of a pedestal of an affiliate owner.
  */
-public record UpdateLocationRequest(String authUsername, String ownerUsername, String pedestalCode,
+public record UpdateLocationRequest(String ownerUsername, String pedestalCode,
                                     LocationDTO location)
         implements Serializable {
 }

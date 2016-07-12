@@ -1,8 +1,13 @@
 package io.pillopl.webservice.console.common;
 
+import io.pillopl.api.exception.AccessNotAllowedException;
 import io.pillopl.commons.ExceptionUtil;
+import io.pillopl.value.Username;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.function.Supplier;
 
@@ -25,6 +30,20 @@ public abstract class AbstractWebService<T, F extends WebServiceFault> {
 
     protected T getBean() {
         return bean;
+    }
+
+    /**
+     * The logged-in user calling the operation (the caller of the service interface, whose rights it checks).
+     *
+     * @throws AccessNotAllowedException without a login (inside {@link #invoke} it becomes a NOT_AUTHORIZED fault)
+     */
+    protected Username caller() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new AccessNotAllowedException("Login required");
+        }
+        return Username.of(authentication.getName());
     }
 
     protected abstract F createFault(String message, WsErrorCode errorCode);

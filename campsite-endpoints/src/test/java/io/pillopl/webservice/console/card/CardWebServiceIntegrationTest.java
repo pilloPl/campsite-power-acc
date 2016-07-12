@@ -58,13 +58,13 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void receptionIssuesAndFindsACard() throws Exception {
-        call(PATH + "/issueCard", new IssueCardRequest("reception", new IssueCardDTO(member.getId(), "3283263748",
+        call("reception", PATH + "/issueCard", new IssueCardRequest(new IssueCardDTO(member.getId(), "3283263748",
                 "HR-900", TODAY, TODAY.plusDays(6), "400012345678")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.card.guestName").value("Kovac"))
                 .andExpect(jsonPath("$.card.cardStatus").value("VALID"));
 
-        call(PATH + "/findCards", new FindCardsRequest("reception", "HR-900"))
+        call("reception", PATH + "/findCards", new FindCardsRequest("HR-900"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cards", hasSize(1)))
                 .andExpect(jsonPath("$.cards[0].cardRfid").value("3283263748"));
@@ -72,14 +72,14 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void issueRefusesWrongDataGuestsOutsideTheScopeAndCallersWithoutTheRight() throws Exception {
-        call(PATH + "/issueCard", new IssueCardRequest("reception", new IssueCardDTO(member.getId(), "04A1",
+        call("reception", PATH + "/issueCard", new IssueCardRequest(new IssueCardDTO(member.getId(), "04A1",
                 "HR-901", null, null, "400012345678"))).andExpect(status().isBadRequest());
-        call(PATH + "/issueCard", new IssueCardRequest("reception", null)).andExpect(status().isBadRequest());
-        call(PATH + "/issueCard", new IssueCardRequest("reception", new IssueCardDTO(outsider.getId(), "1001",
+        call("reception", PATH + "/issueCard", new IssueCardRequest(null)).andExpect(status().isBadRequest());
+        call("reception", PATH + "/issueCard", new IssueCardRequest(new IssueCardDTO(outsider.getId(), "1001",
                 "HR-902", null, null, "400012345678"))).andExpect(status().isForbidden());
-        call(PATH + "/issueCard", new IssueCardRequest("technician", new IssueCardDTO(member.getId(), "1002",
+        call("technician", PATH + "/issueCard", new IssueCardRequest(new IssueCardDTO(member.getId(), "1002",
                 "HR-903", null, null, "400012345678"))).andExpect(status().isForbidden());
-        call(PATH + "/issueCard", new IssueCardRequest("reception", new IssueCardDTO(999999L, "1003", "HR-904",
+        call("reception", PATH + "/issueCard", new IssueCardRequest(new IssueCardDTO(999999L, "1003", "HR-904",
                 null, null, "400012345678"))).andExpect(status().isNotFound());
     }
 
@@ -87,16 +87,16 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void cardIsBlockedAndItsStayExtended() throws Exception {
         CampingCard card = cards.card("2001", "HR-910", member, TODAY.minusDays(3), TODAY.minusDays(1));
 
-        call(PATH + "/changeCardValidity", new ChangeCardValidityRequest("reception", card.getId(),
+        call("reception", PATH + "/changeCardValidity", new ChangeCardValidityRequest(card.getId(),
                 TODAY.minusDays(3), TODAY.plusDays(2)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.card.cardStatus").value("VALID"));
-        call(PATH + "/changeCardStatus", new ChangeCardStatusRequest("reception", card.getId(), "deactivated"))
+        call("reception", PATH + "/changeCardStatus", new ChangeCardStatusRequest(card.getId(), "deactivated"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.card.cardStatus").value("CARD_DEACTIVATED"));
-        call(PATH + "/changeCardStatus", new ChangeCardStatusRequest("reception", card.getId(), "LOST"))
+        call("reception", PATH + "/changeCardStatus", new ChangeCardStatusRequest(card.getId(), "LOST"))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/changeCardStatus", new ChangeCardStatusRequest("reception", 999999L, "ACTIVATED"))
+        call("reception", PATH + "/changeCardStatus", new ChangeCardStatusRequest(999999L, "ACTIVATED"))
                 .andExpect(status().isNotFound());
     }
 
@@ -104,16 +104,16 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void checkAtTheSocketAnswersLikeThePedestal() throws Exception {
         cards.card("2002", "HR-911", member, TODAY, TODAY.plusDays(1));
 
-        call(PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("reception", "2002", "HR-BAY-P001", 1))
+        call("reception", PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("2002", "HR-BAY-P001", 1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.check.validationStatus").value("ACCEPTED"))
                 .andExpect(jsonPath("$.check.guestName").value("Kovac"));
-        call(PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("reception", "2999", "HR-BAY-P001", 2))
+        call("reception", PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("2999", "HR-BAY-P001", 2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.check.validationStatus").value("CARD_INVALID"));
-        call(PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("reception", "2002", "HR-COVE-P001", 1))
+        call("reception", PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("2002", "HR-COVE-P001", 1))
                 .andExpect(status().isNotFound());
-        call(PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("reception", "2002", "HR-BAY-P001", 9))
+        call("reception", PATH + "/checkCardAtSocket", new CheckCardAtSocketRequest("2002", "HR-BAY-P001", 9))
                 .andExpect(status().isBadRequest());
     }
 
@@ -124,17 +124,17 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
         localListAttributeDao.saveAndFlush(attribute);
         cards.card("2003", "HR-912", member, TODAY, TODAY.plusDays(1));
 
-        call(PATH + "/getLocalCardList", new GetLocalCardListRequest("reception", "HR-BAY-P001"))
+        call("reception", PATH + "/getLocalCardList", new GetLocalCardListRequest("HR-BAY-P001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.localCardList.entries", hasSize(1)))
                 .andExpect(jsonPath("$.localCardList.capacity").value(250));
-        call(PATH + "/getLocalCardList", new GetLocalCardListRequest("reception", "HR-COVE-P001"))
+        call("reception", PATH + "/getLocalCardList", new GetLocalCardListRequest("HR-COVE-P001"))
                 .andExpect(status().isNotFound());
-        call(PATH + "/sendLocalCardList", new SendLocalCardListRequest("reception", "HR-BAY-P001"))
+        call("reception", PATH + "/sendLocalCardList", new SendLocalCardListRequest("HR-BAY-P001"))
                 .andExpect(status().isForbidden());
-        call(PATH + "/sendLocalCardList", new SendLocalCardListRequest("admin", "HR-BAY-P001"))
+        call("admin", PATH + "/sendLocalCardList", new SendLocalCardListRequest("HR-BAY-P001"))
                 .andExpect(status().isConflict());
-        call(PATH + "/sendLocalCardList", new SendLocalCardListRequest("admin", "HR-COVE-P001"))
+        call("admin", PATH + "/sendLocalCardList", new SendLocalCardListRequest("HR-COVE-P001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sent").value(false));
     }

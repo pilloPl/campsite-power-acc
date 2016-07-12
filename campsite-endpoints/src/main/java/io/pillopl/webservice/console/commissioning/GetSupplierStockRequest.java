@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Pedestals waiting in the supplier stock groups the calling user sees.
  */
-public record GetSupplierStockRequest(String authUsername) implements Serializable {
+public record GetSupplierStockRequest() implements Serializable {
 }

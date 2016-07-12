@@ -4,7 +4,6 @@ import io.pillopl.api.AdministrationApi;
 import io.pillopl.commons.DateRange;
 import io.pillopl.commons.SortOrder;
 import io.pillopl.dto.admin.AuditFilterDTO;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -30,7 +29,7 @@ public class AdministrationWebService extends AbstractWebService<AdministrationA
         return invoke("findAuditEntries", () -> {
             AuditFilterDTO filter = new AuditFilterDTO(request.name(), request.type(), request.status(),
                     request.category(), DateRange.ofDays(request.dateFrom(), request.dateTo()), request.freeSearch());
-            return new FindAuditEntriesResponse(getBean().findAuditEntries(Username.of(request.authUsername()),
+            return new FindAuditEntriesResponse(getBean().findAuditEntries(caller(),
                     filter, SortOrder.of(request.sortColumn(), request.sortOrder())));
         });
     }
@@ -39,27 +38,27 @@ public class AdministrationWebService extends AbstractWebService<AdministrationA
     public GetSystemPropertiesResponse getSystemProperties(@RequestBody GetSystemPropertiesRequest request)
             throws AdministrationWebServiceFault {
         return invoke("getSystemProperties", () -> new GetSystemPropertiesResponse(
-                getBean().getSystemProperties(Username.of(request.authUsername()))));
+                getBean().getSystemProperties(caller())));
     }
 
     @PostMapping("/setSystemProperty")
     public SetSystemPropertyResponse setSystemProperty(@RequestBody SetSystemPropertyRequest request)
             throws AdministrationWebServiceFault {
         return invoke("setSystemProperty", () -> new SetSystemPropertyResponse(getBean().setSystemProperty(
-                Username.of(request.authUsername()), request.key(), request.value(), request.description())));
+                caller(), request.key(), request.value(), request.description())));
     }
 
     @PostMapping("/findRoles")
     public FindRolesResponse findRoles(@RequestBody FindRolesRequest request) throws AdministrationWebServiceFault {
         return invoke("findRoles", () -> new FindRolesResponse(getBean().findRoles(
-                Username.of(request.authUsername()))));
+                caller())));
     }
 
     @PostMapping("/refreshUserSummary")
     public RefreshUserSummaryResponse refreshUserSummary(@RequestBody RefreshUserSummaryRequest request)
             throws AdministrationWebServiceFault {
         return invoke("refreshUserSummary", () -> {
-            getBean().refreshUserSummary(Username.of(request.authUsername()));
+            getBean().refreshUserSummary(caller());
             return new RefreshUserSummaryResponse(true);
         });
     }

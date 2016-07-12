@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Pedestals of a supplier delivery (or of the network) entered in the console.
  */
-public record ImportSupplierPedestalsRequest(String authUsername, Boolean networkOwned,
+public record ImportSupplierPedestalsRequest(Boolean networkOwned,
                                              List<PedestalImportDTO> pedestals)
         implements Serializable {
 

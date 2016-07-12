@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Activates or deactivates a house card.
  */
-public record ChangeHouseCardStatusRequest(String authUsername, String ownerUsername, Long houseCardId, Boolean active) implements Serializable {
+public record ChangeHouseCardStatusRequest(String ownerUsername, Long houseCardId, Boolean active) implements Serializable {
 }

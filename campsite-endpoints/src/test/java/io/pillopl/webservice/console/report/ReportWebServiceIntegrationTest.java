@@ -62,7 +62,7 @@ class ReportWebServiceIntegrationTest extends WebServiceIntegrationTest {
         record(baySocket, "4", DAY.plusHours(12));
         record(lakeSocket, "40", DAY.plusHours(12));
 
-        call(PATH, request("bayowner", "average per hour of day", null, null, null))
+        call("bayowner", PATH, request("average per hour of day", null, null, null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lines", hasSize(24)))
                 .andExpect(jsonPath("$.lines[10].period").value("10"))
@@ -75,7 +75,7 @@ class ReportWebServiceIntegrationTest extends WebServiceIntegrationTest {
         record(baySocket, "4", DAY.plusHours(12));
         record(lakeSocket, "40", DAY.plusHours(12));
 
-        call(PATH, new GetReportRequest("admin", "MONTHLY_CONSUMPTION", null, null, lake.getId(), null, 2026, 7,
+        call("admin", PATH, new GetReportRequest("MONTHLY_CONSUMPTION", null, null, lake.getId(), null, 2026, 7,
                 null, null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reportType").value("MONTHLY_CONSUMPTION"))
@@ -90,7 +90,7 @@ class ReportWebServiceIntegrationTest extends WebServiceIntegrationTest {
         record(baySocket, "4", DAY.plusHours(12));
         record(lakeSocket, "40", DAY.plusHours(12));
 
-        call(PATH, new GetReportRequest("admin", "ACCUMULATED_KWH_PER_PEDESTAL", "2026-07-01", "2026-07-31", null,
+        call("admin", PATH, new GetReportRequest("ACCUMULATED_KWH_PER_PEDESTAL", "2026-07-01", "2026-07-31", null,
                 null, null, null, "MONTH", List.of("HR-BAYRPT-P001", "HR-LAKERPT-P001")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lines", hasSize(3)))
@@ -100,28 +100,28 @@ class ReportWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void campsiteOutsideTheCallersScopeIsRefused() throws Exception {
-        call(PATH, new GetReportRequest("bayowner", "MONTHLY_CONSUMPTION", null, null, lake.getId(), null, null,
+        call("bayowner", PATH, new GetReportRequest("MONTHLY_CONSUMPTION", null, null, lake.getId(), null, null,
                 null, null, null)).andExpect(status().isForbidden());
     }
 
     @Test
     void reportNeedsTheReportRightAKnownTypeAndAPeriod() throws Exception {
-        call(PATH, request("technician", "AVERAGE_PER_DAY_OF_WEEK", null, null, null))
+        call("technician", PATH, request("AVERAGE_PER_DAY_OF_WEEK", null, null, null))
                 .andExpect(status().isForbidden());
-        call(PATH, request("admin", "TOP_SECRET", null, null, null)).andExpect(status().isBadRequest());
-        call(PATH, new GetReportRequest("admin", "AVERAGE_PER_DAY_OF_WEEK", null, "2026-07-10", null, null, null,
+        call("admin", PATH, request("TOP_SECRET", null, null, null)).andExpect(status().isBadRequest());
+        call("admin", PATH, new GetReportRequest("AVERAGE_PER_DAY_OF_WEEK", null, "2026-07-10", null, null, null,
                 null, null, null)).andExpect(status().isBadRequest());
-        call(PATH, new GetReportRequest("admin", "ACCUMULATED_KWH_PER_PEDESTAL", "2026-07-01", "2026-07-31", null,
+        call("admin", PATH, new GetReportRequest("ACCUMULATED_KWH_PER_PEDESTAL", "2026-07-01", "2026-07-31", null,
                 null, null, null, "WEEK", List.of("HR-BAYRPT-P001"))).andExpect(status().isBadRequest());
-        call(PATH, new GetReportRequest("admin", "MONTHLY_CONSUMPTION", null, null, null, null, 2026, 13, null,
+        call("admin", PATH, new GetReportRequest("MONTHLY_CONSUMPTION", null, null, null, null, 2026, 13, null,
                 null)).andExpect(status().isBadRequest());
-        call(PATH, new GetReportRequest("admin", "MONTHLY_CONSUMPTION", null, null, null, 987654321L, null, null,
+        call("admin", PATH, new GetReportRequest("MONTHLY_CONSUMPTION", null, null, null, 987654321L, null, null,
                 null, null)).andExpect(status().isNotFound());
     }
 
-    private static GetReportRequest request(String user, String type, Long campsiteGroupId, Integer year,
+    private static GetReportRequest request(String type, Long campsiteGroupId, Integer year,
                                             Integer month) {
-        return new GetReportRequest(user, type, "2026-07-10", "2026-07-10", campsiteGroupId, null, year, month,
+        return new GetReportRequest(type, "2026-07-10", "2026-07-10", campsiteGroupId, null, year, month,
                 null, null);
     }
 

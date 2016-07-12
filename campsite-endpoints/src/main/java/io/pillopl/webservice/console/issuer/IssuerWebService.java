@@ -1,7 +1,6 @@
 package io.pillopl.webservice.console.issuer;
 
 import io.pillopl.api.IssuerApi;
-import io.pillopl.value.Username;
 import io.pillopl.webservice.console.common.AbstractWebService;
 import io.pillopl.webservice.console.common.WebServicePaths;
 import io.pillopl.webservice.console.common.WsErrorCode;
@@ -25,7 +24,7 @@ public class IssuerWebService extends AbstractWebService<IssuerApi, IssuerWebSer
     public RunIssuerExchangeResponse runIssuerExchange(@RequestBody RunIssuerExchangeRequest request)
             throws IssuerWebServiceFault {
         return invoke("runIssuerExchange", () -> new RunIssuerExchangeResponse(
-                getBean().runIssuerExchange(Username.of(request.authUsername()))));
+                getBean().runIssuerExchange(caller())));
     }
 
     @Override

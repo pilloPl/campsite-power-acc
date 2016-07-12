@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Roles with their rights (the rights matrix).
  */
-public record FindRolesRequest(String authUsername) implements Serializable {
+public record FindRolesRequest() implements Serializable {
 }

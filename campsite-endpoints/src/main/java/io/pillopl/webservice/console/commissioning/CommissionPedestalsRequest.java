@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * The installer mounts pedestals from the supplier stock for an open commissioning.
  */
-public record CommissionPedestalsRequest(String authUsername, String token, List<Long> pedestalIds)
+public record CommissionPedestalsRequest(String token, List<Long> pedestalIds)
         implements Serializable {
 
     public CommissionPedestalsRequest {

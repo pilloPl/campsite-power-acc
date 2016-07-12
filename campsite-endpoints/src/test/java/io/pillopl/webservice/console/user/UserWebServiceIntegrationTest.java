@@ -27,41 +27,41 @@ class UserWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void newSelfServiceUserGetsItsUsernameFromTheLowerCaseEmail() throws Exception {
-        call(PATH + "/createUser", new CreateUserRequest("admin", "Luka.Horvat@example.org", "Luka", null))
+        call("admin", PATH + "/createUser", new CreateUserRequest("Luka.Horvat@example.org", "Luka", null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.username").value("luka.horvat"))
                 .andExpect(jsonPath("$.user.status").value("INVITED"))
                 .andExpect(jsonPath("$.user.group.name").value("HR SELF SERVICE"))
                 .andExpect(jsonPath("$.user.roles", contains("SELF_SERVICE_USER")))
                 .andExpect(jsonPath("$.user.passwordHash").doesNotExist());
-        call(PATH + "/createUser", new CreateUserRequest("admin", "luka.horvat@example.org", "Luka", "HR"))
+        call("admin", PATH + "/createUser", new CreateUserRequest("luka.horvat@example.org", "Luka", "HR"))
                 .andExpect(status().isConflict());
-        call(PATH + "/createUser", new CreateUserRequest("admin", "luka", "Luka", "HR"))
+        call("admin", PATH + "/createUser", new CreateUserRequest("luka", "Luka", "HR"))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/createUser", new CreateUserRequest("reception", "ana@example.org", "Ana", "HR"))
+        call("reception", PATH + "/createUser", new CreateUserRequest("ana@example.org", "Ana", "HR"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void everyUserSeesAndRenamesItselfButNotOthers() throws Exception {
-        call(PATH + "/findUser", new FindUserRequest("reception", "reception")).andExpect(status().isOk());
-        call(PATH + "/findUser", new FindUserRequest("reception", "admin")).andExpect(status().isForbidden());
-        call(PATH + "/updateUser", new UpdateUserRequest("reception", "reception", null, " Front desk "))
+        call("reception", PATH + "/findUser", new FindUserRequest("reception")).andExpect(status().isOk());
+        call("reception", PATH + "/findUser", new FindUserRequest("admin")).andExpect(status().isForbidden());
+        call("reception", PATH + "/updateUser", new UpdateUserRequest("reception", null, " Front desk "))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.name").value("Front desk"))
                 .andExpect(jsonPath("$.user.email").value("reception@example.org"));
-        call(PATH + "/updateUser", new UpdateUserRequest("reception", "admin", null, "Boss"))
+        call("reception", PATH + "/updateUser", new UpdateUserRequest("admin", null, "Boss"))
                 .andExpect(status().isForbidden());
-        call(PATH + "/updateUser", new UpdateUserRequest("admin", "reception", "admin@example.org", null))
+        call("admin", PATH + "/updateUser", new UpdateUserRequest("reception", "admin@example.org", null))
                 .andExpect(status().isConflict());
-        call(PATH + "/findUser", new FindUserRequest("admin", "ghost")).andExpect(status().isNotFound());
+        call("admin", PATH + "/findUser", new FindUserRequest("ghost")).andExpect(status().isNotFound());
     }
 
     @Test
     void affiliateOwnerSetUpGivesTheOwnerItsCampsiteAndRoles() throws Exception {
         console.user("marko", null, console.staff("HR SELF SERVICE"));
 
-        call(PATH + "/setupAffiliateOwner", new SetupAffiliateOwnerRequest("admin", "marko"))
+        call("admin", PATH + "/setupAffiliateOwner", new SetupAffiliateOwnerRequest("marko"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.user.scopeGroups[0].name").value("AFFILIATE marko"))
                 .andExpect(jsonPath("$.user.roles", hasItem("AFFILIATE_OWNER")))
@@ -70,23 +70,23 @@ class UserWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void usersAreFoundByRolesInTheScope() throws Exception {
-        call(PATH + "/findUsersByRoles", new FindUsersByRolesRequest("admin", List.of("RECEPTION")))
+        call("admin", PATH + "/findUsersByRoles", new FindUsersByRolesRequest(List.of("RECEPTION")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.users[*].username", contains("reception")));
-        call(PATH + "/findUsersByRoles", new FindUsersByRolesRequest("admin", List.of("WIZARD")))
+        call("admin", PATH + "/findUsersByRoles", new FindUsersByRolesRequest(List.of("WIZARD")))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/findUsersByRoles", new FindUsersByRolesRequest("admin", null))
+        call("admin", PATH + "/findUsersByRoles", new FindUsersByRolesRequest(null))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void selfServiceListComesFromTheRefreshedView() throws Exception {
         console.user("marko", null, console.staff("HR SELF SERVICE"));
-        call(PATH + "/setupAffiliateOwner", new SetupAffiliateOwnerRequest("admin", "marko"));
-        call(WebServicePaths.ADMINISTRATION + "/refreshUserSummary", new RefreshUserSummaryRequest("admin"))
+        call("admin", PATH + "/setupAffiliateOwner", new SetupAffiliateOwnerRequest("marko"));
+        call("admin", WebServicePaths.ADMINISTRATION + "/refreshUserSummary", new RefreshUserSummaryRequest())
                 .andExpect(status().isOk());
 
-        call(PATH + "/findSelfServiceUsers", new FindSelfServiceUsersRequest("admin", true, null, null, null))
+        call("admin", PATH + "/findSelfServiceUsers", new FindSelfServiceUsersRequest(true, null, null, null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.users[*].username", contains("marko")))
                 .andExpect(jsonPath("$.users[0].affiliateOwner").value(true))

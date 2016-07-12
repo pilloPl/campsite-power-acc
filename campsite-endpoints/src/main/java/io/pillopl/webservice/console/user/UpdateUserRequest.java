@@ -5,6 +5,6 @@ import java.io.Serializable;
 /**
  * New email and/or name of a user; blank fields stay.
  */
-public record UpdateUserRequest(String authUsername, String username, String email, String name)
+public record UpdateUserRequest(String username, String email, String name)
         implements Serializable {
 }

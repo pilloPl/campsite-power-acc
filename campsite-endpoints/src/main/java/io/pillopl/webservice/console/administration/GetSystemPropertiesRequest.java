@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * All configuration keys with their stored values.
  */
-public record GetSystemPropertiesRequest(String authUsername) implements Serializable {
+public record GetSystemPropertiesRequest() implements Serializable {
 }

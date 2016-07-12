@@ -44,7 +44,7 @@ class IssuerWebServiceIntegrationTest extends WebServiceIntegrationTest {
                 + "VALID_TO", "04A1B2F1;PC-1;ADD;2026-07-01 09:30;770012345678;2026-12-31"), StandardCharsets.UTF_8);
         console.hrAdmin("admin");
 
-        call(PATH, new RunIssuerExchangeRequest("admin"))
+        call("admin", PATH, new RunIssuerExchangeRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncStatuses[?(@.partnerName == 'CONSOLE CLUB')].direction")
                         .value(contains("CARD_IMPORT")))
@@ -58,7 +58,7 @@ class IssuerWebServiceIntegrationTest extends WebServiceIntegrationTest {
         console.user("technician", UserroleName.SERVICE_TECHNICIAN, console.staff("HR RECEPTION"),
                 console.site("HR SITES"));
 
-        call(PATH, new RunIssuerExchangeRequest("technician")).andExpect(status().isForbidden());
-        call(PATH, new RunIssuerExchangeRequest("nobody")).andExpect(status().isForbidden());
+        call("technician", PATH, new RunIssuerExchangeRequest()).andExpect(status().isForbidden());
+        call("nobody", PATH, new RunIssuerExchangeRequest()).andExpect(status().isForbidden());
     }
 }

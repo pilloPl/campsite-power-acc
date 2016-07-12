@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Moves an affiliate campsite to network access or house cards only.
  */
-public record SwitchAccessModeRequest(String authUsername, Long affiliateGroupId, String accessMode,
+public record SwitchAccessModeRequest(Long affiliateGroupId, String accessMode,
                                       Boolean listedInApp)
         implements Serializable {
 }

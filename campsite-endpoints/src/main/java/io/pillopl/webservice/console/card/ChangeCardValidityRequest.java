@@ -6,5 +6,5 @@ import java.time.LocalDate;
 /**
  * New validity of a card (stay extended or shortened).
  */
-public record ChangeCardValidityRequest(String authUsername, Long cardId, LocalDate validFrom, LocalDate validTo) implements Serializable {
+public record ChangeCardValidityRequest(Long cardId, LocalDate validFrom, LocalDate validTo) implements Serializable {
 }

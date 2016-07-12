@@ -5,5 +5,5 @@ import java.io.Serializable;
 /**
  * Cards by the UID from the reader or the printed number.
  */
-public record FindCardsRequest(String authUsername, String rfidOrNumber) implements Serializable {
+public record FindCardsRequest(String rfidOrNumber) implements Serializable {
 }

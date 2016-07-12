@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * The installer mounts one pedestal directly, without a prepared commissioning.
  */
-public record CommissionPedestalRequest(String authUsername, String pedestalCode, String ownerUsername,
+public record CommissionPedestalRequest(String pedestalCode, String ownerUsername,
                                         LocationDTO location, Boolean listedInApp, String accessMode)
         implements Serializable {
 }

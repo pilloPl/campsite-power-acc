@@ -70,34 +70,34 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void managerCreatesATariffOfTheMarketOnce() throws Exception {
-        call(PATH + "/saveTariff", new SaveTariffRequest("manager", dayNight("BAY DAY NIGHT")))
+        call("manager", PATH + "/saveTariff", new SaveTariffRequest(dayNight("BAY DAY NIGHT")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tariff.market").value("HR"))
                 .andExpect(jsonPath("$.tariff.priceText")
                         .value("22:00-06:00: 0.30 EUR/kWh; 0.50 EUR/kWh + 1.00 EUR/session"));
-        call(PATH + "/existsTariff", new ExistsTariffRequest("reception", "BAY DAY NIGHT"))
+        call("reception", PATH + "/existsTariff", new ExistsTariffRequest("BAY DAY NIGHT"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.exists").value(true));
-        call(PATH + "/saveTariff", new SaveTariffRequest("manager", dayNight("BAY DAY NIGHT")))
+        call("manager", PATH + "/saveTariff", new SaveTariffRequest(dayNight("BAY DAY NIGHT")))
                 .andExpect(status().isConflict());
-        call(PATH + "/saveTariff", new SaveTariffRequest("reception", dayNight("RECEPTION")))
+        call("reception", PATH + "/saveTariff", new SaveTariffRequest(dayNight("RECEPTION")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void tariffListShowsOnlyTheCallersMarket() throws Exception {
-        call(PATH + "/findTariffs", new FindTariffsRequest("reception"))
+        call("reception", PATH + "/findTariffs", new FindTariffsRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tariffs[*].name").value(hasItem("HR STANDARD")))
                 .andExpect(jsonPath("$.tariffs[*].name").value(not(hasItem("IT STANDARD"))));
-        call(PATH + "/getDefaultTariff", new GetDefaultTariffRequest("reception"))
+        call("reception", PATH + "/getDefaultTariff", new GetDefaultTariffRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tariff.name").value("HR STANDARD"));
-        call(PATH + "/getTariff", new GetTariffRequest("reception", 2L))
+        call("reception", PATH + "/getTariff", new GetTariffRequest(2L))
                 .andExpect(status().isForbidden());
-        call(PATH + "/getTariff", new GetTariffRequest("reception", 999_999L))
+        call("reception", PATH + "/getTariff", new GetTariffRequest(999_999L))
                 .andExpect(status().isNotFound());
-        call(PATH + "/getTariff", new GetTariffRequest("reception", null))
+        call("reception", PATH + "/getTariff", new GetTariffRequest(null))
                 .andExpect(status().isBadRequest());
     }
 
@@ -108,8 +108,8 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
                 new TariffElementDTO(null, 0, List.of(new PriceComponentDTO(null, "PARKING", BigDecimal.ONE, 1,
                         null)), null)));
 
-        call(PATH + "/saveTariff", new SaveTariffRequest("manager", noElements)).andExpect(status().isBadRequest());
-        call(PATH + "/saveTariff", new SaveTariffRequest("manager", unknownDimension))
+        call("manager", PATH + "/saveTariff", new SaveTariffRequest(noElements)).andExpect(status().isBadRequest());
+        call("manager", PATH + "/saveTariff", new SaveTariffRequest(unknownDimension))
                 .andExpect(status().isBadRequest());
     }
 
@@ -117,19 +117,19 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void socketGetsAPedestalTariffAndThePriceFollowsIt() throws Exception {
         Tariff dayNight = pricing.dayNightTariff("BAY DAY NIGHT", Market.HR, "0.50", "0.30", "1.00");
 
-        call(PATH + "/findSocketTariff", new FindSocketTariffRequest("reception", baySocket, EVENING))
+        call("reception", PATH + "/findSocketTariff", new FindSocketTariffRequest(baySocket, EVENING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.socketTariff.source").value("MARKET_DEFAULT"));
-        call(PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest("manager", List.of("HR-BAY-P001"),
+        call("manager", PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest(List.of("HR-BAY-P001"),
                 dayNight.getId(), EVENING.minusDays(1)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignments", hasSize(1)))
                 .andExpect(jsonPath("$.assignments[0].createdBy").value("manager"));
-        call(PATH + "/findSocketTariff", new FindSocketTariffRequest("reception", baySocket, EVENING))
+        call("reception", PATH + "/findSocketTariff", new FindSocketTariffRequest(baySocket, EVENING))
                 .andExpect(jsonPath("$.socketTariff.source").value("PEDESTAL"))
                 .andExpect(jsonPath("$.socketTariff.tariff.name").value("BAY DAY NIGHT"))
                 .andExpect(jsonPath("$.socketTariff.assignments", hasSize(1)));
-        call(PATH + "/simulatePrice", new SimulatePriceRequest("reception", baySocket, null, EVENING,
+        call("reception", PATH + "/simulatePrice", new SimulatePriceRequest(baySocket, null, EVENING,
                 EVENING.plusHours(6), new BigDecimal("12"), null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.simulation.status").value("PRICED"))
@@ -142,18 +142,18 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void simulationWithAGivenTariffAndWrongInputs() throws Exception {
         Tariff flat = pricing.energyTariff("BAY FLAT", Market.HR, "0.40");
 
-        call(PATH + "/simulatePrice", new SimulatePriceRequest("reception", baySocket, flat.getId(), EVENING,
+        call("reception", PATH + "/simulatePrice", new SimulatePriceRequest(baySocket, flat.getId(), EVENING,
                 EVENING.plusHours(1), new BigDecimal("10"), null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.simulation.tariffSource").value("GIVEN"))
                 .andExpect(jsonPath("$.simulation.cost").value(4.00));
-        call(PATH + "/simulatePrice", new SimulatePriceRequest("reception", baySocket, null, EVENING,
+        call("reception", PATH + "/simulatePrice", new SimulatePriceRequest(baySocket, null, EVENING,
                 EVENING.minusHours(1), BigDecimal.ONE, null))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/simulatePrice", new SimulatePriceRequest("reception", baySocket, null, EVENING,
+        call("reception", PATH + "/simulatePrice", new SimulatePriceRequest(baySocket, null, EVENING,
                 EVENING.plusHours(1), new BigDecimal("-1"), null))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/simulatePrice", new SimulatePriceRequest("reception", atCove.getSockets().get(0).getId(), null,
+        call("reception", PATH + "/simulatePrice", new SimulatePriceRequest(atCove.getSockets().get(0).getId(), null,
                 EVENING, EVENING.plusHours(1), BigDecimal.ONE, null))
                 .andExpect(status().isNotFound());
     }
@@ -162,15 +162,15 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void assignmentsOutsideTheScopeOrOfAnotherMarketAreRefused() throws Exception {
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
 
-        call(PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest("manager", List.of("HR-COVE-P001"),
+        call("manager", PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest(List.of("HR-COVE-P001"),
                 bayTariff.getId(), EVENING)).andExpect(status().isForbidden());
-        call(PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest("manager", List.of("HR-NOPE"),
+        call("manager", PATH + "/applyTariffToPedestals", new ApplyTariffToPedestalsRequest(List.of("HR-NOPE"),
                 bayTariff.getId(), EVENING)).andExpect(status().isNotFound());
-        call(PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest("manager", baySocket, bayTariff.getId(),
+        call("manager", PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest(baySocket, bayTariff.getId(),
                 null)).andExpect(status().isBadRequest());
-        call(PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest("manager", baySocket, 2L, EVENING))
+        call("manager", PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest(baySocket, 2L, EVENING))
                 .andExpect(status().isForbidden());
-        call(PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest("reception", baySocket, bayTariff.getId(),
+        call("reception", PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest(baySocket, bayTariff.getId(),
                 EVENING)).andExpect(status().isForbidden());
     }
 
@@ -178,12 +178,12 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void socketTariffIsAssignedAndItsPlannedAssignmentRemoved() throws Exception {
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
 
-        call(PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest("manager", baySocket, bayTariff.getId(),
+        call("manager", PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest(baySocket, bayTariff.getId(),
                 EVENING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignment.tariffName").value("BAY"))
                 .andExpect(jsonPath("$.removed").value(false));
-        call(PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest("manager", baySocket, null, EVENING))
+        call("manager", PATH + "/applyTariffToSocket", new ApplyTariffToSocketRequest(baySocket, null, EVENING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.removed").value(true));
     }
@@ -192,19 +192,18 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void campsiteDefaultTariffIsSetForSiteGroupsOfTheScope() throws Exception {
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
 
-        call(PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest("manager", bay.getId(),
+        call("manager", PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest(bay.getId(),
                 bayTariff.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.effectiveDefaultTariff.name").value("BAY"));
-        call(PATH + "/findSocketTariff", new FindSocketTariffRequest("reception", baySocket, null))
+        call("reception", PATH + "/findSocketTariff", new FindSocketTariffRequest(baySocket, null))
                 .andExpect(jsonPath("$.socketTariff.source").value("CAMPSITE_DEFAULT"));
-        call(PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest("manager", cove.getId(),
+        call("manager", PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest(cove.getId(),
                 bayTariff.getId())).andExpect(status().isForbidden());
-        call(PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest("manager",
-                console.staff("HR RECEPTION").getId(), bayTariff.getId())).andExpect(status().isBadRequest());
-        call(PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest("manager", 999_999L,
+        call("manager", PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest(console.staff("HR RECEPTION").getId(), bayTariff.getId())).andExpect(status().isBadRequest());
+        call("manager", PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest(999_999L,
                 bayTariff.getId())).andExpect(status().isNotFound());
-        call(PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest("manager", bay.getId(), null))
+        call("manager", PATH + "/setCampsiteDefaultTariff", new SetCampsiteDefaultTariffRequest(bay.getId(), null))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.effectiveDefaultTariff").doesNotExist());
     }
@@ -213,19 +212,19 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
     void onlyTheMarketAdminMovesTheMarketDefault() throws Exception {
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
 
-        call(PATH + "/setMarketDefaultTariff", new SetMarketDefaultTariffRequest("manager", bayTariff.getId()))
+        call("manager", PATH + "/setMarketDefaultTariff", new SetMarketDefaultTariffRequest(bayTariff.getId()))
                 .andExpect(status().isForbidden());
-        call(PATH + "/setMarketDefaultTariff", new SetMarketDefaultTariffRequest("admin", bayTariff.getId()))
+        call("admin", PATH + "/setMarketDefaultTariff", new SetMarketDefaultTariffRequest(bayTariff.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tariff.defaultTariff").value(true));
     }
 
     @Test
     void usedTariffCannotBeChanged() throws Exception {
-        call(PATH + "/updateTariff", new UpdateTariffRequest("admin", 1L, dayNight("ignored")))
+        call("admin", PATH + "/updateTariff", new UpdateTariffRequest(1L, dayNight("ignored")))
                 .andExpect(status().isConflict());
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
-        call(PATH + "/updateTariff", new UpdateTariffRequest("admin", bayTariff.getId(), dayNight("ignored")))
+        call("admin", PATH + "/updateTariff", new UpdateTariffRequest(bayTariff.getId(), dayNight("ignored")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.tariff.name").value("BAY"))
                 .andExpect(jsonPath("$.tariff.elements", hasSize(2)));
@@ -236,12 +235,10 @@ class TariffWebServiceIntegrationTest extends WebServiceIntegrationTest {
         console.user("bay.owner", UserroleName.AFFILIATE_OWNER, console.staff("HR RECEPTION"), bay);
         Tariff bayTariff = pricing.energyTariff("BAY", Market.HR, "0.40");
 
-        call(PATH + "/applyTariffToAffiliatePedestals", new ApplyTariffToAffiliatePedestalsRequest("admin",
-                "bay.owner", bayTariff.getId(), EVENING))
+        call("admin", PATH + "/applyTariffToAffiliatePedestals", new ApplyTariffToAffiliatePedestalsRequest("bay.owner", bayTariff.getId(), EVENING))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.assignments", hasSize(1)))
                 .andExpect(jsonPath("$.assignments[0].pedestalCode").value("HR-BAY-P001"));
-        call(PATH + "/applyTariffToAffiliatePedestals", new ApplyTariffToAffiliatePedestalsRequest("admin",
-                "nobody", bayTariff.getId(), EVENING)).andExpect(status().isNotFound());
+        call("admin", PATH + "/applyTariffToAffiliatePedestals", new ApplyTariffToAffiliatePedestalsRequest("nobody", bayTariff.getId(), EVENING)).andExpect(status().isNotFound());
     }
 }

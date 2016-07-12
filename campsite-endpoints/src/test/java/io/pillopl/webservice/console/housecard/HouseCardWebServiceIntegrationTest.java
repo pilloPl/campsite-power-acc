@@ -37,7 +37,7 @@ class HouseCardWebServiceIntegrationTest extends WebServiceIntegrationTest {
 
     @Test
     void ownerAdministersTheHouseCardsOfItsCampsite() throws Exception {
-        String json = call(PATH + "/saveHouseCard", new SaveHouseCardRequest("marko", "marko",
+        String json = call("marko", PATH + "/saveHouseCard", new SaveHouseCardRequest("marko",
                 new HouseCardDTO(null, "rental", "3001", "M-R1", true, null, null, null, null)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.houseCard.houseCardType").value("RENTAL"))
@@ -45,50 +45,50 @@ class HouseCardWebServiceIntegrationTest extends WebServiceIntegrationTest {
                 .andReturn().getResponse().getContentAsString();
         long id = objectMapper.readTree(json).at("/houseCard/id").asLong();
 
-        call(PATH + "/changeHouseCardStatus", new ChangeHouseCardStatusRequest("marko", "marko", id, false))
+        call("marko", PATH + "/changeHouseCardStatus", new ChangeHouseCardStatusRequest("marko", id, false))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.active").value(false));
-        call(PATH + "/findHouseCards", new FindHouseCardsRequest("marko", "marko"))
+        call("marko", PATH + "/findHouseCards", new FindHouseCardsRequest("marko"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.houseCards", hasSize(1)))
                 .andExpect(jsonPath("$.houseCards[0].active").value(false));
-        call(PATH + "/deleteHouseCard", new DeleteHouseCardRequest("marko", "marko", id))
+        call("marko", PATH + "/deleteHouseCard", new DeleteHouseCardRequest("marko", id))
                 .andExpect(status().isOk());
-        call(PATH + "/deleteHouseCard", new DeleteHouseCardRequest("marko", "marko", id))
+        call("marko", PATH + "/deleteHouseCard", new DeleteHouseCardRequest("marko", id))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void staffManagingTheOwnerSeesItsHouseCards() throws Exception {
-        call(PATH + "/saveHouseCard", new SaveHouseCardRequest("admin", "marko",
+        call("admin", PATH + "/saveHouseCard", new SaveHouseCardRequest("marko",
                 new HouseCardDTO(null, "STAFF", "3002", "M-S1", true, null, null, null, null)))
                 .andExpect(status().isOk());
 
-        call(PATH + "/findHouseCards", new FindHouseCardsRequest("admin", "marko"))
+        call("admin", PATH + "/findHouseCards", new FindHouseCardsRequest("marko"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.houseCards", hasSize(1)));
     }
 
     @Test
     void anotherOwnerAndCallersWithoutTheRightAreRefused() throws Exception {
-        call(PATH + "/findHouseCards", new FindHouseCardsRequest("ivana", "marko")).andExpect(status().isForbidden());
-        call(PATH + "/findHouseCards", new FindHouseCardsRequest("technician", "marko"))
+        call("ivana", PATH + "/findHouseCards", new FindHouseCardsRequest("marko")).andExpect(status().isForbidden());
+        call("technician", PATH + "/findHouseCards", new FindHouseCardsRequest("marko"))
                 .andExpect(status().isForbidden());
-        call(PATH + "/findHouseCards", new FindHouseCardsRequest("marko", "nobody")).andExpect(status().isNotFound());
+        call("marko", PATH + "/findHouseCards", new FindHouseCardsRequest("nobody")).andExpect(status().isNotFound());
     }
 
     @Test
     void houseCardNeedsAKnownTypeAndADecimalUid() throws Exception {
-        call(PATH + "/saveHouseCard", new SaveHouseCardRequest("marko", "marko",
+        call("marko", PATH + "/saveHouseCard", new SaveHouseCardRequest("marko",
                 new HouseCardDTO(null, "GUEST", "3003", null, true, null, null, null, null)))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/saveHouseCard", new SaveHouseCardRequest("marko", "marko",
+        call("marko", PATH + "/saveHouseCard", new SaveHouseCardRequest("marko",
                 new HouseCardDTO(null, "STAFF", "04A1", null, true, null, null, null, null)))
                 .andExpect(status().isBadRequest());
-        call(PATH + "/saveHouseCard", new SaveHouseCardRequest("marko", "marko",
+        call("marko", PATH + "/saveHouseCard", new SaveHouseCardRequest("marko",
                 new HouseCardDTO(999999L, "STAFF", "3004", null, true, null, null, null, null)))
                 .andExpect(status().isNotFound());
-        call(PATH + "/changeHouseCardStatus", new ChangeHouseCardStatusRequest("marko", "marko", null, true))
+        call("marko", PATH + "/changeHouseCardStatus", new ChangeHouseCardStatusRequest("marko", null, true))
                 .andExpect(status().isBadRequest());
     }
 }
