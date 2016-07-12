@@ -28,19 +28,13 @@ public class WhitelistFilterService {
     @Transactional(readOnly = true)
     public boolean isSynchronizableForImport(Long issuerGroupIdFromCard) {
         WhitelistFilter whitelistFilter = getWhitelistFilterForImport(issuerGroupIdFromCard);
-        if (whitelistFilter != null) {
-            return whitelistFilter.isSynchronizable();
-        }
-        return true;
+        return whitelistFilter == null || whitelistFilter.isSynchronizable();
     }
 
     @Transactional(readOnly = true)
     public boolean isSynchronizableForExport(Long issuerGroupIdFromCard) {
         WhitelistFilter whitelistFilter = exportFilterOf(issuerGroupIdFromCard);
-        if (whitelistFilter != null) {
-            return whitelistFilter.isSynchronizable();
-        }
-        return true;
+        return whitelistFilter == null || whitelistFilter.isSynchronizable();
     }
 
     /**
