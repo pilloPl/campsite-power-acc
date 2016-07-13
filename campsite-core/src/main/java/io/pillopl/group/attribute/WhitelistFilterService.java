@@ -71,23 +71,13 @@ public class WhitelistFilterService {
 
     @Transactional(readOnly = true)
     public WhitelistFilter getWhitelistFilterForImport(Long issuerGroupIdFromCard) {
-        List<Long> parentLineIds = groupService.fetchParentLineIds(issuerGroupIdFromCard, true);
-        if (parentLineIds.isEmpty()) {
-            return null;
-        }
-        List<WhitelistFilter> whitelistFilters = whitelistFilterDao.findByGroupIds(parentLineIds);
-        return GroupAttributeHelper.findNearest(parentLineIds, whitelistFilters,
+        return findNearest(issuerGroupIdFromCard,
                 filter -> WhitelistFilterType.isImportFilter(filter.getWhitelistFilterType()));
     }
 
     @Transactional(readOnly = true)
     public WhitelistFilter exportFilterOf(Long issuerGroupIdFromCard) {
-        List<Long> parentLineIds = groupService.fetchParentLineIds(issuerGroupIdFromCard, true);
-        if (parentLineIds.isEmpty()) {
-            return null;
-        }
-        List<WhitelistFilter> whitelistFilters = whitelistFilterDao.findByGroupIds(parentLineIds);
-        return GroupAttributeHelper.findNearest(parentLineIds, whitelistFilters,
+        return findNearest(issuerGroupIdFromCard,
                 filter -> WhitelistFilterType.isExportFilter(filter.getWhitelistFilterType()));
     }
 }
