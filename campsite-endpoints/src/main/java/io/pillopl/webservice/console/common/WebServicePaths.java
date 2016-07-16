@@ -34,6 +34,22 @@ public final class WebServicePaths {
     public static final String ISSUER = CONSOLE + "/issuer";
     public static final String REPORT = CONSOLE + "/report";
 
+    public static final String DASHBOARD = CONSOLE + "/dashboard";
+
+    public static final String MAP = CONSOLE + "/map";
+
+    public static final String SUPPLY = CONSOLE + "/supply";
+
+    public static final String QR_PAY_CONSOLE = CONSOLE + "/qrPay";
+
+    public static final String POWER_BUDGET = CONSOLE + "/powerBudget";
+
+    public static final String MONITORING = CONSOLE + "/monitoring";
+
+    public static final String ERP_BILLING = CONSOLE + "/erpBilling";
+
+    public static final String JOB = CONSOLE + "/job";
+
     /**
      * Calls of the payment app (QR payment at the socket), not of the console.
      */

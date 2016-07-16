@@ -12,6 +12,11 @@ public enum UserroleName {
     CUSTOMER_SERVICE,
 
     /**
+     * Review of records, tariffs, QR payments, reports, ERP billing and the issuer exchange.
+     */
+    BACK_OFFICE,
+
+    /**
      * Owner of an independent (affiliate) campsite in the network, self-service console.
      */
     AFFILIATE_OWNER,

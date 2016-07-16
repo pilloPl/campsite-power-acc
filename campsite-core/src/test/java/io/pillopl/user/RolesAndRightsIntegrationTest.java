@@ -53,4 +53,17 @@ class RolesAndRightsIntegrationTest extends IntegrationTest {
         assertThat(securityGroupDao.findByName("CAMPSITE MANAGEMENT").getRoles()).extracting(Userrole::getName)
                 .containsExactlyInAnyOrder("RECEPTION", "CAMPSITE_MANAGER");
     }
+
+    @Test
+    void backOfficeEditsBillingAndReviewsRecordsButDoesNotAdministerUsers() {
+        Userrole backOffice = userroleDao.findByName("BACK_OFFICE");
+
+        assertThat(backOffice.hasRight("BILLING_EDIT")).isTrue();
+        assertThat(backOffice.hasRight("CONSUMPTION_RECORD_REVIEW")).isTrue();
+        assertThat(backOffice.hasRight("USER_ADMIN")).isFalse();
+        assertThat(userroleDao.findByName("MARKET_ADMIN").hasRight("BILLING_EDIT")).isTrue();
+        assertThat(userroleDao.findByName("RECEPTION").hasRight("BILLING_EDIT")).isFalse();
+        assertThat(securityGroupDao.findByName("BACK OFFICE").getRoles()).extracting(Userrole::getName)
+                .containsExactly("BACK_OFFICE");
+    }
 }

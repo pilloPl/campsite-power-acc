@@ -21,5 +21,6 @@ public enum UserrightName {
     CONFIG_EDIT,
     CONSUMPTION_RECORD_REVIEW,
     SELF_SERVICE,
-    QRPAY_APP
+    QRPAY_APP,
+    BILLING_EDIT
 }
