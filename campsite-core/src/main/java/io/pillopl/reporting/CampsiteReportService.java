@@ -82,20 +82,10 @@ public class CampsiteReportService {
         // Helper maps for each day of the week: kWh total and the sockets that drew energy on that day.
         Map<DayOfWeek, BigDecimal> totalConsumptionPerDay = new HashMap<>();
         Map<DayOfWeek, Set<String>> socketsPerDay = new HashMap<>();
-        totalConsumptionPerDay.put(DayOfWeek.MONDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.MONDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.TUESDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.TUESDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.WEDNESDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.WEDNESDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.THURSDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.THURSDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.FRIDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.FRIDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.SATURDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.SATURDAY, new HashSet<>());
-        totalConsumptionPerDay.put(DayOfWeek.SUNDAY, BigDecimal.ZERO);
-        socketsPerDay.put(DayOfWeek.SUNDAY, new HashSet<>());
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            totalConsumptionPerDay.put(dayOfWeek, BigDecimal.ZERO);
+            socketsPerDay.put(dayOfWeek, new HashSet<>());
+        }
 
         // For each record, determine how much it contributes to each day.
         for (ReportRecord record : records) {
@@ -158,13 +148,9 @@ public class CampsiteReportService {
             }
         }
 
-        lines.add(dayLine(DayOfWeek.MONDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.TUESDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.WEDNESDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.THURSDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.FRIDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.SATURDAY, totalConsumptionPerDay, socketsPerDay));
-        lines.add(dayLine(DayOfWeek.SUNDAY, totalConsumptionPerDay, socketsPerDay));
+        for (DayOfWeek dayOfWeek : DayOfWeek.values()) {
+            lines.add(dayLine(dayOfWeek, totalConsumptionPerDay, socketsPerDay));
+        }
 
         return lines;
     }
