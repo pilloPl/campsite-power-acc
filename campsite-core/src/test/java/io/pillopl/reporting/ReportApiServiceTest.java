@@ -63,6 +63,13 @@ class ReportApiServiceTest {
     }
 
     @Test
+    void reportTypeIsReadWithoutSurroundingBlanksAndCase() {
+        api.getReport(CALLER, "  Quarterly-Consumption ", null, null, null, 2026, null, null, null);
+
+        verify(campsiteReportService).getQuarterlyConsumptions(10L, 20L, null, 2026);
+    }
+
+    @Test
     void campsiteOfTheSiteSubtreeReplacesTheScopeAndDropsTheIssuerSide() {
         when(powerSectionDao.existsById(5L)).thenReturn(true);
 

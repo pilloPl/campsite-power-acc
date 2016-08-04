@@ -79,8 +79,7 @@ public class ReportApiService implements ReportApi {
                 issuerGroupId = null;
             }
 
-            // the same reading as the enum values of the calls: blanks and dashes as underscores, case ignored
-            switch (reportType.trim().replace(' ', '_').replace('-', '_').toUpperCase(Locale.ROOT)) {
+            switch (normalizedReportType(reportType)) {
                 case AVERAGE_PER_HOUR_OF_DAY:
                     requirePeriod(period);
                     return campsiteReportService.hourlyConsumptionProfile(period.from(), period.to(),
@@ -129,5 +128,12 @@ public class ReportApiService implements ReportApi {
     private static Long groupIdOf(Userinfo principal, GroupType type) {
         Group group = principal.getGroup(type);
         return group != null ? group.getId() : null;
+    }
+
+    /**
+     * The same reading as the enum values of the calls: blanks and dashes as underscores, case ignored.
+     */
+    private static String normalizedReportType(String reportType) {
+        return reportType.trim().replace(' ', '_').replace('-', '_').toUpperCase(Locale.ROOT);
     }
 }
