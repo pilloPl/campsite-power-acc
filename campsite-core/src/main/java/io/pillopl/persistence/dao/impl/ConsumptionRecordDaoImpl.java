@@ -131,6 +131,9 @@ public class ConsumptionRecordDaoImpl implements ConsumptionRecordDaoCustom {
         if (fromStatuses == null || fromStatuses.isEmpty()) {
             return 0;
         }
+        if (exportStatus == null) {
+            throw new IllegalArgumentException("Export status for the records billed in " + period + " is missing");
+        }
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("period", Objects.requireNonNull(period, "period"))
                 .addValue("billingAccountNo", billingAccountNo, Types.VARCHAR)
