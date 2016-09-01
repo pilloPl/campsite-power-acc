@@ -31,4 +31,18 @@ public interface SeasonalContractDao extends JpaRepository<SeasonalContract, Lon
             + " and c.status <> io.pillopl.guest.ContractStatus.ENDED order by c.startDate desc")
     List<SeasonalContract> findRunningContractsOnPitch(@Param("siteGroupId") Long siteGroupId,
                                                        @Param("pitchNo") String pitchNo);
+
+    /**
+     * Contracts on pitches of the campsites or of guests of the issuer groups (a contract without pitch belongs to
+     * its guest's issuer), optionally of one status; latest start first.
+     */
+    @Query("select c from SeasonalContract c where (c.siteGroup.id in (:siteGroupIds)"
+            + " or c.billingAccount.guest.group.id in (:issuerGroupIds))"
+            + " and (:status is null or c.status = :status) order by c.startDate desc, c.id desc")
+    List<SeasonalContract> findContractsInScope(@Param("siteGroupIds") java.util.Collection<Long> siteGroupIds,
+                                                @Param("issuerGroupIds") java.util.Collection<Long> issuerGroupIds,
+                                                @Param("status") io.pillopl.guest.ContractStatus status);
+
+    @Query("select c from SeasonalContract c where c.billingAccount.guest.id = :guestId order by c.startDate desc")
+    List<SeasonalContract> findContractsOfGuest(@Param("guestId") Long guestId);
 }

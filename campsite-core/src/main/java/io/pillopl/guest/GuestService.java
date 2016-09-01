@@ -9,6 +9,7 @@ import io.pillopl.group.GroupType;
 import io.pillopl.persistence.dao.BillingAccountDao;
 import io.pillopl.persistence.dao.CampingCardDao;
 import io.pillopl.persistence.dao.GuestDao;
+import io.pillopl.persistence.dao.SeasonalContractDao;
 import io.pillopl.persistence.dao.StayDao;
 import io.pillopl.supply.CheckedOutStayFinder;
 import io.pillopl.user.Userinfo;
@@ -44,6 +45,17 @@ public class GuestService implements CheckedOutStayFinder {
 
     private static final Logger LOG = LoggerFactory.getLogger(GuestService.class);
 
+    public static final String STAYS_ALL = "ALL";
+
+    public static final String STAYS_OPEN = "OPEN";
+
+    public static final String STAYS_CHECKED_OUT = "CHECKED_OUT";
+
+    /**
+     * Stands for "no group" in an IN list (an empty list is no valid IN list).
+     */
+    private static final List<Long> NO_GROUPS = List.of(-1L);
+
     private final GuestDao guestDao;
 
     private final StayDao stayDao;
@@ -58,9 +70,12 @@ public class GuestService implements CheckedOutStayFinder {
 
     private final DateService dateService;
 
+    private final SeasonalContractDao seasonalContractDao;
+
     public GuestService(GuestDao guestDao, StayDao stayDao, BillingAccountDao billingAccountDao,
                         CampingCardDao campingCardDao, GroupService groupService, UserinfoService userinfoService,
-                        DateService dateService) {
+                        DateService dateService, SeasonalContractDao seasonalContractDao) {
+        this.seasonalContractDao = seasonalContractDao;
         this.guestDao = guestDao;
         this.stayDao = stayDao;
         this.billingAccountDao = billingAccountDao;
@@ -90,10 +105,18 @@ public class GuestService implements CheckedOutStayFinder {
             return guests;
         }
         String text = search.trim().toLowerCase(Locale.ROOT);
+        Set<Long> cardHolders = new HashSet<>();
+        for (CampingCard card : campingCardDao.findNotDeletedByCardNumber(search.trim())) {
+            if (card.getGuest() != null) {
+                cardHolders.add(card.getGuest().getId());
+            }
+        }
         List<Guest> found = new ArrayList<>();
         for (Guest guest : guests) {
             if (contains(guest.getName(), text) || contains(guest.getFirstName(), text)
-                    || contains(guest.getCarPlate(), text) || contains(guest.getTrailerPlate(), text)) {
+                    || contains(guest.getCarPlate(), text) || contains(guest.getTrailerPlate(), text)
+                    || cardHolders.contains(guest.getId())
+                    || hasUnitWithPlate(guest, Unit.normalizePlate(search))) {
                 found.add(guest);
             }
         }
@@ -292,6 +315,94 @@ public class GuestService implements CheckedOutStayFinder {
         Guest guest = getGuest(guestId);
         checkIsManageable(principal, guest);
         return stayDao.findByGuestId(guestId);
+    }
+
+    /**
+     * Stays at the campsites of the user's SITE scope (or at one of them) overlapping the days.
+     *
+     * @param state ALL, OPEN or CHECKED_OUT
+     */
+    @Transactional(readOnly = true)
+    public List<Stay> findStays(Userinfo principal, Long siteGroupId, String state, LocalDate from, LocalDate to) {
+        if (from == null || to == null || to.isBefore(from)) {
+            throw new IllegalArgumentException("Period of the stays is missing or ends before it starts");
+        }
+        if (!List.of(STAYS_ALL, STAYS_OPEN, STAYS_CHECKED_OUT).contains(state)) {
+            throw new IllegalArgumentException("Unknown stay state " + state);
+        }
+        Group siteScope = principal.getGroup(GroupType.SITE);
+        if (siteScope == null) {
+            LOG.info(String.format("User '%s' has no SITE scope, no stays", principal.getUsername()));
+            return List.of();
+        }
+        List<Long> campsites = groupService.findManageable(siteScope);
+        if (siteGroupId != null) {
+            if (!campsites.contains(siteGroupId)) {
+                throw new AccessDeniedException(String.format("User '%s' has no access to campsite %s",
+                        principal.getUsername(), siteGroupId));
+            }
+            campsites = groupService.findManageable(groupService.fetchByGroupId(siteGroupId));
+        }
+        return stayDao.findStaysOfCampsites(campsites, state, from, to);
+    }
+
+    /**
+     * Seasonal contracts on pitches of the user's SITE scope or of guests of its ISSUER scope.
+     *
+     * @param status null for all
+     */
+    @Transactional(readOnly = true)
+    public List<SeasonalContract> findSeasonalContracts(Userinfo principal, ContractStatus status) {
+        List<Long> campsites = manageableOrNone(principal.getGroup(GroupType.SITE));
+        List<Long> issuers = manageableOrNone(principal.getGroup(GroupType.ISSUER));
+        if (campsites.equals(NO_GROUPS) && issuers.equals(NO_GROUPS)) {
+            return List.of();
+        }
+        return seasonalContractDao.findContractsInScope(campsites, issuers, status);
+    }
+
+    /**
+     * Cards and contracts of a guest for its page.
+     */
+    @Transactional(readOnly = true)
+    public List<CampingCard> findCardsOfGuest(Userinfo principal, Long guestId) {
+        Guest guest = getGuest(guestId);
+        checkIsManageable(principal, guest);
+        return campingCardDao.findByGuestId(guestId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SeasonalContract> findContractsOfGuest(Userinfo principal, Long guestId) {
+        Guest guest = getGuest(guestId);
+        checkIsManageable(principal, guest);
+        return seasonalContractDao.findContractsOfGuest(guestId);
+    }
+
+    /**
+     * The guest itself after the scope check, for its page.
+     */
+    @Transactional(readOnly = true)
+    public Guest findManageableGuest(Userinfo principal, Long guestId) {
+        Guest guest = getGuest(guestId);
+        checkIsManageable(principal, guest);
+        return guest;
+    }
+
+    private List<Long> manageableOrNone(Group scope) {
+        if (scope == null) {
+            return NO_GROUPS;
+        }
+        List<Long> ids = groupService.findManageable(scope);
+        return ids.isEmpty() ? NO_GROUPS : ids;
+    }
+
+    private static boolean hasUnitWithPlate(Guest guest, String plate) {
+        for (Unit unit : guest.getUnits()) {
+            if (plate != null && !unit.isDeleted() && unit.getPlate() != null && unit.getPlate().contains(plate)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

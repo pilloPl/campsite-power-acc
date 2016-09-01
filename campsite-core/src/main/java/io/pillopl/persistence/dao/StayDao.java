@@ -34,4 +34,17 @@ public interface StayDao extends JpaRepository<Stay, Long> {
             + " and s.checkOutDate is null and s.arrivalDate < :departure and s.departureDate > :arrival")
     List<Stay> findOpenStaysOnPitch(@Param("siteGroupId") Long siteGroupId, @Param("pitchNo") String pitchNo,
                                     @Param("arrival") LocalDate arrival, @Param("departure") LocalDate departure);
+
+    /**
+     * Stays at the campsites overlapping the days, in a state: ALL, OPEN (not checked out) or CHECKED_OUT; latest
+     * arrival first.
+     */
+    @Query("select s from Stay s where s.deleted = false and s.siteGroup.id in (:siteGroupIds)"
+            + " and s.arrivalDate <= :to and s.departureDate >= :from"
+            + " and (:state = 'ALL' or (:state = 'OPEN' and s.checkOutDate is null)"
+            + " or (:state = 'CHECKED_OUT' and s.checkOutDate is not null))"
+            + " order by s.arrivalDate desc, s.id desc")
+    List<Stay> findStaysOfCampsites(@Param("siteGroupIds") Collection<Long> siteGroupIds,
+                                    @Param("state") String state, @Param("from") LocalDate from,
+                                    @Param("to") LocalDate to);
 }

@@ -1,6 +1,7 @@
 package io.pillopl.webservice.console.guest;
 
 import io.pillopl.api.GuestApi;
+import io.pillopl.dto.guest.GuestDTO;
 import io.pillopl.value.CardId;
 import io.pillopl.value.GroupId;
 import io.pillopl.value.PitchNo;
@@ -13,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Web service of the reception's stays: check-in and check-out.
+ * Web service of the guests tab: guests, their page, stays and seasonal contracts; check-in, check-out, new
+ * departure, new guests and units, cancelled orders.
  */
 @RestController
 @RequestMapping(WebServicePaths.GUEST)
@@ -36,6 +38,59 @@ public class GuestWebService extends AbstractWebService<GuestApi, GuestWebServic
     public CheckOutResponse checkOut(@RequestBody CheckOutRequest request) throws GuestWebServiceFault {
         return invoke("checkOut", () -> new CheckOutResponse(getBean().checkOut(caller(),
                 request.stayId())));
+    }
+
+    @PostMapping("/findGuests")
+    public FindGuestsResponse findGuests(@RequestBody FindGuestsRequest request) throws GuestWebServiceFault {
+        return invoke("findGuests", () -> new FindGuestsResponse(getBean().findGuests(caller(), request.search())));
+    }
+
+    @PostMapping("/getGuest")
+    public GetGuestResponse getGuest(@RequestBody GetGuestRequest request) throws GuestWebServiceFault {
+        return invoke("getGuest", () -> new GetGuestResponse(getBean().getGuest(caller(), request.guestId())));
+    }
+
+    @PostMapping("/findStays")
+    public FindStaysResponse findStays(@RequestBody FindStaysRequest request) throws GuestWebServiceFault {
+        return invoke("findStays", () -> new FindStaysResponse(getBean().findStays(caller(),
+                request.campsiteGroupId() != null ? GroupId.of(request.campsiteGroupId()) : null, request.state(),
+                request.from(), request.to())));
+    }
+
+    @PostMapping("/findSeasonalContracts")
+    public FindSeasonalContractsResponse findSeasonalContracts(@RequestBody FindSeasonalContractsRequest request)
+            throws GuestWebServiceFault {
+        return invoke("findSeasonalContracts", () -> new FindSeasonalContractsResponse(
+                getBean().findSeasonalContracts(caller(), request.status())));
+    }
+
+    @PostMapping("/createGuest")
+    public CreateGuestResponse createGuest(@RequestBody CreateGuestRequest request) throws GuestWebServiceFault {
+        return invoke("createGuest", () -> new CreateGuestResponse(getBean().createGuest(caller(),
+                request.issuerGroupId() != null ? GroupId.of(request.issuerGroupId()) : null,
+                new GuestDTO(null, request.issuerGroupId(), null, request.guestType(), request.name(),
+                        request.firstName(), null, request.email(), request.phone(), request.city(),
+                        request.countryIso(), null, null, request.carPlate(), request.trailerPlate(),
+                        request.paymentMethod(), null))));
+    }
+
+    @PostMapping("/addUnit")
+    public AddUnitResponse addUnit(@RequestBody AddUnitRequest request) throws GuestWebServiceFault {
+        return invoke("addUnit", () -> new AddUnitResponse(getBean().addUnit(caller(), request.guestId(),
+                request.unitType(), request.plate(), request.lengthM())));
+    }
+
+    @PostMapping("/changeDeparture")
+    public ChangeDepartureResponse changeDeparture(@RequestBody ChangeDepartureRequest request)
+            throws GuestWebServiceFault {
+        return invoke("changeDeparture", () -> new ChangeDepartureResponse(getBean().changeDeparture(caller(),
+                request.stayId(), request.departure())));
+    }
+
+    @PostMapping("/cancelOrder")
+    public CancelOrderResponse cancelOrder(@RequestBody CancelOrderRequest request) throws GuestWebServiceFault {
+        return invoke("cancelOrder", () -> new CancelOrderResponse(getBean().cancelOrder(caller(), request.orderId(),
+                request.reason())));
     }
 
     @Override

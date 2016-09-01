@@ -239,6 +239,38 @@ class GuestServiceIntegrationTest extends IntegrationTest {
         assertThat(updated.getModDate()).isEqualTo(LocalDateTime.of(2026, 7, 1, 15, 0));
     }
 
+    @Test
+    void staysAreFoundForTheCampsitesOfTheSiteScopeOnly() {
+        Stay stay = guestService.checkIn(reception, guest.getId(), bay.getId(), "A12", ARRIVAL, DEPARTURE, null, null,
+                null);
+
+        assertThat(guestService.findStays(reception, null, GuestService.STAYS_OPEN, ARRIVAL, ARRIVAL))
+                .containsExactly(stay);
+        assertThat(guestService.findStays(reception, bay.getId(), GuestService.STAYS_ALL, DEPARTURE, DEPARTURE))
+                .as("departure day still overlaps").containsExactly(stay);
+        assertThat(guestService.findStays(reception, null, GuestService.STAYS_CHECKED_OUT, ARRIVAL, DEPARTURE))
+                .isEmpty();
+        assertThatThrownBy(() -> guestService.findStays(reception, lake.getId(), GuestService.STAYS_ALL, ARRIVAL,
+                DEPARTURE)).isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> guestService.findStays(reception, null, GuestService.STAYS_ALL, DEPARTURE,
+                ARRIVAL)).isInstanceOf(IllegalArgumentException.class);
+
+        Userinfo noSite = new Userinfo("nosite", "No site", "nosite@example.org");
+        noSite.getGroups().add(club);
+        assertThat(guestService.findStays(noSite, null, GuestService.STAYS_ALL, ARRIVAL, DEPARTURE)).isEmpty();
+        assertThat(guestService.findSeasonalContracts(new Userinfo("none", "None", "none@example.org"), null))
+                .isEmpty();
+    }
+
+    @Test
+    void guestIsFoundByTheNumberOfItsCardAndThePlateOfItsUnit() {
+        guestService.addUnit(reception, guest.getId(), Unit.UnitType.CARAVAN, "RI-55-XY", null);
+
+        assertThat(guestService.findGuests(reception, "HR-7101")).containsExactly(guest);
+        assertThat(guestService.findGuests(reception, "ri-55")).containsExactly(guest);
+        assertThat(guestService.findGuests(reception, "nobody")).isEmpty();
+    }
+
     private void clockAt(LocalDateTime now) {
         dateService.setClock(Clock.fixed(now.atZone(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault()));
     }
