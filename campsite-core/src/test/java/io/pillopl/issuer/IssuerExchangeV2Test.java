@@ -67,6 +67,24 @@ class IssuerExchangeV2Test {
     }
 
     @Test
+    void endpointWithoutTrailingSlashGetsThePathAppended() {
+        partner.setEndpoint(URL);
+        server.expect(requestTo(URL + "/consumption-records")).andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        assertThat(exchange.fetchConsumptionRecords(partner)).isEmpty();
+        server.verify();
+    }
+
+    @Test
+    void emptyBodyOfThePartnerIsAnEmptyCardList() {
+        server.expect(requestTo(URL + "/cards")).andExpect(method(HttpMethod.GET)).andRespond(withSuccess());
+
+        assertThat(exchange.fetchCards(partner)).isEmpty();
+        server.verify();
+    }
+
+    @Test
     void recordsOfThePartnersMembersArePosted() {
         server.expect(requestTo(URL + "/consumption-records")).andExpect(method(HttpMethod.POST))
                 .andExpect(jsonPath("$[0].recordNo").value("BAY-20260710-000001"))
