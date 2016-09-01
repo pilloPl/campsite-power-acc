@@ -26,4 +26,15 @@ public interface ConsumptionRecordApi {
      */
     ConsumptionRecordDTO reviewConsumptionRecord(Username authUsername, Long recordId, boolean confirmed,
                                                  String comment);
+
+    /**
+     * Prices a record again with the network tariff (after a tariff fix): records whose pricing failed or that wait
+     * for their export, never suspect, rejected, exported or imported ones. CONSUMPTION_RECORD_REVIEW.
+     */
+    ConsumptionRecordDTO repriceConsumptionRecord(Username authUsername, Long recordId);
+
+    /**
+     * Puts a record whose export failed (ERROR) back to NEW, so that the next export takes it. BILLING_EDIT.
+     */
+    ConsumptionRecordDTO requeueConsumptionRecordExport(Username authUsername, Long recordId);
 }

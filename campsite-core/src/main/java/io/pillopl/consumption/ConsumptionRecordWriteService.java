@@ -213,6 +213,57 @@ public class ConsumptionRecordWriteService {
         return record;
     }
 
+    /**
+     * Prices a record again with the network tariff, e.g. after a tariff was fixed. Only records whose price may
+     * still change: pricing failed (REVIEW) or waiting for the export (NEW). A suspect record is reviewed first, a
+     * rejected or exported one keeps its price, an imported one keeps its partner's price.
+     *
+     * @return the record or null when there is none with this id
+     * @throws IllegalStateException when the record must not be priced again
+     */
+    public ConsumptionRecord repriceRecord(Long recordId, String by) {
+        ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
+        if (record == null) {
+            return null;
+        }
+        if (record.isImported()) {
+            throw new IllegalStateException("Consumption record " + record.getRecordNo()
+                    + " is imported and keeps the price of its partner");
+        }
+        if (record.isSuspect()) {
+            throw new IllegalStateException("Consumption record " + record.getRecordNo()
+                    + " is suspect: confirm or reject it first");
+        }
+        ExportStatus status = record.getExportStatus();
+        if (status != ExportStatus.REVIEW && status != ExportStatus.NEW) {
+            throw new IllegalStateException("Consumption record " + record.getRecordNo()
+                    + " cannot be priced again (" + status + ")");
+        }
+        record.applyPrice(price(record));
+        LOGGER.info(String.format("Consumption record %s priced again by %s: %s", record.getRecordNo(), by, record));
+        return record;
+    }
+
+    /**
+     * A record whose export failed (ERROR) waits for the next export again (NEW).
+     *
+     * @return the record or null when there is none with this id
+     * @throws IllegalStateException when the export of the record did not fail
+     */
+    public ConsumptionRecord requeueExport(Long recordId, String by) {
+        ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
+        if (record == null) {
+            return null;
+        }
+        if (record.getExportStatus() != ExportStatus.ERROR) {
+            throw new IllegalStateException("Export of consumption record " + record.getRecordNo()
+                    + " did not fail (" + record.getExportStatus() + ")");
+        }
+        record.setExportStatus(ExportStatus.NEW);
+        LOGGER.info(String.format("Export of consumption record %s queued again by %s", record.getRecordNo(), by));
+        return record;
+    }
+
     private ConsumptionRecord recordInReview(Long recordId) {
         ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
         if (record != null && record.getExportStatus() != ExportStatus.REVIEW) {

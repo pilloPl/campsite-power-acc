@@ -98,6 +98,40 @@ public class ConsumptionRecordApiService implements ConsumptionRecordApi {
         }
     }
 
+    @Override
+    public ConsumptionRecordDTO repriceConsumptionRecord(Username authUsername, Long recordId) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CONSUMPTION_RECORD_REVIEW);
+            checkRecordInScope(principal, recordId);
+            return toDTO(consumptionRecordWriteService.repriceRecord(recordId, principal.getUsername()));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public ConsumptionRecordDTO requeueConsumptionRecordExport(Username authUsername, Long recordId) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.BILLING_EDIT);
+            checkRecordInScope(principal, recordId);
+            return toDTO(consumptionRecordWriteService.requeueExport(recordId, principal.getUsername()));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    private void checkRecordInScope(Userinfo principal, Long recordId) {
+        if (recordId == null) {
+            throw new InvalidInputException("Consumption record id is missing");
+        }
+        ConsumptionRecord record = consumptionRecordDao.findById(recordId)
+                .orElseThrow(() -> ObjectNotFoundException.of("Consumption record", recordId));
+        if (!isInScope(principal, record)) {
+            throw new AccessNotAllowedException("Consumption record " + record.getRecordNo()
+                    + " is not in the scope of " + principal.getUsername());
+        }
+    }
+
     /**
      * The same two sides as the visibility SQL: the record's pedestal in the user's SITE subtree or its guest in
      * the user's ISSUER subtree.

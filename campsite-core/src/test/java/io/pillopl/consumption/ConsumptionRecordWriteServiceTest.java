@@ -298,6 +298,61 @@ class ConsumptionRecordWriteServiceTest {
         assertThat(writeService.confirmRecord(9L, "admin", null)).isNull();
     }
 
+    @Test
+    void recordWithFailedPricingIsPricedAgainAfterTheTariffFixAndGoesToExport() {
+        ConsumptionRecord record = create(validated(card, null), null, true);
+        assertThat(record.getExportStatus()).isEqualTo(ExportStatus.REVIEW);
+        record.setKwh(new BigDecimal("14.0"));
+        when(dao.findById(9L)).thenReturn(Optional.of(record));
+        priced("6.30");
+
+        writeService.repriceRecord(9L, "office");
+
+        assertThat(record.getPricingStatus()).isEqualTo(PricingStatus.PRICED);
+        assertThat(record.getCost()).isEqualByComparingTo("6.30");
+        assertThat(record.getExportStatus()).isEqualTo(ExportStatus.NEW);
+    }
+
+    @Test
+    void suspectImportedRejectedAndExportedRecordsAreNotPricedAgain() {
+        ConsumptionRecord suspect = create(validated(card, null), "650", true);
+        when(dao.findById(1L)).thenReturn(Optional.of(suspect));
+        assertThatThrownBy(() -> writeService.repriceRecord(1L, "office"))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("suspect");
+
+        priced("6.30");
+        ConsumptionRecord imported = create(validated(card, null), "14.0", true);
+        imported.setSourceName("PARTNER");
+        when(dao.findById(2L)).thenReturn(Optional.of(imported));
+        assertThatThrownBy(() -> writeService.repriceRecord(2L, "office"))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("imported");
+
+        ConsumptionRecord exported = create(validated(card, null), "14.0", true);
+        exported.setExportStatus(ExportStatus.TRANSFERRED);
+        when(dao.findById(3L)).thenReturn(Optional.of(exported));
+        assertThatThrownBy(() -> writeService.repriceRecord(3L, "office"))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("TRANSFERRED");
+
+        when(dao.findById(4L)).thenReturn(Optional.empty());
+        assertThat(writeService.repriceRecord(4L, "office")).isNull();
+    }
+
+    @Test
+    void onlyAFailedExportIsQueuedAgain() {
+        priced("6.30");
+        ConsumptionRecord record = create(validated(card, null), "14.0", true);
+        when(dao.findById(9L)).thenReturn(Optional.of(record));
+        assertThatThrownBy(() -> writeService.requeueExport(9L, "office"))
+                .isInstanceOf(IllegalStateException.class);
+
+        record.setExportStatus(ExportStatus.ERROR);
+        writeService.requeueExport(9L, "office");
+
+        assertThat(record.getExportStatus()).isEqualTo(ExportStatus.NEW);
+        when(dao.findById(10L)).thenReturn(Optional.empty());
+        assertThat(writeService.requeueExport(10L, "office")).isNull();
+    }
+
     private ConsumptionRecord create(ValidationResult validationResult, String kwh, boolean billed) {
         BigDecimal consumption = kwh != null ? new BigDecimal(kwh) : null;
         return writeService.createConsumptionRecord(session, validationResult,
