@@ -123,10 +123,17 @@ public class SupplySession {
     }
 
     /**
+     * Start of the supply: the pedestal's remote date, or the create date when the pedestal sent none.
+     */
+    public LocalDateTime startedAt() {
+        return remoteDate != null ? remoteDate : createDate;
+    }
+
+    /**
      * The session is supplying since longer than the timeout and was not stopped by the pedestal.
      */
     public boolean isStale(LocalDateTime now, int timeoutInHours) {
-        LocalDateTime start = remoteDate != null ? remoteDate : createDate;
+        LocalDateTime start = startedAt();
         return active && start != null && start.plusHours(timeoutInHours).isBefore(now);
     }
 

@@ -297,7 +297,7 @@ public class SupplyControlUnitImpl {
      * The time of the socket's last reading when it lies within the session, else the closing time.
      */
     static LocalDateTime lastReadingDate(SupplySession session, Socket socket, LocalDateTime now) {
-        LocalDateTime start = session.getRemoteDate() != null ? session.getRemoteDate() : session.getCreateDate();
+        LocalDateTime start = session.startedAt();
         LocalDateTime reading = socket.getModDate();
         if (reading != null && start != null && !reading.isBefore(start) && !reading.isAfter(now)) {
             return reading;
