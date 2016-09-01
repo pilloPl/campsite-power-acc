@@ -40,6 +40,20 @@ public class ConsumptionRecordWebService
                         Boolean.TRUE.equals(request.confirmed()), request.comment())));
     }
 
+    @PostMapping("/repriceConsumptionRecord")
+    public ReviewConsumptionRecordResponse repriceConsumptionRecord(
+            @RequestBody RepriceConsumptionRecordRequest request) throws ConsumptionRecordWebServiceFault {
+        return invoke("repriceConsumptionRecord", () -> new ReviewConsumptionRecordResponse(
+                getBean().repriceConsumptionRecord(caller(), request.consumptionRecordId())));
+    }
+
+    @PostMapping("/requeueConsumptionRecordExport")
+    public ReviewConsumptionRecordResponse requeueConsumptionRecordExport(
+            @RequestBody RequeueConsumptionRecordExportRequest request) throws ConsumptionRecordWebServiceFault {
+        return invoke("requeueConsumptionRecordExport", () -> new ReviewConsumptionRecordResponse(
+                getBean().requeueConsumptionRecordExport(caller(), request.consumptionRecordId())));
+    }
+
     @Override
     protected ConsumptionRecordWebServiceFault createFault(String message, WsErrorCode errorCode) {
         return new ConsumptionRecordWebServiceFault(message, errorCode);

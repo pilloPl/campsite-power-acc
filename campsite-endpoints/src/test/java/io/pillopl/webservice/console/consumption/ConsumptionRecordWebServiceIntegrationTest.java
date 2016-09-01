@@ -145,6 +145,44 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
                 "2026-07-10", "LOST", null, null)).andExpect(status().isBadRequest());
     }
 
+    @Test
+    void recordWaitingForExportIsPricedAgainButASuspectOneIsNot() throws Exception {
+        ConsumptionRecord valid = record(baySocket, "12.5", DAY.plusHours(10));
+        ConsumptionRecord suspect = record(baySocket, "400", DAY.plusHours(12));
+        suspect.markSuspect("400 kWh in one night");
+        consumptionRecordDao.flush();
+
+        call("admin", PATH + "/repriceConsumptionRecord", new RepriceConsumptionRecordRequest(valid.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.consumptionRecord.pricingStatus").value("PRICED"))
+                .andExpect(jsonPath("$.consumptionRecord.exportStatus").value("NEW"));
+        call("admin", PATH + "/repriceConsumptionRecord", new RepriceConsumptionRecordRequest(suspect.getId()))
+                .andExpect(status().isConflict());
+        call("bayowner", PATH + "/repriceConsumptionRecord", new RepriceConsumptionRecordRequest(valid.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void failedExportIsQueuedAgainByTheBackOffice() throws Exception {
+        ConsumptionRecord failed = record(baySocket, "12.5", DAY.plusHours(10));
+        failed.setExportStatus(io.pillopl.consumption.ExportStatus.ERROR);
+        consumptionRecordDao.flush();
+
+        call("admin", PATH + "/requeueConsumptionRecordExport",
+                new RequeueConsumptionRecordExportRequest(failed.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.consumptionRecord.exportStatus").value("NEW"));
+        call("admin", PATH + "/requeueConsumptionRecordExport",
+                new RequeueConsumptionRecordExportRequest(failed.getId()))
+                .andExpect(status().isConflict());
+        call("technician", PATH + "/requeueConsumptionRecordExport",
+                new RequeueConsumptionRecordExportRequest(failed.getId()))
+                .andExpect(status().isForbidden());
+        call("admin", PATH + "/requeueConsumptionRecordExport",
+                new RequeueConsumptionRecordExportRequest(987654321L))
+                .andExpect(status().isNotFound());
+    }
+
     private ConsumptionRecord record(Socket socket, String kwh, LocalDateTime plugOut) {
         SupplySession session = new SupplySession();
         session.setSocket(socket);
