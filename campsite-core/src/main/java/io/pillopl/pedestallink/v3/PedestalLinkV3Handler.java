@@ -260,9 +260,11 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
         }
 
         private Long translateErrorCode(Pedestal pedestal, SocketStatusRequest request) {
-            String manufacturer = pedestal.getPedestalType().getManufacturer();
+            // a pedestal not yet typed has no manufacturer mask: only the link error code counts
+            String manufacturer = pedestal.getPedestalType() != null
+                    ? pedestal.getPedestalType().getManufacturer() : null;
             String vendorErrorCode = request.vendorErrorCode();
-            if (vendorErrorCode != null && !vendorErrorCode.isBlank()) {
+            if (manufacturer != null && vendorErrorCode != null && !vendorErrorCode.isBlank()) {
                 Long vendorMask = service.getSocketStatusLogDao().findErrorMask(manufacturer, vendorErrorCode);
                 if (vendorMask != null && SocketStatusLog.NO_ERROR != vendorMask) {
                     return vendorMask;

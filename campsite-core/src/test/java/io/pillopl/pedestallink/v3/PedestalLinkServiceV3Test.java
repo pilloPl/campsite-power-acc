@@ -165,6 +165,18 @@ class PedestalLinkServiceV3Test {
     }
 
     @Test
+    void pedestalWithoutTypeUsesTheLinkErrorCodeOnly() {
+        pedestal.setPedestalType(null);
+        when(socketStateTaskWorker.translateErrorCode(pedestal, "GROUND_FAILURE")).thenReturn(2L);
+
+        service.handleRequest(PedestalLinkV3Handler.SocketStatusHandler.class, CODE,
+                new SocketStatusRequest(1, "FAULTED", "GROUND_FAILURE", MANUFACTURER, "E07", null, now));
+
+        verify(socketStatusLogDao, never()).findErrorMask(any(), any());
+        verify(socketStateTaskWorker).monitorSocket(socket, SocketStateParams.status(now, SocketStatus.FAULTED, 2L));
+    }
+
+    @Test
     void statusOfAnUnknownPedestalIsRefused() {
         assertThatThrownBy(() -> service.handleRequest(PedestalLinkV3Handler.SocketStatusHandler.class, "HR-NOWHERE",
                 new SocketStatusRequest(1, "AVAILABLE", null, null, null, null, now)))
