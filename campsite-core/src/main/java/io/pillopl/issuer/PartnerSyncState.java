@@ -138,7 +138,7 @@ public enum PartnerSyncState {
             return NEVER;
         }
 
-        return null;
+        throw new IllegalStateException("No export rule for the partner sync state " + this);
     }
 
     /**
