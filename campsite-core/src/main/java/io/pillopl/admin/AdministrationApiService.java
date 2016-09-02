@@ -10,8 +10,11 @@ import io.pillopl.config.SystemPropertyKey;
 import io.pillopl.config.SystemPropertyService;
 import io.pillopl.dto.admin.AuditEntryDTO;
 import io.pillopl.dto.admin.AuditFilterDTO;
+import io.pillopl.dto.admin.RightsMatrixDTO;
+import io.pillopl.dto.admin.SecurityGroupDTO;
 import io.pillopl.dto.admin.SystemPropertyDTO;
 import io.pillopl.dto.user.UserroleDTO;
+import io.pillopl.persistence.dao.SecurityGroupDao;
 import io.pillopl.persistence.dao.SystemPropertyDao;
 import io.pillopl.persistence.dao.UserinfoDao;
 import io.pillopl.persistence.dao.UserroleDao;
@@ -22,6 +25,7 @@ import io.pillopl.user.UserrightName;
 import io.pillopl.util.ApiExceptionTranslator;
 import io.pillopl.util.ApiValues;
 import io.pillopl.value.Username;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,11 +53,15 @@ public class AdministrationApiService implements AdministrationApi {
 
     private final UserinfoDao userinfoDao;
 
+    private final SecurityGroupDao securityGroupDao;
+
     public AdministrationApiService(AuditService auditService, SystemPropertyService systemPropertyService,
                                     SystemPropertyDao systemPropertyDao, UserroleDao userroleDao,
                                     UserinfoSummaryService userinfoSummaryService,
-                                    PrincipalResolver principalResolver, UserinfoDao userinfoDao) {
+                                    PrincipalResolver principalResolver, UserinfoDao userinfoDao,
+                                    SecurityGroupDao securityGroupDao) {
         this.userinfoDao = userinfoDao;
+        this.securityGroupDao = securityGroupDao;
         this.auditService = auditService;
         this.systemPropertyService = systemPropertyService;
         this.systemPropertyDao = systemPropertyDao;
@@ -120,6 +128,34 @@ public class AdministrationApiService implements AdministrationApi {
         try {
             principalResolver.resolve(authUsername, UserrightName.USER_ADMIN);
             userinfoSummaryService.refresh();
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RightsMatrixDTO getRightsMatrix(Username authUsername) {
+        try {
+            principalResolver.resolve(authUsername, UserrightName.USER_ADMIN);
+            List<SecurityGroupDTO> securityGroups = securityGroupDao.findAll(Sort.by("name")).stream()
+                    .map(AdministrationMapper::toDTO).toList();
+            return new RightsMatrixDTO(userroleDao.findAllRightNames(),
+                    AdministrationMapper.toRoleDTOs(userroleDao.findAllOrdered()), securityGroups);
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SystemPropertyDTO> reloadConfiguration(Username authUsername) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CONFIG_EDIT);
+            systemPropertyService.reloadSystemProperties();
+            auditService.auditAction(AuditActionType.CONFIG_CHANGE, principal.getUsername(), "reload", null,
+                    "Configuration reloaded from SYSTEM_PROPERTY", null);
+            return AdministrationMapper.toSystemPropertyDTOs(systemPropertyDao.findAll());
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }

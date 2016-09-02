@@ -16,6 +16,9 @@ class AdministrationWebServiceIntegrationTest extends WebServiceIntegrationTest 
 
     static final String PATH = WebServicePaths.ADMINISTRATION;
 
+    @org.springframework.beans.factory.annotation.Autowired
+    io.pillopl.config.SystemPropertyService configuration;
+
     @BeforeEach
     void setUp() {
         console.hrAdmin("admin");
@@ -71,5 +74,32 @@ class AdministrationWebServiceIntegrationTest extends WebServiceIntegrationTest 
                 .andExpect(jsonPath("$.roles[0].name").value("RECEPTION"))
                 .andExpect(jsonPath("$.roles[0].rights", hasItem("STAY_CHECKOUT")))
                 .andExpect(jsonPath("$.roles[?(@.name == 'AFFILIATE_OWNER')].selfService", hasItem(true)));
+    }
+
+    @Test
+    void fullRightsMatrixHasAllRightsRolesAndSecurityGroups() throws Exception {
+        call("admin", PATH + "/getRightsMatrix", new GetRightsMatrixRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rightsMatrix.rights[0]").value("PEDESTAL_VIEW"))
+                .andExpect(jsonPath("$.rightsMatrix.rights", hasItem("BILLING_EDIT")))
+                .andExpect(jsonPath("$.rightsMatrix.roles[?(@.name == 'BACK_OFFICE')].rights[*]",
+                        hasItem("BILLING_EDIT")))
+                .andExpect(jsonPath("$.rightsMatrix.securityGroups[?(@.name == 'CAMPSITE MANAGEMENT')].roles[*]",
+                        hasItem("CAMPSITE_MANAGER")));
+        call("reception", PATH + "/getRightsMatrix", new GetRightsMatrixRequest()).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void configurationChangedInTheDatabaseTakesEffectAfterTheReload() throws Exception {
+        jdbcTemplate.update("UPDATE SYSTEM_PROPERTY SET PROPERTY_VALUE = '48' "
+                + "WHERE PROPERTY_KEY = 'StaleSessionTimeoutInHours'");
+
+        call("admin", PATH + "/reloadConfiguration", new ReloadConfigurationRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.properties[?(@.key == 'StaleSessionTimeoutInHours')].value", hasItem("48")));
+        org.assertj.core.api.Assertions.assertThat(configuration.getStaleSessionTimeoutInHours())
+                .isEqualTo(48);
+        call("reception", PATH + "/reloadConfiguration", new ReloadConfigurationRequest())
+                .andExpect(status().isForbidden());
     }
 }

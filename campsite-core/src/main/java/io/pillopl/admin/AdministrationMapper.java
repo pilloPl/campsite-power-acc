@@ -4,8 +4,10 @@ import io.pillopl.audit.Audit;
 import io.pillopl.config.SystemProperty;
 import io.pillopl.config.SystemPropertyKey;
 import io.pillopl.dto.admin.AuditEntryDTO;
+import io.pillopl.dto.admin.SecurityGroupDTO;
 import io.pillopl.dto.admin.SystemPropertyDTO;
 import io.pillopl.dto.user.UserroleDTO;
+import io.pillopl.user.SecurityGroup;
 import io.pillopl.user.Userright;
 import io.pillopl.user.Userrole;
 
@@ -74,6 +76,16 @@ public final class AdministrationMapper {
             rights.add(right.getName());
         }
         return new UserroleDTO(role.getName(), groupTypes, role.isSelfService(), new ArrayList<>(rights));
+    }
+
+    /**
+     * Roles of the security group by their sort key.
+     */
+    public static SecurityGroupDTO toDTO(SecurityGroup securityGroup) {
+        List<String> roles = securityGroup.getRoles().stream()
+                .sorted(java.util.Comparator.comparing(Userrole::getSortKey))
+                .map(Userrole::getName).toList();
+        return new SecurityGroupDTO(securityGroup.getName(), roles);
     }
 
     public static List<UserroleDTO> toRoleDTOs(List<Userrole> roles) {

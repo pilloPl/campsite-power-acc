@@ -63,6 +63,19 @@ public class AdministrationWebService extends AbstractWebService<AdministrationA
         });
     }
 
+    @PostMapping("/getRightsMatrix")
+    public GetRightsMatrixResponse getRightsMatrix(@RequestBody GetRightsMatrixRequest request)
+            throws AdministrationWebServiceFault {
+        return invoke("getRightsMatrix", () -> new GetRightsMatrixResponse(getBean().getRightsMatrix(caller())));
+    }
+
+    @PostMapping("/reloadConfiguration")
+    public GetSystemPropertiesResponse reloadConfiguration(@RequestBody ReloadConfigurationRequest request)
+            throws AdministrationWebServiceFault {
+        return invoke("reloadConfiguration", () -> new GetSystemPropertiesResponse(
+                getBean().reloadConfiguration(caller())));
+    }
+
     @Override
     protected AdministrationWebServiceFault createFault(String message, WsErrorCode errorCode) {
         return new AdministrationWebServiceFault(message, errorCode);

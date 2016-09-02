@@ -15,4 +15,10 @@ public interface UserroleDao extends JpaRepository<Userrole, Long> {
 
     @Query("select r from Userrole r order by r.sortKey")
     List<Userrole> findAllOrdered();
+
+    /**
+     * Names of all rights (the columns of the rights matrix) in the order they were added.
+     */
+    @Query("select r.name from Userright r order by r.id")
+    List<String> findAllRightNames();
 }
