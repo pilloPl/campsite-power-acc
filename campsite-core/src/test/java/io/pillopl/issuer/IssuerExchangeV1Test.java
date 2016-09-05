@@ -62,6 +62,16 @@ class IssuerExchangeV1Test {
     }
 
     @Test
+    void cellsAreTrimmedAndMissingCellsAreEmpty() throws IOException {
+        incoming("cards-in", "a.csv", IssuerExchangeV1.CARD_HEADER, " 04A1B2C3 ; CC-1 ;ADD; ", "   ",
+                "04A1B2C4;CC-2;DELETE");
+
+        assertThat(exchange.fetchCards(partner)).containsExactly(
+                new CardLine("04A1B2C3", "CC-1", "ADD", null, null, null),
+                new CardLine("04A1B2C4", "CC-2", "DELETE", null, null, null));
+    }
+
+    @Test
     void fileWithAnotherHeaderFailsTheRunAndStays() throws IOException {
         incoming("cards-in", "a.csv", IssuerExchangeV1.CARD_HEADER, "04A1B2C3;CC-1;ADD;;770012345678;");
         incoming("cards-in", "b.csv", "UID,NUMBER", "04A1B2C3,CC-1");
