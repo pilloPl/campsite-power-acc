@@ -12,6 +12,8 @@ import org.quartz.TriggerBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 /**
  * The Quartz jobs of the pedestal backend: a job class, its detail and a trigger with the interval from
  * SYSTEM_PROPERTY (read at start-up).
@@ -52,10 +54,30 @@ public class JobConfiguration {
      */
     static final int NIGHTLY_HOUR = 3;
 
+    /**
+     * What each job does, shown in the jobs list of the administration tab.
+     */
+    static final Map<String, String> DESCRIPTIONS = Map.ofEntries(
+            Map.entry(CLOSE_SESSIONS_ON_CHECKOUT, "Closes the supply sessions of checked-out stays and silent sessions"),
+            Map.entry(PEDESTAL_HEARTBEAT_TIMEOUT, "Marks pedestals without heartbeat as timed out"),
+            Map.entry(UNKNOWN_STATE_EVENT_TRIGGER, "Sets sockets without status notification to UNKNOWN"),
+            Map.entry(EVENT_RETRY, "Sends the events the queue refused again"),
+            Map.entry(GROUP_VALIDITY_CONTROL, "Checks the group trees and the records no export takes"),
+            Map.entry(USERINFO_SUMMARY_REFRESH, "Refreshes the self-service user view"),
+            Map.entry(SOCKET_UTILIZATION_REFRESH, "Refreshes the socket utilization view of the reports"),
+            Map.entry(AUDIT_CLEANUP, "Deletes expired audit rows"),
+            Map.entry(LOCAL_CARD_LIST_DISTRIBUTION, "Sends the local card lists to the pedestals"),
+            Map.entry(ARCHIVE_QRPAY_PROCESS, "Moves finished QR payments into the archive"),
+            Map.entry(ERP_ACCOUNT_EXPORT, "Hands orders waiting for an account to the ERP"),
+            Map.entry(ERP_ACCOUNT_IMPORT, "Takes the partner and account numbers from the ERP"),
+            Map.entry(ERP_BILLING_EXPORT, "Bills the month and exports the billing lines to the ERP"),
+            Map.entry(ISSUER_EXCHANGE, "Exchanges cards and records with the issuer partners"));
+
     @Bean
     public JobDetail closeSessionsOnCheckoutJobDetail() {
         return JobBuilder.newJob(CloseSessionsOnCheckoutJob.class)
                 .withIdentity(CLOSE_SESSIONS_ON_CHECKOUT)
+                .withDescription(DESCRIPTIONS.get(CLOSE_SESSIONS_ON_CHECKOUT))
                 .storeDurably()
                 .build();
     }
@@ -244,6 +266,7 @@ public class JobConfiguration {
     private static JobDetail jobDetail(Class<? extends Job> jobClass, String name) {
         return JobBuilder.newJob(jobClass)
                 .withIdentity(name)
+                .withDescription(DESCRIPTIONS.get(name))
                 .storeDurably()
                 .build();
     }
