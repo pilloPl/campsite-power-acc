@@ -622,6 +622,72 @@ UPDATE CONSUMPTION_RECORD
    AND EXPORT_STATUS IN (:fromStatuses)
 ]]></entry>
 
+    <!-- QR payment: console view of the processes -->
+
+    <!--
+      Current rows (no successor) of the QR payment processes, live and archived, at the pedestals of the user's SITE
+      subtree and optionally of one campsite subtree, one state, requests in [:from, :to]; newest request first, one
+      page, with the total of the filter. STUCK: an unfinished process whose state began before :stuckBefore.
+    -->
+    <entry key="findQrPayProcessOverviewPage"><![CDATA[
+WITH RECURSIVE user_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :userSiteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN user_tree t ON c.PARENT_ID = t.id
+),
+campsite_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = COALESCE(CAST(:campsiteGroupId AS BIGINT), :userSiteGroupId)
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN campsite_tree t ON c.PARENT_ID = t.id
+),
+current_rows AS (
+    SELECT p.PROCESS_ID, p.ORDER_REFERENCE, p.STATE, p.SOCKET_ID, p.CLIENT_USERNAME, p.APP_USER_ID, p.REQUEST_DATE,
+           p.START_TIME, p.TRANSACTION_ID, p.KWH, p.COST, p.CURRENCY, p.ERROR_CODE, p.ERROR_MESSAGE,
+           FALSE AS ARCHIVED
+      FROM QRPAY_PROCESS p
+     WHERE p.NEXT_PROCESS_ID IS NULL
+    UNION ALL
+    SELECT a.PROCESS_ID, a.ORDER_REFERENCE, a.STATE, a.SOCKET_ID, a.CLIENT_USERNAME, a.APP_USER_ID, a.REQUEST_DATE,
+           a.START_TIME, a.TRANSACTION_ID, a.KWH, a.COST, a.CURRENCY, a.ERROR_CODE, a.ERROR_MESSAGE,
+           TRUE AS ARCHIVED
+      FROM QRPAY_PROCESS_ARCHIVE a
+     WHERE a.NEXT_PROCESS_ID IS NULL
+)
+SELECT cr.*,
+       s.SOCKET_CODE,
+       pe.CODE AS PEDESTAL_CODE,
+       site.ID AS CAMPSITE_GROUP_ID,
+       site.DISPLAYNAME AS CAMPSITE_NAME,
+       CASE WHEN cr.STATE NOT IN ('CLOSED', 'ERROR') AND cr.START_TIME < :stuckBefore THEN TRUE ELSE FALSE END
+           AS STUCK,
+       COUNT(*) OVER () AS TOTAL
+  FROM current_rows cr
+  JOIN SOCKET s ON s.ID = cr.SOCKET_ID
+  JOIN PEDESTAL pe ON pe.ID = s.PEDESTAL_ID
+  JOIN TBL_GROUP site ON site.ID = pe.GROUP_ID
+ WHERE pe.GROUP_ID IN (SELECT id FROM user_tree)
+   AND pe.GROUP_ID IN (SELECT id FROM campsite_tree)
+   AND (CAST(:state AS VARCHAR) IS NULL OR cr.STATE = :state)
+   AND (CAST(:from AS TIMESTAMP) IS NULL OR cr.REQUEST_DATE >= :from)
+   AND (CAST(:to AS TIMESTAMP) IS NULL OR cr.REQUEST_DATE <= :to)
+ ORDER BY cr.REQUEST_DATE DESC, cr.PROCESS_ID DESC
+ LIMIT :limit OFFSET :offset
+]]></entry>
+
+    <!-- All rows of one process, live or archived (a chain is wholly in one of the tables), first row first. -->
+    <entry key="findQrPayProcessChain"><![CDATA[
+SELECT p.ID, p.PROCESS_ID, p.ORDER_REFERENCE, p.SOCKET_ID, p.STATE, p.START_TIME, p.STOP_TIME, p.TRANSACTION_ID,
+       p.SUPPLY_SESSION_ID, p.ERROR_CODE, p.ERROR_MESSAGE, FALSE AS ARCHIVED
+  FROM QRPAY_PROCESS p
+ WHERE p.PROCESS_ID = :processId
+UNION ALL
+SELECT a.ID, a.PROCESS_ID, a.ORDER_REFERENCE, a.SOCKET_ID, a.STATE, a.START_TIME, a.STOP_TIME, a.TRANSACTION_ID,
+       a.SUPPLY_SESSION_ID, a.ERROR_CODE, a.ERROR_MESSAGE, TRUE AS ARCHIVED
+  FROM QRPAY_PROCESS_ARCHIVE a
+ WHERE a.PROCESS_ID = :processId
+ ORDER BY ID
+]]></entry>
+
     <!-- QR payment: archive of the finished process chains -->
 
     <!--

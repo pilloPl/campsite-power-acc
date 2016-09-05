@@ -226,6 +226,13 @@ public class SystemPropertyService {
     /**
      * A QR payment process CLOSED or in ERROR since longer than this is moved to the archive.
      */
+    /**
+     * An unfinished QR payment in the same state for longer is stuck: the console may cancel it.
+     */
+    public int getQrPayStuckAfterMinutes() {
+        return getPropertyInt(SystemPropertyKey.QrPayStuckAfterMinutes, 30);
+    }
+
     public int getQrPayArchiveDelayInHours() {
         return getPropertyInt(SystemPropertyKey.QrPayArchiveDelayInHours, 24);
     }

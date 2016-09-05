@@ -1,6 +1,7 @@
 package io.pillopl.qrpay;
 
 import io.pillopl.api.QrPayApi;
+import io.pillopl.api.QrPayConsoleApi;
 import io.pillopl.api.exception.AccessNotAllowedException;
 import io.pillopl.api.exception.ConflictException;
 import io.pillopl.api.exception.InvalidInputException;
@@ -8,11 +9,22 @@ import io.pillopl.api.exception.ObjectNotFoundException;
 import io.pillopl.card.Authorization;
 import io.pillopl.card.AuthorizationResult;
 import io.pillopl.card.ValidationStatus;
+import io.pillopl.commons.DateRange;
+import io.pillopl.commons.ListPage;
+import io.pillopl.commons.Pagination;
 import io.pillopl.commons.TextUtil;
+import io.pillopl.config.SystemPropertyService;
 import io.pillopl.dto.qrpay.QrPayProcessDTO;
+import io.pillopl.dto.qrpay.QrPayProcessOverviewDTO;
+import io.pillopl.dto.qrpay.QrPayTimelineDTO;
+import io.pillopl.group.Group;
+import io.pillopl.group.GroupService;
+import io.pillopl.group.GroupType;
 import io.pillopl.infrastructure.Pedestal;
 import io.pillopl.infrastructure.PedestalService;
 import io.pillopl.infrastructure.Socket;
+import io.pillopl.persistence.dao.QrPayProcessDao;
+import io.pillopl.persistence.dao.QrPayProcessDaoCustom.QrPayChainRow;
 import io.pillopl.pricing.PricingService;
 import io.pillopl.qrpay.state.QrPayState;
 import io.pillopl.qrpay.state.QrPayStateFactory;
@@ -32,6 +44,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Drives the QR payment processes: the app's start, stop and queries (with the owner check on every call for an
@@ -39,7 +53,7 @@ import java.time.LocalDateTime;
  * transactional: every transition commits on its own, so the pedestal finds the process when it answers.
  */
 @Service
-public class QrPayProcessSupervisor implements QrPayApi {
+public class QrPayProcessSupervisor implements QrPayApi, QrPayConsoleApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(QrPayProcessSupervisor.class);
 
@@ -63,13 +77,23 @@ public class QrPayProcessSupervisor implements QrPayApi {
 
     private final DateService dateService;
 
+    private final QrPayProcessDao qrPayProcessDao;
+
+    private final GroupService groupService;
+
+    private final SystemPropertyService systemPropertyService;
+
     private long signalRetryPauseInMillis = 200;
 
     public QrPayProcessSupervisor(PrincipalResolver principalResolver, QrPayStateFactory stateFactory,
                                   QrPayProcessService qrPayProcessService, QrPayCostService qrPayCostService,
                                   PedestalService pedestalService, PricingService pricingService,
                                   Authorization authorization, SupplySessionManager supplySessionManager,
-                                  DateService dateService) {
+                                  DateService dateService, QrPayProcessDao qrPayProcessDao, GroupService groupService,
+                                  SystemPropertyService systemPropertyService) {
+        this.qrPayProcessDao = qrPayProcessDao;
+        this.groupService = groupService;
+        this.systemPropertyService = systemPropertyService;
         this.principalResolver = principalResolver;
         this.stateFactory = stateFactory;
         this.qrPayProcessService = qrPayProcessService;
@@ -177,6 +201,198 @@ public class QrPayProcessSupervisor implements QrPayApi {
             throw new AccessNotAllowedException("QR payment " + reference + " belongs to another user");
         }
         return current;
+    }
+
+    // ---------------------------------------------------------------- calls of the console
+
+    @Override
+    public ListPage<QrPayProcessOverviewDTO> findQrPayProcesses(Username authUsername, String state,
+                                                                Long campsiteGroupId, DateRange period,
+                                                                Pagination pagination) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.REPORT_VIEW);
+            Group siteGroup = principal.getGroup(GroupType.SITE);
+            if (siteGroup == null) {
+                return ListPage.empty();
+            }
+            QrPayStateName stateName = parseStateOrNull(state);
+            DateRange range = period != null ? period : DateRange.UNBOUNDED;
+            return qrPayProcessDao.findProcessOverviewPage(siteGroup.getId(), campsiteGroupId,
+                    stateName != null ? stateName.name() : null, range.from(), range.to(), stuckBefore(),
+                    pagination != null ? pagination : Pagination.FIRST_PAGE);
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public QrPayTimelineDTO getQrPayTimeline(Username authUsername, Long processId) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.REPORT_VIEW);
+            return timeline(findChainInScope(principal, processId));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    /**
+     * The cancel goes through the state classes like the signals of the app and the pedestal: a supply that may run
+     * is stopped (the price follows the stop of the pedestal), a pending price is taken now or the process fails
+     * with CALCULATION_FAILED, a process without supply goes to ERROR (CANCELLED).
+     */
+    @Override
+    public QrPayTimelineDTO cancelQrPayProcess(Username authUsername, Long processId) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.BILLING_EDIT);
+            List<QrPayChainRow> chain = findChainInScope(principal, processId);
+            QrPayChainRow last = chain.get(chain.size() - 1);
+            if (last.archived()) {
+                throw new ConflictException("QR payment " + processId + " is archived");
+            }
+            QrPayProcess current = qrPayProcessService.findCurrent(processId);
+            String refusal = cancelRefusal(current, supplyRunning(current), stuckBefore());
+            if (refusal != null) {
+                throw new ConflictException("QR payment " + processId + " cannot be cancelled: " + refusal);
+            }
+            String message = "Cancelled by " + principal.getUsername();
+            LOG.info(String.format("QR payment %s in %s cancelled by %s", processId, current.getStateName(),
+                    principal.getUsername()));
+            QrPayState state = stateFactory.getState(current.detachedCopy());
+            switch (current.getStateName()) {
+                case START_REQUESTED, SOCKET_START_WAITING, SOCKET_STOP_WAITING ->
+                        state.handleError(QrPayErrorCode.CANCELLED, message);
+                case SOCKET_START_RECEIVED, START_CONFIRMED, ERROR -> {
+                    state.stopRequested();
+                    stateFactory.createState(processId).remoteSupplyStop();
+                }
+                case STOP_REQUESTED -> state.remoteSupplyStop();
+                case SOCKET_STOP_RECEIVED -> takePriceOrFail(state.requestCalculation(), message);
+                case CALCULATION_REQUESTED -> takePriceOrFail(state, message);
+                case CALCULATION_DONE -> state.close();
+                default -> throw new ConflictException("QR payment " + processId + " is finished");
+            }
+            return timeline(qrPayProcessDao.findChain(processId));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public int runQrPayArchive(Username authUsername) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.BILLING_EDIT);
+            int archived = qrPayProcessService.archiveFinishedProcesses();
+            LOG.info(String.format("QR payment archive run by %s: %d rows", principal.getUsername(), archived));
+            return archived;
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    /**
+     * Why a process cannot be cancelled, null when it can: CLOSED is final, ERROR only while its supply still runs,
+     * every other state once it is stuck (in the state since before {@code stuckBefore}).
+     */
+    static String cancelRefusal(QrPayProcess current, boolean supplyRunning, LocalDateTime stuckBefore) {
+        QrPayStateName stateName = current.getStateName();
+        if (stateName == QrPayStateName.CLOSED) {
+            return "it is closed";
+        }
+        if (stateName == QrPayStateName.ERROR) {
+            return supplyRunning ? null : "it failed and no supply runs";
+        }
+        if (current.getStartTime() != null && !current.getStartTime().isBefore(stuckBefore)) {
+            return "it is not stuck, its state began at " + current.getStartTime();
+        }
+        return null;
+    }
+
+    private void takePriceOrFail(QrPayState state, String message) {
+        QrPayState priced = state.calculate();
+        if (priced.getStateName() == QrPayStateName.CALCULATION_REQUESTED) {
+            priced.handleError(QrPayErrorCode.CALCULATION_FAILED, message + ": no consumption record for session "
+                    + priced.getProcess().getSupplySessionId());
+        } else if (priced.getStateName() == QrPayStateName.CALCULATION_DONE) {
+            priced.close();
+        }
+    }
+
+    private boolean supplyRunning(QrPayProcess process) {
+        if (process.getTransactionId() == null) {
+            return false;
+        }
+        SupplySession session = supplySessionManager.getSession(process.getSupplySessionId());
+        return session != null && session.isActive();
+    }
+
+    private LocalDateTime stuckBefore() {
+        return dateService.getNow().minusMinutes(systemPropertyService.getQrPayStuckAfterMinutes());
+    }
+
+    /**
+     * @throws ObjectNotFoundException when the process is unknown or its socket outside the SITE scope of the user
+     */
+    private List<QrPayChainRow> findChainInScope(Userinfo principal, Long processId) {
+        if (processId == null) {
+            throw new InvalidInputException("Process id is missing");
+        }
+        List<QrPayChainRow> chain = qrPayProcessDao.findChain(processId);
+        if (chain.isEmpty()) {
+            throw ObjectNotFoundException.of("QR payment", processId);
+        }
+        Pedestal pedestal = pedestalService.findBySocketId(chain.get(0).socketId());
+        Group siteGroup = principal.getGroup(GroupType.SITE);
+        if (pedestal == null || siteGroup == null || !groupService.isManageable(siteGroup, pedestal.getGroup())) {
+            LOG.info(String.format("QR payment %s is outside the scope of %s", processId, principal.getUsername()));
+            throw ObjectNotFoundException.of("QR payment", processId);
+        }
+        return chain;
+    }
+
+    QrPayTimelineDTO timeline(List<QrPayChainRow> chain) {
+        QrPayChainRow last = chain.get(chain.size() - 1);
+        List<QrPayTimelineDTO.Step> steps = new ArrayList<>();
+        for (QrPayChainRow row : chain) {
+            steps.add(new QrPayTimelineDTO.Step(row.id(), row.state(), row.startTime(), row.stopTime(),
+                    row.transactionId(), row.errorCode(), row.errorMessage()));
+        }
+        boolean cancellable = false;
+        if (!last.archived()) {
+            QrPayProcess current = qrPayProcessService.findCurrent(last.processId());
+            cancellable = current != null && cancelRefusal(current, supplyRunning(current), stuckBefore()) == null;
+        }
+        return new QrPayTimelineDTO(last.processId(), last.orderReference(), last.state(), last.archived(),
+                cancellable, steps, stateNames(), transitions());
+    }
+
+    static List<String> stateNames() {
+        List<String> names = new ArrayList<>();
+        for (QrPayStateName stateName : QrPayStateName.values()) {
+            names.add(stateName.name());
+        }
+        return names;
+    }
+
+    static List<QrPayTimelineDTO.Transition> transitions() {
+        List<QrPayTimelineDTO.Transition> transitions = new ArrayList<>();
+        for (QrPayStateName from : QrPayStateName.values()) {
+            for (QrPayStateName to : from.getNextStates()) {
+                transitions.add(new QrPayTimelineDTO.Transition(from.name(), to.name()));
+            }
+        }
+        return transitions;
+    }
+
+    private static QrPayStateName parseStateOrNull(String state) {
+        String trimmed = TextUtil.trimToNull(state);
+        if (trimmed == null) {
+            return null;
+        }
+        try {
+            return QrPayStateName.valueOf(trimmed.toUpperCase(java.util.Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidInputException("Unknown QR payment state: " + state, e);
+        }
     }
 
     // ---------------------------------------------------------------- signals of the pedestal

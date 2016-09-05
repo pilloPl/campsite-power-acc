@@ -1,5 +1,7 @@
 package io.pillopl.qrpay;
 
+import java.util.List;
+
 /**
  * States of a QR payment process, in the order of the happy flow. A stop request of the app in a state where the
  * supply is already stopping or stopped is silently ignored (the app repeats its stop).
@@ -47,6 +49,26 @@ public enum QrPayStateName {
      */
     public boolean isSupplyMayStart() {
         return supplyMayStart;
+    }
+
+    /**
+     * The states the state classes may move a process to from this one (ERROR is reachable from every state but
+     * CLOSED; a supply running in spite of an error is still stopped and priced).
+     */
+    public List<QrPayStateName> getNextStates() {
+        return switch (this) {
+            case START_REQUESTED -> List.of(SOCKET_START_WAITING, ERROR);
+            case SOCKET_START_WAITING -> List.of(SOCKET_START_RECEIVED, STOP_REQUESTED, SOCKET_STOP_RECEIVED, ERROR);
+            case SOCKET_START_RECEIVED -> List.of(START_CONFIRMED, STOP_REQUESTED, SOCKET_STOP_RECEIVED, ERROR);
+            case START_CONFIRMED -> List.of(STOP_REQUESTED, SOCKET_STOP_RECEIVED, ERROR);
+            case STOP_REQUESTED -> List.of(SOCKET_STOP_WAITING, ERROR);
+            case SOCKET_STOP_WAITING -> List.of(SOCKET_STOP_RECEIVED, ERROR);
+            case SOCKET_STOP_RECEIVED -> List.of(CALCULATION_REQUESTED, ERROR);
+            case CALCULATION_REQUESTED -> List.of(CALCULATION_DONE, ERROR);
+            case CALCULATION_DONE -> List.of(CLOSED, ERROR);
+            case CLOSED -> List.of();
+            case ERROR -> List.of(STOP_REQUESTED, SOCKET_STOP_RECEIVED);
+        };
     }
 
     public boolean isFinished() {

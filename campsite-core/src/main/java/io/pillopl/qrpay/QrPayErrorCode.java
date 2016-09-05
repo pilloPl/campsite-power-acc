@@ -13,6 +13,7 @@ public enum QrPayErrorCode {
     SUPPLY_ALREADY_STARTED("The supply was started before."),
     CALCULATION_FAILED("The price of the supply could not be calculated."),
     UNSUPPORTED_OPERATION("This operation is not allowed in the state of the payment."),
+    CANCELLED("The payment was cancelled by the campsite."),
     UNDEFINED("An unspecific error occurred during the payment.");
 
     private final String text;

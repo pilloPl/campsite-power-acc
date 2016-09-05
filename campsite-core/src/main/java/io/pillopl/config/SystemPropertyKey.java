@@ -76,5 +76,8 @@ public enum SystemPropertyKey {
     // audit
     AuditErrorEventsExpiryPeriodInDays,
     AuditSuccessEventsExpiryPeriodInDays,
-    AuditCleanupJobIntervalInSeconds
+    AuditCleanupJobIntervalInSeconds,
+
+    // console: QR payments
+    QrPayStuckAfterMinutes
 }
