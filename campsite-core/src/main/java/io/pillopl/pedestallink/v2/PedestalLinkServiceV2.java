@@ -315,11 +315,12 @@ public class PedestalLinkServiceV2 {
             statusEvent.setAttribute(EventAttribute.PEDESTAL_CODE, pedestal.getCode());
             statusEvent.setAttribute(EventAttribute.GROUP_ID, pedestal.getGroup() != null
                     ? pedestal.getGroup().getId() : null);
-            LOGGER.debug("Socket state event sent to queue " + statusEvent);
+            LOGGER.debug(String.format("Socket state event %s handed to the event retry", statusEvent));
             eventRetryService.sendOrRetryLater(statusEvent);
         } catch (Exception e) {
-            // log error
-            LOGGER.error(e.getMessage(), e);
+            // the status is monitored already: the pedestal still gets its acknowledge
+            LOGGER.error(String.format("Socket state event of socket %s of pedestal %s not sent", socketNo,
+                    pedestalCode), e);
         }
 
         return new AcknowledgeResponse(now);
