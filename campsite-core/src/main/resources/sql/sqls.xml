@@ -622,6 +622,46 @@ UPDATE CONSUMPTION_RECORD
    AND EXPORT_STATUS IN (:fromStatuses)
 ]]></entry>
 
+    <!-- ===== Power budget: load of a section switchboard over time ===== -->
+
+    <!--
+      One row per hour starting in [:from, :to) for the sockets of the section: the rated current (MAX_CURRENT_A) of
+      the sessions running in the hour (started before its end, not stopped before its start), their number, and the
+      sum over the sockets of the highest current each measured in the hour (SOCKET_STATUS_LOG.CURRENT_A).
+    -->
+    <entry key="findPowerSectionLoadPerHour"><![CDATA[
+WITH hours (hour_start) AS (
+    SELECT h
+      FROM generate_series(date_trunc('hour', CAST(:from AS TIMESTAMP)), CAST(:to AS TIMESTAMP), INTERVAL '1 hour') h
+     WHERE h < :to
+),
+section_sockets (id) AS (
+    SELECT s.ID FROM SOCKET s WHERE s.POWER_SECTION_ID = :sectionId
+),
+running (hour_start, max_current_a) AS (
+    SELECT h.hour_start, ss.MAX_CURRENT_A
+      FROM hours h
+      JOIN SUPPLY_SESSION ss ON ss.SOCKET_ID IN (SELECT id FROM section_sockets)
+       AND ss.CREATE_DATE < h.hour_start + INTERVAL '1 hour'
+       AND (ss.STOP_DATE > h.hour_start OR (ss.STOP_DATE IS NULL AND ss.ACTIVE = TRUE))
+),
+measured (hour_start, socket_id, max_current_a) AS (
+    SELECT date_trunc('hour', l.CREATE_DATE), l.SOCKET_ID, MAX(l.CURRENT_A)
+      FROM SOCKET_STATUS_LOG l
+     WHERE l.SOCKET_ID IN (SELECT id FROM section_sockets)
+       AND l.CREATE_DATE >= date_trunc('hour', CAST(:from AS TIMESTAMP))
+       AND l.CREATE_DATE < :to
+       AND l.CURRENT_A IS NOT NULL
+     GROUP BY date_trunc('hour', l.CREATE_DATE), l.SOCKET_ID
+)
+SELECT h.hour_start AS HOUR_START,
+       COALESCE((SELECT SUM(r.max_current_a) FROM running r WHERE r.hour_start = h.hour_start), 0) AS ALLOCATED_A,
+       COALESCE((SELECT SUM(m.max_current_a) FROM measured m WHERE m.hour_start = h.hour_start), 0) AS MEASURED_A,
+       (SELECT COUNT(*) FROM running r WHERE r.hour_start = h.hour_start) AS SESSIONS
+  FROM hours h
+ ORDER BY h.hour_start
+]]></entry>
+
     <!-- QR payment: console view of the processes -->
 
     <!--

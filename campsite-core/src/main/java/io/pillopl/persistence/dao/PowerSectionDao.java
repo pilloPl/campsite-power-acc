@@ -3,7 +3,11 @@ package io.pillopl.persistence.dao;
 import io.pillopl.power.PowerSection;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PowerSectionDao extends JpaRepository<PowerSection, Long> {
+import java.util.List;
+
+public interface PowerSectionDao extends JpaRepository<PowerSection, Long>, PowerSectionDaoCustom {
 
     PowerSection findBySectionName(String sectionName);
+
+    List<PowerSection> findAllByOrderBySectionName();
 }

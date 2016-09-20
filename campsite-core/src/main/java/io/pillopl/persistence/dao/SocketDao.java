@@ -20,4 +20,8 @@ public interface SocketDao extends JpaRepository<Socket, Long> {
 
     @Query("select s from Socket s where s.deleted = false and s.pitchNo = :pitchNo and s.pedestal.group.id = :groupId")
     List<Socket> findByPitchNoInGroup(@Param("pitchNo") String pitchNo, @Param("groupId") Long groupId);
+
+    @Query("select s from Socket s where s.deleted = false and s.powerSection.id = :sectionId "
+            + "order by s.pedestal.code, s.socketNo")
+    List<Socket> findActiveByPowerSectionId(@Param("sectionId") Long sectionId);
 }

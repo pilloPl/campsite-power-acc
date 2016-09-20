@@ -37,7 +37,9 @@ class PowerSectionServiceTest {
     final SectionPowerAlgorithm algorithm = mock(SectionPowerAlgorithm.class);
 
     final PowerSectionService service = new PowerSectionService(pedestalService, supplySessionManager, eventService,
-            applicationContext);
+            applicationContext, mock(io.pillopl.persistence.dao.PowerSectionDao.class),
+            mock(io.pillopl.persistence.dao.SocketDao.class), mock(io.pillopl.group.GroupService.class),
+            mock(io.pillopl.user.PrincipalResolver.class), new io.pillopl.util.DateService());
 
     final Socket socket = new Socket();
     final PowerSection section = new PowerSection("Meadow", new BigDecimal("32"), "meadowAlgorithm");
@@ -135,5 +137,45 @@ class PowerSectionServiceTest {
         assertThat(event.getType()).isEqualTo(EventType.POWER_SECTION_MISCONFIGURED);
         assertThat(PowerSectionMisconfiguredEvent.getPowerSectionId(event)).isEqualTo(7L);
         assertThat(PowerSectionMisconfiguredEvent.getProblem(event)).isEqualTo(problem);
+    }
+
+    @Test
+    void capacityMustBePositiveWithAtMostTwoDecimals() {
+        assertThat(PowerSectionService.checkedCapacity(new BigDecimal("63.5"))).isEqualByComparingTo("63.50");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.checkedCapacity(null))
+                .isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.checkedCapacity(
+                new BigDecimal("-1"))).isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.checkedCapacity(
+                new BigDecimal("16.125"))).isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.checkedCapacity(
+                new BigDecimal("1000000"))).isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+    }
+
+    @Test
+    void onlyASectionAlgorithmBeanCanBeSelected() {
+        when(applicationContext.getBeansOfType(SectionPowerAlgorithm.class))
+                .thenReturn(java.util.Map.of("nominalCurrentSum", algorithm));
+
+        assertThat(service.checkedAlgorithm(" nominalCurrentSum ")).isEqualTo("nominalCurrentSum");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.checkedAlgorithm("forecast"))
+                .isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.checkedAlgorithm(null))
+                .isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+    }
+
+    @Test
+    void openLoadPeriodIsTheLastDayAndLongPeriodsAreRefused() {
+        java.time.LocalDateTime now = java.time.LocalDateTime.of(2026, 7, 10, 15, 20);
+
+        assertThat(PowerSectionService.loadRange(null, now)).containsExactly(now.minusHours(24), now);
+        assertThat(PowerSectionService.loadRange(new io.pillopl.commons.DateRange(now.minusDays(2), null), now))
+                .containsExactly(now.minusDays(2), now);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.loadRange(
+                new io.pillopl.commons.DateRange(now.minusDays(32), now), now))
+                .isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> PowerSectionService.loadRange(
+                new io.pillopl.commons.DateRange(now, now), now))
+                .isInstanceOf(io.pillopl.api.exception.InvalidInputException.class);
     }
 }
