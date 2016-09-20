@@ -20,6 +20,17 @@ class ReceptionHoursTest {
     }
 
     @Test
+    void receptionIsClosedDuringTheLunchBreakBetweenTwoRowsOfTheSameDay() {
+        Location location = new Location("Rovinj", "52210", "Obala", "12");
+        location.addReceptionHours(morning);
+        location.addReceptionHours(new ReceptionHours(DayOfWeek.SATURDAY, LocalTime.of(14, 0), LocalTime.of(18, 0)));
+
+        assertThat(location.getReceptionHours()).noneMatch(h -> h.isOpenAt(DayOfWeek.SATURDAY, LocalTime.of(13, 0)));
+        assertThat(location.getReceptionHours()).anyMatch(h -> h.isOpenAt(DayOfWeek.SATURDAY, LocalTime.of(15, 30)));
+        assertThat(location.getReceptionHours()).allMatch(h -> h.getLocation() == location);
+    }
+
+    @Test
     void receptionHoursOfAnotherDayDoNotApply() {
         assertThat(morning.isOpenAt(DayOfWeek.SUNDAY, LocalTime.of(9, 0))).isFalse();
     }
