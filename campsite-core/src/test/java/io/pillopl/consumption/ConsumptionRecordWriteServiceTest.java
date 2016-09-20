@@ -243,6 +243,18 @@ class ConsumptionRecordWriteServiceTest {
     }
 
     @Test
+    void failingNotificationDoesNotLoseTheSuspectRecord() {
+        org.mockito.Mockito.doThrow(new IllegalStateException("mail server down")).when(notifier)
+                .suspectRecordCreated(any(ConsumptionRecord.class));
+
+        ConsumptionRecord record = create(validated(card, null), "650", true);
+
+        assertThat(record.isSuspect()).isTrue();
+        verify(dao).save(record);
+        verify(notifier).suspectRecordCreated(record);
+    }
+
+    @Test
     void sessionWithARecordGetsNoSecondRecord() {
         ConsumptionRecord existing = new ConsumptionRecord();
         existing.setRecordNo("BAY-20260712-000001");
