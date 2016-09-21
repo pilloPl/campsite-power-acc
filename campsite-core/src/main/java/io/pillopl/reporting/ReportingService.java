@@ -79,22 +79,22 @@ public class ReportingService {
             LocalDate nextPeriodStart = nextPeriod(timeResolution, periodStart);
             String period = periodLabel(timeResolution, periodStart);
 
-            List<Object[]> resList = consumptionReportDao.sumKwhPerPedestal(periodStart.atStartOfDay(),
+            List<Object[]> pedestalSums = consumptionReportDao.sumKwhPerPedestal(periodStart.atStartOfDay(),
                     nextPeriodStart.atStartOfDay(), selectedPedestalCodes, siteGroupId, issuerGroupId);
-            Map<String, Object[]> resMap = new HashMap<>();
-            for (Object[] res : resList) {
-                resMap.put((String) res[0], res);
+            Map<String, Object[]> sumPerPedestal = new HashMap<>();
+            for (Object[] pedestalSum : pedestalSums) {
+                sumPerPedestal.put((String) pedestalSum[0], pedestalSum);
             }
 
             BigDecimal sumOfKwh = BigDecimal.ZERO;
             long sumOfRecords = 0;
             Map<String, ReportLineDTO> periodLines = new LinkedHashMap<>();
             for (String pedestalCode : selectedPedestalCodes) {
-                Object[] resLine = resMap.get(pedestalCode);
-                if (resLine != null) {
-                    BigDecimal kwh = ((BigDecimal) resLine[1]).setScale(CampsiteReportService.KWH_SCALE,
+                Object[] pedestalSum = sumPerPedestal.get(pedestalCode);
+                if (pedestalSum != null) {
+                    BigDecimal kwh = ((BigDecimal) pedestalSum[1]).setScale(CampsiteReportService.KWH_SCALE,
                             RoundingMode.HALF_UP);
-                    long records = (Long) resLine[2];
+                    long records = (Long) pedestalSum[2];
                     periodLines.put(pedestalCode, new ReportLineDTO(period, pedestalCode, kwh, records, null));
                     sumOfKwh = sumOfKwh.add(kwh);
                     sumOfRecords = sumOfRecords + records;
