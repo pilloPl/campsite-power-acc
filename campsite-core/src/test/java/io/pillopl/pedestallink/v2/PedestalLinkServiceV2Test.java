@@ -3,6 +3,7 @@ package io.pillopl.pedestallink.v2;
 import io.pillopl.card.Authorization;
 import io.pillopl.card.ValidationStatus;
 import io.pillopl.config.SystemPropertyService;
+import io.pillopl.dto.pedestallink.v1.BootRequest;
 import io.pillopl.dto.pedestallink.v2.SocketStatusRequest;
 import io.pillopl.dto.pedestallink.v2.VendorDataRequest;
 import io.pillopl.event.Event;
@@ -96,6 +97,15 @@ class PedestalLinkServiceV2Test {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> PedestalLinkServiceV2.translateStatus(null))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void unknownPedestalIsRejectedAtBootAndOnlyAcknowledgedAtHeartbeat() {
+        assertThat(service.boot("HR-NOWHERE", new BootRequest(MANUFACTURER, "AT-2", null, null, null, null, null))
+                .status()).isEqualTo("REJECTED");
+        assertThat(service.heartbeat("HR-NOWHERE").currentTime()).isEqualTo(now);
+
+        verify(pedestalService, never()).registerIncoming(any(), any());
     }
 
     @Test
