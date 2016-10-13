@@ -121,6 +121,21 @@ class IssuerExchangeImportServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void pitchAndNightsOfTheLineAreKeptWhenThePartnerSendsNoPlugIn() {
+        ConsumptionRecordDTO withoutPlugIn = new ConsumptionRecordDTO(null, "CLUB-84", null, "CLUB-P001-1", "C-12",
+                null, null, null, null, "8101", null, null, null, true, false, false, null, PLUG_OUT, null, 2,
+                new BigDecimal("7"), null, new BigDecimal("3.10"), "EUR", null, null, null, null, null, null, null,
+                null);
+
+        assertThat(importLines(withoutPlugIn)).hasSize(1);
+
+        ConsumptionRecord record = consumptionRecordDao.findBySourceNameAndExternalRecordNo("RECORD CLUB", "CLUB-84");
+        assertThat(record.getPitchNo()).isEqualTo("C-12");
+        assertThat(record.getNights()).isEqualTo(2);
+        assertThat(record.getDurationSeconds()).isNull();
+    }
+
+    @Test
     void lineWithoutRecordNumberCardSocketOrPlugOutIsRefused() {
         ConsumptionRecordDTO noPlugOut = new ConsumptionRecordDTO(null, "CLUB-81", null, "CLUB-P001-1", null, null,
                 null, null, null, "8101", null, null, null, true, false, false, PLUG_IN, null, null, 1,
