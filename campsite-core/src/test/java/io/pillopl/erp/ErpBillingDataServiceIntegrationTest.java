@@ -1,10 +1,15 @@
 package io.pillopl.erp;
 
+import io.pillopl.api.exception.AccessNotAllowedException;
+import io.pillopl.api.exception.ConflictException;
+import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.card.CampingCard;
 import io.pillopl.consumption.ConsumptionRecord;
 import io.pillopl.consumption.ExportStatus;
 import io.pillopl.consumption.PaymentChannel;
 import io.pillopl.consumption.SettlementFlags;
+import io.pillopl.dto.erp.ErpBillingLineDTO;
+import io.pillopl.dto.erp.ErpBillingRunDTO;
 import io.pillopl.erp.ErpBillingLine.LineType;
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupManager;
@@ -19,10 +24,14 @@ import io.pillopl.persistence.dao.CampingCardDao;
 import io.pillopl.persistence.dao.ConsumptionRecordDao;
 import io.pillopl.persistence.dao.SupplySessionDao;
 import io.pillopl.persistence.dao.UserinfoDao;
+import io.pillopl.persistence.dao.UserroleDao;
 import io.pillopl.pricing.PricingStatus;
 import io.pillopl.supply.SupplySession;
 import io.pillopl.test.IntegrationTest;
 import io.pillopl.user.Userinfo;
+import io.pillopl.user.UserinfoStatus;
+import io.pillopl.user.UserroleName;
+import io.pillopl.value.Username;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +72,8 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
     @Autowired SupplySessionDao supplySessionDao;
     @Autowired InfrastructureFixture infrastructure;
     @Autowired EntityManager entityManager;
+    @Autowired ErpBillingApiService erpBillingApi;
+    @Autowired UserroleDao userroleDao;
 
     Pedestal pedestal;
     Order order;
@@ -206,6 +217,69 @@ class ErpBillingDataServiceIntegrationTest extends IntegrationTest {
         assertThat(erpBillingDataService.findRecordsWithoutExport()).extracting(ConsumptionRecord::getId)
                 .contains(withoutAccount.getId())
                 .doesNotContain(recent.getId(), notBillable.getId(), settledByCampsite.getId());
+    }
+
+    @Test
+    void backOfficePreviewsAndRunsTheMonthOnceAndFollowsTheRunPerExportStatus() {
+        record("700", LocalDateTime.of(2026, 6, 20, 10, 0), SEASONAL_TARIFF);
+        Username office = staff("erp-backoffice", UserroleName.BACK_OFFICE);
+
+        List<ErpBillingLineDTO> preview = erpBillingApi.previewErpBilling(office, 6, 2026);
+        assertThat(preview).extracting(ErpBillingLineDTO::lineType).containsExactly("FIXED_FEE", "PACKAGE_OVERAGE");
+        assertThat(preview).allSatisfy(line -> assertThat(line.id()).isNull());
+        assertThat(erpBillingApi.findErpBillingRuns(office)).extracting(ErpBillingRunDTO::billingPeriod)
+                .doesNotContain("2026_06");
+
+        List<ErpBillingLineDTO> run = erpBillingApi.runErpBilling(office, 6, 2026);
+        assertThat(run).extracting(ErpBillingLineDTO::articleNo).containsExactly("ART-SEASON-FIX", "ART-SEASON-KWH");
+        assertThat(run).allSatisfy(line -> assertThat(line.id()).isNotNull());
+        assertThatThrownBy(() -> erpBillingApi.runErpBilling(office, 6, 2026)).isInstanceOf(ConflictException.class);
+
+        erpBillingDataService.markLinesTransferred(erpBillingDataService.findErpBillingLines("2026_06"));
+        erpBillingDataService.takeErpAnswer("2026_06", ACCOUNT, "ART-SEASON-FIX", true, null);
+        erpBillingDataService.takeErpAnswer("2026_06", ACCOUNT, "ART-SEASON-KWH", false, "article blocked");
+
+        ErpBillingRunDTO june = erpBillingApi.findErpBillingRuns(office).stream()
+                .filter(r -> r.billingPeriod().equals("2026_06")).findFirst().orElseThrow();
+        assertThat(june.lines()).isEqualTo(2);
+        assertThat(june.accounts()).isEqualTo(1);
+        assertThat(june.amount()).isEqualByComparingTo(run.get(0).amount().add(run.get(1).amount()));
+        assertThat(june.linesPerExportStatus()).containsEntry("PROCESSED", 1).containsEntry("ERROR", 1);
+        assertThat(erpBillingApi.findErpBillingLines(office, "2026_06", "error")).singleElement()
+                .satisfies(line -> assertThat(line.errorText()).isEqualTo("article blocked"));
+
+        assertThat(erpBillingApi.retryErpExport(office, "2026_06")).isEqualTo(1);
+        assertThat(erpBillingApi.findErpBillingLines(office, "2026_06", null))
+                .extracting(ErpBillingLineDTO::exportStatus).containsExactly("PROCESSED", "NEW");
+    }
+
+    @Test
+    void erpTabNeedsTheReportRightToReadAndTheBillingRightToRun() {
+        Username desk = staff("erp-desk", UserroleName.RECEPTION);
+        Username office = staff("erp-backoffice", UserroleName.BACK_OFFICE);
+
+        assertThatThrownBy(() -> erpBillingApi.previewErpBilling(desk, 6, 2026))
+                .isInstanceOf(AccessNotAllowedException.class);
+        assertThatThrownBy(() -> erpBillingApi.runErpBilling(desk, 6, 2026))
+                .isInstanceOf(AccessNotAllowedException.class);
+        assertThatThrownBy(() -> erpBillingApi.retryErpExport(desk, "2026_06"))
+                .isInstanceOf(AccessNotAllowedException.class);
+        assertThatThrownBy(() -> erpBillingApi.findErpBillingLines(office, null, null))
+                .isInstanceOf(InvalidInputException.class);
+        assertThatThrownBy(() -> erpBillingApi.findErpBillingLines(office, "2026_06", "LOST"))
+                .isInstanceOf(InvalidInputException.class);
+        assertThatThrownBy(() -> erpBillingApi.previewErpBilling(office, 13, 2026))
+                .isInstanceOf(InvalidInputException.class);
+        assertThat(erpBillingApi.findRecordsWithoutExport(office)).isNotNull();
+    }
+
+    private Username staff(String username, UserroleName role) {
+        Userinfo user = new Userinfo(username, username, username + "@example.org");
+        user.setStatus(UserinfoStatus.ACTIVE);
+        user.setGroup(groupService.fetchStaffGroup("HR STAFF"));
+        user.getRoles().add(userroleDao.findByName(role.name()));
+        userinfoDao.saveAndFlush(user);
+        return Username.of(username);
     }
 
     private ExportStatus exportStatus(ConsumptionRecord record) {
