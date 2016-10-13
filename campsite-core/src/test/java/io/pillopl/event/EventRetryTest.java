@@ -76,6 +76,14 @@ class EventRetryTest {
     }
 
     @Test
+    void eventWithoutAttributesIsKeptAsEmptyTextAndReadBackEmpty() {
+        EventRetry retry = EventRetry.of(new Event(EventType.BOOT_NOTIFICATION), "first", now);
+
+        assertThat(retry.getAttributes()).isEmpty();
+        assertThat(retry.toEvent().getAttributes()).isEmpty();
+    }
+
+    @Test
     void longFailureIsCut() {
         EventRetry retry = EventRetry.of(new Event(EventType.BOOT_NOTIFICATION), "x".repeat(2000), now);
 
