@@ -1,6 +1,7 @@
 package io.pillopl.issuer;
 
 import io.pillopl.group.Group;
+import io.pillopl.group.GroupType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -104,6 +105,49 @@ public class IssuerPartner {
         this.issuerGroup = issuerGroup;
         this.interfaceVersion = interfaceVersion;
         this.endpoint = endpoint;
+    }
+
+    /**
+     * The rules of ISSUER_PARTNER: a name of at most 100 characters, an endpoint, an ISSUER group of the cards, a SITE
+     * group (the partner's own campsites) for the card export and the record import.
+     *
+     * @throws IllegalArgumentException naming the first broken rule
+     */
+    public void validate() {
+        if (name == null || name.isBlank() || name.length() > 100) {
+            throw new IllegalArgumentException("Partner name must have 1 to 100 characters");
+        }
+        if (endpoint == null || endpoint.isBlank() || endpoint.length() > 500) {
+            throw new IllegalArgumentException("Partner endpoint must have 1 to 500 characters");
+        }
+        if (issuerGroup == null || !GroupType.ISSUER.name().equals(issuerGroup.getType())) {
+            throw new IllegalArgumentException("The cards of a partner hang in an ISSUER group");
+        }
+        if (siteGroup != null && !GroupType.SITE.name().equals(siteGroup.getType())) {
+            throw new IllegalArgumentException("The campsites of a partner hang in a SITE group");
+        }
+        if (siteGroup == null && (cardExport || recordImport)) {
+            throw new IllegalArgumentException("Card export and record import need the SITE group of the partner");
+        }
+    }
+
+    /**
+     * The directions switched on for the partner, in the order of {@link IssuerSyncStatus.Direction}.
+     */
+    public List<IssuerSyncStatus.Direction> getDirections() {
+        List<IssuerSyncStatus.Direction> directions = new ArrayList<>();
+        for (IssuerSyncStatus.Direction direction : IssuerSyncStatus.Direction.values()) {
+            boolean on = switch (direction) {
+                case CARD_IMPORT -> cardImport;
+                case CARD_EXPORT -> cardExport;
+                case RECORD_EXPORT -> recordExport;
+                case RECORD_IMPORT -> recordImport;
+            };
+            if (on) {
+                directions.add(direction);
+            }
+        }
+        return directions;
     }
 
     public boolean isExchanging() {

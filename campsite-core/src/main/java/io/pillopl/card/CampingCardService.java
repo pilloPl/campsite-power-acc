@@ -131,6 +131,29 @@ public class CampingCardService {
     }
 
     /**
+     * The card goes to the issuer partners again with the next card export: a blocked card as a delete, any other as
+     * a change (an add when the partners never got it).
+     *
+     * @throws IllegalStateException when the card is kept out of the exchange for good, or the partners never got a
+     *                               card that is blocked (nothing to send)
+     */
+    @Transactional
+    public CampingCard requestPartnerResync(Userinfo principal, Long cardId) {
+        CampingCard card = getCard(cardId);
+        checkIsManageable(principal, card);
+        if (card.getPartnerSyncState() == PartnerSyncState.NEVER) {
+            throw new IllegalStateException("Card " + card.getCardNumber() + " is kept out of the partner exchange");
+        }
+        card.calculatePartnerSyncState(card.getActivation() == CardActivation.DEACTIVATED ? PartnerSyncState.DELETE
+                : PartnerSyncState.MODIFY);
+        if (!card.getPartnerSyncState().isExported()) {
+            throw new IllegalStateException("Card " + card.getCardNumber() + " has nothing to send to the partners ("
+                    + card.getPartnerSyncState() + ")");
+        }
+        return campingCardDao.save(card);
+    }
+
+    /**
      * The stay was extended or shortened.
      */
     @Transactional

@@ -15,4 +15,6 @@ public interface IssuerPartnerDao extends JpaRepository<IssuerPartner, Long> {
      */
     @Query("select p from IssuerPartner p where p.deleted = false and p.active = true order by p.name")
     List<IssuerPartner> findExchanging();
+
+    List<IssuerPartner> findByDeletedFalseOrderByName();
 }
