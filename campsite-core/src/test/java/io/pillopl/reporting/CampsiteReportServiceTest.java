@@ -151,6 +151,17 @@ class CampsiteReportServiceTest {
     }
 
     @Test
+    void campsiteWithoutNightsIsLeftOutOfTheStayNightReport() {
+        when(dao.getConsumptionPerStayNight(FROM, TO, SITE, null, null)).thenReturn(List.of(
+                new ReportLineDTO("BAY", null, new BigDecimal("12"), 0, null),
+                new ReportLineDTO("LAKE", null, new BigDecimal("10"), 2, null)));
+
+        assertThat(service.getConsumptionPerStayNight(FROM, TO, SITE, null, null))
+                .extracting(ReportLineDTO::period, ReportLineDTO::kwh)
+                .containsExactly(tuple("LAKE", new BigDecimal("5.000")));
+    }
+
+    @Test
     void topPitchesReportTakesAsManyRowsAsConfigured() {
         when(systemPropertyService.getReportTopPitchesMaxRows()).thenReturn(5);
         List<ReportLineDTO> top = List.of(new ReportLineDTO("A12", "BAY", new BigDecimal("80"), 4, null));

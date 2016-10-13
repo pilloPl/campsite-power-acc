@@ -278,6 +278,11 @@ public class CampsiteReportService {
         List<ReportLineDTO> lines = new ArrayList<>();
         for (ReportLineDTO campsite : consumptionReportDao.getConsumptionPerStayNight(from, to, siteGroupId,
                 issuerGroupId, powerSectionId)) {
+            if (campsite.count() <= 0 || campsite.kwh() == null) {
+                // no night to divide by: the campsite has no kWh per night, not an arithmetic error
+                LOG.debug("Campsite {} without stay nights left out of the stay night report", campsite.period());
+                continue;
+            }
             BigDecimal kwhPerNight = campsite.kwh().divide(BigDecimal.valueOf(campsite.count()), KWH_SCALE,
                     RoundingMode.HALF_UP);
             lines.add(new ReportLineDTO(campsite.period(), null, kwhPerNight, campsite.count(), null));
