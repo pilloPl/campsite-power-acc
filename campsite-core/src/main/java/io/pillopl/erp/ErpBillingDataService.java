@@ -257,10 +257,18 @@ public class ErpBillingDataService {
                 totalAmount = totalAmount.add(line.getAmount());
             }
             if (totalAmount.compareTo(c_minimumBillAmount) < 0) {
-                LOG.warn(String.format("Bill of account %s in %s is %s, below the minimum of %s: not sent, the power"
-                                + " waits for the next run", account.getErpAccountNo(), period, totalAmount,
-                        c_minimumBillAmount));
-                continue;
+                // The power waits for the next run (its records stay NEW and come again); the share of a fixed fee
+                // belongs to this period only and would be lost, so it is billed in spite of the minimum.
+                if (!keepOnlyFixedFees(linesPerArticleNo)) {
+                    LOG.warn(String.format("Bill of account %s in %s is %s, below the minimum of %s: not sent, the"
+                                    + " power waits for the next run", account.getErpAccountNo(), period, totalAmount,
+                            c_minimumBillAmount));
+                    continue;
+                }
+                LOG.warn(String.format("Bill of account %s in %s is %s, below the minimum of %s: only the fixed fee"
+                                + " is sent, the power waits for the next run", account.getErpAccountNo(), period,
+                        totalAmount, c_minimumBillAmount));
+                accountBilledConsumption.clear();
             }
 
             Guest guest = account.getGuest();
@@ -293,6 +301,20 @@ public class ErpBillingDataService {
         }
 
         return erpBillingLines;
+    }
+
+    /**
+     * Below the minimum bill only the fixed fee lines of the account stay (review S10).
+     *
+     * @return false when the account has no fixed fee line (then nothing is billed)
+     */
+    static boolean keepOnlyFixedFees(Map<String, ErpBillingLine> linesPerArticleNo) {
+        boolean hasFixedFee = linesPerArticleNo.values().stream()
+                .anyMatch(line -> line.getLineType() == LineType.FIXED_FEE);
+        if (hasFixedFee) {
+            linesPerArticleNo.values().removeIf(line -> line.getLineType() != LineType.FIXED_FEE);
+        }
+        return hasFixedFee;
     }
 
     /**

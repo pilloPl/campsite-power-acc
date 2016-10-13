@@ -147,6 +147,23 @@ class ErpBillingDataServiceTest {
     }
 
     @Test
+    void fixedFeeBelowTheMinimumIsBilledAndThePowerWaitsForTheNextRun() {
+        SeasonalContract contract = contract(LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31), "3.00",
+                SeasonalContract.FeePeriod.MONTHLY, "100");
+        when(contractService.findContractsActiveIn(eq(10L), eq(JULY.getFirstDay()), eq(JULY.getLastDay())))
+                .thenReturn(List.of(contract));
+        consumption.add(new ErpConsumption(ACCOUNT, 1L, false, "2026_07", new BigDecimal("2"),
+                new BigDecimal("0.90"), 1));
+        java.util.Set<ErpConsumption> billed = new java.util.LinkedHashSet<>();
+
+        List<ErpBillingLine> lines = service.findAndCalculateErpBillingLines(7, 2026, billed);
+
+        assertThat(lines).extracting(ErpBillingLine::getLineType, ErpBillingLine::getAmount)
+                .containsExactly(tuple(LineType.FIXED_FEE, new BigDecimal("3.00")));
+        assertThat(billed).as("the power records stay NEW for the next run").isEmpty();
+    }
+
+    @Test
     void accountClosedBeforeThePeriodIsNotBilled() {
         account.close(LocalDateTime.of(2026, 6, 30, 18, 0));
         consumption.add(new ErpConsumption(ACCOUNT, 1L, false, "2026_06", new BigDecimal("16"),
