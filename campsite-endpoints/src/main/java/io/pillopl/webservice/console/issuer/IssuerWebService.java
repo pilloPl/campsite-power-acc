@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Web service of the exchange with the issuer partners.
+ * Web service of the issuer exchange tab: partners, the sync state matrix, the run of the exchange and a card sent
+ * to the partners again.
  */
 @RestController
 @RequestMapping(WebServicePaths.ISSUER)
@@ -25,6 +26,32 @@ public class IssuerWebService extends AbstractWebService<IssuerApi, IssuerWebSer
             throws IssuerWebServiceFault {
         return invoke("runIssuerExchange", () -> new RunIssuerExchangeResponse(
                 getBean().runIssuerExchange(caller())));
+    }
+
+    @PostMapping("/findIssuerPartners")
+    public FindIssuerPartnersResponse findIssuerPartners(@RequestBody FindIssuerPartnersRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("findIssuerPartners", () -> new FindIssuerPartnersResponse(getBean().findIssuerPartners(
+                caller())));
+    }
+
+    @PostMapping("/saveIssuerPartner")
+    public SaveIssuerPartnerResponse saveIssuerPartner(@RequestBody SaveIssuerPartnerRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("saveIssuerPartner", () -> new SaveIssuerPartnerResponse(getBean().saveIssuerPartner(
+                caller(), request.partner())));
+    }
+
+    @PostMapping("/findIssuerSyncStatuses")
+    public FindIssuerSyncStatusesResponse findIssuerSyncStatuses(@RequestBody FindIssuerSyncStatusesRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("findIssuerSyncStatuses", () -> new FindIssuerSyncStatusesResponse(
+                getBean().findIssuerSyncStatuses(caller())));
+    }
+
+    @PostMapping("/resyncCard")
+    public ResyncCardResponse resyncCard(@RequestBody ResyncCardRequest request) throws IssuerWebServiceFault {
+        return invoke("resyncCard", () -> new ResyncCardResponse(getBean().resyncCard(caller(), request.cardId())));
     }
 
     @Override
