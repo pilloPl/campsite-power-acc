@@ -4,6 +4,7 @@ import io.pillopl.api.IssuerApi;
 import io.pillopl.api.exception.ConflictException;
 import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.api.exception.ObjectNotFoundException;
+import io.pillopl.card.CampingCard;
 import io.pillopl.card.CampingCardService;
 import io.pillopl.card.CardMapper;
 import io.pillopl.commons.TextUtil;
@@ -159,8 +160,11 @@ public class IssuerApiService implements IssuerApi {
     public CampingCardDTO resyncCard(Username authUsername, Long cardId) {
         try {
             Userinfo principal = principalResolver.resolve(authUsername, UserrightName.BILLING_EDIT);
-            LOG.info(String.format("Card %s sent to the partners again by %s", cardId, principal.getUsername()));
-            return CardMapper.toDTO(campingCardService.requestPartnerResync(principal, cardId), dateService.getNow());
+            CampingCard card = campingCardService.requestPartnerResync(principal, cardId);
+            // logged only once the resync was accepted: a card kept out of the exchange throws before
+            LOG.info(String.format("Card %s marked %s for the partners by %s", cardId, card.getPartnerSyncState(),
+                    principal.getUsername()));
+            return CardMapper.toDTO(card, dateService.getNow());
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }
