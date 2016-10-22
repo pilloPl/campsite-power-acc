@@ -325,8 +325,7 @@ public class CampsiteReportService {
             }
             Map<String, Long> perPedestal = countPerTypeAndPedestal.computeIfAbsent(
                     incident.getIncidentType().name(), type -> new TreeMap<>());
-            Long count = perPedestal.get(incident.getPedestalCode());
-            perPedestal.put(incident.getPedestalCode(), count == null ? 1L : count + 1);
+            perPedestal.merge(incident.getPedestalCode(), 1L, Long::sum);
         }
         for (Map.Entry<String, Map<String, Long>> type : countPerTypeAndPedestal.entrySet()) {
             for (Map.Entry<String, Long> pedestal : type.getValue().entrySet()) {
