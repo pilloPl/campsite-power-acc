@@ -311,6 +311,23 @@ class ConsumptionRecordWriteServiceTest {
     }
 
     @Test
+    void confirmedImportedRecordKeepsThePriceOfItsPartner() {
+        ConsumptionRecord imported = create(validated(card, null), "650", true);
+        imported.setSourceName("PARTNER");
+        imported.setCost(new BigDecimal("210.00"));
+        imported.setCurrency("EUR");
+        when(dao.findById(9L)).thenReturn(Optional.of(imported));
+
+        writeService.confirmRecord(9L, "admin", "partner checked the meter");
+
+        assertThat(imported.getValidationState()).isEqualTo(RecordValidationState.CONFIRMED);
+        assertThat(imported.getPricingStatus()).isEqualTo(PricingStatus.PRICED);
+        assertThat(imported.getCost()).isEqualByComparingTo("210.00");
+        assertThat(imported.getExportStatus()).isEqualTo(ExportStatus.NEW);
+        verify(pricingService, never()).calculateCost(any(PricingInput.class));
+    }
+
+    @Test
     void recordWithFailedPricingIsPricedAgainAfterTheTariffFixAndGoesToExport() {
         ConsumptionRecord record = create(validated(card, null), null, true);
         assertThat(record.getExportStatus()).isEqualTo(ExportStatus.REVIEW);
