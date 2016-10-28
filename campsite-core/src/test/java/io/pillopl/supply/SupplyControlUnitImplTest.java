@@ -68,11 +68,12 @@ class SupplyControlUnitImplTest {
     final ObjectProvider<CheckedOutStayFinder> stayFinderProvider = mock(ObjectProvider.class);
     final CheckedOutStayFinder stayFinder = mock(CheckedOutStayFinder.class);
     final ConsumptionRecordWriteService consumptionRecordWriteService = mock(ConsumptionRecordWriteService.class);
+    final RemoteSupplyControl remoteSupplyControl = mock(RemoteSupplyControl.class);
 
     final SupplyControlUnitImpl controlUnit = new SupplyControlUnitImpl(dateService, sessionManager,
             validationService, pedestalService, pricingService, eventService, supplyIncidentDao,
             systemPropertyService, stayFinderProvider, consumptionRecordWriteService,
-            mock(PlatformTransactionManager.class));
+            mock(PlatformTransactionManager.class), remoteSupplyControl);
 
     final Pedestal pedestal = new Pedestal();
     final Socket socket = new Socket();
@@ -435,6 +436,87 @@ class SupplyControlUnitImplTest {
 
     private SupplyRequest stop(Integer transactionId) {
         return SupplyRequest.stop(transactionId, new BigDecimal("1262.5"), NOW, null);
+    }
+
+    // ------------------------------------------------------------------------------------------ console
+
+    @Test
+    void consoleClosesOnlyActiveSessionsThatAreSilentForTheTimeout() {
+        SupplySession closed = session(card, null, false);
+        SupplySession reporting = session(card, null, true);
+        when(sessionManager.findStaleSessions(NOW, 24)).thenReturn(List.of());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.closeStaleSession(closed))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("closed already");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.closeStaleSession(reporting))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("still reports");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.closeStaleSession(null))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(consumptionRecordWriteService, never()).createConsumptionRecord(any(), any(), any(), any(),
+                anyBoolean(), any(), any());
+    }
+
+    @Test
+    void consoleStopIsSentToThePedestalOfAnActiveSessionWithRemoteControl() {
+        SupplySession active = session(card, null, true);
+        when(remoteSupplyControl.remoteSupplyStop(pedestal, 1001)).thenReturn(true);
+
+        controlUnit.requestSupplyStop(active);
+
+        verify(remoteSupplyControl).remoteSupplyStop(pedestal, 1001);
+    }
+
+    @Test
+    void consoleStopIsRefusedForClosedSessionsPedestalsWithoutRemoteControlAndARefusingPedestal() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStop(
+                session(card, null, false))).isInstanceOf(IllegalStateException.class);
+
+        SupplySession active = session(card, null, true);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStop(active))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("did not accept");
+
+        pedestal.setRemoteControl(false);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStop(active))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("cannot be controlled remotely");
+        verify(remoteSupplyControl, org.mockito.Mockito.times(1)).remoteSupplyStop(any(), org.mockito.ArgumentMatchers.anyInt());
+    }
+
+    @Test
+    void consoleStartNeedsAFreeSocketAndAnAcceptedCardBeforeThePedestalIsAsked() {
+        when(validationService.validateFor(SOCKET_1, RFID, NOW, false))
+                .thenReturn(result(ValidationStatus.BLOCKED, card, null));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStart(socket, RFID))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("BLOCKED");
+
+        when(validationService.validateFor(SOCKET_1, RFID, NOW, false))
+                .thenReturn(result(ValidationStatus.ACCEPTED, card, null));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStart(socket, RFID))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("did not accept");
+        when(remoteSupplyControl.remoteSupplyStart(pedestal, 1, RFID)).thenReturn(true);
+        controlUnit.requestSupplyStart(socket, RFID);
+
+        when(sessionManager.getActiveSession(socket)).thenReturn(session(card, null, true));
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.requestSupplyStart(socket, RFID))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("supplying already");
+        verify(remoteSupplyControl, org.mockito.Mockito.times(2)).remoteSupplyStart(pedestal, 1, RFID);
+    }
+
+    @Test
+    void incidentIsReviewedOnlyOnce() {
+        SupplyIncident incident = new SupplyIncident(IncidentType.NO_SESSION, PEDESTAL, "Stop without session",
+                PLUG_IN);
+        when(supplyIncidentDao.findById(41L)).thenReturn(java.util.Optional.of(incident));
+        when(supplyIncidentDao.saveAndFlush(incident)).thenReturn(incident);
+
+        controlUnit.reviewIncident(41L, "service", "  meter replaced ");
+
+        assertThat(incident.getReviewedBy()).isEqualTo("service");
+        assertThat(incident.getReviewDate()).isEqualTo(NOW);
+        assertThat(incident.getReviewComment()).isEqualTo("meter replaced");
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.reviewIncident(41L, "other", null))
+                .isInstanceOf(IllegalStateException.class);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.reviewIncident(42L, "other", null))
+                .isInstanceOf(java.util.NoSuchElementException.class);
     }
 
     private ValidationResult validatedForStart(ValidationStatus status, CampingCard card, HouseCard houseCard) {

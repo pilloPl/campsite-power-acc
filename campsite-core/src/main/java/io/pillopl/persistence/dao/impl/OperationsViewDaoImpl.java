@@ -1,0 +1,132 @@
+package io.pillopl.persistence.dao.impl;
+
+import io.pillopl.commons.ListPage;
+import io.pillopl.commons.Pagination;
+import io.pillopl.dto.supply.SupplyIncidentDTO;
+import io.pillopl.dto.supply.SupplySessionDTO;
+import io.pillopl.persistence.dao.OperationsViewDao;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * SQL of the service tabs from the SQL map on {@link NamedParameterJdbcTemplate}. The page total comes with every
+ * row (COUNT(*) OVER ()), an empty page has total 0.
+ */
+@Repository
+public class OperationsViewDaoImpl implements OperationsViewDao {
+
+    @Value("#{sqls['findSupplySessionsPage']}")
+    private String findSupplySessionsPage;
+
+    @Value("#{sqls['findSupplyIncidentsPage']}")
+    private String findSupplyIncidentsPage;
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    public OperationsViewDaoImpl(NamedParameterJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public ListPage<SupplySessionDTO> findSupplySessions(Long siteGroupId, String pedestalCode, String socketCode,
+                                                         boolean activeOnly, LocalDateTime from, LocalDateTime to,
+                                                         LocalDateTime silentSince, Pagination pagination) {
+        Objects.requireNonNull(silentSince, "silentSince");
+        MapSqlParameterSource params = scope(siteGroupId, from, to, pagination)
+                .addValue("pedestalCode", blankToNull(pedestalCode), Types.VARCHAR)
+                .addValue("socketCode", blankToNull(socketCode), Types.VARCHAR)
+                .addValue("activeOnly", activeOnly, Types.BOOLEAN)
+                .addValue("silentSince", Timestamp.valueOf(silentSince), Types.TIMESTAMP);
+        long[] total = {0};
+        List<SupplySessionDTO> sessions = jdbcTemplate.query(findSupplySessionsPage, params, (rs, rowNum) -> {
+            total[0] = rs.getLong("TOTAL");
+            return toSession(rs);
+        });
+        return ListPage.of(sessions, total[0], pagination);
+    }
+
+    @Override
+    public ListPage<SupplyIncidentDTO> findSupplyIncidents(Long siteGroupId, String pedestalCode,
+                                                           boolean unreviewedOnly, LocalDateTime from,
+                                                           LocalDateTime to, Pagination pagination) {
+        MapSqlParameterSource params = scope(siteGroupId, from, to, pagination)
+                .addValue("pedestalCode", blankToNull(pedestalCode), Types.VARCHAR)
+                .addValue("unreviewedOnly", unreviewedOnly, Types.BOOLEAN);
+        long[] total = {0};
+        List<SupplyIncidentDTO> incidents = jdbcTemplate.query(findSupplyIncidentsPage, params, (rs, rowNum) -> {
+            total[0] = rs.getLong("TOTAL");
+            return new SupplyIncidentDTO(rs.getLong("ID"), rs.getString("INCIDENT_TYPE"),
+                    rs.getString("PEDESTAL_CODE"), rs.getLong("CAMPSITE_GROUP_ID"), integer(rs, "TRANSACTION_ID"),
+                    rs.getString("CARD_RFID"), longOrNull(rs, "SUPPLY_SESSION_ID"), rs.getBigDecimal("METER_KWH"),
+                    toLocal(rs.getTimestamp("REMOTE_DATE")), rs.getString("MESSAGE"),
+                    toLocal(rs.getTimestamp("CREATE_DATE")), rs.getString("REVIEWED_BY"),
+                    toLocal(rs.getTimestamp("REVIEW_DATE")), rs.getString("REVIEW_COMMENT"));
+        });
+        return ListPage.of(incidents, total[0], pagination);
+    }
+
+    /**
+     * An active session shows the socket's last reading as its end and the consumption so far.
+     */
+    private static SupplySessionDTO toSession(ResultSet rs) throws SQLException {
+        boolean active = rs.getBoolean("ACTIVE");
+        BigDecimal startMeter = rs.getBigDecimal("START_METER_KWH");
+        BigDecimal stopMeter = active ? rs.getBigDecimal("SOCKET_METER_KWH") : rs.getBigDecimal("STOP_METER_KWH");
+        BigDecimal kwh = active
+                ? (startMeter != null && stopMeter != null ? stopMeter.subtract(startMeter).max(BigDecimal.ZERO) : null)
+                : rs.getBigDecimal("KWH");
+        LocalDateTime created = toLocal(rs.getTimestamp("CREATE_DATE"));
+        LocalDateTime remote = toLocal(rs.getTimestamp("REMOTE_DATE"));
+        String guestName = rs.getString("GUEST_NAME");
+        return new SupplySessionDTO(rs.getLong("ID"), integer(rs, "TRANSACTION_ID"), active, rs.getBoolean("STALE"),
+                rs.getLong("SOCKET_ID"), rs.getString("SOCKET_CODE"), rs.getString("SOCKET_NAME"),
+                rs.getString("PITCH_NO"), rs.getString("PEDESTAL_CODE"), rs.getLong("CAMPSITE_GROUP_ID"),
+                rs.getString("CAMPSITE_NAME"), rs.getString("CARD_NUMBER"), rs.getString("CARD_RFID"),
+                rs.getString("HOUSE_CARD_TYPE"), longOrNull(rs, "QRPAY_PROCESS_ID"), longOrNull(rs, "STAY_ID"),
+                guestName != null && !guestName.isBlank() ? guestName : null, rs.getString("UNIT_PLATE"),
+                rs.getInt("MAX_CURRENT_A"), remote != null ? remote : created, toLocal(rs.getTimestamp("STOP_DATE")),
+                rs.getString("STOP_REASON"), startMeter, stopMeter, kwh, longOrNull(rs, "RECORD_ID"),
+                toLocal(rs.getTimestamp("SOCKET_MOD_DATE")));
+    }
+
+    static MapSqlParameterSource scope(Long siteGroupId, LocalDateTime from, LocalDateTime to,
+                                       Pagination pagination) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        Pagination page = pagination != null ? pagination : Pagination.FIRST_PAGE;
+        return new MapSqlParameterSource()
+                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
+                .addValue("from", from != null ? Timestamp.valueOf(from) : null, Types.TIMESTAMP)
+                .addValue("to", to != null ? Timestamp.valueOf(to) : null, Types.TIMESTAMP)
+                .addValue("limit", page.rowsPerPage(), Types.INTEGER)
+                .addValue("offset", page.offset(), Types.BIGINT);
+    }
+
+    static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    static LocalDateTime toLocal(Timestamp timestamp) {
+        return timestamp != null ? timestamp.toLocalDateTime() : null;
+    }
+
+    static Long longOrNull(ResultSet rs, String column) throws SQLException {
+        long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
+    }
+
+    static Integer integer(ResultSet rs, String column) throws SQLException {
+        int value = rs.getInt(column);
+        return rs.wasNull() ? null : value;
+    }
+}

@@ -64,6 +64,15 @@ public class SupplyIncident {
     @Column(name = "CREATE_DATE", nullable = false)
     private LocalDateTime createDate;
 
+    @Column(name = "REVIEWED_BY", length = 100)
+    private String reviewedBy;
+
+    @Column(name = "REVIEW_DATE")
+    private LocalDateTime reviewDate;
+
+    @Column(name = "REVIEW_COMMENT", length = 1000)
+    private String reviewComment;
+
     public SupplyIncident() {
     }
 
@@ -72,6 +81,25 @@ public class SupplyIncident {
         this.pedestalCode = pedestalCode;
         this.message = message;
         this.createDate = createDate;
+    }
+
+    public boolean isReviewed() {
+        return reviewedBy != null;
+    }
+
+    /**
+     * The service team looked at the incident (once).
+     *
+     * @throws IllegalStateException when it was reviewed already
+     */
+    public void review(String username, LocalDateTime at, String comment) {
+        if (isReviewed()) {
+            throw new IllegalStateException(String.format("Supply incident %d was reviewed by %s on %s", id,
+                    reviewedBy, reviewDate));
+        }
+        this.reviewedBy = username;
+        this.reviewDate = at;
+        this.reviewComment = comment != null && !comment.isBlank() ? comment.trim() : null;
     }
 
     @Override

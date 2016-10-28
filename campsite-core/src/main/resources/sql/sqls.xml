@@ -191,6 +191,78 @@ SELECT DISTINCT p.ID, p.CODE
  WHERE p.DELETED = FALSE
 ]]></entry>
 
+    <!-- ===== Console operations of the service tabs (dashboard, supply sessions, monitoring, map) ===== -->
+
+    <!--
+      Supply sessions of the pedestals in the subtree of :siteGroupId, optionally of one pedestal or socket, only the
+      active ones, overlapping [:from, :to] (an open session reaches until now): active sessions first, then the
+      newest; TOTAL is the number of matching rows (one page per call). STALE is the stale-session rule of the job:
+      started before :silentSince, no reading or status of the socket and no message of the pedestal since.
+    -->
+    <entry key="findSupplySessionsPage"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT ss.ID, ss.TRANSACTION_ID, ss.ACTIVE, ss.CREATE_DATE, ss.REMOTE_DATE, ss.STOP_DATE, ss.STOP_REASON,
+       ss.START_METER_KWH, ss.MAX_CURRENT_A, ss.STAY_ID, ss.UNIT_PLATE, ss.QRPAY_PROCESS_ID,
+       s.ID AS SOCKET_ID, s.SOCKET_CODE, s.NAME AS SOCKET_NAME, s.PITCH_NO, s.METER_KWH AS SOCKET_METER_KWH,
+       s.MOD_DATE AS SOCKET_MOD_DATE, p.CODE AS PEDESTAL_CODE, g.ID AS CAMPSITE_GROUP_ID,
+       g.DISPLAYNAME AS CAMPSITE_NAME, cc.CARD_NUMBER, COALESCE(cc.CARD_RFID, hc.RFID) AS CARD_RFID,
+       hc.HOUSE_CARD_TYPE, TRIM(CONCAT(gu.FIRST_NAME, ' ', gu.NAME)) AS GUEST_NAME,
+       cr.ID AS RECORD_ID, cr.STOP_METER_KWH, cr.KWH,
+       (ss.ACTIVE
+        AND COALESCE(ss.REMOTE_DATE, ss.CREATE_DATE) < :silentSince
+        AND s.MOD_DATE < :silentSince
+        AND NOT EXISTS (SELECT 1 FROM PEDESTAL_STATE ps
+                         WHERE ps.PEDESTAL_ID = p.ID AND ps.APPROX_LAST_INCOMING >= :silentSince)) AS STALE,
+       COUNT(*) OVER () AS TOTAL
+  FROM SUPPLY_SESSION ss
+  JOIN SOCKET s ON s.ID = ss.SOCKET_ID
+  JOIN PEDESTAL p ON p.ID = s.PEDESTAL_ID
+  JOIN TBL_GROUP g ON g.ID = p.GROUP_ID
+  LEFT JOIN CAMPING_CARD cc ON cc.ID = ss.CARD_ID
+  LEFT JOIN HOUSECARD hc ON hc.ID = ss.HOUSECARD_ID
+  LEFT JOIN STAY st ON st.ID = ss.STAY_ID
+  LEFT JOIN GUEST gu ON gu.ID = COALESCE(st.GUEST_ID, cc.GUEST_ID)
+  LEFT JOIN CONSUMPTION_RECORD cr ON cr.SUPPLY_SESSION_ID = ss.ID
+ WHERE p.GROUP_ID IN (SELECT id FROM site_tree)
+   AND (CAST(:pedestalCode AS VARCHAR) IS NULL OR p.CODE = :pedestalCode)
+   AND (CAST(:socketCode AS VARCHAR) IS NULL OR s.SOCKET_CODE = :socketCode)
+   AND (:activeOnly = FALSE OR ss.ACTIVE = TRUE)
+   AND (CAST(:from AS TIMESTAMP) IS NULL OR ss.ACTIVE = TRUE OR ss.STOP_DATE >= :from)
+   AND (CAST(:to AS TIMESTAMP) IS NULL OR COALESCE(ss.REMOTE_DATE, ss.CREATE_DATE) <= :to)
+ ORDER BY ss.ACTIVE DESC, COALESCE(ss.REMOTE_DATE, ss.CREATE_DATE) DESC, ss.ID DESC
+ LIMIT :limit OFFSET :offset
+]]></entry>
+
+    <!--
+      Supply incidents of the pedestals in the subtree of :siteGroupId (by pedestal code), optionally of one pedestal,
+      only the unreviewed ones, created in [:from, :to]; newest first, TOTAL as above.
+    -->
+    <entry key="findSupplyIncidentsPage"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT i.ID, i.INCIDENT_TYPE, i.PEDESTAL_CODE, p.GROUP_ID AS CAMPSITE_GROUP_ID, i.TRANSACTION_ID, i.CARD_RFID,
+       i.SUPPLY_SESSION_ID, i.METER_KWH, i.REMOTE_DATE, i.MESSAGE, i.CREATE_DATE, i.REVIEWED_BY, i.REVIEW_DATE,
+       i.REVIEW_COMMENT, COUNT(*) OVER () AS TOTAL
+  FROM SUPPLY_INCIDENT_LOG i
+  JOIN PEDESTAL p ON p.CODE = i.PEDESTAL_CODE
+ WHERE p.GROUP_ID IN (SELECT id FROM site_tree)
+   AND (CAST(:pedestalCode AS VARCHAR) IS NULL OR i.PEDESTAL_CODE = :pedestalCode)
+   AND (:unreviewedOnly = FALSE OR i.REVIEWED_BY IS NULL)
+   AND (CAST(:from AS TIMESTAMP) IS NULL OR i.CREATE_DATE >= :from)
+   AND (CAST(:to AS TIMESTAMP) IS NULL OR i.CREATE_DATE <= :to)
+ ORDER BY i.CREATE_DATE DESC, i.ID DESC
+ LIMIT :limit OFFSET :offset
+]]></entry>
+
+    <!-- ===== end of the console operations of the service tabs ===== -->
+
     <!-- Camping cards -->
 
     <!--

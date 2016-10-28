@@ -70,13 +70,17 @@ public class SupplyControlUnitImpl {
 
     private final TransactionTemplate transactionTemplate;
 
+    private final RemoteSupplyControl remoteSupplyControl;
+
     public SupplyControlUnitImpl(DateService dateService, SupplySessionManager sessionManager,
                                  ValidationService validationService, PedestalService pedestalService,
                                  PricingService pricingService, EventService eventService,
                                  SupplyIncidentDao supplyIncidentDao, SystemPropertyService systemPropertyService,
                                  ObjectProvider<CheckedOutStayFinder> checkedOutStayFinder,
                                  ConsumptionRecordWriteService consumptionRecordWriteService,
-                                 PlatformTransactionManager transactionManager) {
+                                 PlatformTransactionManager transactionManager,
+                                 RemoteSupplyControl remoteSupplyControl) {
+        this.remoteSupplyControl = remoteSupplyControl;
         this.dateService = dateService;
         this.sessionManager = sessionManager;
         this.validationService = validationService;
@@ -226,6 +230,99 @@ public class SupplyControlUnitImpl {
             LOG.info(String.format("Closed %d stale supply sessions", closed));
         }
         return closed;
+    }
+
+    /**
+     * The console closes one stale session by hand, with the same rule and code path as the job: only an active
+     * session whose socket and pedestal have been silent for StaleSessionTimeoutInHours is closed with TIMEOUT, in
+     * the caller's transaction.
+     *
+     * @throws IllegalStateException when the session is closed already or still reports
+     */
+    public SupplySession closeStaleSession(final SupplySession session) {
+        if (session == null) {
+            throw new IllegalArgumentException("No supply session given");
+        }
+        if (!session.isActive()) {
+            throw new IllegalStateException(String.format("Supply session %d is closed already (%s)",
+                    session.getId(), session.getStopReason()));
+        }
+        final LocalDateTime now = dateService.getNow();
+        final int timeoutInHours = systemPropertyService.getStaleSessionTimeoutInHours();
+        final boolean stale = sessionManager.findStaleSessions(now, timeoutInHours).stream()
+                .anyMatch(candidate -> candidate.getId().equals(session.getId()));
+        if (!stale) {
+            throw new IllegalStateException(String.format("Supply session %d still reports (silent for less than "
+                    + "%d hours)", session.getId(), timeoutInHours));
+        }
+        closeSession(session.getId(), StopReason.TIMEOUT, now);
+        return sessionManager.getSession(session.getId());
+    }
+
+    /**
+     * Remote supply start of a socket from the console with the UID of a card valid there.
+     *
+     * @throws IllegalStateException when the pedestal has no remote control, the socket is busy or the pedestal did
+     *                               not accept the start
+     */
+    public void requestSupplyStart(final Socket socket, final String cardRfid) {
+        final var pedestal = socket.getPedestal();
+        checkRemoteControl(pedestal);
+        if (sessionManager.getActiveSession(socket) != null) {
+            throw new IllegalStateException(String.format("Socket %s is supplying already", socket.getSocketCode()));
+        }
+        final ValidationResult validationResult = validationService.validateFor(socketLinkIdOf(socket), cardRfid,
+                dateService.getNow(), false);
+        if (validationResult.getStatus() != ValidationStatus.ACCEPTED) {
+            throw new IllegalStateException(String.format("Card %s may not supply at socket %s: %s", cardRfid,
+                    socket.getSocketCode(), validationResult.getStatus()));
+        }
+        if (!remoteSupplyControl.remoteSupplyStart(pedestal, socket.getSocketNo(), cardRfid)) {
+            throw new IllegalStateException(String.format("Pedestal %s did not accept the supply start of socket %s",
+                    pedestal.getCode(), socket.getSocketCode()));
+        }
+        LOG.info(String.format("Supply start of socket %s for card %s requested", socket, cardRfid));
+    }
+
+    /**
+     * Remote supply stop of an active session from the console; the session ends with the pedestal's supplyStopped.
+     *
+     * @throws IllegalStateException when the session is closed, the pedestal has no remote control or did not
+     *                               accept the stop
+     */
+    public void requestSupplyStop(final SupplySession session) {
+        if (!session.isActive()) {
+            throw new IllegalStateException(String.format("Supply session %d is closed already", session.getId()));
+        }
+        final var pedestal = session.getSocket().getPedestal();
+        checkRemoteControl(pedestal);
+        if (!remoteSupplyControl.remoteSupplyStop(pedestal, session.getTransactionId())) {
+            throw new IllegalStateException(String.format("Pedestal %s did not accept the supply stop of session %d",
+                    pedestal.getCode(), session.getId()));
+        }
+        LOG.info(String.format("Supply stop of session %s requested", session));
+    }
+
+    /**
+     * The service team reviewed an incident of a stop nobody could book.
+     */
+    @Transactional
+    public SupplyIncident reviewIncident(final Long incidentId, final String username, final String comment) {
+        final SupplyIncident incident = supplyIncidentDao.findById(incidentId).orElseThrow(
+                () -> new java.util.NoSuchElementException("Supply incident " + incidentId + " does not exist"));
+        incident.review(username, dateService.getNow(), comment);
+        return supplyIncidentDao.saveAndFlush(incident);
+    }
+
+    private static void checkRemoteControl(final io.pillopl.infrastructure.Pedestal pedestal) {
+        if (!pedestal.isRemoteControl()) {
+            throw new IllegalStateException(String.format("Pedestal %s cannot be controlled remotely",
+                    pedestal.getCode()));
+        }
+    }
+
+    private static SocketLinkId socketLinkIdOf(final Socket socket) {
+        return SocketLinkId.of(socket.getPedestal().getCode(), socket.getSocketNo());
     }
 
     int closeCheckedOutSessions(final LocalDateTime now) {
