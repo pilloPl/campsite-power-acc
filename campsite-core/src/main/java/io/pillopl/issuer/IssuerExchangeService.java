@@ -234,6 +234,8 @@ public class IssuerExchangeService {
                     card.partnerSyncExported(now);
                 }
                 campingCardDao.saveAll(cards);
+            } else {
+                LOG.warn(String.format("%s cards stay waiting: not every partner got the card list", cards.size()));
             }
         });
     }
