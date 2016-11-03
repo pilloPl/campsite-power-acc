@@ -114,6 +114,8 @@ public class IssuerExchangeV2 implements IssuerExchange {
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<ConsumptionRecordDTO>>() {
                     });
+            LOG.info(String.format("%s consumption records fetched from %s", records != null ? records.size() : 0,
+                    partner.getName()));
             return records != null ? records : new ArrayList<>();
         } catch (RestClientException e) {
             throw new IssuerExchangeException("Consumption records of " + partner.getName() + " not fetched: "
