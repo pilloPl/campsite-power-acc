@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 /**
  * Link v1, pedestal backend to pedestal: start the supply of a socket with an auth tag (remoteSupplyStart) or stop the supply
- * of a transaction (remoteSupplyStop).
+ * of a transaction (remoteSupplyStop); the service commands (status request, breaker reset) name only the socket (none
+ * for the whole pedestal).
  */
 public record RemoteCommandRequest(Integer socketNo, String authTag, Integer transactionId) implements Serializable {
 
@@ -14,5 +15,9 @@ public record RemoteCommandRequest(Integer socketNo, String authTag, Integer tra
 
     public static RemoteCommandRequest stop(int transactionId) {
         return new RemoteCommandRequest(null, null, transactionId);
+    }
+
+    public static RemoteCommandRequest forSocket(Integer socketNo) {
+        return new RemoteCommandRequest(socketNo, null, null);
     }
 }

@@ -65,6 +65,20 @@ public class PedestalLinkClientDispatcher implements LocalCardListSender, Remote
                 : pedestalLinkClientV2.remoteSupplyStop(pedestal, transactionId);
     }
 
+    @Override
+    public boolean requestStatus(Pedestal pedestal, Integer socketNo) {
+        return isLinkV1(pedestal)
+                ? pedestalLinkClientV1.requestStatus(pedestal, socketNo)
+                : pedestalLinkClientV2.requestStatus(pedestal, socketNo);
+    }
+
+    @Override
+    public boolean resetBreaker(Pedestal pedestal, int socketNo) {
+        return isLinkV1(pedestal)
+                ? pedestalLinkClientV1.resetBreaker(pedestal, socketNo)
+                : pedestalLinkClientV2.resetBreaker(pedestal, socketNo);
+    }
+
     static PedestalLinkVersion linkVersionOf(Pedestal pedestal) {
         if (pedestal.getPedestalType() == null || pedestal.getPedestalType().getLinkVersion() == null) {
             LOG.debug(String.format("Pedestal %s has no link version, served by link v1", pedestal));

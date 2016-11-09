@@ -117,4 +117,16 @@ class PedestalLinkClientV2Test {
         assertThat(client.remoteSupplyStart(pedestal, 1, "QR1005")).isFalse();
         server.verify();
     }
+
+    @Test
+    void serviceCommandsPostTheSocketToTheirOwnAddress() {
+        server.expect(requestTo(URL + "/requestStatus")).andExpect(jsonPath("$.socketNo").value(2))
+                .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
+        server.expect(requestTo(URL + "/resetBreaker")).andExpect(jsonPath("$.socketNo").value(1))
+                .andRespond(withSuccess(ACCEPTED, MediaType.APPLICATION_JSON));
+
+        assertThat(client.requestStatus(pedestal, 2)).isTrue();
+        assertThat(client.resetBreaker(pedestal, 1)).isTrue();
+        server.verify();
+    }
 }

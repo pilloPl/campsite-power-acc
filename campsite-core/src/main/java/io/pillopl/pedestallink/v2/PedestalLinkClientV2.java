@@ -43,6 +43,10 @@ public class PedestalLinkClientV2 implements LocalCardListSender, RemoteSupplyCo
 
     static final String REMOTE_SUPPLY_START = "/requestSupplyStart";
 
+    static final String REQUEST_STATUS = "/requestStatus";
+
+    static final String RESET_BREAKER = "/resetBreaker";
+
     static final String REMOTE_SUPPLY_STOP = "/requestSupplyStop";
 
     static final int CONNECT_TIMEOUT_IN_MILLIS = 5_000;
@@ -124,6 +128,22 @@ public class PedestalLinkClientV2 implements LocalCardListSender, RemoteSupplyCo
     @Override
     public boolean remoteSupplyStop(Pedestal pedestal, int transactionId) {
         return sendRemoteCommand(pedestal, REMOTE_SUPPLY_STOP, RemoteCommandRequest.stop(transactionId));
+    }
+
+    /**
+     * Status request of one socket (or of all). Not queued: the console asks again.
+     */
+    @Override
+    public boolean requestStatus(Pedestal pedestal, Integer socketNo) {
+        return sendRemoteCommand(pedestal, REQUEST_STATUS, RemoteCommandRequest.forSocket(socketNo));
+    }
+
+    /**
+     * Breaker reset of a socket. Not queued: a reset the pedestal does not get now is refused.
+     */
+    @Override
+    public boolean resetBreaker(Pedestal pedestal, int socketNo) {
+        return sendRemoteCommand(pedestal, RESET_BREAKER, RemoteCommandRequest.forSocket(socketNo));
     }
 
     private boolean sendRemoteCommand(Pedestal pedestal, String command, RemoteCommandRequest request) {
