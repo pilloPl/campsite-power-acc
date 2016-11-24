@@ -222,6 +222,17 @@ class ConsumptionRecordWriteServiceTest {
     }
 
     @Test
+    void sessionWithoutSocketGetsNoRecord() {
+        session.setSocket(null);
+        ValidationResult withoutSocket = validated(card, null);
+        withoutSocket.setSocket(null);
+
+        assertThatThrownBy(() -> create(withoutSocket, "2.0", true))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("Supply session 101 has no socket");
+        verify(dao, never()).save(any(ConsumptionRecord.class));
+    }
+
+    @Test
     void suspectRecordIsNotPricedAndTheTeamIsNotified() {
         ConsumptionRecord record = create(validated(card, null), "650", true);
 

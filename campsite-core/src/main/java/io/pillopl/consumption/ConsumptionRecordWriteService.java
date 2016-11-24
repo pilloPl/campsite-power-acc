@@ -97,6 +97,10 @@ public class ConsumptionRecordWriteService {
 
         // pedestal, socket and campsite as they are now
         Socket socket = validationResult.getSocket() != null ? validationResult.getSocket() : session.getSocket();
+        if (socket == null) {
+            throw new IllegalStateException("Supply session " + session.getId()
+                    + " has no socket, its consumption record cannot be written");
+        }
         Pedestal pedestal = socket.getPedestal();
         record.setSocketId(socket.getId());
         record.setSocketCode(socket.getSocketCode());
