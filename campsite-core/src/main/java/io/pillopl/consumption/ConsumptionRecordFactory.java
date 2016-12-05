@@ -92,6 +92,9 @@ public class ConsumptionRecordFactory {
      * padded to six digits and never cut: two records never share an id.
      */
     public String generateRecordId(String campsiteCode, LocalDateTime plugOut) {
+        if (plugOut == null) {
+            throw new IllegalArgumentException("Record id of campsite " + campsiteCode + " needs the plug-out");
+        }
         String code = campsiteCode == null || campsiteCode.isBlank() ? UNKNOWN_CAMPSITE_CODE : campsiteCode.strip();
         return formatRecordId(code, plugOut, consumptionRecordDao.nextRecordNumber());
     }

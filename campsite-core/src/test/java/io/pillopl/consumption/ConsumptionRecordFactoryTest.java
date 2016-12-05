@@ -9,7 +9,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ConsumptionRecordFactoryTest {
@@ -78,6 +81,13 @@ class ConsumptionRecordFactoryTest {
     @Test
     void recordIdOfAnUnknownCampsiteUsesAPlaceholderCode() {
         assertThat(factory.generateRecordId(" ", PLUG_OUT)).isEqualTo("NA-20260714-000042");
+    }
+
+    @Test
+    void recordIdWithoutPlugOutTakesNoNumber() {
+        assertThatThrownBy(() -> factory.generateRecordId("BAY", null))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("needs the plug-out");
+        verify(consumptionRecordDao, never()).nextRecordNumber();
     }
 
     @Test
