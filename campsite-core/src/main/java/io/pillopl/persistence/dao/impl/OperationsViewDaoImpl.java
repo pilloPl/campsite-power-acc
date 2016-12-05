@@ -32,6 +32,12 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
     @Value("#{sqls['findSupplyIncidentsPage']}")
     private String findSupplyIncidentsPage;
 
+    @Value("#{sqls['getDashboardCounts']}")
+    private String getDashboardCounts;
+
+    @Value("#{sqls['findAlertSources']}")
+    private String findAlertSources;
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     public OperationsViewDaoImpl(NamedParameterJdbcTemplate jdbcTemplate) {
@@ -74,6 +80,38 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
                     toLocal(rs.getTimestamp("REVIEW_DATE")), rs.getString("REVIEW_COMMENT"));
         });
         return ListPage.of(incidents, total[0], pagination);
+    }
+
+    @Override
+    public DashboardCounts getDashboardCounts(Long siteGroupId, LocalDateTime dayStart, LocalDateTime silentSince,
+                                              boolean withEvents, boolean withErp) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
+                .addValue("dayStart", Timestamp.valueOf(dayStart), Types.TIMESTAMP)
+                .addValue("silentSince", Timestamp.valueOf(silentSince), Types.TIMESTAMP)
+                .addValue("withEvents", withEvents, Types.BOOLEAN)
+                .addValue("withErp", withErp, Types.BOOLEAN);
+        return jdbcTemplate.queryForObject(getDashboardCounts, params, (rs, rowNum) -> new DashboardCounts(
+                rs.getLong("ACTIVE_SESSIONS"), rs.getBigDecimal("KWH_TODAY"), rs.getLong("FAULTED_SOCKETS"),
+                rs.getLong("BREAKER_TRIPPED_SOCKETS"), rs.getLong("TIMED_OUT_PEDESTALS"), rs.getLong("REVIEW_QUEUE"),
+                rs.getLong("STALE_SESSIONS"), longOrNull(rs, "FAILED_EVENTS"), longOrNull(rs, "ERP_LINES_IN_ERROR")));
+    }
+
+    @Override
+    public List<AlertSource> findAlertSources(Long siteGroupId, LocalDateTime silentSince, boolean withEvents,
+                                              boolean withErp, int maxRows) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
+                .addValue("silentSince", Timestamp.valueOf(silentSince), Types.TIMESTAMP)
+                .addValue("withEvents", withEvents, Types.BOOLEAN)
+                .addValue("withErp", withErp, Types.BOOLEAN)
+                .addValue("maxRows", maxRows, Types.INTEGER);
+        return jdbcTemplate.query(findAlertSources, params, (rs, rowNum) -> new AlertSource(
+                rs.getString("ALERT_TYPE"), rs.getLong("OBJECT_ID"), toLocal(rs.getTimestamp("ALERT_TIME")),
+                rs.getString("PEDESTAL_CODE"), longOrNull(rs, "SOCKET_ID"), rs.getString("SOCKET_NAME"),
+                longOrNull(rs, "SESSION_ID"), longOrNull(rs, "RECORD_ID"), rs.getString("DETAIL")));
     }
 
     /**

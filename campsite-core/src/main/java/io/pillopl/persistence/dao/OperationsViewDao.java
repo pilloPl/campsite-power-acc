@@ -5,7 +5,9 @@ import io.pillopl.commons.Pagination;
 import io.pillopl.dto.supply.SupplyIncidentDTO;
 import io.pillopl.dto.supply.SupplySessionDTO;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Hand-written SQL of the service tabs of the console (dashboard, supply sessions, monitoring, map), always restricted
@@ -23,4 +25,26 @@ public interface OperationsViewDao {
 
     ListPage<SupplyIncidentDTO> findSupplyIncidents(Long siteGroupId, String pedestalCode, boolean unreviewedOnly,
                                                     LocalDateTime from, LocalDateTime to, Pagination pagination);
+
+    /**
+     * Key figures of the dashboard; failedEvents and erpLinesInError are null unless asked for.
+     */
+    record DashboardCounts(long activeSessions, BigDecimal kwhToday, long faultedSockets,
+                           long breakerTrippedSockets, long timedOutPedestals, long reviewQueue, long staleSessions,
+                           Long failedEvents, Long erpLinesInError) {
+    }
+
+    DashboardCounts getDashboardCounts(Long siteGroupId, LocalDateTime dayStart, LocalDateTime silentSince,
+                                       boolean withEvents, boolean withErp);
+
+    /**
+     * One source of a live alert: its type, the object and the time of the occurrence, what it points to and a
+     * detail for the text.
+     */
+    record AlertSource(String alertType, long objectId, LocalDateTime alertTime, String pedestalCode, Long socketId,
+                       String socketName, Long sessionId, Long recordId, String detail) {
+    }
+
+    List<AlertSource> findAlertSources(Long siteGroupId, LocalDateTime silentSince, boolean withEvents,
+                                       boolean withErp, int maxRows);
 }

@@ -261,6 +261,118 @@ SELECT i.ID, i.INCIDENT_TYPE, i.PEDESTAL_CODE, p.GROUP_ID AS CAMPSITE_GROUP_ID, 
  LIMIT :limit OFFSET :offset
 ]]></entry>
 
+    <!--
+      Key figures of the dashboard for the subtree of :siteGroupId. kWh today: records with plug-out since :dayStart
+      (rejected ones left out) plus the consumption so far of the active sessions. Stale sessions follow the rule of
+      the stale-session job (:silentSince). Failed events and refused ERP lines are network wide and only counted
+      when :withEvents / :withErp.
+    -->
+    <entry key="getDashboardCounts"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+),
+scope_socket AS (
+    SELECT s.ID, s.PEDESTAL_ID, s.STATUS, s.METER_KWH, s.MOD_DATE
+      FROM SOCKET s
+      JOIN PEDESTAL p ON p.ID = s.PEDESTAL_ID
+     WHERE p.DELETED = FALSE AND s.DELETED = FALSE AND p.GROUP_ID IN (SELECT id FROM site_tree)
+),
+active_session AS (
+    SELECT ss.ID, ss.START_METER_KWH, ss.REMOTE_DATE, ss.CREATE_DATE, sc.PEDESTAL_ID, sc.METER_KWH, sc.MOD_DATE
+      FROM SUPPLY_SESSION ss
+      JOIN scope_socket sc ON sc.ID = ss.SOCKET_ID
+     WHERE ss.ACTIVE = TRUE
+)
+SELECT (SELECT COUNT(*) FROM active_session) AS ACTIVE_SESSIONS,
+       (SELECT COALESCE(SUM(cr.KWH), 0)
+          FROM CONSUMPTION_RECORD cr
+         WHERE cr.PLUG_OUT >= :dayStart
+           AND cr.KWH IS NOT NULL
+           AND cr.VALIDATION_STATE <> 'REJECTED'
+           AND cr.SITE_GROUP_ID IN (SELECT id FROM site_tree))
+       + (SELECT COALESCE(SUM(GREATEST(a.METER_KWH - a.START_METER_KWH, 0)), 0)
+            FROM active_session a
+           WHERE a.START_METER_KWH IS NOT NULL) AS KWH_TODAY,
+       (SELECT COUNT(*) FROM scope_socket WHERE STATUS = 'FAULTED') AS FAULTED_SOCKETS,
+       (SELECT COUNT(*) FROM scope_socket WHERE STATUS = 'BREAKER_TRIPPED') AS BREAKER_TRIPPED_SOCKETS,
+       (SELECT COUNT(*)
+          FROM PEDESTAL_STATE ps
+          JOIN PEDESTAL p ON p.ID = ps.PEDESTAL_ID
+         WHERE ps.TIMEOUT = TRUE AND p.DELETED = FALSE AND p.GROUP_ID IN (SELECT id FROM site_tree))
+           AS TIMED_OUT_PEDESTALS,
+       (SELECT COUNT(*) FROM CONSUMPTION_RECORD_SUSPECT v WHERE v.SITE_GROUP_ID IN (SELECT id FROM site_tree))
+           AS REVIEW_QUEUE,
+       (SELECT COUNT(*)
+          FROM active_session a
+         WHERE COALESCE(a.REMOTE_DATE, a.CREATE_DATE) < :silentSince
+           AND a.MOD_DATE < :silentSince
+           AND NOT EXISTS (SELECT 1 FROM PEDESTAL_STATE ps
+                            WHERE ps.PEDESTAL_ID = a.PEDESTAL_ID AND ps.APPROX_LAST_INCOMING >= :silentSince))
+           AS STALE_SESSIONS,
+       CASE WHEN :withEvents THEN (SELECT COUNT(*) FROM EVENT_RETRY e WHERE e.STATUS = 'FAILED') END
+           AS FAILED_EVENTS,
+       CASE WHEN :withErp THEN (SELECT COUNT(*) FROM ERP_BILLING_LINE l WHERE l.EXPORT_STATUS = 'ERROR') END
+           AS ERP_LINES_IN_ERROR
+]]></entry>
+
+    <!--
+      Sources of the live alerts of the subtree of :siteGroupId, newest first, at most :maxRows: faulted and tripped
+      sockets, timed-out pedestals, stale sessions (rule of the job), records in the review queue, and, network wide,
+      failed events (:withEvents) and refused ERP lines (:withErp). OBJECT_ID with ALERT_TIME identifies one occurrence.
+    -->
+    <entry key="findAlertSources"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT * FROM (
+    SELECT 'SOCKET_FAULT' AS ALERT_TYPE, s.ID AS OBJECT_ID, COALESCE(s.LAST_STATUS_UPDATE, s.MOD_DATE) AS ALERT_TIME,
+           p.CODE AS PEDESTAL_CODE, s.ID AS SOCKET_ID, s.NAME AS SOCKET_NAME, CAST(NULL AS BIGINT) AS SESSION_ID,
+           CAST(NULL AS BIGINT) AS RECORD_ID, s.STATUS AS DETAIL
+      FROM SOCKET s
+      JOIN PEDESTAL p ON p.ID = s.PEDESTAL_ID
+     WHERE s.STATUS IN ('FAULTED', 'BREAKER_TRIPPED') AND s.DELETED = FALSE AND p.DELETED = FALSE
+       AND p.GROUP_ID IN (SELECT id FROM site_tree)
+    UNION ALL
+    SELECT 'PEDESTAL_TIMEOUT', p.ID, COALESCE(ps.LAST_TIMEOUT, ps.APPROX_LAST_INCOMING), p.CODE, NULL, NULL, NULL,
+           NULL, to_char(ps.APPROX_LAST_INCOMING, 'YYYY-MM-DD HH24:MI')
+      FROM PEDESTAL_STATE ps
+      JOIN PEDESTAL p ON p.ID = ps.PEDESTAL_ID
+     WHERE ps.TIMEOUT = TRUE AND p.DELETED = FALSE AND p.GROUP_ID IN (SELECT id FROM site_tree)
+    UNION ALL
+    SELECT 'STALE_SESSION', ss.ID, COALESCE(ss.REMOTE_DATE, ss.CREATE_DATE), p.CODE, s.ID, s.NAME, ss.ID, NULL,
+           to_char(s.MOD_DATE, 'YYYY-MM-DD HH24:MI')
+      FROM SUPPLY_SESSION ss
+      JOIN SOCKET s ON s.ID = ss.SOCKET_ID
+      JOIN PEDESTAL p ON p.ID = s.PEDESTAL_ID
+     WHERE ss.ACTIVE = TRUE AND p.GROUP_ID IN (SELECT id FROM site_tree)
+       AND COALESCE(ss.REMOTE_DATE, ss.CREATE_DATE) < :silentSince
+       AND s.MOD_DATE < :silentSince
+       AND NOT EXISTS (SELECT 1 FROM PEDESTAL_STATE st
+                        WHERE st.PEDESTAL_ID = p.ID AND st.APPROX_LAST_INCOMING >= :silentSince)
+    UNION ALL
+    SELECT 'REVIEW_RECORD', v.ID, v.CREATE_DATE, v.PEDESTAL_CODE, NULL, v.SOCKET_CODE, v.SUPPLY_SESSION_ID, v.ID,
+           COALESCE(v.SUSPECT_REASON, v.PRICING_FAILURE_REASON)
+      FROM CONSUMPTION_RECORD_SUSPECT v
+     WHERE v.SITE_GROUP_ID IN (SELECT id FROM site_tree)
+    UNION ALL
+    SELECT 'FAILED_EVENT', e.ID, COALESCE(e.LAST_RETRY_DATE, e.CREATE_DATE), NULL, NULL, NULL, NULL, NULL,
+           e.EVENT_TYPE || ': ' || COALESCE(e.FAILURE, '')
+      FROM EVENT_RETRY e
+     WHERE :withEvents AND e.STATUS = 'FAILED'
+    UNION ALL
+    SELECT 'ERP_ERROR', l.ID, COALESCE(l.ANSWER_DATE, l.EXPORT_DATE, l.CREATE_DATE), NULL, NULL, NULL, NULL, NULL,
+           l.BILLING_PERIOD || ' ' || l.BILLING_ACCOUNT_NO || ': ' || COALESCE(l.ERROR_TEXT, '')
+      FROM ERP_BILLING_LINE l
+     WHERE :withErp AND l.EXPORT_STATUS = 'ERROR'
+) alert
+ ORDER BY alert.ALERT_TIME DESC, alert.ALERT_TYPE, alert.OBJECT_ID
+ LIMIT :maxRows
+]]></entry>
+
     <!-- ===== end of the console operations of the service tabs ===== -->
 
     <!-- Camping cards -->
