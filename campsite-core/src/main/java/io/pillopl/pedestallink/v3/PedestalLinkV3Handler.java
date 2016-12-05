@@ -215,7 +215,11 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
 
         @Override
         public AcknowledgeResponse processRequest(SocketStatusRequest request, String pedestalCode) {
-            int socketNo = request.socketNo() != null ? request.socketNo() : -1;
+            if (request.socketNo() == null) {
+                throw new IllegalArgumentException(String.format(
+                        "Link v3 socket status of pedestal %s without socket number", pedestalCode));
+            }
+            int socketNo = request.socketNo();
 
             SocketStatus status = TranslationHelper.translateSocketStatus(request.status(), request.errorCode());
 

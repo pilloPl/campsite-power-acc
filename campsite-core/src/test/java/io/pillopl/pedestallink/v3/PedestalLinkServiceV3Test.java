@@ -184,6 +184,15 @@ class PedestalLinkServiceV3Test {
     }
 
     @Test
+    void statusWithoutSocketNumberIsRefused() {
+        assertThatThrownBy(() -> service.handleRequest(PedestalLinkV3Handler.SocketStatusHandler.class, CODE,
+                new SocketStatusRequest(null, "AVAILABLE", null, null, null, null, now)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("without socket number");
+        verify(eventRetryService, never()).sendOrRetryLater(any());
+    }
+
+    @Test
     void bootEventOfLinkV3GoesThroughTheRetry() {
         when(pedestalService.updateBootData(CODE, "3.1.0", "SN-401", null)).thenReturn(pedestal);
         when(systemPropertyService.getPedestalHeartbeatIntervalInSeconds()).thenReturn(600);
