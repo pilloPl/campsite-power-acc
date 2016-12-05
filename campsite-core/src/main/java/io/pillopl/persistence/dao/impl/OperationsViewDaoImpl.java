@@ -2,6 +2,7 @@ package io.pillopl.persistence.dao.impl;
 
 import io.pillopl.commons.ListPage;
 import io.pillopl.commons.Pagination;
+import io.pillopl.dto.map.SectionLoadDTO;
 import io.pillopl.dto.supply.SupplyIncidentDTO;
 import io.pillopl.dto.supply.SupplySessionDTO;
 import io.pillopl.persistence.dao.OperationsViewDao;
@@ -37,6 +38,12 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
 
     @Value("#{sqls['findAlertSources']}")
     private String findAlertSources;
+
+    @Value("#{sqls['findMapSockets']}")
+    private String findMapSockets;
+
+    @Value("#{sqls['findSectionLoads']}")
+    private String findSectionLoads;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -96,6 +103,38 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
                 rs.getLong("ACTIVE_SESSIONS"), rs.getBigDecimal("KWH_TODAY"), rs.getLong("FAULTED_SOCKETS"),
                 rs.getLong("BREAKER_TRIPPED_SOCKETS"), rs.getLong("TIMED_OUT_PEDESTALS"), rs.getLong("REVIEW_QUEUE"),
                 rs.getLong("STALE_SESSIONS"), longOrNull(rs, "FAILED_EVENTS"), longOrNull(rs, "ERP_LINES_IN_ERROR")));
+    }
+
+    @Override
+    public List<MapSocketRow> findMapSockets(Long siteGroupId) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        MapSqlParameterSource params = new MapSqlParameterSource("siteGroupId", siteGroupId);
+        return jdbcTemplate.query(findMapSockets, params, (rs, rowNum) -> new MapSocketRow(rs.getLong("GROUP_ID"),
+                rs.getString("GROUP_NAME"), rs.getString("GROUP_DISPLAY_NAME"), rs.getLong("PEDESTAL_ID"),
+                rs.getString("PEDESTAL_CODE"), rs.getBigDecimal("LATITUDE"), rs.getBigDecimal("LONGITUDE"),
+                rs.getString("PEDESTAL_TYPE"), rs.getString("LINK_VERSION"), rs.getBoolean("REMOTE_CONTROL"),
+                rs.getBoolean("TIMEOUT"), toLocal(rs.getTimestamp("APPROX_LAST_INCOMING")),
+                longOrNull(rs, "SOCKET_ID"), integer(rs, "SOCKET_NO"), rs.getString("SOCKET_NAME"),
+                rs.getString("SOCKET_CODE"), rs.getString("PITCH_NO"), rs.getString("STATUS"),
+                longOrNull(rs, "POWER_SECTION_ID"), longOrNull(rs, "SESSION_ID"), integer(rs, "MAX_CURRENT_A")));
+    }
+
+    /**
+     * The load share is the allowed current of the active sessions divided by the capacity (3 decimals).
+     */
+    @Override
+    public List<SectionLoadDTO> findSectionLoads(Long siteGroupId) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        MapSqlParameterSource params = new MapSqlParameterSource("siteGroupId", siteGroupId);
+        return jdbcTemplate.query(findSectionLoads, params, (rs, rowNum) -> {
+            BigDecimal capacity = rs.getBigDecimal("MAX_CURRENT_A");
+            BigDecimal allocated = rs.getBigDecimal("ALLOCATED_CURRENT_A");
+            BigDecimal share = capacity != null && capacity.signum() > 0
+                    ? allocated.divide(capacity, 3, java.math.RoundingMode.HALF_UP) : null;
+            return new SectionLoadDTO(rs.getLong("ID"), rs.getString("SECTION_NAME"), capacity,
+                    rs.getString("ALGORITHM_BEAN_NAME"), rs.getLong("SOCKETS"), rs.getLong("ACTIVE_SESSIONS"),
+                    allocated, share);
+        });
     }
 
     @Override

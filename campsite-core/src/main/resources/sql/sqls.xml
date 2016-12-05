@@ -373,6 +373,57 @@ SELECT * FROM (
  LIMIT :maxRows
 ]]></entry>
 
+    <!--
+      Sockets of the map: every socket of the not deleted pedestals in the subtree of :siteGroupId with its pedestal
+      (campsite group, coordinates of its location, link version, link timeout) and its active session, ordered by
+      campsite, pedestal and socket number.
+    -->
+    <entry key="findMapSockets"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT g.ID AS GROUP_ID, g.NAME AS GROUP_NAME, g.DISPLAYNAME AS GROUP_DISPLAY_NAME,
+       p.ID AS PEDESTAL_ID, p.CODE AS PEDESTAL_CODE, l.LATITUDE, l.LONGITUDE, pt.NAME AS PEDESTAL_TYPE,
+       pt.LINK_VERSION, p.REMOTE_CONTROL, COALESCE(ps.TIMEOUT, FALSE) AS TIMEOUT,
+       ps.APPROX_LAST_INCOMING, s.ID AS SOCKET_ID, s.SOCKET_NO, s.NAME AS SOCKET_NAME, s.SOCKET_CODE, s.PITCH_NO,
+       s.STATUS, s.POWER_SECTION_ID, ss.ID AS SESSION_ID, ss.MAX_CURRENT_A
+  FROM PEDESTAL p
+  JOIN TBL_GROUP g ON g.ID = p.GROUP_ID
+  JOIN LOCATION l ON l.ID = p.LOCATION_ID
+  JOIN PEDESTAL_TYPE pt ON pt.ID = p.PEDESTAL_TYPE_ID
+  LEFT JOIN PEDESTAL_STATE ps ON ps.PEDESTAL_ID = p.ID
+  LEFT JOIN SOCKET s ON s.PEDESTAL_ID = p.ID AND s.DELETED = FALSE
+  LEFT JOIN SUPPLY_SESSION ss ON ss.SOCKET_ID = s.ID AND ss.ACTIVE = TRUE
+ WHERE p.DELETED = FALSE
+   AND p.GROUP_ID IN (SELECT id FROM site_tree)
+ ORDER BY g.DISPLAYNAME, g.ID, p.CODE, s.SOCKET_NO, s.ID, ss.ID
+]]></entry>
+
+    <!--
+      Load of the section switchboards with sockets in the subtree of :siteGroupId: the sockets on the section, the
+      active sessions and the current they were allowed (MAX_CURRENT_A of the sessions) against the capacity.
+    -->
+    <entry key="findSectionLoads"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT ps.ID, ps.SECTION_NAME, ps.MAX_CURRENT_A, ps.ALGORITHM_BEAN_NAME,
+       COUNT(DISTINCT s.ID) AS SOCKETS,
+       COUNT(DISTINCT ss.ID) AS ACTIVE_SESSIONS,
+       COALESCE(SUM(ss.MAX_CURRENT_A), 0) AS ALLOCATED_CURRENT_A
+  FROM POWER_SECTION ps
+  JOIN SOCKET s ON s.POWER_SECTION_ID = ps.ID AND s.DELETED = FALSE
+  JOIN PEDESTAL p ON p.ID = s.PEDESTAL_ID AND p.DELETED = FALSE
+  LEFT JOIN SUPPLY_SESSION ss ON ss.SOCKET_ID = s.ID AND ss.ACTIVE = TRUE
+ WHERE p.GROUP_ID IN (SELECT id FROM site_tree)
+ GROUP BY ps.ID, ps.SECTION_NAME, ps.MAX_CURRENT_A, ps.ALGORITHM_BEAN_NAME
+ ORDER BY ps.SECTION_NAME
+]]></entry>
+
     <!-- ===== end of the console operations of the service tabs ===== -->
 
     <!-- Camping cards -->

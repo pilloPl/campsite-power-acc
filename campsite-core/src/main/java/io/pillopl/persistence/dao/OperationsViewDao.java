@@ -2,6 +2,7 @@ package io.pillopl.persistence.dao;
 
 import io.pillopl.commons.ListPage;
 import io.pillopl.commons.Pagination;
+import io.pillopl.dto.map.SectionLoadDTO;
 import io.pillopl.dto.supply.SupplyIncidentDTO;
 import io.pillopl.dto.supply.SupplySessionDTO;
 
@@ -44,6 +45,20 @@ public interface OperationsViewDao {
     record AlertSource(String alertType, long objectId, LocalDateTime alertTime, String pedestalCode, Long socketId,
                        String socketName, Long sessionId, Long recordId, String detail) {
     }
+
+    /**
+     * A socket of the map with its pedestal and campsite (socket columns null for a pedestal without sockets).
+     */
+    record MapSocketRow(Long groupId, String groupName, String groupDisplayName, Long pedestalId, String pedestalCode,
+                        BigDecimal latitude, BigDecimal longitude, String pedestalType, String linkVersion,
+                        boolean remoteControl, boolean timeout, LocalDateTime lastIncoming, Long socketId,
+                        Integer socketNo, String socketName, String socketCode, String pitchNo, String status,
+                        Long powerSectionId, Long sessionId, Integer sessionMaxCurrentA) {
+    }
+
+    List<MapSocketRow> findMapSockets(Long siteGroupId);
+
+    List<SectionLoadDTO> findSectionLoads(Long siteGroupId);
 
     List<AlertSource> findAlertSources(Long siteGroupId, LocalDateTime silentSince, boolean withEvents,
                                        boolean withErp, int maxRows);
