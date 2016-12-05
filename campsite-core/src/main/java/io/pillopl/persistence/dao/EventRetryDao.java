@@ -11,4 +11,7 @@ import java.util.List;
 public interface EventRetryDao extends JpaRepository<EventRetry, Long> {
 
     List<EventRetry> findByStatusOrderByIdAsc(EventRetry.Status status);
+
+    List<EventRetry> findByStatusOrderByIdDesc(EventRetry.Status status,
+                                               org.springframework.data.domain.Pageable pageable);
 }

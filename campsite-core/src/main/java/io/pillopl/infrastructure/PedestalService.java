@@ -5,9 +5,21 @@ import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
 import io.pillopl.group.GroupType;
 import io.pillopl.group.IsLinkedToGroup;
+import io.pillopl.event.EventRetry;
+import io.pillopl.monitoring.PedestalCommunicationLog;
+import io.pillopl.monitoring.PedestalMailService;
+import io.pillopl.monitoring.SocketStatusLog;
+import io.pillopl.persistence.dao.EventRetryDao;
+import io.pillopl.persistence.dao.PedestalCommunicationLogDao;
 import io.pillopl.persistence.dao.PedestalDao;
 import io.pillopl.persistence.dao.PedestalStateDao;
 import io.pillopl.persistence.dao.SocketDao;
+import io.pillopl.persistence.dao.SocketStatusLogDao;
+import io.pillopl.persistence.dao.SupplySessionDao;
+import io.pillopl.supply.RemoteSupplyControl;
+import io.pillopl.util.DateService;
+import jakarta.mail.MessagingException;
+import org.springframework.data.domain.PageRequest;
 import io.pillopl.user.Userinfo;
 import io.pillopl.user.UserinfoService;
 import org.slf4j.Logger;
@@ -49,9 +61,33 @@ public class PedestalService {
 
     private final LocationService locationService;
 
+    private final SocketStatusLogDao socketStatusLogDao;
+
+    private final PedestalCommunicationLogDao pedestalCommunicationLogDao;
+
+    private final EventRetryDao eventRetryDao;
+
+    private final SupplySessionDao supplySessionDao;
+
+    private final RemoteSupplyControl remoteSupplyControl;
+
+    private final PedestalMailService pedestalMailService;
+
+    private final DateService dateService;
+
     public PedestalService(PedestalDao pedestalDao, SocketDao socketDao, PedestalStateDao pedestalStateDao,
                            GroupService groupService, UserinfoService userinfoService,
-                           LocationService locationService) {
+                           LocationService locationService, SocketStatusLogDao socketStatusLogDao,
+                           PedestalCommunicationLogDao pedestalCommunicationLogDao, EventRetryDao eventRetryDao,
+                           SupplySessionDao supplySessionDao, RemoteSupplyControl remoteSupplyControl,
+                           PedestalMailService pedestalMailService, DateService dateService) {
+        this.socketStatusLogDao = socketStatusLogDao;
+        this.pedestalCommunicationLogDao = pedestalCommunicationLogDao;
+        this.eventRetryDao = eventRetryDao;
+        this.supplySessionDao = supplySessionDao;
+        this.remoteSupplyControl = remoteSupplyControl;
+        this.pedestalMailService = pedestalMailService;
+        this.dateService = dateService;
         this.pedestalDao = pedestalDao;
         this.socketDao = socketDao;
         this.pedestalStateDao = pedestalStateDao;
@@ -324,5 +360,126 @@ public class PedestalService {
 
     public Pedestal save(Pedestal pedestal) {
         return pedestalDao.save(pedestal);
+    }
+
+    // ---------------------------------------------------------------- monitoring and service (console)
+
+    /**
+     * Statuses of the sockets of a pedestal (or of one of its sockets) in [from, to], newest first.
+     */
+    @Transactional(readOnly = true)
+    public List<SocketStatusLog> findSocketStatusLogs(Pedestal pedestal, Socket socket, LocalDateTime from,
+                                                      LocalDateTime to, int maxRows) {
+        if (socket != null) {
+            return socketStatusLogDao.findBySocketBetween(socket.getId(), from, to, PageRequest.of(0, maxRows));
+        }
+        return socketStatusLogDao.findByPedestalBetween(pedestal.getId(), from, to, PageRequest.of(0, maxRows));
+    }
+
+    /**
+     * Abbreviations of the error flags of a status, read with the masks of the pedestal's manufacturer.
+     */
+    @Transactional(readOnly = true)
+    public List<String> findErrorNames(Pedestal pedestal, long errorFlags) {
+        if (errorFlags == SocketStatusLog.NO_ERROR) {
+            return List.of();
+        }
+        String manufacturer = pedestal.getPedestalType() != null ? pedestal.getPedestalType().getManufacturer()
+                : "DEFAULT";
+        return socketStatusLogDao.findErrorAbbreviations(manufacturer, errorFlags);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedestalCommunicationLog> findCommunicationLogs(Pedestal pedestal, LocalDateTime from,
+                                                                LocalDateTime to, int maxRows) {
+        return pedestalCommunicationLogDao.findByPedestalBetween(pedestal.getId(), from, to,
+                PageRequest.of(0, maxRows));
+    }
+
+    /**
+     * Link states of the pedestals in the groups that are timed out, longest silent first.
+     */
+    @Transactional(readOnly = true)
+    public List<PedestalState> findHeartbeatTimeouts(Collection<Long> groupIds) {
+        if (groupIds == null || groupIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return pedestalStateDao.findTimedOutInGroups(groupIds);
+    }
+
+    /**
+     * Events the retry gave up on, newest first (network wide, not tied to a pedestal).
+     */
+    @Transactional(readOnly = true)
+    public List<EventRetry> findFailedEvents(int maxRows) {
+        return eventRetryDao.findByStatusOrderByIdDesc(EventRetry.Status.FAILED, PageRequest.of(0, maxRows));
+    }
+
+    /**
+     * Asks the pedestal for the status of one socket or of all sockets.
+     *
+     * @throws IllegalStateException when the pedestal did not accept the request
+     */
+    public void requestStatus(Pedestal pedestal, Integer socketNo) {
+        if (!remoteSupplyControl.requestStatus(pedestal, socketNo)) {
+            throw new IllegalStateException(String.format("Pedestal %s did not accept the status request",
+                    pedestal.getCode()));
+        }
+        LOG.info(String.format("Status of pedestal %s socket %s requested", pedestal.getCode(),
+                socketNo != null ? socketNo : "all"));
+    }
+
+    /**
+     * Ends the fault of a socket. A tripped breaker of a pedestal type with remote breaker reset is switched on
+     * remotely first; any other fault was repaired on site. The socket returns to AVAILABLE, or OCCUPIED while a
+     * session is active, and the change is logged without error flags.
+     *
+     * @return true when a remote breaker reset was sent
+     * @throws IllegalStateException when the socket is not in fault or the pedestal refused the reset
+     */
+    public boolean resetFault(Socket socket) {
+        SocketStatus status = socket.getStatus();
+        if (status != SocketStatus.FAULTED && status != SocketStatus.BREAKER_TRIPPED) {
+            throw new IllegalStateException(String.format("Socket %s is not in fault (%s)", socket.getName(),
+                    status));
+        }
+        Pedestal pedestal = socket.getPedestal();
+        boolean remoteReset = status == SocketStatus.BREAKER_TRIPPED && pedestal.getPedestalType() != null
+                && pedestal.getPedestalType().isRemoteBreakerReset();
+        if (remoteReset && !remoteSupplyControl.resetBreaker(pedestal, socket.getSocketNo())) {
+            throw new IllegalStateException(String.format("Pedestal %s did not accept the breaker reset of socket %s",
+                    pedestal.getCode(), socket.getName()));
+        }
+        LocalDateTime now = dateService.getNow();
+        SocketStatus newStatus = supplySessionDao.findActiveBySocket(socket).isEmpty() ? SocketStatus.AVAILABLE
+                : SocketStatus.OCCUPIED;
+        socket.updateStatus(newStatus, now);
+        socketDao.save(socket);
+        SocketStatusLog log = new SocketStatusLog(socket, now, null);
+        log.setStatus(newStatus);
+        log.setMeterKwh(socket.getMeterKwh());
+        socketStatusLogDao.save(log);
+        LOG.info(String.format("Fault %s of socket %s reset (%s), socket is %s", status, socket,
+                remoteReset ? "remote breaker reset" : "repaired on site", newStatus));
+        return remoteReset;
+    }
+
+    /**
+     * Mails the last fault of the socket (its last status with error flags) to the service recipients again.
+     *
+     * @return the error flags mailed
+     * @throws IllegalStateException when the socket has no logged fault or the mail could not be sent
+     */
+    @Transactional(readOnly = true)
+    public long resendFaultMail(Socket socket) {
+        SocketStatusLog fault = socketStatusLogDao.findLastFaultBySocketId(socket.getId(), PageRequest.of(0, 1))
+                .stream().findFirst().orElseThrow(() -> new IllegalStateException(String.format(
+                        "Socket %s has no logged fault", socket.getName())));
+        try {
+            pedestalMailService.sendErrorMail(socket, fault.getErrorFlags());
+        } catch (MessagingException e) {
+            throw new IllegalStateException("Fault mail not sent: " + e.getMessage(), e);
+        }
+        return fault.getErrorFlags();
     }
 }

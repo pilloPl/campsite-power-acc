@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,6 +38,25 @@ public interface SocketStatusLogDao extends JpaRepository<SocketStatusLog, Long>
 
     @Query("select l from SocketStatusLog l where l.socket.id = :socketId order by l.createDate desc, l.id desc")
     List<SocketStatusLog> findLastsBySocketId(@Param("socketId") Long socketId, Pageable pageable);
+
+    @Query("select l from SocketStatusLog l where l.socket.id = :socketId and l.createDate >= :from"
+            + " and l.createDate <= :to order by l.createDate desc, l.id desc")
+    List<SocketStatusLog> findBySocketBetween(@Param("socketId") Long socketId, @Param("from") LocalDateTime from,
+                                              @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("select l from SocketStatusLog l where l.socket.pedestal.id = :pedestalId and l.createDate >= :from"
+            + " and l.createDate <= :to order by l.createDate desc, l.id desc")
+    List<SocketStatusLog> findByPedestalBetween(@Param("pedestalId") Long pedestalId,
+                                                @Param("from") LocalDateTime from, @Param("to") LocalDateTime to,
+                                                Pageable pageable);
+
+    /**
+     * Last statuses of a socket that carried error flags or a fault status, newest first.
+     */
+    @Query("select l from SocketStatusLog l where l.socket.id = :socketId and (l.errorFlags <> 0"
+            + " or l.status in (io.pillopl.infrastructure.SocketStatus.FAULTED,"
+            + " io.pillopl.infrastructure.SocketStatus.BREAKER_TRIPPED)) order by l.createDate desc, l.id desc")
+    List<SocketStatusLog> findLastFaultBySocketId(@Param("socketId") Long socketId, Pageable pageable);
 
     default SocketStatusLog findLastBySocketId(Long socketId) {
         List<SocketStatusLog> logs = findLastsBySocketId(socketId, PageRequest.of(0, 1));

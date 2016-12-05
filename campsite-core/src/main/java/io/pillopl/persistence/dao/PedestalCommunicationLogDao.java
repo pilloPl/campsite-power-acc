@@ -16,4 +16,11 @@ public interface PedestalCommunicationLogDao extends JpaRepository<PedestalCommu
     @Query("select l from PedestalCommunicationLog l where l.pedestal.id = :pedestalId and l.logType = :logType"
             + " order by l.date desc, l.id desc")
     List<PedestalCommunicationLog> getLogs(@Param("pedestalId") Long pedestalId, @Param("logType") LogType logType);
+
+    @Query("select l from PedestalCommunicationLog l where l.pedestal.id = :pedestalId and l.date >= :from"
+            + " and l.date <= :to order by l.date desc, l.id desc")
+    List<PedestalCommunicationLog> findByPedestalBetween(@Param("pedestalId") Long pedestalId,
+                                                         @Param("from") java.time.LocalDateTime from,
+                                                         @Param("to") java.time.LocalDateTime to,
+                                                         org.springframework.data.domain.Pageable pageable);
 }
