@@ -30,6 +30,15 @@ public class ReportWebService extends AbstractWebService<ReportApi, ReportWebSer
                         request.pedestalCodes())));
     }
 
+    @PostMapping("/refreshUtilization")
+    public RefreshUtilizationResponse refreshUtilization(@RequestBody RefreshUtilizationRequest request)
+            throws ReportWebServiceFault {
+        return invoke("refreshUtilization", () -> {
+            getBean().refreshUtilization(caller());
+            return new RefreshUtilizationResponse(true);
+        });
+    }
+
     @Override
     protected ReportWebServiceFault createFault(String message, WsErrorCode errorCode) {
         return new ReportWebServiceFault(message, errorCode);
