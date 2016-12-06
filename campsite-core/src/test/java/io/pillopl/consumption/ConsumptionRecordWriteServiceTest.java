@@ -210,6 +210,19 @@ class ConsumptionRecordWriteServiceTest {
     }
 
     @Test
+    void supplyPaidThroughTheAppIsSettledLikeACampingCardSupply() {
+        session.setCard(null);
+        pedestal.setSettledByCampsite(true);
+        priced("1.00");
+
+        ConsumptionRecord record = create(validated(null, null), "2.0", true);
+
+        assertThat(record.getPaymentChannel()).isEqualTo(PaymentChannel.QR_APP);
+        assertThat(record.getCardId()).isNull();
+        assertThat(record.getSettlementFlags()).isEqualTo(new SettlementFlags(true, true, false));
+    }
+
+    @Test
     void addressOfAPedestalWithoutLocationIsNotAvailable() {
         pedestal.setLocation(null);
         priced("1.00");

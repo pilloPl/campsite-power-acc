@@ -147,8 +147,9 @@ public class ConsumptionRecordWriteService {
                 record.setIssuerGroupId(issuerGroup != null ? issuerGroup.getId() : null);
                 record.setIssuerTenant(issuerTenantService.findIssuerTenantNameFor(issuerGroup));
             }
-            record.setSettlementFlags(SettlementFlags.forCampingCard(billed, pedestal.isSettledByCampsite()));
-        } else {
+        }
+        if (houseCard == null) {
+            // camping card or QR payment: settled the same way
             record.setSettlementFlags(SettlementFlags.forCampingCard(billed, pedestal.isSettledByCampsite()));
         }
         record.setPaymentChannel(PaymentChannel.of(houseCard != null, card != null));
