@@ -90,9 +90,13 @@ public class SupplyIncident {
     /**
      * The service team looked at the incident (once).
      *
-     * @throws IllegalStateException when it was reviewed already
+     * @throws IllegalArgumentException when the reviewer is missing
+     * @throws IllegalStateException    when it was reviewed already
      */
     public void review(String username, LocalDateTime at, String comment) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException(String.format("Supply incident %d needs a reviewer", id));
+        }
         if (isReviewed()) {
             throw new IllegalStateException(String.format("Supply incident %d was reviewed by %s on %s", id,
                     reviewedBy, reviewDate));

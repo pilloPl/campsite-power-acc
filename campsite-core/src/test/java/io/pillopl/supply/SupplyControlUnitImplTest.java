@@ -519,6 +519,18 @@ class SupplyControlUnitImplTest {
                 .isInstanceOf(java.util.NoSuchElementException.class);
     }
 
+    @Test
+    void incidentIsNotMarkedReviewedWithoutAReviewer() {
+        SupplyIncident incident = new SupplyIncident(IncidentType.NO_SESSION, PEDESTAL, "Stop without session",
+                PLUG_IN);
+        when(supplyIncidentDao.findById(43L)).thenReturn(java.util.Optional.of(incident));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> controlUnit.reviewIncident(43L, " ", "checked"))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("needs a reviewer");
+        assertThat(incident.isReviewed()).isFalse();
+        verify(supplyIncidentDao, never()).saveAndFlush(any());
+    }
+
     private ValidationResult validatedForStart(ValidationStatus status, CampingCard card, HouseCard houseCard) {
         ValidationResult result = result(status, card, houseCard);
         when(validationService.validateFor(SOCKET_1, RFID, PLUG_IN, false)).thenReturn(result);
