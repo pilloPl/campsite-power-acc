@@ -60,6 +60,17 @@ public interface OperationsViewDao {
 
     List<SectionLoadDTO> findSectionLoads(Long siteGroupId);
 
+    /**
+     * One cell of the utilization heatmap (ISO day of week 1..7, hour 0..23).
+     */
+    record UtilizationCell(int dayOfWeek, int hour, long monitoredSeconds, long supplyingSeconds, long sockets) {
+    }
+
+    /**
+     * Cells with samples of MV SOCKET_UTILIZATION in [from, to], by day of week and hour.
+     */
+    List<UtilizationCell> getSocketUtilization(Long siteGroupId, LocalDateTime from, LocalDateTime to);
+
     List<AlertSource> findAlertSources(Long siteGroupId, LocalDateTime silentSince, boolean withEvents,
                                        boolean withErp, int maxRows);
 }

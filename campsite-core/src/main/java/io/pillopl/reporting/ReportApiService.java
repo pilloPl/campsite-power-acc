@@ -9,6 +9,8 @@ import io.pillopl.dto.report.ReportLineDTO;
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
 import io.pillopl.group.GroupType;
+import io.pillopl.monitoring.PedestalStateService;
+import io.pillopl.persistence.dao.OperationsViewDao;
 import io.pillopl.persistence.dao.PowerSectionDao;
 import io.pillopl.reporting.ReportingService.TimeResolution;
 import io.pillopl.user.PrincipalResolver;
@@ -41,9 +43,16 @@ public class ReportApiService implements ReportApi {
 
     private final PrincipalResolver principalResolver;
 
+    private final OperationsViewDao operationsViewDao;
+
+    private final PedestalStateService pedestalStateService;
+
     public ReportApiService(CampsiteReportService campsiteReportService, ReportingService reportingService,
                             GroupService groupService, PowerSectionDao powerSectionDao,
-                            PrincipalResolver principalResolver) {
+                            PrincipalResolver principalResolver, OperationsViewDao operationsViewDao,
+                            PedestalStateService pedestalStateService) {
+        this.operationsViewDao = operationsViewDao;
+        this.pedestalStateService = pedestalStateService;
         this.campsiteReportService = campsiteReportService;
         this.reportingService = reportingService;
         this.groupService = groupService;
@@ -107,6 +116,10 @@ public class ReportApiService implements ReportApi {
                     requirePeriod(period);
                     return campsiteReportService.getTopPitches(period.from(), period.to(), siteGroupId,
                             issuerGroupId, powerSectionId);
+                case SOCKET_UTILIZATION:
+                    requirePeriod(period);
+                    return siteGroupId != null ? socketUtilization(operationsViewDao.getSocketUtilization(siteGroupId,
+                            period.from(), period.to())) : List.of();
                 case SUPPLY_INCIDENTS_PER_PEDESTAL:
                     requirePeriod(period);
                     return campsiteReportService.getSupplyIncidentsPerPedestal(period.from(), period.to(),
@@ -117,6 +130,32 @@ public class ReportApiService implements ReportApi {
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }
+    }
+
+    @Override
+    @Transactional
+    public void refreshUtilization(Username authUsername) {
+        try {
+            principalResolver.resolve(authUsername, UserrightName.REPORT_VIEW);
+            pedestalStateService.refreshSocketUtilization();
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    /**
+     * Heatmap lines: period = day of week, series = hour "07", hours = supplying hours (2 decimals), count =
+     * monitored socket minutes (rounded up).
+     */
+    static List<ReportLineDTO> socketUtilization(List<OperationsViewDao.UtilizationCell> cells) {
+        List<ReportLineDTO> lines = new java.util.ArrayList<>(cells.size());
+        for (OperationsViewDao.UtilizationCell cell : cells) {
+            lines.add(new ReportLineDTO(java.time.DayOfWeek.of(cell.dayOfWeek()).name(),
+                    String.format("%02d", cell.hour()), null, (cell.monitoredSeconds() + 59) / 60,
+                    java.math.BigDecimal.valueOf(cell.supplyingSeconds())
+                            .divide(java.math.BigDecimal.valueOf(3600), 2, java.math.RoundingMode.HALF_UP)));
+        }
+        return lines;
     }
 
     private static void requirePeriod(DateRange period) {

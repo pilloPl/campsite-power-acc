@@ -38,8 +38,12 @@ class ReportApiServiceTest {
     final GroupService groupService = mock(GroupService.class);
     final PowerSectionDao powerSectionDao = mock(PowerSectionDao.class);
     final PrincipalResolver principalResolver = mock(PrincipalResolver.class);
+    final io.pillopl.persistence.dao.OperationsViewDao operationsViewDao =
+            mock(io.pillopl.persistence.dao.OperationsViewDao.class);
+    final io.pillopl.monitoring.PedestalStateService pedestalStateService =
+            mock(io.pillopl.monitoring.PedestalStateService.class);
     final ReportApiService api = new ReportApiService(campsiteReportService, reportingService, groupService,
-            powerSectionDao, principalResolver);
+            powerSectionDao, principalResolver, operationsViewDao, pedestalStateService);
 
     final Userinfo principal = mock(Userinfo.class);
     final Group site = mock(Group.class);
@@ -150,5 +154,24 @@ class ReportApiServiceTest {
                 null, null, "WEEK", List.of("P1"))).isInstanceOf(InvalidInputException.class);
         assertThatThrownBy(() -> api.getReport(CALLER, ReportApi.ACCUMULATED_KWH_PER_PEDESTAL, JULY, null, null,
                 null, null, null, List.of("P1"))).isInstanceOf(InvalidInputException.class);
+    }
+
+    @Test
+    void utilizationHeatmapNamesDayAndHourAndCountsMonitoredMinutesAndSupplyingHours() {
+        org.mockito.Mockito.when(operationsViewDao.getSocketUtilization(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(FROM),
+                org.mockito.ArgumentMatchers.eq(TO))).thenReturn(java.util.List.of(
+                new io.pillopl.persistence.dao.OperationsViewDao.UtilizationCell(1, 7, 7230, 5400, 3)));
+
+        java.util.List<io.pillopl.dto.report.ReportLineDTO> lines = api.getReport(CALLER, "socket utilization", JULY,
+                null, null, null, null, null, null);
+
+        org.assertj.core.api.Assertions.assertThat(lines).containsExactly(new io.pillopl.dto.report.ReportLineDTO(
+                "MONDAY", "07", null, 121, new java.math.BigDecimal("1.50")));
+    }
+
+    @Test
+    void utilizationRefreshNeedsTheReportRight() {
+        api.refreshUtilization(CALLER);
+        org.mockito.Mockito.verify(pedestalStateService).refreshSocketUtilization();
     }
 }

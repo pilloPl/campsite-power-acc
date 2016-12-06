@@ -424,6 +424,30 @@ SELECT ps.ID, ps.SECTION_NAME, ps.MAX_CURRENT_A, ps.ALGORITHM_BEAN_NAME,
  ORDER BY ps.SECTION_NAME
 ]]></entry>
 
+    <!--
+      Utilization heatmap from MV SOCKET_UTILIZATION: per ISO day of week (1 = Monday) and hour of the samples taken
+      in [:from, :to] by the sockets of the subtree of :siteGroupId, the monitored seconds and the seconds the sockets
+      were supplying (meter moving), and the sockets seen. A sample counts until the next sample of its socket.
+    -->
+    <entry key="getSocketUtilization"><![CDATA[
+WITH RECURSIVE site_tree (id) AS (
+    SELECT g.ID FROM TBL_GROUP g WHERE g.ID = :siteGroupId
+    UNION ALL
+    SELECT c.ID FROM TBL_GROUP c JOIN site_tree t ON c.PARENT_ID = t.id
+)
+SELECT CAST(EXTRACT(ISODOW FROM u.MOD_DATE) AS INTEGER) AS DAY_OF_WEEK,
+       u.HOUR,
+       COALESCE(SUM(u.TIME_IN_SECONDS), 0) AS MONITORED_SECONDS,
+       COALESCE(SUM(CASE WHEN u.SUPPLYING = 1 THEN u.TIME_IN_SECONDS ELSE 0 END), 0) AS SUPPLYING_SECONDS,
+       COUNT(DISTINCT u.SOCKET_ID) AS SOCKETS
+  FROM SOCKET_UTILIZATION u
+ WHERE u.GROUP_ID IN (SELECT id FROM site_tree)
+   AND u.MOD_DATE >= :from
+   AND u.MOD_DATE <= :to
+ GROUP BY CAST(EXTRACT(ISODOW FROM u.MOD_DATE) AS INTEGER), u.HOUR
+ ORDER BY 1, 2
+]]></entry>
+
     <!-- ===== end of the console operations of the service tabs ===== -->
 
     <!-- Camping cards -->

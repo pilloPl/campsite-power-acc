@@ -22,6 +22,13 @@ public interface ReportApi {
     String TOP_PITCHES = "TOP_PITCHES";
 
     /**
+     * Utilization heatmap of the sockets of the caller's campsites (MV SOCKET_UTILIZATION, SITE scope only): one line
+     * per day of week (period "MONDAY") and hour (series "07") with samples in the period; hours = supplying hours,
+     * count = monitored socket minutes, so the share is hours * 60 / count; kwh is null.
+     */
+    String SOCKET_UTILIZATION = "SOCKET_UTILIZATION";
+
+    /**
      * @param reportType      one of the constants of this interface
      * @param period          plug-out (incidents: creation) period, both ends required except for the monthly and
      *                        quarterly consumption, which take year and month instead
@@ -35,4 +42,9 @@ public interface ReportApi {
     List<ReportLineDTO> getReport(Username authUsername, String reportType, DateRange period, Long campsiteGroupId,
                                   Long powerSectionId, Integer year, Integer month, String timeResolution,
                                   List<String> pedestalCodes);
+
+    /**
+     * Refreshes MV SOCKET_UTILIZATION from the monitoring log (REPORT_VIEW), otherwise done by its job.
+     */
+    void refreshUtilization(Username authUsername);
 }

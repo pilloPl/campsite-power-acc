@@ -39,6 +39,9 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
     @Value("#{sqls['findAlertSources']}")
     private String findAlertSources;
 
+    @Value("#{sqls['getSocketUtilization']}")
+    private String getSocketUtilization;
+
     @Value("#{sqls['findMapSockets']}")
     private String findMapSockets;
 
@@ -135,6 +138,18 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
                     rs.getString("ALGORITHM_BEAN_NAME"), rs.getLong("SOCKETS"), rs.getLong("ACTIVE_SESSIONS"),
                     allocated, share);
         });
+    }
+
+    @Override
+    public List<UtilizationCell> getSocketUtilization(Long siteGroupId, LocalDateTime from, LocalDateTime to) {
+        Objects.requireNonNull(siteGroupId, "siteGroupId");
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("siteGroupId", siteGroupId, Types.BIGINT)
+                .addValue("from", Timestamp.valueOf(from), Types.TIMESTAMP)
+                .addValue("to", Timestamp.valueOf(to), Types.TIMESTAMP);
+        return jdbcTemplate.query(getSocketUtilization, params, (rs, rowNum) -> new UtilizationCell(
+                rs.getInt("DAY_OF_WEEK"), rs.getInt("HOUR"), rs.getLong("MONITORED_SECONDS"),
+                rs.getLong("SUPPLYING_SECONDS"), rs.getLong("SOCKETS")));
     }
 
     @Override
