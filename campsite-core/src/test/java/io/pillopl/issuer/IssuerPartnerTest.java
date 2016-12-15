@@ -61,6 +61,21 @@ class IssuerPartnerTest {
     }
 
     @Test
+    void nameAndEndpointMustFitTheirColumns() {
+        IssuerPartner longName = partner();
+        longName.setName("N".repeat(IssuerPartner.NAME_MAX_LENGTH + 1));
+        assertThatThrownBy(longName::validate).hasMessage("Partner name must have 1 to 100 characters");
+
+        IssuerPartner longEndpoint = partner();
+        longEndpoint.setEndpoint("https://partner.example.org/" + "e".repeat(IssuerPartner.ENDPOINT_MAX_LENGTH));
+        assertThatThrownBy(longEndpoint::validate).hasMessage("Partner endpoint must have 1 to 500 characters");
+
+        IssuerPartner longest = partner();
+        longest.setName("N".repeat(IssuerPartner.NAME_MAX_LENGTH));
+        longest.validate();
+    }
+
+    @Test
     void syncMatrixShowsEveryDirectionOfThePartnerAndNotRunForTheNewOnes() {
         IssuerPartner partner = partner();
         partner.setCardImport(true);

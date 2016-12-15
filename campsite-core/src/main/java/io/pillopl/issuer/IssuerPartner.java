@@ -33,6 +33,10 @@ import java.util.List;
 @Setter
 public class IssuerPartner {
 
+    static final int NAME_MAX_LENGTH = 100;
+
+    static final int ENDPOINT_MAX_LENGTH = 500;
+
     /**
      * Interface generation of the partner: V1 CSV files in a directory synchronised by SFTP, V2 REST calls.
      */
@@ -49,7 +53,7 @@ public class IssuerPartner {
     /**
      * Short name, also the source name of the partner's imported consumption records.
      */
-    @Column(name = "NAME", length = 100, nullable = false, unique = true)
+    @Column(name = "NAME", length = NAME_MAX_LENGTH, nullable = false, unique = true)
     private String name;
 
     @Column(name = "DISPLAY_NAME", length = 255)
@@ -70,7 +74,7 @@ public class IssuerPartner {
     /**
      * Directory of the files (V1) or base URL of the partner's REST interface (V2).
      */
-    @Column(name = "ENDPOINT", length = 500, nullable = false)
+    @Column(name = "ENDPOINT", length = ENDPOINT_MAX_LENGTH, nullable = false)
     private String endpoint;
 
     @Column(name = "CARD_IMPORT", nullable = false)
@@ -114,11 +118,12 @@ public class IssuerPartner {
      * @throws IllegalArgumentException naming the first broken rule
      */
     public void validate() {
-        if (name == null || name.isBlank() || name.length() > 100) {
-            throw new IllegalArgumentException("Partner name must have 1 to 100 characters");
+        if (name == null || name.isBlank() || name.length() > NAME_MAX_LENGTH) {
+            throw new IllegalArgumentException("Partner name must have 1 to " + NAME_MAX_LENGTH + " characters");
         }
-        if (endpoint == null || endpoint.isBlank() || endpoint.length() > 500) {
-            throw new IllegalArgumentException("Partner endpoint must have 1 to 500 characters");
+        if (endpoint == null || endpoint.isBlank() || endpoint.length() > ENDPOINT_MAX_LENGTH) {
+            throw new IllegalArgumentException("Partner endpoint must have 1 to " + ENDPOINT_MAX_LENGTH
+                    + " characters");
         }
         if (issuerGroup == null || !GroupType.ISSUER.name().equals(issuerGroup.getType())) {
             throw new IllegalArgumentException("The cards of a partner hang in an ISSUER group");
