@@ -124,6 +124,16 @@ class ConsumptionRecordWebServiceIntegrationTest extends WebServiceIntegrationTe
     }
 
     @Test
+    void callsOnARecordNeedItsId() throws Exception {
+        call("admin", PATH + "/reviewConsumptionRecord", new ReviewConsumptionRecordRequest(null, true, null))
+                .andExpect(status().isBadRequest());
+        call("admin", PATH + "/repriceConsumptionRecord", new RepriceConsumptionRecordRequest(null))
+                .andExpect(status().isBadRequest());
+        call("admin", PATH + "/requeueConsumptionRecordExport", new RequeueConsumptionRecordExportRequest(null))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void reviewNeedsTheRightAndARecordWaitingForReview() throws Exception {
         ConsumptionRecord valid = record(baySocket, "12.5", DAY.plusHours(10));
 
