@@ -240,7 +240,7 @@ public class ConsumptionRecordWriteService {
                     + " is suspect: confirm or reject it first");
         }
         ExportStatus status = record.getExportStatus();
-        if (status != ExportStatus.REVIEW && status != ExportStatus.NEW) {
+        if (status == null || !status.mayBePricedAgain()) {
             throw new IllegalStateException("Consumption record " + record.getRecordNo()
                     + " cannot be priced again (" + status + ")");
         }

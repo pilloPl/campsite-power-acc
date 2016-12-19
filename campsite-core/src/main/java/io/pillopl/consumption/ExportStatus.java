@@ -17,4 +17,11 @@ public enum ExportStatus {
     public boolean isExportable() {
         return this == NEW;
     }
+
+    /**
+     * The price of the record may still change: its pricing failed (REVIEW) or it waits for the export (NEW).
+     */
+    public boolean mayBePricedAgain() {
+        return this == REVIEW || this == NEW;
+    }
 }

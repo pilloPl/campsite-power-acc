@@ -35,6 +35,14 @@ class ConsumptionRecordValuesTest {
     }
 
     @Test
+    void onlyRecordsInReviewOrWaitingForExportArePricedAgain() {
+        for (ExportStatus status : ExportStatus.values()) {
+            assertThat(status.mayBePricedAgain())
+                    .isEqualTo(status == ExportStatus.REVIEW || status == ExportStatus.NEW);
+        }
+    }
+
+    @Test
     void onlySuspectRecordsWaitForReview() {
         for (RecordValidationState state : RecordValidationState.values()) {
             assertThat(state.isWaitingForReview()).isEqualTo(state == RecordValidationState.SUSPECT);
