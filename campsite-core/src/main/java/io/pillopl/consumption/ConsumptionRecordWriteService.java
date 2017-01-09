@@ -227,7 +227,7 @@ public class ConsumptionRecordWriteService {
      * @throws IllegalStateException when the record must not be priced again
      */
     public ConsumptionRecord repriceRecord(Long recordId, String by) {
-        ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
+        ConsumptionRecord record = findRecord(recordId);
         if (record == null) {
             return null;
         }
@@ -256,7 +256,7 @@ public class ConsumptionRecordWriteService {
      * @throws IllegalStateException when the export of the record did not fail
      */
     public ConsumptionRecord requeueExport(Long recordId, String by) {
-        ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
+        ConsumptionRecord record = findRecord(recordId);
         if (record == null) {
             return null;
         }
@@ -270,12 +270,16 @@ public class ConsumptionRecordWriteService {
     }
 
     private ConsumptionRecord recordInReview(Long recordId) {
-        ConsumptionRecord record = consumptionRecordDao.findById(recordId).orElse(null);
+        ConsumptionRecord record = findRecord(recordId);
         if (record != null && record.getExportStatus() != ExportStatus.REVIEW) {
             throw new IllegalStateException("Consumption record " + record.getRecordNo()
                     + " does not wait for a review (" + record.getExportStatus() + ")");
         }
         return record;
+    }
+
+    private ConsumptionRecord findRecord(Long recordId) {
+        return consumptionRecordDao.findById(recordId).orElse(null);
     }
 
     /**
