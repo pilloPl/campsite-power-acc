@@ -7,6 +7,7 @@ import io.pillopl.value.Username;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Resolves the calling user of a service interface call (the auth username of the request) and checks its rights.
@@ -25,6 +26,7 @@ public class PrincipalResolver {
     /**
      * @throws AccessNotAllowedException when the user is unknown, deleted or locked
      */
+    @Transactional(readOnly = true)
     public Userinfo resolve(Username authUsername) {
         Userinfo principal = userinfoDao.findByUsername(authUsername.value());
         if (principal == null || principal.isDeleted()) {
@@ -35,6 +37,7 @@ public class PrincipalResolver {
             LOG.info(String.format("Call by locked user '%s' refused", authUsername));
             throw new AccessNotAllowedException("User is locked: " + authUsername);
         }
+        loadScopeAndRights(principal);
         return principal;
     }
 
@@ -42,6 +45,7 @@ public class PrincipalResolver {
      * @throws AccessNotAllowedException when the user is unknown or has not the right (directly or through a security
      *                                    group)
      */
+    @Transactional(readOnly = true)
     public Userinfo resolve(Username authUsername, UserrightName right) {
         Userinfo principal = resolve(authUsername);
         if (!principal.hasRight(right.name())) {
@@ -62,5 +66,16 @@ public class PrincipalResolver {
             throw ObjectNotFoundException.of("User", username);
         }
         return userinfo;
+    }
+
+    /**
+     * The caller is also used after the lookup by services without a transaction of their own (the console runs
+     * without open session in view): its scope groups, roles and rights are loaded here.
+     */
+    private static void loadScopeAndRights(Userinfo principal) {
+        principal.getGroups().size();
+        for (Userrole role : principal.getEffectiveRoles()) {
+            role.getRights().size();
+        }
     }
 }
