@@ -137,14 +137,13 @@ public class ConsumptionRecordApiService implements ConsumptionRecordApi {
      * the user's ISSUER subtree.
      */
     private boolean isInScope(Userinfo principal, ConsumptionRecord record) {
-        Group siteGroup = principal.getGroup(GroupType.SITE);
-        if (siteGroup != null && record.getSiteGroupId() != null
-                && groupService.findManageable(siteGroup).contains(record.getSiteGroupId())) {
-            return true;
-        }
-        Group issuerGroup = principal.getGroup(GroupType.ISSUER);
-        return issuerGroup != null && record.getIssuerGroupId() != null
-                && groupService.findManageable(issuerGroup).contains(record.getIssuerGroupId());
+        return isInSubtree(principal.getGroup(GroupType.SITE), record.getSiteGroupId())
+                || isInSubtree(principal.getGroup(GroupType.ISSUER), record.getIssuerGroupId());
+    }
+
+    private boolean isInSubtree(Group userGroup, Long recordGroupId) {
+        return userGroup != null && recordGroupId != null
+                && groupService.findManageable(userGroup).contains(recordGroupId);
     }
 
     private static Long groupIdOf(Userinfo principal, GroupType type) {
