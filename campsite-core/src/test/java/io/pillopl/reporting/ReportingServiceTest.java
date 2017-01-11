@@ -71,6 +71,21 @@ class ReportingServiceTest {
     }
 
     @Test
+    void pedestalSelectedTwiceHasOneLinePerBucket() {
+        when(dao.sumKwhPerPedestal(eq(month(7)), eq(month(8)), any(), eq(SITE), eq(null)))
+                .thenReturn(rows(new Object[]{"P1", new BigDecimal("4"), 1L}));
+
+        List<ReportLineDTO> lines = service.fetchAccumulatedKwhPerPedestal(TimeResolution.MONTH,
+                LocalDateTime.of(2026, 7, 1, 0, 0), LocalDateTime.of(2026, 7, 31, 0, 0), List.of("P1", "P1"), SITE,
+                null);
+
+        assertThat(lines).extracting(ReportLineDTO::series, ReportLineDTO::kwh, ReportLineDTO::count)
+                .containsExactly(
+                        tuple("P1", new BigDecimal("4.000"), 1L),
+                        tuple(ReportLineDTO.ALL_SERIES, new BigDecimal("4.000"), 1L));
+    }
+
+    @Test
     void accumulatedKwhNeedsAPedestal() {
         assertThatThrownBy(() -> service.fetchAccumulatedKwhPerPedestal(TimeResolution.MONTH,
                 LocalDateTime.of(2026, 7, 1, 0, 0), LocalDateTime.of(2026, 7, 31, 0, 0), List.of(), SITE, null))
