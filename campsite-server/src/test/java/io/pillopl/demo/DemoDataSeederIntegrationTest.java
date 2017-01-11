@@ -44,6 +44,16 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
     @Autowired TariffApi tariffApi;
     @Autowired PedestalApi pedestalApi;
     @Autowired GroupApi groupApi;
+    @Autowired io.pillopl.api.DashboardApi dashboardApi;
+    @Autowired io.pillopl.api.MapApi mapApi;
+    @Autowired io.pillopl.api.SupplyApi supplyApi;
+    @Autowired io.pillopl.api.MonitoringApi monitoringApi;
+    @Autowired io.pillopl.api.QrPayConsoleApi qrPayConsoleApi;
+    @Autowired io.pillopl.api.PowerBudgetApi powerBudgetApi;
+    @Autowired io.pillopl.api.ErpBillingApi erpBillingApi;
+    @Autowired io.pillopl.api.IssuerApi issuerApi;
+    @Autowired io.pillopl.api.GuestApi guestApi;
+    @Autowired io.pillopl.api.JobApi jobApi;
 
     long sessionsOfFirstSeed;
 
@@ -163,6 +173,33 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
     private List<String> rights(String username) {
         CurrentUserDTO user = userApi.getCurrentUser(Username.of(username));
         return user.rights();
+    }
+
+    @Test
+    void theNewConsoleTabsFindDataOnTheSeed() {
+        LocalDate today = LocalDate.now();
+        DateRange month = DateRange.ofDays(today.minusDays(30).toString(), today.toString());
+        var dashboard = dashboardApi.getDashboard(ADMIN, null);
+        assertThat(dashboard.activeSessions()).isPositive();
+        assertThat(dashboard.reviewQueue()).isPositive();
+        assertThat(dashboardApi.findAlerts(ADMIN, null, false, 100)).isNotEmpty();
+        assertThat(mapApi.getMapData(ADMIN, null).campsites()).isNotEmpty();
+        assertThat(supplyApi.findSupplySessions(ADMIN, null, null, null, false, month, Pagination.ofNullable(0, 20))
+                .items()).hasSize(20);
+        assertThat(supplyApi.findSupplyIncidents(ADMIN, null, null, false, month, null).items()).isNotEmpty();
+        assertThat(monitoringApi.getStatusReport(ADMIN, today.withDayOfMonth(1), null)).isNotEmpty();
+        assertThat(monitoringApi.findHeartbeatTimeouts(Username.of("admin.fr"), null)).isNotEmpty();
+        assertThat(monitoringApi.findFailedEvents(ADMIN, 50)).isNotEmpty();
+        assertThat(qrPayConsoleApi.findQrPayProcesses(ADMIN, null, null, null, null).items()).isNotEmpty();
+        assertThat(powerBudgetApi.findPowerSections(ADMIN)).isNotEmpty();
+        assertThat(erpBillingApi.findErpBillingRuns(ADMIN)).isNotEmpty();
+        assertThat(issuerApi.findIssuerPartners(ADMIN)).isNotEmpty();
+        assertThat(issuerApi.findIssuerSyncStatuses(ADMIN)).isNotEmpty();
+        assertThat(guestApi.findGuests(ADMIN, "a")).isNotEmpty();
+        assertThat(guestApi.findSeasonalContracts(ADMIN, null)).isNotEmpty();
+        assertThat(reportApi.getReport(ADMIN, "SOCKET_UTILIZATION", month, null, null, null, null, null, null))
+                .isNotEmpty();
+        assertThat(jobApi.findJobs(ADMIN)).isNotEmpty();
     }
 
     private long count(String sql) {

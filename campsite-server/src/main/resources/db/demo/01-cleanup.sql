@@ -3,6 +3,8 @@
 -- payments, stays) go with them. Children before parents.
 
 DELETE FROM AUDIT WHERE ID >= 900000000;
+-- acknowledgements of dashboard alerts refer to objects by id in their key; a reseed shows all alerts again
+DELETE FROM CONSOLE_ALERT_ACK;
 DELETE FROM EVENT_RETRY WHERE ID >= 900000000;
 
 DELETE FROM ISSUER_SYNC_STATUS WHERE ID >= 900000000 OR ISSUER_PARTNER_ID >= 900000000;
