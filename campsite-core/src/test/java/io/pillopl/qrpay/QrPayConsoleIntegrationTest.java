@@ -76,6 +76,7 @@ class QrPayConsoleIntegrationTest extends IntegrationTest {
     @Autowired GroupManager groupManager;
     @Autowired InfrastructureFixture infrastructure;
     @Autowired DateService dateService;
+    @Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
 
     final SocketLinkId socket1 = SocketLinkId.of("HR-PORT-P301", 1);
     final LocalDateTime plugIn = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).minusMinutes(5);
@@ -203,6 +204,27 @@ class QrPayConsoleIntegrationTest extends IntegrationTest {
                 .isInstanceOf(ConflictException.class).hasMessageContaining("no supply runs");
         assertThatThrownBy(() -> supervisor.cancelQrPayProcess(Username.of("qr-desk"), started.processId()))
                 .isInstanceOf(AccessNotAllowedException.class);
+    }
+
+    @Test
+    void timelineFollowsTheLinksOfTheChainEvenWhenALaterRowHasASmallerId() {
+        Long socketId = pedestalService.findSocket("HR-PORT-P301", 1).getId();
+        LocalDateTime requested = LocalDateTime.now().minusHours(3);
+        jdbcTemplate.update("INSERT INTO QRPAY_PROCESS (ID, PROCESS_ID, ORDER_REFERENCE, STATE, SOCKET_ID, "
+                + "CLIENT_USERNAME, APP_USER_ID, REQUEST_DATE, START_TIME) VALUES (990000001, 990000001, 'PORT-8', "
+                + "'START_REQUESTED', ?, 'console-payment-app', 'guest-1', ?, ?)", socketId, requested, requested);
+        jdbcTemplate.update("INSERT INTO QRPAY_PROCESS (ID, PROCESS_ID, ORDER_REFERENCE, STATE, SOCKET_ID, "
+                + "CLIENT_USERNAME, APP_USER_ID, REQUEST_DATE, START_TIME, PREVIOUS_PROCESS_ID) VALUES (990000002, "
+                + "990000001, 'PORT-8', 'SOCKET_START_WAITING', ?, 'console-payment-app', 'guest-1', ?, ?, 990000001)",
+                socketId, requested, requested);
+        jdbcTemplate.update("UPDATE QRPAY_PROCESS SET NEXT_PROCESS_ID = 990000002 WHERE ID = 990000001");
+
+        QrPayTimelineDTO cancelled = supervisor.cancelQrPayProcess(OFFICE, 990000001L);
+
+        assertThat(cancelled.steps()).extracting(QrPayTimelineDTO.Step::state)
+                .containsExactly("START_REQUESTED", "SOCKET_START_WAITING", "ERROR");
+        assertThat(cancelled.steps().get(2).rowId()).isLessThan(990000001L);
+        assertThat(cancelled.currentState()).isEqualTo("ERROR");
     }
 
     @Test

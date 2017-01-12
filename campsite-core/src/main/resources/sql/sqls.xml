@@ -973,18 +973,32 @@ SELECT cr.*,
  LIMIT :limit OFFSET :offset
 ]]></entry>
 
-    <!-- All rows of one process, live or archived (a chain is wholly in one of the tables), first row first. -->
+    <!-- All rows of one process, live or archived (a chain is wholly in one of the tables), in the order of their links
+         (NEXT_PROCESS_ID) from the first row: ids need not grow along the chain. -->
     <entry key="findQrPayProcessChain"><![CDATA[
-SELECT p.ID, p.PROCESS_ID, p.ORDER_REFERENCE, p.SOCKET_ID, p.STATE, p.START_TIME, p.STOP_TIME, p.TRANSACTION_ID,
-       p.SUPPLY_SESSION_ID, p.ERROR_CODE, p.ERROR_MESSAGE, FALSE AS ARCHIVED
-  FROM QRPAY_PROCESS p
- WHERE p.PROCESS_ID = :processId
-UNION ALL
-SELECT a.ID, a.PROCESS_ID, a.ORDER_REFERENCE, a.SOCKET_ID, a.STATE, a.START_TIME, a.STOP_TIME, a.TRANSACTION_ID,
-       a.SUPPLY_SESSION_ID, a.ERROR_CODE, a.ERROR_MESSAGE, TRUE AS ARCHIVED
-  FROM QRPAY_PROCESS_ARCHIVE a
- WHERE a.PROCESS_ID = :processId
- ORDER BY ID
+WITH RECURSIVE process_rows AS (
+    SELECT p.ID, p.PROCESS_ID, p.ORDER_REFERENCE, p.SOCKET_ID, p.STATE, p.START_TIME, p.STOP_TIME, p.TRANSACTION_ID,
+           p.SUPPLY_SESSION_ID, p.ERROR_CODE, p.ERROR_MESSAGE, p.NEXT_PROCESS_ID, FALSE AS ARCHIVED
+      FROM QRPAY_PROCESS p
+     WHERE p.PROCESS_ID = :processId
+    UNION ALL
+    SELECT a.ID, a.PROCESS_ID, a.ORDER_REFERENCE, a.SOCKET_ID, a.STATE, a.START_TIME, a.STOP_TIME, a.TRANSACTION_ID,
+           a.SUPPLY_SESSION_ID, a.ERROR_CODE, a.ERROR_MESSAGE, a.NEXT_PROCESS_ID, TRUE AS ARCHIVED
+      FROM QRPAY_PROCESS_ARCHIVE a
+     WHERE a.PROCESS_ID = :processId
+), chain AS (
+    SELECT r.*, 1 AS STEP
+      FROM process_rows r
+     WHERE r.ID = :processId
+    UNION ALL
+    SELECT r.*, c.STEP + 1
+      FROM process_rows r
+      JOIN chain c ON r.ID = c.NEXT_PROCESS_ID
+)
+SELECT ID, PROCESS_ID, ORDER_REFERENCE, SOCKET_ID, STATE, START_TIME, STOP_TIME, TRANSACTION_ID, SUPPLY_SESSION_ID,
+       ERROR_CODE, ERROR_MESSAGE, ARCHIVED
+  FROM chain
+ ORDER BY STEP
 ]]></entry>
 
     <!-- QR payment: archive of the finished process chains -->
