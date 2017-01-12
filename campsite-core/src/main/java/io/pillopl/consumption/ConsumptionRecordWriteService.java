@@ -41,6 +41,8 @@ public class ConsumptionRecordWriteService {
 
     static final String N_A = "N/A";
 
+    static final String UNKNOWN_CONSUMPTION = "Consumption unknown: unusable meter reading";
+
     private final ConsumptionRecordDao consumptionRecordDao;
 
     private final ConsumptionRecordFactory consumptionRecordFactory;
@@ -292,8 +294,8 @@ public class ConsumptionRecordWriteService {
                     record.getPlugIn(), record.getPlugOut(), record.getKwh()));
         }
         if (record.getKwh() == null) {
-            LOGGER.warn("Consumption unknown, record cannot be priced: " + record);
-            return PriceCalculation.failed(null, "Consumption unknown: unusable meter reading");
+            LOGGER.warn("Consumption of record {} unknown, it cannot be priced: {}", record.getRecordNo(), record);
+            return PriceCalculation.failed(null, UNKNOWN_CONSUMPTION);
         }
         return pricingService.calculateCost(PricingInput.of(record.getSocketId(), record.getCardId(),
                 record.getPlugIn(), record.getPlugOut(), record.getKwh(), record.getNights()));

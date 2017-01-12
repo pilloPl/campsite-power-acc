@@ -177,6 +177,7 @@ class ConsumptionRecordWriteServiceTest {
 
         assertThat(record.getPricingStatus()).isEqualTo(PricingStatus.PRICING_FAILED);
         assertThat(record.getExportStatus()).isEqualTo(ExportStatus.REVIEW);
+        assertThat(record.getPricingFailureReason()).isEqualTo(ConsumptionRecordWriteService.UNKNOWN_CONSUMPTION);
         verify(pricingService, never()).calculateCost(any(PricingInput.class));
     }
 
