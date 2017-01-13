@@ -344,8 +344,11 @@ public abstract class PedestalLinkV3Handler<REQ, RESP> {
             Pedestal pedestal = service.getPedestal(pedestalCode);
             service.getPedestalService().registerIncoming(pedestal, service.getDateService().getNow());
 
-            if (request.vendorId() == null
-                    || !request.vendorId().equalsIgnoreCase(pedestal.getPedestalType().getManufacturer())) {
+            String manufacturer = pedestal.getPedestalType() != null
+                    ? pedestal.getPedestalType().getManufacturer() : null;
+            if (request.vendorId() == null || !request.vendorId().equalsIgnoreCase(manufacturer)) {
+                LOGGER.warn(String.format("Link v3 vendor data of pedestal %s from vendor %s, but the manufacturer"
+                        + " is %s", pedestalCode, request.vendorId(), manufacturer));
                 return new VendorDataResponse(VendorDataResponse.UNKNOWN_VENDOR, null);
             }
             if (request.messageId() == null || request.messageId().isBlank()) {
