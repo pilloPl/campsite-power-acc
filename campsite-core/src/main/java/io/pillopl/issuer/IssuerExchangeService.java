@@ -290,7 +290,10 @@ public class IssuerExchangeService {
         return exchange;
     }
 
-    private static String toMessage(List<String> rejections) {
+    /**
+     * The first {@value #MAX_REJECTIONS_IN_MESSAGE} rejections and how many more there are, null without any.
+     */
+    static String toMessage(List<String> rejections) {
         if (rejections.isEmpty()) {
             return null;
         }

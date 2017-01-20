@@ -30,6 +30,15 @@ class IssuerExchangeServiceTest {
     }
 
     @Test
+    void statusMessageShowsTheFirstRejectionsAndCountsTheRest() {
+        assertThat(IssuerExchangeService.toMessage(List.of())).isNull();
+        assertThat(IssuerExchangeService.toMessage(List.of("a", "b"))).isEqualTo("a; b");
+        assertThat(IssuerExchangeService.toMessage(List.of("a", "b", "c", "d", "e"))).isEqualTo("a; b; c; d; e");
+        assertThat(IssuerExchangeService.toMessage(List.of("a", "b", "c", "d", "e", "f", "g")))
+                .isEqualTo("a; b; c; d; e; and 2 more");
+    }
+
+    @Test
     void partnerOfAnInterfaceVersionWithoutTransportCannotBeExchangedWith() {
         IssuerExchangeService service = new IssuerExchangeService(null, null, null, null, null, null, null, null,
                 null, List.of(new IssuerExchangeV1(null)), new NoTransactions());
