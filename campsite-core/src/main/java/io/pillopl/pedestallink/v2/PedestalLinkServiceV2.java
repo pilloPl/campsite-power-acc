@@ -277,7 +277,8 @@ public class PedestalLinkServiceV2 {
 
         // the pedestal code is the identity on the link
         if (pedestalCode == null) {
-            throw new IllegalArgumentException(String.format("Unknown pedestal %s (socket %s)", null, socketNo));
+            throw new IllegalArgumentException(String.format("Link v2 socket status without pedestal code (socket %s)",
+                    socketNo));
         }
 
         // load the pedestal to find the manufacturer

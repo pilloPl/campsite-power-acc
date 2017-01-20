@@ -167,7 +167,8 @@ class PedestalLinkServiceV2Test {
     @Test
     void statusWithoutPedestalCodeIsRefused() {
         assertThatThrownBy(() -> service.socketStatus(null, status("AVAILABLE", "NO_ERROR", null)))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("without pedestal code");
     }
 
     @Test
