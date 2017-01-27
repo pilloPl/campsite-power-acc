@@ -26,8 +26,10 @@ import java.util.List;
  * guests, stays and 44 days of supplies, see {@code db/demo/*.sql}. Runs at start-up in one transaction: removes an
  * earlier seed (ids from 900000000 on, with what the application created on top of it), inserts the data relative
  * to now, gives the demo users their passwords ({@code demo-<username>}) and refreshes the materialized views and
- * the configuration cache. With {@code campsite.demo.reseed=false} an existing seed is kept. It starts before the
- * Quartz scheduler (lower lifecycle phase), so that no job works on the rows while they are replaced.
+ * the configuration cache. The link addresses of the link v2 and v3 pedestals point to the
+ * {@link DemoPedestalSimulator} of the running application. With {@code campsite.demo.reseed=false} an existing seed
+ * is kept. It starts before the Quartz scheduler (lower lifecycle phase), so that no job works on the rows while
+ * they are replaced.
  */
 @Component
 @Profile("demo")
@@ -60,16 +62,20 @@ public class DemoDataSeeder implements SmartLifecycle {
 
     private final boolean reseed;
 
+    private final String simulatorAddress;
+
     private volatile boolean running;
 
     public DemoDataSeeder(JdbcTemplate jdbcTemplate, PasswordEncoder passwordEncoder,
                           SystemPropertyService systemPropertyService, PlatformTransactionManager transactionManager,
-                          @Value("${campsite.demo.reseed:true}") boolean reseed) {
+                          @Value("${campsite.demo.reseed:true}") boolean reseed,
+                          @Value("${server.port:8080}") int serverPort) {
         this.jdbcTemplate = jdbcTemplate;
         this.passwordEncoder = passwordEncoder;
         this.systemPropertyService = systemPropertyService;
         this.transactionTemplate = new TransactionTemplate(transactionManager);
         this.reseed = reseed;
+        this.simulatorAddress = "http://localhost:" + serverPort + DemoPedestalSimulator.PATH + "/";
     }
 
     @Override
@@ -117,6 +123,9 @@ public class DemoDataSeeder implements SmartLifecycle {
                 jdbcTemplate.update("UPDATE USERINFO SET PASSWORD_HASH = ?, FAILED_LOGINS = 0 WHERE USERNAME = ? "
                         + "AND ID >= 900000000", passwordEncoder.encode(PASSWORD_PREFIX + username), username);
             }
+            // the link v2 and v3 pedestals of the demo are answered by the demo pedestal simulator
+            jdbcTemplate.update("UPDATE PEDESTAL SET LINK_URL = ? || CODE WHERE ID >= 900000000 AND LINK_URL IS NOT NULL",
+                    simulatorAddress);
             jdbcTemplate.execute("REFRESH MATERIALIZED VIEW SOCKET_UTILIZATION");
             jdbcTemplate.execute("REFRESH MATERIALIZED VIEW USERINFO_SUMMARY");
         });
