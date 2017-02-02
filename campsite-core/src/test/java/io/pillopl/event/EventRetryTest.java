@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EventRetryTest {
 
@@ -49,6 +50,15 @@ class EventRetryTest {
 
         assertThat(EventRetry.of(event, null, now).getAttributes())
                 .isEqualTo("PEDESTAL_CODE=HR-BAY-P201\nPEDESTAL_ID=3\n");
+    }
+
+    @Test
+    void unreadableAttributeIsNamedInTheFailure() {
+        EventRetry retry = EventRetry.of(new Event(EventType.BOOT_NOTIFICATION), "first", now);
+        retry.setAttributes("HEARTBEAT_INTERVAL=often\n");
+
+        assertThatThrownBy(retry::toEvent).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("HEARTBEAT_INTERVAL=often");
     }
 
     @Test

@@ -96,8 +96,13 @@ public class EventRetry {
             throw new UncheckedIOException(e);
         }
         for (String name : properties.stringPropertyNames()) {
-            EventAttribute attribute = EventAttribute.valueOf(name);
-            event.setAttribute(attribute, readValue(attribute, properties.getProperty(name)));
+            try {
+                EventAttribute attribute = EventAttribute.valueOf(name);
+                event.setAttribute(attribute, readValue(attribute, properties.getProperty(name)));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format("Attribute %s=%s of %s can not be read back", name,
+                        properties.getProperty(name), this), e);
+            }
         }
         return event;
     }
