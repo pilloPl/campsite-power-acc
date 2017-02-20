@@ -33,8 +33,7 @@ public final class SupplySessionMapper {
                 ? stopMeter.subtract(session.getStartMeterKwh()).max(BigDecimal.ZERO) : null;
         String guestName = record != null ? record.getGuestName()
                 : session.getCard() != null && session.getCard().getGuest() != null
-                ? (nullToEmpty(session.getCard().getGuest().getFirstName()) + " "
-                + session.getCard().getGuest().getName()).trim() : null;
+                ? session.getCard().getGuest().getFullName() : null;
         return new SupplySessionDTO(session.getId(), session.getTransactionId(), session.isActive(), stale,
                 socket.getId(), socket.getSocketCode(), socket.getName(), socket.getPitchNo(), pedestal.getCode(),
                 pedestal.getGroup() != null ? pedestal.getGroup().getId() : null,
@@ -62,9 +61,5 @@ public final class SupplySessionMapper {
     public static PedestalCommandDTO toCommand(String command, Socket socket, String message) {
         return new PedestalCommandDTO(command, socket.getPedestal().getCode(), socket.getId(), socket.getSocketNo(),
                 true, socket.getStatus() != null ? socket.getStatus().name() : null, message);
-    }
-
-    private static String nullToEmpty(String value) {
-        return value != null ? value : "";
     }
 }
