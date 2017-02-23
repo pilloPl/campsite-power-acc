@@ -387,3 +387,16 @@ SELECT x.ID, x.CAMPSITE_CODE || '-' || TO_CHAR(x.PLUG_OUT, 'YYYYMMDD') || '-' ||
 UPDATE HOUSECARD hc
    SET LAST_USED = (SELECT MAX(ss.CREATE_DATE) FROM SUPPLY_SESSION ss WHERE ss.HOUSECARD_ID = hc.ID)
  WHERE hc.ID >= 900000000;
+
+-- Welcome card pools: per market a pool guest keeps the cards the reception hands to guests who arrive without a card
+INSERT INTO GUEST (ID, GROUP_ID, GUEST_TYPE, NAME, FIRST_NAME, STATUS, CREATE_DATE, DELETED, MOD_DATE)
+SELECT 900090000 + m.NO, m.POOL_GROUP_ID, 'TRANSIT', 'Welcome card pool', m.MARKET, 'ACTIVE',
+       CURRENT_DATE - 60, FALSE, CURRENT_DATE - 60
+  FROM (VALUES (1, 'HR', 41), (2, 'IT', 42), (3, 'FR', 43)) AS m(NO, MARKET, POOL_GROUP_ID);
+
+INSERT INTO CAMPING_CARD (ID, CARD_RFID, CARD_NUMBER, STATUS, GUEST_ID, VALID_FROM, VALID_TO, BILLING_ACCOUNT_NO,
+                          DELETED, CREATE_DATE, PARTNER_SYNC_STATE)
+SELECT 900090100 + m.NO * 20 + n, '8' || LPAD((m.NO * 100 + n)::TEXT, 9, '0'), m.MARKET || '-W' || LPAD(n::TEXT, 3, '0'),
+       'ACTIVATED', 900090000 + m.NO, NULL, NULL, '7700' || LPAD((m.NO * 100 + n)::TEXT, 8, '0'), FALSE,
+       CURRENT_DATE - 60, 'NOT'
+  FROM (VALUES (1, 'HR'), (2, 'IT'), (3, 'FR')) AS m(NO, MARKET), generate_series(1, 8) AS n;
