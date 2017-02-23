@@ -2,6 +2,7 @@ package io.pillopl.api;
 
 import io.pillopl.dto.admin.IssuerPartnerDTO;
 import io.pillopl.dto.admin.IssuerSyncStatusDTO;
+import io.pillopl.dto.admin.WhitelistFilterDTO;
 import io.pillopl.dto.card.CampingCardDTO;
 import io.pillopl.value.Username;
 
@@ -9,8 +10,8 @@ import java.util.List;
 
 /**
  * The exchange of card lists and consumption records with the issuer partners, for the administration: partners
- * and the sync state matrix need REPORT_VIEW, editing partners and running the exchange CONFIG_EDIT (the partners
- * are network configuration), sending a card again BILLING_EDIT and the card in the caller's ISSUER scope.
+ * and the sync state matrix need REPORT_VIEW, editing partners and whitelist filters and running the exchange
+ * CONFIG_EDIT (the partners are network configuration; filters of groups in the caller's ISSUER scope), sending a card again BILLING_EDIT and the card in the caller's ISSUER scope.
  */
 public interface IssuerApi {
 
@@ -42,4 +43,20 @@ public interface IssuerApi {
      *                                                    send
      */
     CampingCardDTO resyncCard(Username authUsername, Long cardId);
+
+    /**
+     * The whitelist filters of the ISSUER groups in the caller's ISSUER scope.
+     */
+    List<WhitelistFilterDTO> findWhitelistFilters(Username authUsername);
+
+    /**
+     * Sets the whitelist filter of an ISSUER group in the caller's scope (one per group: an existing one is changed);
+     * the partner is optional (null = every partner).
+     */
+    WhitelistFilterDTO saveWhitelistFilter(Username authUsername, WhitelistFilterDTO filter);
+
+    /**
+     * Removes the filter: the group follows the nearest filter above it again (none = synchronised).
+     */
+    void deleteWhitelistFilter(Username authUsername, Long filterId);
 }

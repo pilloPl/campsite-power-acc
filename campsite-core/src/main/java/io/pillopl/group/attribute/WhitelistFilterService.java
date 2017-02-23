@@ -1,11 +1,15 @@
 package io.pillopl.group.attribute;
 
+import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
+import io.pillopl.group.GroupType;
 import io.pillopl.issuer.IssuerPartner;
 import io.pillopl.persistence.dao.WhitelistFilterDao;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -23,6 +27,45 @@ public class WhitelistFilterService {
     public WhitelistFilterService(GroupService groupService, WhitelistFilterDao whitelistFilterDao) {
         this.groupService = groupService;
         this.whitelistFilterDao = whitelistFilterDao;
+    }
+
+    /**
+     * The filters set on the groups of the ISSUER subtree, ordered by group name.
+     */
+    @Transactional(readOnly = true)
+    public List<WhitelistFilter> findFiltersOfSubtree(Group issuerScope) {
+        if (issuerScope == null) {
+            return List.of();
+        }
+        List<WhitelistFilter> filters = new ArrayList<>(whitelistFilterDao.findByGroupIds(
+                groupService.findManageable(issuerScope)));
+        filters.sort(Comparator.comparing(filter -> filter.getGroup().getName()));
+        return filters;
+    }
+
+    /**
+     * Sets the filter of an ISSUER group (a group has at most one filter: an existing one is changed).
+     */
+    @Transactional
+    public WhitelistFilter saveFilter(Group issuerGroup, boolean synchronizable, WhitelistFilterType type,
+                                      IssuerPartner partner) {
+        if (issuerGroup == null || !GroupType.ISSUER.isGroupType(issuerGroup)) {
+            throw new IllegalArgumentException("A whitelist filter belongs to an ISSUER group");
+        }
+        WhitelistFilter filter = whitelistFilterDao.findForGroup(issuerGroup.getId());
+        if (filter == null) {
+            filter = new WhitelistFilter();
+            filter.setGroup(issuerGroup);
+        }
+        filter.setSynchronizable(synchronizable);
+        filter.setWhitelistFilterType(type != null ? type : WhitelistFilterType.IMPORT_EXPORT);
+        filter.setIssuerPartner(partner);
+        return whitelistFilterDao.saveAndFlush(filter);
+    }
+
+    @Transactional
+    public void deleteFilter(WhitelistFilter filter) {
+        whitelistFilterDao.delete(filter);
     }
 
     @Transactional(readOnly = true)

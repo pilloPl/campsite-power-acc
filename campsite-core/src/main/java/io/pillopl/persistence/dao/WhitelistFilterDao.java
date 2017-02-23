@@ -15,4 +15,7 @@ public interface WhitelistFilterDao extends JpaRepository<WhitelistFilter, Long>
      */
     @Query("select a from WhitelistFilter a where a.group.id in (:groupIds)")
     List<WhitelistFilter> findByGroupIds(@Param("groupIds") Collection<Long> groupIds);
+
+    @Query("select a from WhitelistFilter a where a.group.id = :groupId")
+    WhitelistFilter findForGroup(@Param("groupId") Long groupId);
 }

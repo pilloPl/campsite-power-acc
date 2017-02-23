@@ -1,6 +1,7 @@
 package io.pillopl.issuer;
 
 import io.pillopl.api.IssuerApi;
+import io.pillopl.api.exception.AccessNotAllowedException;
 import io.pillopl.api.exception.ConflictException;
 import io.pillopl.api.exception.InvalidInputException;
 import io.pillopl.api.exception.ObjectNotFoundException;
@@ -10,10 +11,16 @@ import io.pillopl.card.CardMapper;
 import io.pillopl.commons.TextUtil;
 import io.pillopl.dto.admin.IssuerPartnerDTO;
 import io.pillopl.dto.admin.IssuerSyncStatusDTO;
+import io.pillopl.dto.admin.WhitelistFilterDTO;
 import io.pillopl.dto.card.CampingCardDTO;
 import io.pillopl.group.Group;
 import io.pillopl.group.GroupService;
+import io.pillopl.group.GroupType;
+import io.pillopl.group.attribute.WhitelistFilter;
+import io.pillopl.group.attribute.WhitelistFilterService;
+import io.pillopl.group.attribute.WhitelistFilterType;
 import io.pillopl.persistence.dao.IssuerPartnerDao;
+import io.pillopl.persistence.dao.WhitelistFilterDao;
 import io.pillopl.user.PrincipalResolver;
 import io.pillopl.user.Userinfo;
 import io.pillopl.user.UserrightName;
@@ -33,8 +40,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Issuer exchange calls of the console: partners and their sync states (REPORT_VIEW), editing partners and the run
- * (CONFIG_EDIT: the partners are network configuration), a card sent again (BILLING_EDIT).
+ * Issuer exchange calls of the console: partners, their sync states and the whitelist filters (REPORT_VIEW), editing
+ * partners and filters and the run (CONFIG_EDIT: network configuration), a card sent again (BILLING_EDIT).
  */
 @Service
 public class IssuerApiService implements IssuerApi {
@@ -55,12 +62,19 @@ public class IssuerApiService implements IssuerApi {
 
     private final DateService dateService;
 
+    private final WhitelistFilterService whitelistFilterService;
+
+    private final WhitelistFilterDao whitelistFilterDao;
+
     static final String NOT_RUN = "NOT_RUN";
 
     public IssuerApiService(IssuerExchangeService issuerExchangeService, IssuerPartnerDao issuerPartnerDao,
                             PrincipalResolver principalResolver, PlatformTransactionManager transactionManager,
                             GroupService groupService, CampingCardService campingCardService,
-                            DateService dateService) {
+                            DateService dateService, WhitelistFilterService whitelistFilterService,
+                            WhitelistFilterDao whitelistFilterDao) {
+        this.whitelistFilterService = whitelistFilterService;
+        this.whitelistFilterDao = whitelistFilterDao;
         this.groupService = groupService;
         this.campingCardService = campingCardService;
         this.dateService = dateService;
@@ -168,6 +182,94 @@ public class IssuerApiService implements IssuerApi {
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<WhitelistFilterDTO> findWhitelistFilters(Username authUsername) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.REPORT_VIEW);
+            List<WhitelistFilterDTO> result = new ArrayList<>();
+            for (WhitelistFilter filter : whitelistFilterService.findFiltersOfSubtree(
+                    principal.getGroup(GroupType.ISSUER))) {
+                result.add(toDTO(filter));
+            }
+            return result;
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public WhitelistFilterDTO saveWhitelistFilter(Username authUsername, WhitelistFilterDTO dto) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CONFIG_EDIT);
+            if (dto == null) {
+                throw new InvalidInputException("Whitelist filter is missing");
+            }
+            Group issuerGroup = issuerGroupInScope(principal, dto.groupId());
+            if (dto.id() != null) {
+                WhitelistFilter existing = filterInScope(principal, dto.id());
+                if (!existing.getGroupId().equals(issuerGroup.getId())) {
+                    throw new InvalidInputException("A whitelist filter cannot move to another group");
+                }
+            }
+            IssuerPartner partner = null;
+            if (dto.issuerPartnerId() != null) {
+                partner = issuerPartnerDao.findById(dto.issuerPartnerId()).filter(p -> !p.isDeleted())
+                        .orElseThrow(() -> ObjectNotFoundException.of("Issuer partner", dto.issuerPartnerId()));
+            }
+            WhitelistFilterType type = dto.filterType() != null ? ApiValues.parseEnum(WhitelistFilterType.class,
+                    dto.filterType(), "filter type") : WhitelistFilterType.IMPORT_EXPORT;
+            WhitelistFilter saved = whitelistFilterService.saveFilter(issuerGroup, dto.synchronizable(), type,
+                    partner);
+            LOG.info(String.format("Whitelist filter %s saved by %s", saved, principal.getUsername()));
+            return toDTO(saved);
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void deleteWhitelistFilter(Username authUsername, Long filterId) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CONFIG_EDIT);
+            WhitelistFilter filter = filterInScope(principal, filterId);
+            whitelistFilterService.deleteFilter(filter);
+            LOG.info(String.format("Whitelist filter %s deleted by %s", filter, principal.getUsername()));
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    private Group issuerGroupInScope(Userinfo principal, Long groupId) {
+        Group group = group(groupId, "issuer group");
+        if (!GroupType.ISSUER.isGroupType(group)) {
+            throw new InvalidInputException(String.format("Group %s is no ISSUER group", groupId));
+        }
+        if (!groupService.isManageable(principal.getGroup(GroupType.ISSUER), group)) {
+            throw new AccessNotAllowedException(String.format("User '%s' has no access to group %s",
+                    principal.getUsername(), groupId));
+        }
+        return group;
+    }
+
+    private WhitelistFilter filterInScope(Userinfo principal, Long filterId) {
+        WhitelistFilter filter = filterId != null ? whitelistFilterDao.findById(filterId).orElse(null) : null;
+        if (filter == null || !groupService.isManageable(principal.getGroup(GroupType.ISSUER), filter.getGroup())) {
+            throw ObjectNotFoundException.of("Whitelist filter", filterId);
+        }
+        return filter;
+    }
+
+    static WhitelistFilterDTO toDTO(WhitelistFilter f) {
+        Group group = f.getGroup();
+        IssuerPartner partner = f.getIssuerPartner();
+        return new WhitelistFilterDTO(f.getId(), group.getId(), group.getName(), group.getDisplayName(),
+                f.isSynchronizable(), f.getWhitelistFilterType().name(), partner != null ? partner.getId() : null,
+                partner != null ? partner.getName() : null);
     }
 
     /**
