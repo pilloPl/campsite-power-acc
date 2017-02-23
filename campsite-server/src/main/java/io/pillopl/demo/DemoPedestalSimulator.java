@@ -10,6 +10,7 @@ import io.pillopl.pedestallink.v2.PedestalLinkServiceV2;
 import io.pillopl.pedestallink.v3.PedestalLinkServiceV3;
 import io.pillopl.pedestallink.v3.PedestalLinkV3Handler;
 import io.pillopl.util.DateService;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +35,10 @@ import java.util.concurrent.TimeUnit;
  * here, so that the remote commands of the console reach a controller. Like a real controller it accepts the command
  * at once and reports the result a moment later over the inbound link: a remote stop ends the session with the
  * current meter value (reason REMOTE), a remote start opens a session for the card. Status requests, breaker resets
- * and local card lists are accepted without a report.
+ * and local card lists are accepted without a report. Not part of the OpenAPI description (a demo stand-in).
  */
 @RestController
+@Hidden
 @Profile("demo")
 @RequestMapping(DemoPedestalSimulator.PATH + "/{pedestalCode}")
 public class DemoPedestalSimulator {
