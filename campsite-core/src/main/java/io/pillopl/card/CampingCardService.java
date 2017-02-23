@@ -1,6 +1,10 @@
 package io.pillopl.card;
 
 import io.pillopl.group.AccessDeniedException;
+import io.pillopl.group.Group;
+import io.pillopl.group.GroupService;
+import io.pillopl.group.Market;
+import io.pillopl.guest.BillingAccount;
 import io.pillopl.guest.Guest;
 import io.pillopl.issuer.PartnerSyncState;
 import io.pillopl.persistence.dao.CampingCardDao;
@@ -40,13 +44,17 @@ public class CampingCardService {
 
     private final DateService dateService;
 
+    private final GroupService groupService;
+
     public CampingCardService(CampingCardDao campingCardDao, GuestDao guestDao, UserinfoService userinfoService,
-                              ValidationService validationService, DateService dateService) {
+                              ValidationService validationService, DateService dateService,
+                              GroupService groupService) {
         this.campingCardDao = campingCardDao;
         this.guestDao = guestDao;
         this.userinfoService = userinfoService;
         this.validationService = validationService;
         this.dateService = dateService;
+        this.groupService = groupService;
     }
 
     @Transactional(readOnly = true)
@@ -151,6 +159,88 @@ public class CampingCardService {
                     + card.getPartnerSyncState() + ")");
         }
         return campingCardDao.save(card);
+    }
+
+    /**
+     * Unassigned cards of the welcome card pools of the markets, as far as the user manages the pool.
+     */
+    @Transactional(readOnly = true)
+    public List<CampingCard> findWelcomePoolCards(Userinfo principal) {
+        List<CampingCard> result = new ArrayList<>();
+        for (Group pool : welcomeCardPools()) {
+            for (CampingCard card : campingCardDao.findNotDeletedByGuestGroupId(pool.getId())) {
+                if (card.getActivation() == CardActivation.ACTIVATED && isManageable(principal, card)) {
+                    result.add(card);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * A card of the welcome card pool is handed to a guest at the reception: it leaves the pool, belongs to the guest
+     * (and so to the guest's card issuer) for the given validity, bills to the guest's open billing account, and goes
+     * to the issuer partners as a new card.
+     *
+     * @throws IllegalStateException when the card is not an unassigned card of a welcome card pool, or the guest is a
+     *                               pool guest himself
+     */
+    @Transactional
+    public CampingCard assignWelcomeCard(Userinfo principal, Long cardId, Long guestId, LocalDate validFrom,
+                                         LocalDate validTo) {
+        CampingCard card = getCard(cardId);
+        checkIsManageable(principal, card);
+        if (!isWelcomePoolCard(card) || card.getActivation() != CardActivation.ACTIVATED) {
+            throw new IllegalStateException("Card " + card.getCardNumber() + " is not a free card of a welcome card "
+                    + "pool");
+        }
+        Guest guest = getGuest(guestId);
+        checkIsManageable(principal, guest);
+        if (isWelcomePool(guest.getGroup())) {
+            throw new IllegalStateException("Guest " + guest.getId() + " belongs to a welcome card pool");
+        }
+        LocalDate from = validFrom != null ? validFrom : dateService.getToday();
+        if (validTo == null) {
+            throw new IllegalArgumentException("The last day of the card's validity is missing");
+        }
+        checkValidity(from, validTo);
+        // the card bills to the guest's open account; guests billed by their issuer keep the card's account
+        String account = guest.getBillingAccounts().stream().filter(BillingAccount::isBillable)
+                .map(BillingAccount::getErpAccountNo).findFirst().orElse(null);
+        if (account == null && !guest.getBillingAccounts().isEmpty()) {
+            throw new IllegalStateException("Guest " + guest.getId() + " has no open billing account");
+        }
+        Guest pool = card.getGuest();
+        card.setGuest(guest);
+        if (account != null) {
+            card.setBillingAccountNo(account);
+        }
+        card.setValidFrom(from);
+        card.setValidTo(validTo);
+        card.calculatePartnerSyncState(PartnerSyncState.ADD);
+        card = campingCardDao.save(card);
+        LOG.info(String.format("Welcome card %s of pool guest %s assigned to %s by %s", card, pool.getId(), guest,
+                principal.getUsername()));
+        return card;
+    }
+
+    boolean isWelcomePoolCard(CampingCard card) {
+        return card.getGuest() != null && isWelcomePool(card.getGuest().getGroup());
+    }
+
+    private boolean isWelcomePool(Group group) {
+        return group != null && welcomeCardPools().stream().anyMatch(pool -> pool.getId().equals(group.getId()));
+    }
+
+    private List<Group> welcomeCardPools() {
+        List<Group> pools = new ArrayList<>();
+        for (Market market : Market.values()) {
+            Group pool = groupService.getExtensionByMarket(market).findWelcomeCardPoolIssuerGroup();
+            if (pool != null) {
+                pools.add(pool);
+            }
+        }
+        return pools;
     }
 
     /**

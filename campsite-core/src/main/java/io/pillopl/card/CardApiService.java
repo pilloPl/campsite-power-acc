@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -101,6 +102,39 @@ public class CardApiService implements CardApi {
             Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CARD_EDIT);
             return CardMapper.toDTO(campingCardService.changeValidity(principal, cardId.value(), validFrom, validTo),
                     dateService.getNow());
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CampingCardDTO> findWelcomePoolCards(Username authUsername) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CARD_VIEW);
+            List<CampingCardDTO> result = new ArrayList<>();
+            for (CampingCard card : campingCardService.findWelcomePoolCards(principal)) {
+                result.add(CardMapper.toDTO(card, dateService.getNow()));
+            }
+            return result;
+        } catch (RuntimeException e) {
+            throw ApiExceptionTranslator.translate(e);
+        }
+    }
+
+    @Override
+    public CampingCardDTO assignWelcomeCard(Username authUsername, CardId cardId, Long guestId, LocalDate validFrom,
+                                            LocalDate validTo) {
+        try {
+            Userinfo principal = principalResolver.resolve(authUsername, UserrightName.CARD_EDIT);
+            if (cardId == null) {
+                throw new InvalidInputException("The welcome card is missing");
+            }
+            if (guestId == null) {
+                throw new InvalidInputException("The guest is missing");
+            }
+            return CardMapper.toDTO(campingCardService.assignWelcomeCard(principal, cardId.value(), guestId,
+                    validFrom, validTo), dateService.getNow());
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }

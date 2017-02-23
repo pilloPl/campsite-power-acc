@@ -34,6 +34,19 @@ public interface CardApi {
     CampingCardDTO changeCardValidity(Username authUsername, CardId cardId, LocalDate validFrom, LocalDate validTo);
 
     /**
+     * Free cards of the welcome card pools the user manages (cards kept for guests who arrive without a card).
+     */
+    List<CampingCardDTO> findWelcomePoolCards(Username authUsername);
+
+    /**
+     * Hands a card of the welcome card pool to a guest for the validity (from today when the first day is missing).
+     *
+     * @throws io.pillopl.api.exception.ConflictException when the card is not a free welcome pool card
+     */
+    CampingCardDTO assignWelcomeCard(Username authUsername, CardId cardId, Long guestId, LocalDate validFrom,
+                                     LocalDate validTo);
+
+    /**
      * What the pedestal would answer to the card at the socket now; nothing is started.
      */
     CardCheckDTO checkCardAtSocket(Username authUsername, CardRfid cardRfid, SocketLinkId socket);

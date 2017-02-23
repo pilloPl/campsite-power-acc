@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Web service of the cards tab: card lookup, issue at the reception, block, validity, check at a socket, and the
- * local card lists of the pedestals.
+ * Web service of the cards tab: card lookup, issue at the reception, block, validity, cards of the welcome card pool
+ * handed to guests, check at a socket, and the local card lists of the pedestals.
  */
 @RestController
 @RequestMapping(WebServicePaths.CARD)
@@ -50,6 +50,20 @@ public class CardWebService extends AbstractWebService<CardApi, CardWebServiceFa
         return invoke("changeCardValidity", () -> new ChangeCardValidityResponse(getBean().changeCardValidity(
                 caller(), CardId.of(request.cardId()), request.validFrom(),
                 request.validTo())));
+    }
+
+    @PostMapping("/findWelcomePoolCards")
+    public FindCardsResponse findWelcomePoolCards(@RequestBody FindWelcomePoolCardsRequest request)
+            throws CardWebServiceFault {
+        return invoke("findWelcomePoolCards", () -> new FindCardsResponse(getBean().findWelcomePoolCards(caller())));
+    }
+
+    @PostMapping("/assignWelcomeCard")
+    public AssignWelcomeCardResponse assignWelcomeCard(@RequestBody AssignWelcomeCardRequest request)
+            throws CardWebServiceFault {
+        return invoke("assignWelcomeCard", () -> new AssignWelcomeCardResponse(getBean().assignWelcomeCard(
+                caller(), request.cardId() != null ? CardId.of(request.cardId()) : null, request.guestId(),
+                request.validFrom(), request.validTo())));
     }
 
     @PostMapping("/checkCardAtSocket")

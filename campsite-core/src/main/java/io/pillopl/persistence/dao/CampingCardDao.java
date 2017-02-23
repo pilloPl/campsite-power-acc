@@ -23,4 +23,10 @@ public interface CampingCardDao extends JpaRepository<CampingCard, Long>, Campin
 
     @Query("select c from CampingCard c where c.deleted = false and c.guest.id = :guestId order by c.id")
     List<CampingCard> findByGuestId(@Param("guestId") Long guestId);
+
+    /**
+     * Living cards of the guests of an ISSUER group (the welcome card pool keeps its cards on a pool guest).
+     */
+    @Query("select c from CampingCard c where c.deleted = false and c.guest.group.id = :groupId order by c.cardNumber")
+    List<CampingCard> findNotDeletedByGuestGroupId(@Param("groupId") Long groupId);
 }

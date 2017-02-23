@@ -7,8 +7,10 @@ import io.pillopl.group.Group;
 import io.pillopl.group.GroupManager;
 import io.pillopl.group.GroupType;
 import io.pillopl.group.attribute.LocalListAttribute;
+import io.pillopl.guest.BillingAccount;
 import io.pillopl.guest.Guest;
 import io.pillopl.infrastructure.InfrastructureFixture;
+import io.pillopl.persistence.dao.BillingAccountDao;
 import io.pillopl.persistence.dao.LocalListAttributeDao;
 import io.pillopl.user.UserroleName;
 import io.pillopl.webservice.console.WebServiceIntegrationTest;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +35,7 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
     @Autowired InfrastructureFixture infrastructure;
     @Autowired CardFixture cards;
     @Autowired LocalListAttributeDao localListAttributeDao;
+    @Autowired BillingAccountDao billingAccountDao;
 
     Group bay, club, discount;
     Guest member, outsider;
@@ -137,5 +141,57 @@ class CardWebServiceIntegrationTest extends WebServiceIntegrationTest {
         call("admin", PATH + "/sendLocalCardList", new SendLocalCardListRequest("HR-COVE-P001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sent").value(false));
+    }
+
+    @Test
+    void receptionHandsAWelcomePoolCardToAGuestForTheStayAndTheCardLeavesThePool() throws Exception {
+        console.user("desk", UserroleName.RECEPTION, console.staff("HR RECEPTION"), console.staff("HR RECEPTION"),
+                bay, console.issuer("HR ISSUERS"));
+        Guest poolGuest = cards.guest("Welcome pool", console.issuer("HR WELCOME_CARD_POOL"));
+        CampingCard welcome = cards.card("6001", "HR-W-001", poolGuest, null, null);
+        BillingAccount account = billingAccountDao.saveAndFlush(new BillingAccount(member, "400099887766", "Stay"));
+        member.getBillingAccounts().add(account);
+
+        call("desk", PATH + "/findWelcomePoolCards", new FindWelcomePoolCardsRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cards", hasSize(1)))
+                .andExpect(jsonPath("$.cards[0].cardNumber").value("HR-W-001"));
+        call("desk", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(welcome.getId(), member.getId(),
+                TODAY, TODAY.plusDays(5)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.card.guestName").value("Kovac"))
+                .andExpect(jsonPath("$.card.validTo").value(TODAY.plusDays(5).toString()))
+                .andExpect(jsonPath("$.card.billingAccountNo").value("400099887766"))
+                .andExpect(jsonPath("$.card.cardStatus").value("VALID"));
+
+        call("desk", PATH + "/findWelcomePoolCards", new FindWelcomePoolCardsRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cards", hasSize(0)));
+        assertThat(jdbcTemplate.queryForList("SELECT STATUS FROM AUDIT WHERE ACTION_TYPE = 'CONSOLE_ACTION' "
+                + "AND USERID = 'desk' AND ACTION_NAME = 'card/assignWelcomeCard'", String.class))
+                .containsExactly("SUCCESS");
+    }
+
+    @Test
+    void onlyFreeWelcomePoolCardsAreHandedOutWithAValidityToCallersWithTheRight() throws Exception {
+        console.user("desk", UserroleName.RECEPTION, console.staff("HR RECEPTION"), console.staff("HR RECEPTION"),
+                bay, console.issuer("HR ISSUERS"));
+        Guest poolGuest = cards.guest("Welcome pool", console.issuer("HR WELCOME_CARD_POOL"));
+        CampingCard welcome = cards.card("6002", "HR-W-002", poolGuest, null, null);
+        CampingCard own = cards.card("6003", "HR-920", member, TODAY, TODAY.plusDays(1));
+
+        call("desk", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(own.getId(), outsider.getId(),
+                TODAY, TODAY.plusDays(2))).andExpect(status().isConflict());
+        call("desk", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(welcome.getId(), member.getId(),
+                TODAY, null)).andExpect(status().isBadRequest());
+        call("desk", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(welcome.getId(), poolGuest.getId(),
+                TODAY, TODAY.plusDays(2))).andExpect(status().isConflict());
+        call("desk", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(welcome.getId(), null, TODAY,
+                TODAY.plusDays(2))).andExpect(status().isBadRequest());
+        call("technician", PATH + "/assignWelcomeCard", new AssignWelcomeCardRequest(welcome.getId(),
+                member.getId(), TODAY, TODAY.plusDays(2))).andExpect(status().isForbidden());
+        call("reception", PATH + "/findWelcomePoolCards", new FindWelcomePoolCardsRequest())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cards", hasSize(0)));
     }
 }
