@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Web service of the issuer exchange tab: partners, the sync state matrix, the run of the exchange and a card sent
- * to the partners again.
+ * Web service of the issuer exchange tab: partners, whitelist filters, the sync state matrix, the run of the exchange
+ * and a card sent to the partners again.
  */
 @RestController
 @RequestMapping(WebServicePaths.ISSUER)
@@ -52,6 +52,29 @@ public class IssuerWebService extends AbstractWebService<IssuerApi, IssuerWebSer
     @PostMapping("/resyncCard")
     public ResyncCardResponse resyncCard(@RequestBody ResyncCardRequest request) throws IssuerWebServiceFault {
         return invoke("resyncCard", () -> new ResyncCardResponse(getBean().resyncCard(caller(), request.cardId())));
+    }
+
+    @PostMapping("/findWhitelistFilters")
+    public FindWhitelistFiltersResponse findWhitelistFilters(@RequestBody FindWhitelistFiltersRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("findWhitelistFilters", () -> new FindWhitelistFiltersResponse(getBean().findWhitelistFilters(
+                caller())));
+    }
+
+    @PostMapping("/saveWhitelistFilter")
+    public SaveWhitelistFilterResponse saveWhitelistFilter(@RequestBody SaveWhitelistFilterRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("saveWhitelistFilter", () -> new SaveWhitelistFilterResponse(getBean().saveWhitelistFilter(
+                caller(), request.filter())));
+    }
+
+    @PostMapping("/deleteWhitelistFilter")
+    public DeleteWhitelistFilterResponse deleteWhitelistFilter(@RequestBody DeleteWhitelistFilterRequest request)
+            throws IssuerWebServiceFault {
+        return invoke("deleteWhitelistFilter", () -> {
+            getBean().deleteWhitelistFilter(caller(), request.filterId());
+            return new DeleteWhitelistFilterResponse(request.filterId());
+        });
     }
 
     @Override
