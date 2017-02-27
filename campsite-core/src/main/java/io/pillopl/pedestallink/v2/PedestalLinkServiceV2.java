@@ -333,7 +333,7 @@ public class PedestalLinkServiceV2 {
      */
     Long translateErrorCode(Pedestal pedestal, SocketStatusRequest request) {
         if (request.vendorErrorCode() != null && !request.vendorErrorCode().isBlank()) {
-            String manufacturer = pedestal.getPedestalType().getManufacturer();
+            String manufacturer = manufacturerOf(pedestal);
             Long vendorMask = socketStatusLogDao.findErrorMask(manufacturer, request.vendorErrorCode());
             if (isErrorCode(vendorMask)) {
                 return vendorMask;
@@ -346,6 +346,13 @@ public class PedestalLinkServiceV2 {
 
     private static boolean isErrorCode(Long mask) {
         return mask != null && SocketStatusLog.NO_ERROR != mask;
+    }
+
+    /**
+     * A pedestal not yet typed has no manufacturer: no vendor mask and no vendor data for it.
+     */
+    private static String manufacturerOf(Pedestal pedestal) {
+        return pedestal.getPedestalType() != null ? pedestal.getPedestalType().getManufacturer() : null;
     }
 
     @Transactional
@@ -425,7 +432,7 @@ public class PedestalLinkServiceV2 {
         Pedestal pedestal = getPedestal(pedestalCode);
         pedestalService.registerIncoming(pedestal, dateService.getNow());
 
-        String manufacturer = pedestal.getPedestalType().getManufacturer();
+        String manufacturer = manufacturerOf(pedestal);
         if (request.vendorId() == null || !request.vendorId().equalsIgnoreCase(manufacturer)) {
             LOGGER.warn(String.format("Vendor data of pedestal %s from vendor %s, but the manufacturer is %s",
                     pedestalCode, request.vendorId(), manufacturer));

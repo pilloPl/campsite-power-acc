@@ -201,6 +201,15 @@ class PedestalLinkServiceV2Test {
     }
 
     @Test
+    void pedestalWithoutTypeAcceptsNoVendorData() {
+        pedestal.setPedestalType(null);
+
+        assertThat(service.vendorData("HR-BAY-P101", new VendorDataRequest(MANUFACTURER, "DOOR", "open")).status())
+                .isEqualTo("UNKNOWN_VENDOR");
+        verify(eventRetryService, never()).sendOrRetryLater(any());
+    }
+
+    @Test
     void vendorDataWithoutMessageIdIsRefused() {
         assertThat(service.vendorData("HR-BAY-P101", new VendorDataRequest(MANUFACTURER, " ", "open")).status())
                 .isEqualTo("UNKNOWN_MESSAGE_ID");
