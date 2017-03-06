@@ -99,8 +99,8 @@ public class CampsiteReportService {
             long supplySeconds = Duration.between(plugIn, plugOut).getSeconds();
             if (supplySeconds <= 0) {
                 // nothing to spread: an instant (or a confirmed suspect record with negative duration)
-                LOG.debug(String.format("Record of socket %s without supply time left out of the day report",
-                        record.socketCode()));
+                LOG.debug("Record of socket {} without supply time ({} - {}) left out of the day report",
+                        record.socketCode(), plugIn, plugOut);
                 continue;
             }
             if (kwh.signum() <= 0) {
@@ -191,8 +191,8 @@ public class CampsiteReportService {
             long supplySeconds = Duration.between(plugIn, plugOut).getSeconds();
             if (supplySeconds <= 0) {
                 // nothing to spread: an instant (or a confirmed suspect record with negative duration)
-                LOG.debug(String.format("Record of socket %s without supply time left out of the hour report",
-                        record.socketCode()));
+                LOG.debug("Record of socket {} without supply time ({} - {}) left out of the hour report",
+                        record.socketCode(), plugIn, plugOut);
                 continue;
             }
             if (kwh.signum() <= 0) {
