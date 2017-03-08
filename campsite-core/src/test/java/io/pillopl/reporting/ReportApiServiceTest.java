@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -94,6 +95,15 @@ class ReportApiServiceTest {
 
         assertThatThrownBy(() -> api.getReport(CALLER, ReportApi.MONTHLY_CONSUMPTION, null, 11L, null, null, null,
                 null, null)).isInstanceOf(AccessNotAllowedException.class);
+    }
+
+    @Test
+    void callerWithoutSiteGroupGetsAnEmptyUtilizationHeatmap() {
+        when(principal.getGroup(GroupType.SITE)).thenReturn(null);
+
+        assertThat(api.getReport(CALLER, ReportApi.SOCKET_UTILIZATION, JULY, null, null, null, null, null, null))
+                .isEmpty();
+        verifyNoInteractions(operationsViewDao);
     }
 
     @Test
