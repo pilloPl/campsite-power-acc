@@ -58,6 +58,20 @@ class PedestalLinkClientDispatcherTest {
     }
 
     @Test
+    void serviceCommandsFollowTheLinkGenerationOfThePedestal() {
+        Pedestal first = pedestal(PedestalLinkVersion.V1);
+        Pedestal third = pedestal(PedestalLinkVersion.V3);
+        when(v1.requestStatus(first, null)).thenReturn(true);
+        when(v2.resetBreaker(third, 2)).thenReturn(true);
+
+        assertThat(dispatcher.requestStatus(first, null)).isTrue();
+        assertThat(dispatcher.resetBreaker(third, 2)).isTrue();
+
+        verify(v1).requestStatus(first, null);
+        verify(v2).resetBreaker(third, 2);
+    }
+
+    @Test
     void pedestalWithoutTypeIsALinkV1Pedestal() {
         Pedestal pedestal = new Pedestal();
 
