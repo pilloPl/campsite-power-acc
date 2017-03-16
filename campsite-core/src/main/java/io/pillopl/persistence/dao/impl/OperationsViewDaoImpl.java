@@ -2,7 +2,7 @@ package io.pillopl.persistence.dao.impl;
 
 import io.pillopl.commons.ListPage;
 import io.pillopl.commons.Pagination;
-import io.pillopl.dto.map.SectionLoadDTO;
+import io.pillopl.dto.map.MapSectionLoadDTO;
 import io.pillopl.dto.supply.SupplyIncidentDTO;
 import io.pillopl.dto.supply.SupplySessionDTO;
 import io.pillopl.persistence.dao.OperationsViewDao;
@@ -126,7 +126,7 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
      * The load share is the allowed current of the active sessions divided by the capacity (3 decimals).
      */
     @Override
-    public List<SectionLoadDTO> findSectionLoads(Long siteGroupId) {
+    public List<MapSectionLoadDTO> findSectionLoads(Long siteGroupId) {
         Objects.requireNonNull(siteGroupId, "siteGroupId");
         MapSqlParameterSource params = new MapSqlParameterSource("siteGroupId", siteGroupId);
         return jdbcTemplate.query(findSectionLoads, params, (rs, rowNum) -> {
@@ -134,7 +134,7 @@ public class OperationsViewDaoImpl implements OperationsViewDao {
             BigDecimal allocated = rs.getBigDecimal("ALLOCATED_CURRENT_A");
             BigDecimal share = capacity != null && capacity.signum() > 0
                     ? allocated.divide(capacity, 3, java.math.RoundingMode.HALF_UP) : null;
-            return new SectionLoadDTO(rs.getLong("ID"), rs.getString("SECTION_NAME"), capacity,
+            return new MapSectionLoadDTO(rs.getLong("ID"), rs.getString("SECTION_NAME"), capacity,
                     rs.getString("ALGORITHM_BEAN_NAME"), rs.getLong("SOCKETS"), rs.getLong("ACTIVE_SESSIONS"),
                     allocated, share);
         });

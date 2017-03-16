@@ -2,7 +2,7 @@ package io.pillopl.persistence.dao;
 
 import io.pillopl.commons.ListPage;
 import io.pillopl.commons.Pagination;
-import io.pillopl.dto.map.SectionLoadDTO;
+import io.pillopl.dto.map.MapSectionLoadDTO;
 import io.pillopl.dto.supply.SupplyIncidentDTO;
 import io.pillopl.dto.supply.SupplySessionDTO;
 
@@ -58,7 +58,7 @@ public interface OperationsViewDao {
 
     List<MapSocketRow> findMapSockets(Long siteGroupId);
 
-    List<SectionLoadDTO> findSectionLoads(Long siteGroupId);
+    List<MapSectionLoadDTO> findSectionLoads(Long siteGroupId);
 
     /**
      * One cell of the utilization heatmap (ISO day of week 1..7, hour 0..23).
