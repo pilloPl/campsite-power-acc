@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -95,6 +96,14 @@ class EventRetryServiceTest {
         service.retryOpenEvents(1);
 
         assertThat(retry.getStatus()).isEqualTo(EventRetry.Status.FAILED);
+    }
+
+    @Test
+    void retryWithoutAnyAllowedAttemptIsRefused() {
+        assertThatThrownBy(() -> service.retryOpenEvents(0)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at least 1");
+
+        verify(eventRetryDao, never()).findByStatusOrderByIdAsc(any());
     }
 
     @Test

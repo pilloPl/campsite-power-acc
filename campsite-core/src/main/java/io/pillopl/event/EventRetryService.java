@@ -59,6 +59,10 @@ public class EventRetryService {
      */
     @Transactional
     public int retryOpenEvents(int maxAttempts) {
+        if (maxAttempts < 1) {
+            throw new IllegalArgumentException("Max attempts of the event retry must be at least 1, was "
+                    + maxAttempts);
+        }
         List<EventRetry> open = eventRetryDao.findByStatusOrderByIdAsc(EventRetry.Status.OPEN);
         int sent = 0;
         for (EventRetry retry : open) {
