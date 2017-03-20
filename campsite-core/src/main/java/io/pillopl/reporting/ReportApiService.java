@@ -22,6 +22,10 @@ import io.pillopl.value.Username;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -32,6 +36,10 @@ import java.util.Locale;
 @Service
 @Transactional(readOnly = true)
 public class ReportApiService implements ReportApi {
+
+    private static final BigDecimal SECONDS_PER_HOUR = BigDecimal.valueOf(3600);
+
+    private static final int HOURS_SCALE = 2;
 
     private final CampsiteReportService campsiteReportService;
 
@@ -148,12 +156,12 @@ public class ReportApiService implements ReportApi {
      * monitored socket minutes (rounded up).
      */
     static List<ReportLineDTO> socketUtilization(List<OperationsViewDao.UtilizationCell> cells) {
-        List<ReportLineDTO> lines = new java.util.ArrayList<>(cells.size());
+        List<ReportLineDTO> lines = new ArrayList<>(cells.size());
         for (OperationsViewDao.UtilizationCell cell : cells) {
-            lines.add(new ReportLineDTO(java.time.DayOfWeek.of(cell.dayOfWeek()).name(),
+            lines.add(new ReportLineDTO(DayOfWeek.of(cell.dayOfWeek()).name(),
                     String.format("%02d", cell.hour()), null, (cell.monitoredSeconds() + 59) / 60,
-                    java.math.BigDecimal.valueOf(cell.supplyingSeconds())
-                            .divide(java.math.BigDecimal.valueOf(3600), 2, java.math.RoundingMode.HALF_UP)));
+                    BigDecimal.valueOf(cell.supplyingSeconds())
+                            .divide(SECONDS_PER_HOUR, HOURS_SCALE, RoundingMode.HALF_UP)));
         }
         return lines;
     }
