@@ -10,8 +10,11 @@ export type DataTableProps<R extends GridValidRowModel> = Omit<DataGridProps<R>,
   testId?: string;
 };
 
-/** MUI X Data Grid (MIT) with the defaults of the console: compact rows, client paging, row id `id`. */
-export function DataTable<R extends GridValidRowModel>({ rows, height = 460, testId, ...props }: DataTableProps<R>) {
+/**
+ * MUI X Data Grid (MIT) with the defaults of the console: compact rows, client paging, row id `id`; a caller's `sx` is
+ * added to the default styles.
+ */
+export function DataTable<R extends GridValidRowModel>({ rows, height = 460, testId, sx, ...props }: DataTableProps<R>) {
   return (
     <Box sx={{ height: height === 'auto' ? undefined : height, width: '100%' }} data-testid={testId}>
       <DataGrid<R>
@@ -22,8 +25,12 @@ export function DataTable<R extends GridValidRowModel>({ rows, height = 460, tes
         autoHeight={height === 'auto'}
         pageSizeOptions={[10, 25, 50, 100]}
         initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
-        sx={{ bgcolor: 'background.paper', '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 600 } }}
+        hideFooterSelectedRowCount
         {...props}
+        sx={[
+          { bgcolor: 'background.paper', '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 600 } },
+          ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+        ]}
       />
     </Box>
   );

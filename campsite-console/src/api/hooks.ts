@@ -37,10 +37,17 @@ export function useApiMutation<P extends PostPath>(path: P, options: ApiMutation
         });
       }
       if (options.success) {
-        notify(typeof options.success === 'function' ? options.success(response) : options.success, 'success');
+        notify(typeof options.success === 'function' ? options.success(response) : options.success,
+          refusedByPedestal(response) ? 'warning' : 'success');
       }
       options.onSuccess?.(response);
     },
     onError: (error) => notify(errorMessage(error), 'error'),
   });
+}
+
+/** A pedestal command answered without a fault but not accepted by the pedestal (`command.accepted` false). */
+export function refusedByPedestal(response: unknown): boolean {
+  const command = (response as { command?: { accepted?: boolean } } | null)?.command;
+  return command?.accepted === false;
 }

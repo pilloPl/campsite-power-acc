@@ -4,6 +4,7 @@ import { enumLabel } from './format';
 const COLOURS: Record<string, ChipProps['color']> = {
   AVAILABLE: 'success', ACTIVE: 'success', OPEN: 'info', OK: 'success', CLOSED: 'default', DONE: 'success',
   EXPORTED: 'success', APPROVED: 'success', CHARGED: 'success', SUCCESS: 'success', VALID: 'success', PAID: 'success',
+  PRICED: 'success', CONFIRMED: 'success', PROCESSED: 'success', ACCEPTED: 'success',
   OCCUPIED: 'info', SUPPLYING: 'info', RUNNING: 'info', NEW: 'info', PENDING: 'warning', REVIEW: 'warning',
   SUSPECT: 'warning', STALE: 'warning', WARNING: 'warning', LOCKED: 'warning', INVITED: 'warning', PAUSED: 'warning',
   BLOCKED: 'error', FAULTED: 'error', ERROR: 'error', BREAKER_TRIPPED: 'error', REJECTED: 'error', FAILED: 'error',
