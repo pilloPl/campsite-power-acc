@@ -1028,6 +1028,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/issuer/saveWhitelistFilter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["saveWhitelistFilter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/issuer/saveIssuerPartner": {
         parameters: {
             query?: never;
@@ -1076,6 +1092,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/issuer/findWhitelistFilters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["findWhitelistFilters"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/issuer/findIssuerSyncStatuses": {
         parameters: {
             query?: never;
@@ -1102,6 +1134,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["findIssuerPartners"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/issuer/deleteWhitelistFilter": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["deleteWhitelistFilter"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1860,6 +1908,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/card/findWelcomePoolCards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["findWelcomePoolCards"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/card/findCards": {
         parameters: {
             query?: never;
@@ -1918,6 +1982,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["changeCardStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/card/assignWelcomeCard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["assignWelcomeCard"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3517,7 +3597,7 @@ export interface components {
         };
         MapDataDTO: {
             campsites?: components["schemas"]["CampsiteMapDTO"][];
-            sections?: components["schemas"]["SectionLoadDTO"][];
+            sections?: components["schemas"]["MapSectionLoadDTO"][];
         };
         MapPedestalDTO: {
             /** Format: int64 */
@@ -3532,6 +3612,19 @@ export interface components {
             /** Format: date-time */
             lastIncoming?: string;
             sockets?: components["schemas"]["MapSocketDTO"][];
+        };
+        MapSectionLoadDTO: {
+            /** Format: int64 */
+            id?: number;
+            sectionName?: string;
+            maxCurrentA?: number;
+            algorithmBeanName?: string;
+            /** Format: int64 */
+            sockets?: number;
+            /** Format: int64 */
+            activeSessions?: number;
+            allocatedCurrentA?: number;
+            loadShare?: number;
         };
         MapSocketDTO: {
             /** Format: int64 */
@@ -3571,6 +3664,25 @@ export interface components {
         FindJobsRequest: unknown;
         FindJobsResponse: {
             jobs?: components["schemas"]["JobDTO"][];
+        };
+        SaveWhitelistFilterRequest: {
+            filter?: components["schemas"]["WhitelistFilterDTO"];
+        };
+        WhitelistFilterDTO: {
+            /** Format: int64 */
+            id?: number;
+            /** Format: int64 */
+            groupId?: number;
+            groupName?: string;
+            groupDisplayName?: string;
+            synchronizable?: boolean;
+            filterType?: string;
+            /** Format: int64 */
+            issuerPartnerId?: number;
+            issuerPartnerName?: string;
+        };
+        SaveWhitelistFilterResponse: {
+            filter?: components["schemas"]["WhitelistFilterDTO"];
         };
         IssuerPartnerDTO: {
             /** Format: int64 */
@@ -3643,6 +3755,10 @@ export interface components {
         ResyncCardResponse: {
             card?: components["schemas"]["CampingCardDTO"];
         };
+        FindWhitelistFiltersRequest: unknown;
+        FindWhitelistFiltersResponse: {
+            filters?: components["schemas"]["WhitelistFilterDTO"][];
+        };
         FindIssuerSyncStatusesRequest: unknown;
         FindIssuerSyncStatusesResponse: {
             syncStatuses?: components["schemas"]["IssuerSyncStatusDTO"][];
@@ -3650,6 +3766,14 @@ export interface components {
         FindIssuerPartnersRequest: unknown;
         FindIssuerPartnersResponse: {
             partners?: components["schemas"]["IssuerPartnerDTO"][];
+        };
+        DeleteWhitelistFilterRequest: {
+            /** Format: int64 */
+            filterId?: number;
+        };
+        DeleteWhitelistFilterResponse: {
+            /** Format: int64 */
+            deletedFilterId?: number;
         };
         HouseCardDTO: {
             /** Format: int64 */
@@ -4396,11 +4520,12 @@ export interface components {
             validTo?: string;
             houseCard?: boolean;
         };
-        FindCardsRequest: {
-            rfidOrNumber?: string;
-        };
+        FindWelcomePoolCardsRequest: unknown;
         FindCardsResponse: {
             cards?: components["schemas"]["CampingCardDTO"][];
+        };
+        FindCardsRequest: {
+            rfidOrNumber?: string;
         };
         CheckCardAtSocketRequest: {
             cardRfid?: string;
@@ -4437,6 +4562,19 @@ export interface components {
             activation?: string;
         };
         ChangeCardStatusResponse: {
+            card?: components["schemas"]["CampingCardDTO"];
+        };
+        AssignWelcomeCardRequest: {
+            /** Format: int64 */
+            cardId?: number;
+            /** Format: int64 */
+            guestId?: number;
+            /** Format: date */
+            validFrom?: string;
+            /** Format: date */
+            validTo?: string;
+        };
+        AssignWelcomeCardResponse: {
             card?: components["schemas"]["CampingCardDTO"];
         };
         LogoutResponse: {
@@ -6186,6 +6324,30 @@ export interface operations {
             };
         };
     };
+    saveWhitelistFilter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveWhitelistFilterRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["SaveWhitelistFilterResponse"];
+                };
+            };
+        };
+    };
     saveIssuerPartner: {
         parameters: {
             query?: never;
@@ -6258,6 +6420,30 @@ export interface operations {
             };
         };
     };
+    findWhitelistFilters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FindWhitelistFiltersRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FindWhitelistFiltersResponse"];
+                };
+            };
+        };
+    };
     findIssuerSyncStatuses: {
         parameters: {
             query?: never;
@@ -6302,6 +6488,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["FindIssuerPartnersResponse"];
+                };
+            };
+        };
+    };
+    deleteWhitelistFilter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeleteWhitelistFilterRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DeleteWhitelistFilterResponse"];
                 };
             };
         };
@@ -7434,6 +7644,30 @@ export interface operations {
             };
         };
     };
+    findWelcomePoolCards: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FindWelcomePoolCardsRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["FindCardsResponse"];
+                };
+            };
+        };
+    };
     findCards: {
         parameters: {
             query?: never;
@@ -7526,6 +7760,30 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["ChangeCardStatusResponse"];
+                };
+            };
+        };
+    };
+    assignWelcomeCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignWelcomeCardRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AssignWelcomeCardResponse"];
                 };
             };
         };
