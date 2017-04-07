@@ -194,7 +194,11 @@ public class PedestalLinkServiceV3 {
     }
 
     void register(PedestalLinkV3Handler<?, ?> handler) {
-        handlers.put(handler.getClass(), handler);
+        PedestalLinkV3Handler<?, ?> previous = handlers.putIfAbsent(handler.getClass(), handler);
+        if (previous != null) {
+            throw new IllegalStateException(String.format("Link v3 handler %s is registered already",
+                    handler.getClass().getName()));
+        }
     }
 
     @Transactional

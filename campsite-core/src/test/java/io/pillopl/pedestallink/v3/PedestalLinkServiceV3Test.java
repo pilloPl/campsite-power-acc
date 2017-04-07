@@ -128,6 +128,13 @@ class PedestalLinkServiceV3Test {
     }
 
     @Test
+    void secondHandlerForTheSameMessageIsRefused() {
+        assertThatThrownBy(() -> service.register(new PedestalLinkV3Handler.Heartbeat(service)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("registered already");
+    }
+
+    @Test
     void statusOfThePedestalItselfIsOnlyPassedOnAsEvent() {
         service.handleRequest(PedestalLinkV3Handler.SocketStatusHandler.class, CODE,
                 new SocketStatusRequest(0, "UNAVAILABLE", "NO_ERROR", MANUFACTURER, null, "maintenance", now));
