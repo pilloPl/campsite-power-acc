@@ -286,8 +286,9 @@ public class PedestalLinkServiceV1 {
                     ? pedestal.getGroup().getId() : null);
             eventService.send(statusEvent);
         } catch (Exception e) {
-            // log error
-            LOGGER.error(e.getMessage(), e);
+            // the status is monitored already: the pedestal still gets its acknowledge
+            LOGGER.error(String.format("Socket state event of socket %s of pedestal %s not sent", socketNo,
+                    pedestalCode), e);
         }
 
         return new AcknowledgeResponse(now);
