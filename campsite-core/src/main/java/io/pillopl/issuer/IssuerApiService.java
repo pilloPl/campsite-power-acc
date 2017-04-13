@@ -257,7 +257,10 @@ public class IssuerApiService implements IssuerApi {
     }
 
     private WhitelistFilter filterInScope(Userinfo principal, Long filterId) {
-        WhitelistFilter filter = filterId != null ? whitelistFilterDao.findById(filterId).orElse(null) : null;
+        if (filterId == null) {
+            throw new InvalidInputException("The whitelist filter id is missing");
+        }
+        WhitelistFilter filter = whitelistFilterDao.findById(filterId).orElse(null);
         if (filter == null || !groupService.isManageable(principal.getGroup(GroupType.ISSUER), filter.getGroup())) {
             throw ObjectNotFoundException.of("Whitelist filter", filterId);
         }

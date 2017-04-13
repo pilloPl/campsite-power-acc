@@ -94,6 +94,8 @@ class WhitelistFilterWebServiceIntegrationTest extends WebServiceIntegrationTest
                 club.getId(), null, null, false, "IMPORT", 987_654_321L, null))).andExpect(status().isNotFound());
         call("admin", PATH + "/deleteWhitelistFilter", new DeleteWhitelistFilterRequest(987_654_321L))
                 .andExpect(status().isNotFound());
+        call("admin", PATH + "/deleteWhitelistFilter", new DeleteWhitelistFilterRequest(null))
+                .andExpect(status().isBadRequest());
         call("admin", PATH + "/findWhitelistFilters", new FindWhitelistFiltersRequest())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.filters[?(@.groupName == 'FILTER CLUB')]", hasSize(0)));
