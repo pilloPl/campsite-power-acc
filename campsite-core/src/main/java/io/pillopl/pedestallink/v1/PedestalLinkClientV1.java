@@ -105,6 +105,7 @@ public class PedestalLinkClientV1 implements LocalCardListSender, RemoteSupplyCo
     public LocalCardListSendResult deleteLocalList(Pedestal pedestal) {
         String notSendable = checkSendable(pedestal);
         if (notSendable != null) {
+            LOG.warn(String.format("Local card list of %s not deleted: %s", pedestal, notSendable));
             return LocalCardListSendResult.failed(notSendable);
         }
         queuedLists.remove(pedestal.getId());
