@@ -49,8 +49,12 @@ public class WhitelistFilterService {
     @Transactional
     public WhitelistFilter saveFilter(Group issuerGroup, boolean synchronizable, WhitelistFilterType type,
                                       IssuerPartner partner) {
-        if (issuerGroup == null || !GroupType.ISSUER.isGroupType(issuerGroup)) {
-            throw new IllegalArgumentException("A whitelist filter belongs to an ISSUER group");
+        if (issuerGroup == null) {
+            throw new IllegalArgumentException("A whitelist filter needs its ISSUER group");
+        }
+        if (!GroupType.ISSUER.isGroupType(issuerGroup)) {
+            throw new IllegalArgumentException(String.format("A whitelist filter belongs to an ISSUER group, "
+                    + "not to %s group %s", issuerGroup.getType(), issuerGroup.getName()));
         }
         WhitelistFilter filter = whitelistFilterDao.findForGroup(issuerGroup.getId());
         if (filter == null) {
