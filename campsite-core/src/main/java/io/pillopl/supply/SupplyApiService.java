@@ -88,12 +88,19 @@ public class SupplyApiService implements SupplyApi {
             if (siteGroupId == null) {
                 return ListPage.of(java.util.List.of(), 0, pagination);
             }
-            DateRange p = period != null ? period : DateRange.UNBOUNDED;
+            DateRange p = orUnbounded(period);
             return operationsViewDao.findSupplySessions(siteGroupId, pedestalCode, socketCode, activeOnly, p.from(),
                     p.to(), silentSince(), pagination);
         } catch (RuntimeException e) {
             throw ApiExceptionTranslator.translate(e);
         }
+    }
+
+    /**
+     * A list without a period is not limited in time.
+     */
+    private static DateRange orUnbounded(DateRange period) {
+        return period != null ? period : DateRange.UNBOUNDED;
     }
 
     @Override
@@ -148,7 +155,7 @@ public class SupplyApiService implements SupplyApi {
             if (siteGroupId == null) {
                 return ListPage.of(java.util.List.of(), 0, pagination);
             }
-            DateRange p = period != null ? period : DateRange.UNBOUNDED;
+            DateRange p = orUnbounded(period);
             return operationsViewDao.findSupplyIncidents(siteGroupId, pedestalCode, unreviewedOnly, p.from(), p.to(),
                     pagination);
         } catch (RuntimeException e) {
