@@ -32,5 +32,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
+    // the data grid pages render many cells in jsdom; under parallel load a test takes a few seconds
+    testTimeout: 20_000,
   },
 });
