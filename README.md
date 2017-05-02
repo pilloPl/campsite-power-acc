@@ -20,6 +20,7 @@ office, administrators).
 | `campsite-core` | domain model, services, DAOs (JPA and hand-written SQL in `sql/sqls.xml`), mail templates |
 | `campsite-endpoints` | console and pedestal link web services, security (login, CSRF, CORS), OpenAPI |
 | `campsite-server` | Spring Boot application, Quartz jobs, configuration, demo data |
+| `campsite-console` | operations console (npm project, not built by Maven, see below) |
 
 ## Build and test
 
@@ -51,6 +52,12 @@ java -jar campsite-server/target/campsite-server-1.0.0-SNAPSHOT.jar --spring.pro
 
 The database and port can be changed with `CAMPSITE_DB_HOST`, `CAMPSITE_DB_PORT`, `CAMPSITE_DB_NAME`,
 `CAMPSITE_DB_USER`, `CAMPSITE_DB_PASSWORD` and `CAMPSITE_HTTP_PORT` (default 8080).
+
+The demo pedestals of link v2 and v3 are answered by a demo pedestal simulator in the running application
+(`/api/pedestal-link/demo-simulator/<code>`, profile `demo` only): remote start, stop, status request and breaker
+reset from the console are accepted, and a stop or start is reported back over the inbound link about 1.5 seconds
+later (`campsite.demo.simulator.report-delay-in-millis`). Link v1 demo pedestals have no link address, so the
+console shows their remote commands as refused.
 
 ### Demo users
 
@@ -101,3 +108,52 @@ configured with `campsite.console.cors.allowed-origins` (environment `CAMPSITE_C
 
 The OpenAPI description of all web services is at `/v3/api-docs` (the typed client of the console is generated from
 it), the Swagger UI at `/swagger-ui.html`.
+
+## Operations console (`campsite-console`)
+
+The console is a separate npm project (React 18, TypeScript, Vite, React Router, TanStack Query, MUI with MUI X Data
+Grid, react-leaflet with OpenStreetMap tiles, ECharts). It is not part of the Maven build. Node 20 or later:
+
+```bash
+cd campsite-console
+npm ci
+npm test                 # Vitest + React Testing Library (components, pages, API layer), no backend needed
+npm run typecheck
+npm run build            # static files in campsite-console/dist
+```
+
+### Development
+
+Start the backend with the demo data (see above), then the Vite dev server, which proxies `/api` to the backend
+(`CAMPSITE_BACKEND_URL`, default `http://localhost:8080`), so the session cookie and the `XSRF-TOKEN` cookie stay on
+one origin:
+
+```bash
+npm run dev              # http://localhost:5173, log in e.g. as admin / demo-admin
+```
+
+The login page posts to `/api/console/auth/login`; every call sends the session cookie and the `X-XSRF-TOKEN` header
+with the value of the `XSRF-TOKEN` cookie. The tabs shown follow the rights of the logged-in user (see the demo users
+above).
+
+The typed API client is generated from the running backend and committed (`src/api/schema.d.ts`):
+
+```bash
+npm run generate-api     # openapi-typescript http://localhost:8080/v3/api-docs (or CAMPSITE_API_DOCS=<url>)
+```
+
+### End-to-end tests and screenshots
+
+Playwright runs against the backend started with the profile `demo` and the Vite dev server (started by Playwright
+when it is not running). Start the backend freshly before a run: the e2e tests change demo data (they stop a supply,
+check out a stay, review a suspect record, hand out a welcome pool card, add a whitelist filter), and every start
+of the backend reseeds the demo.
+
+```bash
+npx playwright install chromium   # once
+npm run e2e              # login, every tab of every demo role without a 5xx answer, key actions (about 10 min)
+npm run screenshots      # docs/screenshots/<nn>-<tab>.png (1440x900) of all 16 tabs and the key actions
+```
+
+The map tiles come from openstreetmap.org, so the map tab needs internet access for its background. `CONSOLE_URL`
+runs the tests against an already started console (for example the built one behind `npm run preview`).
