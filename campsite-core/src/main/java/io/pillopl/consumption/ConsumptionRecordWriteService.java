@@ -315,11 +315,11 @@ public class ConsumptionRecordWriteService {
         }
     }
 
-    private static String orNa(Location location, Supplier<String> value) {
+    private static String orNa(Location location, Supplier<String> addressPart) {
         if (location == null) {
             return N_A;
         }
-        String v = value.get();
-        return v != null ? v : N_A;
+        String part = addressPart.get();
+        return part != null ? part : N_A;
     }
 }
