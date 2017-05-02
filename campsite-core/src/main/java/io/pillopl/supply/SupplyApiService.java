@@ -192,6 +192,9 @@ public class SupplyApiService implements SupplyApi {
     }
 
     private SupplySession sessionInScope(Userinfo principal, Long sessionId) {
+        if (sessionId == null) {
+            throw new InvalidInputException("Supply session id is missing");
+        }
         SupplySession session = sessionManager.getSession(sessionId);
         if (session == null || !pedestalService.isManageable(principal, session.getSocket().getPedestal())) {
             throw ObjectNotFoundException.of("Supply session", sessionId);

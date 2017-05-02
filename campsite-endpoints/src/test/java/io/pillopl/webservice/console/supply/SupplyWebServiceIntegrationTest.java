@@ -119,6 +119,15 @@ class SupplyWebServiceIntegrationTest extends WebServiceIntegrationTest {
     }
 
     @Test
+    void stopAndCloseWithoutASessionAreBadRequests() throws Exception {
+        call("bayservice", PATH + "/stopSupply", new SupplySessionRequest(null))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("id is missing")));
+        call("bayservice", PATH + "/closeStaleSession", new SupplySessionRequest(null))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void supplyStopFromTheConsoleIsRefusedWithoutRightOutsideTheScopeAndWhenThePedestalSaysNo() throws Exception {
         SupplySession active = session(baySocket, LocalDateTime.now().minusHours(3), "100");
         SupplySession lake = session(lakeSocket, LocalDateTime.now().minusHours(3), "1");
