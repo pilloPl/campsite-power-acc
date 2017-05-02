@@ -13,6 +13,7 @@ test.describe('login and navigation', () => {
 
   for (const username of ['reception', 'host', 'service', 'backoffice']) {
     test(`${username} opens each of its tabs without a server error`, async ({ page }) => {
+      test.setTimeout(5 * 60_000);
       const serverErrors: string[] = [];
       page.on('response', (response) => {
         if (response.url().includes('/api/') && response.status() >= 500) {
@@ -39,6 +40,7 @@ test.describe('login and navigation', () => {
   });
 
   test('the market admin opens every tab and each shows its data without a fault', async ({ page }) => {
+    test.setTimeout(5 * 60_000);
     const serverErrors: string[] = [];
     page.on('response', (response) => {
       if (response.url().includes('/api/') && response.status() >= 500) {
