@@ -148,7 +148,7 @@ class GroupServiceHelperTest {
 
     @Test
     void groupMarketsAreOnlyThePrefixMarkets() {
-        assertThat(GroupServiceHelper.getGroupMarkets()).containsExactly("HR", "IT", "FR");
+        assertThat(GroupServiceHelper.getGroupMarkets()).containsExactly("HR", "IT", "FR", "ES");
     }
 
     @Test

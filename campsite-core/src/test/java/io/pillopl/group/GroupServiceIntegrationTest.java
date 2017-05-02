@@ -43,6 +43,13 @@ class GroupServiceIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void spainIsAMarketWithItsRootsAndNamedGroups() {
+        assertThat(groupService.determineMarketByGroupId(64L)).isEqualTo(Market.ES);
+        assertThat(groupService.getExtensionByMarket(Market.ES).findWelcomeCardPoolIssuerGroup().getId()).isEqualTo(44L);
+        assertThat(groupService.fetchStaffGroup("ES RECEPTION").getId()).isEqualTo(74L);
+    }
+
+    @Test
     void marketExtensionFindsTheNamedGroupsOfTheMarket() {
         MarketExtension<Market> it = groupService.getExtensionByMarket(Market.IT);
 

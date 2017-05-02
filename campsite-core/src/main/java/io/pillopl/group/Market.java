@@ -5,7 +5,7 @@ package io.pillopl.group;
  * {@link #UNKNOWN} never appears as a prefix; it is the fallback of callers that need a value.
  */
 public enum Market {
-    HR, IT, FR, UNKNOWN;
+    HR, IT, FR, ES, UNKNOWN;
 
     public boolean isPrefixMarket() {
         return this != UNKNOWN;

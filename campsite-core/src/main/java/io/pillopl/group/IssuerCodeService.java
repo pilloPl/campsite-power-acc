@@ -44,6 +44,9 @@ public class IssuerCodeService {
         if (market == Market.FR) {
             return "CPN-FR";
         }
+        if (market == Market.ES) {
+            return "CPN-ES";
+        }
         return UNKNOWN_ISSUER;
     }
 }

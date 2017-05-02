@@ -154,6 +154,8 @@ public class UserinfoService {
                 return "it";
             case FR:
                 return "fr";
+            case ES:
+                return "es";
             default:
         }
         return null;

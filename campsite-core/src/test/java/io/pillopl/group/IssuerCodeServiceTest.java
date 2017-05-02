@@ -19,6 +19,7 @@ class IssuerCodeServiceTest {
         assertThat(issuerCodeService.defineIssuer(Market.HR)).isEqualTo("CPN-HR");
         assertThat(issuerCodeService.defineIssuer(Market.IT)).isEqualTo("CPN-IT");
         assertThat(issuerCodeService.defineIssuer(Market.FR)).isEqualTo("CPN-FR");
+        assertThat(issuerCodeService.defineIssuer(Market.ES)).isEqualTo("CPN-ES");
     }
 
     @Test
