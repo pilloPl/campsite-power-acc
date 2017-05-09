@@ -23,6 +23,14 @@ class IssuerCodeServiceTest {
     }
 
     @Test
+    void cardOfAGuestWithoutGroupGetsTheUnknownIssuer() {
+        CampingCard card = new CampingCard.Builder("3", "3").guest(new Guest(null, GuestType.TRANSIT, "Novak")).build();
+
+        assertThat(issuerCodeService.defineIssuer(card)).isEqualTo(IssuerCodeService.UNKNOWN_ISSUER);
+        assertThat(issuerCodeService.defineIssuer((Market) null)).isEqualTo(IssuerCodeService.UNKNOWN_ISSUER);
+    }
+
+    @Test
     void groupWithoutMarketGetsTheUnknownIssuer() {
         Group group = new Group(GroupType.ISSUER, "CARAVAN CLUB");
         group.setId(5L);
