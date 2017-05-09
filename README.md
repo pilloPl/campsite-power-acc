@@ -32,16 +32,21 @@ mvn -q -B verify
 
 ## Running the backend with demo data
 
-The profile `demo` fills the database with a demo network at start-up (`campsite-server/src/main/resources/db/demo`):
-three campsites (Camp Istria Bay in Croatia, Garda Lakeside Camping in Italy, Ardeche River Camp in France) with map
-outlines of the campsites, sections and pitches, 18 pedestals of the three link generations with 72 sockets, power
-sections, tariffs and seasonal contracts, several hundred guests with stays, cards and house cards, 44 days of supplies
-with meter readings every 30 minutes, consumption records with a review queue, ERP billing lines of the month before,
-QR payments, an issuer partner, faults, incidents, events and audit rows. Every start replaces the demo rows (ids from
-900000000 on) and moves them to the current date; `--campsite.demo.reseed=false` keeps an existing seed. The demo
-also sets a few configuration values: `CheckoutSessionCloseDelayInMinutes` 0 (a check-out closes the supplies at the
-next job run), `PedestalHeartbeatTimeoutInMinutes` 10080 (the demo pedestals send no heartbeats), the reviewers of
-suspect records and temporary directories for the ERP files. Do not use the profile on a production database.
+The profile `demo` fills the database with a demo network at start-up (`campsite-server/src/main/resources/db/demo`).
+Three campsites carry the full demo life (Camp Istria Bay in Croatia, Garda Lakeside Camping in Italy, Ardeche River
+Camp in France): map outlines of the campsites, sections and pitches, 18 pedestals of the three link generations with
+72 sockets, power sections, tariffs and seasonal contracts, several hundred guests with stays, cards and house cards,
+44 days of supplies with meter readings every 30 minutes, consumption records with a review queue, ERP billing lines
+of the month before, QR payments, an issuer partner, faults, incidents, events and audit rows. Around them the network
+spans four markets (HR, IT, FR and ES) with regions, campsite operators and 16 campsites in the SITE tree (the other 13
+campsites have a map outline, two power sections and two pedestals each, but no guests), card issuers with sub-groups,
+two international issuers and about 40 acceptance agreements in the ISSUER tree, reception desks, service teams and
+back offices in the STAFF tree, group attributes on several levels (tenants, notifications, communication log, local
+card lists, default tariffs, welcome card adoption, whitelist filters) and welcome card pools. Every start replaces the
+demo rows (ids from 900000000 on) and moves them to the current date; `--campsite.demo.reseed=false` keeps an existing
+seed. The demo also sets a few configuration values: `CheckoutSessionCloseDelayInMinutes` 0 (a check-out closes the
+supplies at the next job run), `PedestalHeartbeatTimeoutInMinutes` 10080 (the demo pedestals send no heartbeats), the
+reviewers of suspect records and temporary directories for the ERP files. Do not use the profile on a production database.
 
 ```bash
 docker compose up -d                       # PostgreSQL 16, database campsite_power, user/password campsite
@@ -49,6 +54,9 @@ mvn -q -B -DskipTests package
 java -jar campsite-server/target/campsite-server-1.0.0-SNAPSHOT.jar --spring.profiles.active=demo
 # or: mvn -pl campsite-server spring-boot:run -Dspring-boot.run.profiles=demo
 ```
+
+Migration V245 adds the market ES below V255 and V260: a database migrated before it needs a fresh volume once
+(`docker compose down -v`) or `--spring.flyway.out-of-order=true`.
 
 The database and port can be changed with `CAMPSITE_DB_HOST`, `CAMPSITE_DB_PORT`, `CAMPSITE_DB_NAME`,
 `CAMPSITE_DB_USER`, `CAMPSITE_DB_PASSWORD` and `CAMPSITE_HTTP_PORT` (default 8080).
@@ -70,7 +78,7 @@ The password of every demo user is `demo-<username>`.
 | `service` | SERVICE_TECHNICIAN | Croatian campsites | 2 Map, 4 Pedestals & sockets, 11 Power budget, 12 Monitoring & service |
 | `backoffice` | BACK_OFFICE | Croatia | 8 Consumption records, 9 Tariffs, 10 QR payments, 13 Reports, 14 ERP billing, 15 Issuer exchange |
 | `admin` | MARKET_ADMIN | Croatia | all tabs, 16 Administration |
-| `admin.it`, `admin.fr` | MARKET_ADMIN | Italy, France | all tabs of their market |
+| `admin.it`, `admin.fr`, `admin.es` | MARKET_ADMIN | Italy, France, Spain | all tabs of their market |
 | `qrpay-app` | QRPAY_APP_CLIENT | technical user of the payment app (HTTP basic on `/api/qrpay/**`) | none |
 
 `trainee` is an invited reception user without a password (to try the user administration).

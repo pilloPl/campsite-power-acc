@@ -113,6 +113,26 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
     }
 
     @Test
+    void theNetworkSpansFourMarketsWithRegionsOperatorsCampsitesIssuerAgreementsStaffAndInheritedAttributes() {
+        // a campsite is the SITE group of pedestals: 16 of them below the regions of four markets
+        assertThat(count("SELECT COUNT(DISTINCT GROUP_ID) FROM PEDESTAL WHERE ID >= 900000000")).isEqualTo(16);
+        assertThat(count("SELECT COUNT(*) FROM CAMPSITE_MAP_AREA WHERE AREA_TYPE = 'CAMPSITE' AND ID >= 900000000"))
+                .isEqualTo(16);
+        assertThat(jdbcTemplate.queryForList("SELECT DISTINCT root.NAME FROM TBL_GROUP r JOIN TBL_GROUP root "
+                + "ON root.ID = r.PARENT_ID WHERE r.NAME LIKE '% REGION %'", String.class))
+                .containsExactlyInAnyOrder("HR SITES", "IT SITES", "FR SITES", "ES SITES");
+        assertThat(count("SELECT COUNT(*) FROM TBL_GROUP WHERE ID >= 900000000 AND TYPENAME = 'ISSUER'"))
+                .isGreaterThanOrEqualTo(15);
+        assertThat(count("SELECT COUNT(*) FROM GROUP_ASSOCIATEDGROUP")).isGreaterThanOrEqualTo(40);
+        assertThat(count("SELECT COUNT(*) FROM TBL_GROUP WHERE ID >= 900000000 AND TYPENAME = 'STAFF'"))
+                .isGreaterThanOrEqualTo(15);
+        // Porec Pine Grove has no tenant of its own: it inherits the one of its operator
+        assertThat(groupApi.getGroupAttributes(ADMIN, io.pillopl.value.GroupId.of(900000121L)).siteTenantName())
+                .isEqualTo("Adriatic Holiday Parks d.d.");
+        assertThat(userApi.authenticate(Username.of("admin.es"), "demo-admin.es").username()).isEqualTo("admin.es");
+    }
+
+    @Test
     void aMonthOfSuppliesWithRecordsOfEveryChannelAndTheReviewQueue() {
         assertThat(count("SELECT EXTRACT(DAY FROM MAX(CREATE_DATE) - MIN(CREATE_DATE)) FROM SUPPLY_SESSION "
                 + "WHERE ID >= 900000000")).isGreaterThanOrEqualTo(40);

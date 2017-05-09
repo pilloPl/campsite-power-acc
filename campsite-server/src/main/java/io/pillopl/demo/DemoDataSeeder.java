@@ -50,7 +50,7 @@ public class DemoDataSeeder implements SmartLifecycle {
      * Demo users with a password; {@code trainee} is invited and has none yet.
      */
     public static final List<String> USERS = List.of("reception", "host", "service", "backoffice", "admin", "admin.it",
-            "admin.fr", "qrpay-app");
+            "admin.fr", "admin.es", "qrpay-app");
 
     private final JdbcTemplate jdbcTemplate;
 
