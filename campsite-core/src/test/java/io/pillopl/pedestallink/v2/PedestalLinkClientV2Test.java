@@ -99,6 +99,14 @@ class PedestalLinkClientV2Test {
     }
 
     @Test
+    void remoteCommandWithoutAnswerOfTheControllerFails() {
+        server.expect(requestTo(URL + "/requestSupplyStop")).andRespond(withSuccess());
+
+        assertThat(client.remoteSupplyStop(pedestal, 1007)).isFalse();
+        server.verify();
+    }
+
+    @Test
     void v1PedestalIsNotServedByLinkV2() {
         pedestal.setPedestalType(new PedestalType("ACME PEDESTALS", "P4", PedestalLinkVersion.V1));
 
