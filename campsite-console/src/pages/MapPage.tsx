@@ -66,6 +66,15 @@ function Legend() {
 }
 
 /** Tab 2: campsites, sections and pitches on OpenStreetMap with the pedestals and the section load overlay. */
+export function busiestCampsite<C extends { pedestals?: { sockets?: { activeSessionId?: number }[] }[] }>(
+  campsites: C[],
+): C | undefined {
+  const supplying = (campsite: C) => (campsite.pedestals ?? [])
+    .reduce((sum, pedestal) => sum + (pedestal.sockets ?? []).filter((socket) => socket.activeSessionId).length, 0);
+  return campsites.reduce<C | undefined>((best, campsite) => (!best || supplying(campsite) > supplying(best) ? campsite : best),
+    undefined);
+}
+
 export default function MapPage() {
   const query = useApiQuery('/api/console/map/getMapData', {}, { refetchInterval: 60_000 });
   const campsites = useMemo(() => query.data?.map?.campsites ?? [], [query.data]);
@@ -74,7 +83,8 @@ export default function MapPage() {
   const [showLoad, setShowLoad] = useState(true);
   const [openCode, setOpenCode] = useState<string | null>(null);
 
-  const campsite = campsites.find((candidate) => candidate.groupId === campsiteId) ?? campsites[0];
+  // without a choice the busiest campsite: the one with the most supplying sockets
+  const campsite = campsites.find((candidate) => candidate.groupId === campsiteId) ?? busiestCampsite(campsites);
   const areas = useMemo(() => parseAreas(campsite), [campsite]);
   const sectionById = useMemo(() => new Map(sections.map((section) => [section.id, section])), [sections]);
   const campsiteSections = sections.filter((section) =>

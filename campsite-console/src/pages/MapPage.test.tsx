@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import MapPage from './MapPage';
+import MapPage, { busiestCampsite } from './MapPage';
 import { adminUser, fakeBackend } from '../test/backend';
 import { renderWithProviders } from '../test/render';
 import { mapData } from './map/testData';
@@ -19,6 +19,13 @@ function backend(rights = adminUser.rights) {
 }
 
 describe('map tab', () => {
+  it('opens the campsite with the most supplying sockets first', () => {
+    const quiet = { groupId: 1, pedestals: [{ sockets: [{}, {}] }] };
+    const busy = { groupId: 2, pedestals: [{ sockets: [{ activeSessionId: 7 }] }, { sockets: [{ activeSessionId: 8 }] }] };
+    expect(busiestCampsite([quiet, busy])?.groupId).toBe(2);
+    expect(busiestCampsite([])).toBeUndefined();
+  });
+
   it('draws the pedestals of the campsite and the section load overlay', async () => {
     backend();
     renderWithProviders(<MapPage />);
