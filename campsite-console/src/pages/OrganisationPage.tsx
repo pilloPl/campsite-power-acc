@@ -1,4 +1,4 @@
-import { Alert, Chip, MenuItem, Stack, Table, TableBody, TableCell, TableRow, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Alert, Chip, MenuItem, Stack, Table, TableBody, TableCell, TableRow, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { useQueries } from '@tanstack/react-query';
 import type { EChartsOption } from 'echarts';
 import { useMemo, useState } from 'react';
@@ -31,6 +31,24 @@ interface EChartsTreeNode {
 }
 
 /** Group tree of the backend as data of an ECharts tree series; the selected group is highlighted. */
+/** The group with the longest parent line (first of equals), or the first group. */
+export function deepestGroup(groups: Group[]): Group | undefined {
+  const byId = new Map(groups.map((group) => [group.id, group]));
+  const depth = (group: Group): number => {
+    let level = 0;
+    for (let parent = byId.get(group.parentId); parent && level < 50; parent = byId.get(parent.parentId)) level += 1;
+    return level;
+  };
+  return groups.reduce<Group | undefined>((best, group) => (!best || depth(group) > depth(best) ? group : best), undefined);
+}
+
+/** Number of leaves of a tree: the height the tree diagram needs. */
+export function leafCount(node: TreeNode | undefined): number {
+  if (!node) return 0;
+  const children = node.children ?? [];
+  return children.length === 0 ? 1 : children.reduce((sum, child) => sum + leafCount(child), 0);
+}
+
 export function toTreeData(node: TreeNode | undefined, selectedId?: number): EChartsTreeNode[] {
   if (!node) return [];
   const convert = (current: TreeNode): EChartsTreeNode => ({
@@ -89,7 +107,8 @@ export default function OrganisationPage() {
   const issuerList = issuers.data?.groups ?? [];
   const siteList = sites.data?.groups ?? [];
 
-  const selected = groupList.find((group) => group.id === selectedId) ?? groupList[0];
+  // without a choice the deepest group is shown: it inherits the most attributes
+  const selected = groupList.find((group) => group.id === selectedId) ?? deepestGroup(groupList);
   const attributes = useApiQuery('/api/console/group/getGroupAttributes', { groupId: selected?.id },
     { enabled: selected?.id !== undefined });
 
@@ -121,7 +140,7 @@ export default function OrganisationPage() {
 
   const graphOption = useMemo<EChartsOption>(() => {
     type GraphNode = { id: string; name: string; category: number; x: number; y: number; symbolSize: number;
-      label: { position: 'left' | 'right' } };
+      label: { position: 'left' | 'right' }; value?: [number, number] };
     const issuerNodes: GraphNode[] = [];
     const siteNodes = new Map<string, GraphNode>();
     const links: { source: string; target: string; lineStyle?: { type: 'dashed' } }[] = [];
@@ -146,16 +165,23 @@ export default function OrganisationPage() {
     const known = new Set(issuerNodes.map((node) => node.id));
     const shownLinks = links.filter((link) => known.has(link.source));
     const sitesOrdered = [...siteNodes.values()];
-    issuerNodes.forEach((node, index) => { node.y = ((index + 1) * 240) / (issuerNodes.length + 1); });
-    sitesOrdered.forEach((node, index) => { node.y = ((index + 1) * 240) / (sitesOrdered.length + 1); });
+    // issuers in a column on the left, campsites on the right, both spread over the height (cartesian: round nodes)
+    issuerNodes.forEach((node, index) => { node.value = [0, (index + 0.5) / issuerNodes.length]; });
+    sitesOrdered.forEach((node, index) => { node.value = [1, (index + 0.5) / sitesOrdered.length]; });
+    issuerNodes.forEach((node) => { node.symbolSize = 18; });
+    sitesOrdered.forEach((node) => { node.symbolSize = 14; });
     return {
       tooltip: {},
       legend: [{ data: ['Card issuer', 'Campsite', 'Campsite of another market'], bottom: 0 }],
+      grid: { left: 210, right: 230, top: 15, bottom: 40 },
+      xAxis: { type: 'value', show: false, min: -0.02, max: 1.02 },
+      yAxis: { type: 'value', show: false, min: 0, max: 1, inverse: true },
+      dataZoom: [{ type: 'inside', xAxisIndex: 0, filterMode: 'none' }, { type: 'inside', yAxisIndex: 0, filterMode: 'none' }],
       series: [{
         type: 'graph',
-        layout: 'none',
-        left: 170, right: 200, top: 20, bottom: 40,
-        label: { show: true, fontSize: 12 },
+        coordinateSystem: 'cartesian2d',
+        label: { show: true, fontSize: 11 },
+        emphasis: { focus: 'adjacency', lineStyle: { width: 3 } },
         edgeSymbol: ['none', 'arrow'],
         edgeSymbolSize: 9,
         categories: [
@@ -165,12 +191,15 @@ export default function OrganisationPage() {
         ],
         data: [...issuerNodes, ...sitesOrdered],
         links: shownLinks,
-        lineStyle: { color: '#7a9a84', width: 2, curveness: 0.15, opacity: 0.9 },
+        lineStyle: { color: '#7a9a84', width: 1.2, curveness: 0.1, opacity: 0.7 },
       }],
     };
   }, [issuerList, siteList, agreementList]);
 
   const acceptedIds = new Set(currentAgreement?.acceptingSiteGroupIds ?? []);
+  const graphNodes = (graphOption.series as { data?: { category: number }[] }[] | undefined)?.[0]?.data ?? [];
+  const graphHeight = Math.min(620, Math.max(300,
+    22 * Math.max(graphNodes.filter((node) => node.category === 0).length, graphNodes.filter((node) => node.category !== 0).length) + 80));
 
   return (
     <Page
@@ -205,7 +234,7 @@ export default function OrganisationPage() {
           <Section title={`${GROUP_TYPES.find((type) => type.value === groupType)?.label} tree`} testId="group-tree">
             <QueryState isLoading={tree.isLoading} error={tree.error}>
               <Chart
-                height={250}
+                height={Math.min(600, Math.max(280, 46 * leafCount(tree.data?.tree) + 40))}
                 testId="group-tree-chart"
                 onEvents={{ click: (params) => setSelectedId((params as { data?: { value?: number } }).data?.value) }}
                 option={{
@@ -213,12 +242,15 @@ export default function OrganisationPage() {
                   series: [{
                     type: 'tree',
                     data: toTreeData(tree.data?.tree, selected?.id),
-                    top: 15, left: 160, bottom: 15, right: 220,
-                    symbolSize: 14,
-                    initialTreeDepth: -1,
-                    expandAndCollapse: false,
+                    top: 15, left: 30, bottom: 15, right: 200,
+                    symbolSize: 12,
+                    roam: true,
+                    initialTreeDepth: 3,
+                    expandAndCollapse: true,
+                    animationDurationUpdate: 300,
                     itemStyle: { color: '#2e6b3f', borderColor: '#2e6b3f' },
-                    label: { position: 'left', verticalAlign: 'middle', align: 'right', fontSize: 13 },
+                    label: { position: 'right', verticalAlign: 'middle', align: 'left', fontSize: 12, distance: 6,
+                      backgroundColor: 'rgba(255,255,255,0.9)', padding: [1, 3] },
                     leaves: { label: { position: 'right', verticalAlign: 'middle', align: 'left' } },
                     lineStyle: { color: '#9bb5a2', width: 2 },
                   }],
@@ -227,7 +259,10 @@ export default function OrganisationPage() {
             </QueryState>
           </Section>
           <Section title="Acceptance agreements: card issuers accepted by campsites" testId="agreement-graph">
-            <Chart height={300} testId="agreement-graph-chart" option={graphOption} />
+            <Typography variant="caption" color="text.secondary">
+              Scroll to zoom, drag to move; hover a node to see its agreements. Dashed: inherited from the parent issuer.
+            </Typography>
+            <Chart height={graphHeight} testId="agreement-graph-chart" option={graphOption} />
           </Section>
         </Stack>
         <Stack spacing={2} sx={{ flex: 2, minWidth: 0, width: '100%' }}>

@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import OrganisationPage, { affiliateAccessMode, toTreeData } from './OrganisationPage';
+import OrganisationPage, { affiliateAccessMode, deepestGroup, leafCount, toTreeData } from './OrganisationPage';
 import { adminUser, fakeBackend } from '../test/backend';
 import { renderWithProviders } from '../test/render';
 
@@ -42,6 +42,16 @@ function backend() {
 }
 
 describe('organisation tab', () => {
+  it('shows the deepest group first, which inherits the most attributes', () => {
+    expect(deepestGroup(sites.map((site) => ({ ...site, parentId: site.parentId ?? undefined })))?.id).toBe(77);
+    expect(deepestGroup([])).toBeUndefined();
+  });
+
+  it('sizes the tree diagram by its leaves', () => {
+    expect(leafCount(siteTree)).toBe(2);
+    expect(leafCount(undefined)).toBe(0);
+  });
+
   it('turns the group tree into an ECharts tree and finds affiliate campsites by their parent group', () => {
     expect(toTreeData(siteTree as never, 51)[0].children[0]).toMatchObject({
       name: 'Network access Croatia', value: 51, itemStyle: { color: '#c77700' },
