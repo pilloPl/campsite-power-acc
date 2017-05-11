@@ -85,7 +85,10 @@ public class ConsumptionRecordDaoImpl implements ConsumptionRecordDaoCustom {
     @Override
     public long nextRecordNumber() {
         Long next = jdbcTemplate.queryForObject(nextConsumptionRecordNumber, new MapSqlParameterSource(), Long.class);
-        return Objects.requireNonNull(next, "CONSUMPTION_RECORD_NO_SEQ");
+        if (next == null) {
+            throw new IllegalStateException("CONSUMPTION_RECORD_NO_SEQ returned no record number");
+        }
+        return next;
     }
 
     @Override
