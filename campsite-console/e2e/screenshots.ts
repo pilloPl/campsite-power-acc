@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TABS } from '../src/tabs';
 import { addWhitelistFilter, assignWelcomePoolCard, checkOutStayWithOpenSession, reviewSuspectRecord, simulatePrice, stopSupplyFromMapPopup } from './actions';
-import { loginAs, openTab, waitForMap } from './support';
+import { loginAs, openTab, settle, waitForMap } from './support';
 
 /**
  * `npm run screenshots`: docs/screenshots/<nn>-<tab>.png of all 16 tabs (as the market admin, who sees all) and of
@@ -52,4 +52,12 @@ test('screenshots of all tabs and the key actions', async ({ page }) => {
 
   await addWhitelistFilter(page, () => shoot(page, '25-issuer-whitelist-filter-dialog'));
   await shoot(page, '26-issuer-whitelist-filters');
+
+  await openTab(page, 'Organisation');
+  await page.getByRole('button', { name: 'Card issuers' }).click();
+  await settle(page);
+  await shoot(page, '27-organisation-issuer-tree');
+  await page.getByRole('button', { name: 'Staff' }).click();
+  await settle(page);
+  await shoot(page, '28-organisation-staff-tree');
 });
