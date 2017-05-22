@@ -83,8 +83,8 @@ public class ConsumptionRecordWriteService {
                                                      LocalDateTime systemDate) {
         ConsumptionRecord existing = consumptionRecordDao.findBySupplySessionId(session.getId());
         if (existing != null) {
-            LOGGER.error(String.format("Session %s has its consumption record %s already, no second record",
-                    session, existing.getRecordNo()));
+            LOGGER.error("Session {} has its consumption record {} already, no second record (stop reason {})",
+                    session, existing.getRecordNo(), stopReason);
             return existing;
         }
 
