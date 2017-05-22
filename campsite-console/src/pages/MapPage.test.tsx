@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import MapPage, { busiestCampsite } from './MapPage';
+import MapPage from './MapPage';
+import { busiestCampsite } from '../components/CampsiteSelect';
 import { adminUser, fakeBackend } from '../test/backend';
 import { renderWithProviders } from '../test/render';
 import { mapData } from './map/testData';

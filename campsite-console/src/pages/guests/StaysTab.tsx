@@ -78,6 +78,10 @@ export function StaysTab({ campsiteGroupId }: { campsiteGroupId: number | undefi
     },
   ], [sessionsByStay, canCheckOut, canEdit]);
 
+  // stays with running supplies first (the grid sorts again only when its rows change)
+  const sortedStays = [...(stays.data?.stays ?? [])].sort((a, b) =>
+    (sessionsByStay.get(b.id ?? -1)?.length ?? 0) - (sessionsByStay.get(a.id ?? -1)?.length ?? 0));
+
   return (
     <Stack spacing={2}>
       <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
@@ -93,7 +97,7 @@ export function StaysTab({ campsiteGroupId }: { campsiteGroupId: number | undefi
           slotProps={{ inputLabel: { shrink: true } }} />
       </Stack>
       <QueryState isLoading={stays.isLoading} error={stays.error}>
-        <DataTable rows={stays.data?.stays} columns={columns} height={600} testId="stays-table"
+        <DataTable rows={sortedStays} columns={columns} height={600} testId="stays-table"
           columnVisibilityModel={{ checkOutDate: state !== 'OPEN', actions: state !== 'CHECKED_OUT' }}
           initialState={{
             pagination: { paginationModel: { pageSize: 25 } },

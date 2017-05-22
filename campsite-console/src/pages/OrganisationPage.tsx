@@ -31,7 +31,7 @@ interface EChartsTreeNode {
 }
 
 /** Group tree of the backend as data of an ECharts tree series; the selected group is highlighted. */
-/** The group with the longest parent line (first of equals), or the first group. */
+/** The group with the longest parent line (the last of equals). */
 export function deepestGroup(groups: Group[]): Group | undefined {
   const byId = new Map(groups.map((group) => [group.id, group]));
   const depth = (group: Group): number => {
@@ -39,7 +39,7 @@ export function deepestGroup(groups: Group[]): Group | undefined {
     for (let parent = byId.get(group.parentId); parent && level < 50; parent = byId.get(parent.parentId)) level += 1;
     return level;
   };
-  return groups.reduce<Group | undefined>((best, group) => (!best || depth(group) > depth(best) ? group : best), undefined);
+  return groups.reduce<Group | undefined>((best, group) => (!best || depth(group) >= depth(best) ? group : best), undefined);
 }
 
 /** Number of leaves of a tree: the height the tree diagram needs. */

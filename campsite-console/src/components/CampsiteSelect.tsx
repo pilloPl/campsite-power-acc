@@ -11,6 +11,16 @@ export function useCampsites() {
   return { ...query, campsites };
 }
 
+/** The campsite with the most supplying sockets: the default of the views of one campsite. */
+export function busiestCampsite<C extends { pedestals?: { sockets?: { activeSessionId?: number }[] }[] }>(
+  campsites: C[],
+): C | undefined {
+  const supplying = (campsite: C) => (campsite.pedestals ?? [])
+    .reduce((sum, pedestal) => sum + (pedestal.sockets ?? []).filter((socket) => socket.activeSessionId).length, 0);
+  return campsites.reduce<C | undefined>((best, campsite) => (!best || supplying(campsite) > supplying(best) ? campsite : best),
+    undefined);
+}
+
 /** Filter by campsite; empty value = all campsites of the scope. */
 export function CampsiteSelect({ value, onChange, allowAll = true, label = 'Campsite' }: {
   value: number | undefined;

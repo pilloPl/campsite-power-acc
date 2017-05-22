@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap } from 'react-leaflet';
 import type { Schemas } from '../api/client';
 import { useApiQuery } from '../api/hooks';
+import { busiestCampsite } from '../components/CampsiteSelect';
 import { formatNumber } from '../components/format';
 import { Page, QueryState, Section } from '../components/Page';
 import { PedestalPopup } from './map/PedestalPopup';
@@ -66,15 +67,6 @@ function Legend() {
 }
 
 /** Tab 2: campsites, sections and pitches on OpenStreetMap with the pedestals and the section load overlay. */
-export function busiestCampsite<C extends { pedestals?: { sockets?: { activeSessionId?: number }[] }[] }>(
-  campsites: C[],
-): C | undefined {
-  const supplying = (campsite: C) => (campsite.pedestals ?? [])
-    .reduce((sum, pedestal) => sum + (pedestal.sockets ?? []).filter((socket) => socket.activeSessionId).length, 0);
-  return campsites.reduce<C | undefined>((best, campsite) => (!best || supplying(campsite) > supplying(best) ? campsite : best),
-    undefined);
-}
-
 export default function MapPage() {
   const query = useApiQuery('/api/console/map/getMapData', {}, { refetchInterval: 60_000 });
   const campsites = useMemo(() => query.data?.map?.campsites ?? [], [query.data]);

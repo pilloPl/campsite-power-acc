@@ -8,6 +8,7 @@ import { useApiMutation, useApiQuery } from '../api/hooks';
 import { useAuth } from '../auth/AuthContext';
 import { Right } from '../auth/rights';
 import { ActionButton } from '../components/ActionButton';
+import { busiestCampsite } from '../components/CampsiteSelect';
 import { DataTable } from '../components/DataTable';
 import { FormDialog } from '../components/FormDialog';
 import { enumLabel, formatDate, formatDateTime, isoDay } from '../components/format';
@@ -67,7 +68,9 @@ export default function CardsPage() {
   const map = useApiQuery('/api/console/map/getMapData', {}, { staleTime: 5 * 60_000 });
   const pedestals = (map.data?.map?.campsites ?? []).flatMap((campsite) =>
     (campsite.pedestals ?? []).map((pedestal) => ({ code: pedestal.code as string, campsite: campsite.displayName, sockets: pedestal.sockets ?? [] })));
-  const currentPedestal = pedestalCode || pedestals[0]?.code || '';
+  // without a choice the first pedestal of the busiest campsite (the one whose card list is in use)
+  const busiest = busiestCampsite(map.data?.map?.campsites ?? []);
+  const currentPedestal = pedestalCode || busiest?.pedestals?.[0]?.code || pedestals[0]?.code || '';
   const localList = useApiQuery('/api/console/card/getLocalCardList', { pedestalCode: currentPedestal },
     { enabled: currentPedestal !== '' });
 
