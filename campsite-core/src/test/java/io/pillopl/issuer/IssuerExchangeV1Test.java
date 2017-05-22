@@ -83,6 +83,14 @@ class IssuerExchangeV1Test {
     }
 
     @Test
+    void headerAfterAByteOrderMarkIsRecognised() throws IOException {
+        incoming("cards-in", "a.csv", "\uFEFF" + IssuerExchangeV1.CARD_HEADER, "04A1B2C3;CC-1;MODIFY;;;");
+
+        assertThat(exchange.fetchCards(partner)).containsExactly(
+                new CardLine("04A1B2C3", "CC-1", "MODIFY", null, null, null));
+    }
+
+    @Test
     void networkCardListIsWrittenWithATimeStamp() throws IOException {
         exchange.sendCards(partner, List.of(new CardLine("0A0B0C0D", "HR-1", "ADD", "2026-07-11 02:30", null,
                 LocalDate.of(2026, 7, 14))));

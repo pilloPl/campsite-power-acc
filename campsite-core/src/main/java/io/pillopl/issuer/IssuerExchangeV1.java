@@ -43,6 +43,8 @@ public class IssuerExchangeV1 implements IssuerExchange {
 
     static final String SEPARATOR = ";";
 
+    private static final String BYTE_ORDER_MARK = "\uFEFF";
+
     static final String CARD_HEADER = "CARD_UID;CARD_NUMBER;ACTION;ACTION_DATE;BILLING_ACCOUNT_NO;VALID_TO";
 
     static final String RECORD_HEADER = "RECORD_NO;CAMPSITE;SOCKET_CODE;PITCH_NO;CARD_RFID;PLUG_IN;PLUG_OUT;"
@@ -140,7 +142,7 @@ public class IssuerExchangeV1 implements IssuerExchange {
         } catch (IOException e) {
             throw new IssuerExchangeException("Cannot read " + path + ": " + e.getMessage(), e);
         }
-        if (lines.isEmpty() || !header.equalsIgnoreCase(lines.get(0).strip())) {
+        if (lines.isEmpty() || !header.equalsIgnoreCase(withoutByteOrderMark(lines.get(0)).strip())) {
             throw new IssuerExchangeException("File " + path.getFileName() + " has not the header " + header);
         }
         List<String[]> rows = new ArrayList<>();
@@ -151,6 +153,13 @@ public class IssuerExchangeV1 implements IssuerExchange {
         }
         LOG.info(String.format("%s lines read from %s", rows.size(), path));
         return rows;
+    }
+
+    /**
+     * Spreadsheet programs of the partners save UTF-8 with a byte order mark in front of the header.
+     */
+    private static String withoutByteOrderMark(String line) {
+        return line.startsWith(BYTE_ORDER_MARK) ? line.substring(BYTE_ORDER_MARK.length()) : line;
     }
 
     private static void moveToDone(Path path) {
