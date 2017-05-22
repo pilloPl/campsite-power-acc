@@ -11,7 +11,7 @@ test.describe('login and navigation', () => {
     await expect(page.getByTestId('login-error')).toBeVisible();
   });
 
-  for (const username of ['reception', 'host', 'service', 'backoffice']) {
+  for (const username of ['reception', 'host', 'service', 'backoffice', 'admin.es']) {
     test(`${username} opens each of its tabs without a server error`, async ({ page }) => {
       test.setTimeout(5 * 60_000);
       const serverErrors: string[] = [];
