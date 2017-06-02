@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Consumption record calls of the console: REPORT_VIEW to list the records of the caller's SITE and ISSUER scope,
@@ -152,12 +153,13 @@ public class ConsumptionRecordApiService implements ConsumptionRecordApi {
     }
 
     public static ConsumptionRecordDTO toDTO(ConsumptionRecord r) {
-        SettlementFlags flags = r.getSettlementFlags();
+        SettlementFlags flags = Objects.requireNonNullElse(r.getSettlementFlags(),
+                new SettlementFlags(false, false, false));
         return new ConsumptionRecordDTO(r.getId(), r.getRecordNo(), r.getPedestalCode(), r.getSocketCode(),
                 r.getPitchNo(), r.getCampsiteCode(), r.getCampsiteName(), r.getSiteTenant(), r.getIssuerTenant(),
                 r.getCardRfid(), r.getCardNumber(), r.getGuestName(), name(r.getPaymentChannel()),
-                flags != null && flags.isBillable(), flags != null && flags.isSettledByCampsite(),
-                flags != null && flags.isHouseCardRental(), r.getPlugIn(), r.getPlugOut(), r.getDurationSeconds(),
+                flags.isBillable(), flags.isSettledByCampsite(), flags.isHouseCardRental(), r.getPlugIn(),
+                r.getPlugOut(), r.getDurationSeconds(),
                 r.getNights(), r.getKwh(), name(r.getStopReason()), r.getCost(), r.getCurrency(),
                 name(r.getPricingStatus()), r.getPricingFailureReason(), r.getTariffName(),
                 name(r.getValidationState()), r.getSuspectReason(), name(r.getExportStatus()), r.getReviewedBy(),
