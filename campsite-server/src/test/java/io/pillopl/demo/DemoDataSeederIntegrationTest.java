@@ -66,7 +66,10 @@ class DemoDataSeederIntegrationTest extends IntegrationTest {
 
     @Test
     void seedingAgainReplacesTheDemoDataInsteadOfAddingToIt() {
-        assertThat(count("SELECT COUNT(*) FROM SUPPLY_SESSION WHERE ID >= 900000000")).isEqualTo(sessionsOfFirstSeed);
+        // the seed follows the clock (supplies up to now), so a later seed may differ by a few sessions; a seed added
+        // to the old one would double them
+        assertThat(count("SELECT COUNT(*) FROM SUPPLY_SESSION WHERE ID >= 900000000"))
+                .isBetween(sessionsOfFirstSeed - sessionsOfFirstSeed / 50, sessionsOfFirstSeed + sessionsOfFirstSeed / 50);
         assertThat(count("SELECT COUNT(*) FROM USERINFO WHERE USERNAME = 'admin'")).isEqualTo(1);
     }
 
