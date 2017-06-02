@@ -313,6 +313,39 @@ $$
     END
 $$;
 
+-- ARDECHE-P06 went silent while guests were plugged in. The stays above are random and depend on the time of the
+-- seed, so when none of its sockets is still supplying, its last card supply stays open: the stale sessions of the
+-- silent pedestal are there at every time of day.
+DO
+$$
+    DECLARE
+        v_session BIGINT;
+    BEGIN
+        IF NOT EXISTS (SELECT 1
+                         FROM SUPPLY_SESSION ss
+                         JOIN SOCKET so ON so.ID = ss.SOCKET_ID
+                        WHERE so.PEDESTAL_ID = 900000306 AND ss.ACTIVE) THEN
+            SELECT ss.ID INTO v_session
+              FROM SUPPLY_SESSION ss
+              JOIN SOCKET so ON so.ID = ss.SOCKET_ID
+              LEFT JOIN STAY st ON st.ID = ss.STAY_ID
+             WHERE so.PEDESTAL_ID = 900000306 AND ss.CARD_ID IS NOT NULL
+             ORDER BY (st.ID IS NOT NULL AND st.CHECK_OUT_DATE IS NULL) DESC, ss.STOP_DATE DESC
+             LIMIT 1;
+            DELETE FROM SOCKET_STATUS_LOG l
+             USING SUPPLY_SESSION ss
+             WHERE ss.ID = v_session AND l.SOCKET_ID = ss.SOCKET_ID AND l.CREATE_DATE = ss.STOP_DATE
+               AND l.STATUS = 'AVAILABLE';
+            DELETE FROM pg_temp.demo_stop WHERE SESSION_ID = v_session;
+            UPDATE SOCKET so
+               SET STATUS = 'SUPPLYING'
+              FROM SUPPLY_SESSION ss
+             WHERE ss.ID = v_session AND so.ID = ss.SOCKET_ID;
+            UPDATE SUPPLY_SESSION SET ACTIVE = TRUE, STOP_REASON = NULL, STOP_DATE = NULL WHERE ID = v_session;
+        END IF;
+    END
+$$;
+
 -- consumption records of the closed supplies, priced with the tariff of the socket, pedestal or market
 INSERT INTO CONSUMPTION_RECORD (ID, RECORD_NO, SUPPLY_SESSION_ID, TRANSACTION_ID, SOCKET_ID, SOCKET_CODE, SOCKET_NAME,
                                 PITCH_NO, PEDESTAL_ID, PEDESTAL_CODE, PEDESTAL_REFERENCE_ID, PEDESTAL_TYPE,
