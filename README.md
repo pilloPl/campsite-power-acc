@@ -55,9 +55,6 @@ java -jar campsite-server/target/campsite-server-1.0.0-SNAPSHOT.jar --spring.pro
 # or: mvn -pl campsite-server spring-boot:run -Dspring-boot.run.profiles=demo
 ```
 
-Migration V245 adds the market ES below V255 and V260: a database migrated before it needs a fresh volume once
-(`docker compose down -v`) or `--spring.flyway.out-of-order=true`.
-
 The database and port can be changed with `CAMPSITE_DB_HOST`, `CAMPSITE_DB_PORT`, `CAMPSITE_DB_NAME`,
 `CAMPSITE_DB_USER`, `CAMPSITE_DB_PASSWORD` and `CAMPSITE_HTTP_PORT` (default 8080).
 
