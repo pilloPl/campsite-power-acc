@@ -28,6 +28,25 @@ class IssuerPartnerTest {
     }
 
     @Test
+    void partnerWithEveryDirectionSwitchedOffHasAnEmptyMatrixRow() {
+        IssuerPartner partner = partner();
+
+        assertThat(partner.getDirections()).isEmpty();
+        assertThat(IssuerApiService.syncStatusMatrixRow(partner)).isEmpty();
+    }
+
+    @Test
+    void statusRowOfADirectionIsCreatedOnlyOnce() {
+        IssuerPartner partner = partner();
+
+        IssuerSyncStatus first = partner.getSyncStatus(IssuerSyncStatus.Direction.CARD_EXPORT);
+
+        assertThat(partner.getSyncStatus(IssuerSyncStatus.Direction.CARD_EXPORT)).isSameAs(first);
+        assertThat(partner.getSyncStatuses()).hasSize(1);
+        assertThat(first.getIssuerPartner()).isSameAs(partner);
+    }
+
+    @Test
     void cardExportAndRecordImportNeedTheSiteGroupOfThePartner() {
         IssuerPartner partner = partner();
         partner.setCardExport(true);
