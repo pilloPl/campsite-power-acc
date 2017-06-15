@@ -13,6 +13,8 @@ public class IssuerCodeService {
 
     public static final String UNKNOWN_ISSUER = "UNKNOWN";
 
+    static final String ISSUER_CODE_PREFIX = "CPN-";
+
     private final GroupService groupService;
 
     public IssuerCodeService(GroupService groupService) {
@@ -34,19 +36,13 @@ public class IssuerCodeService {
         return defineIssuer(issuerGroup);
     }
 
+    /**
+     * The network prefix followed by the market, the unknown issuer for a group without a market prefix.
+     */
     public String defineIssuer(Market market) {
-        if (market == Market.HR) {
-            return "CPN-HR";
+        if (market == null || !market.isPrefixMarket()) {
+            return UNKNOWN_ISSUER;
         }
-        if (market == Market.IT) {
-            return "CPN-IT";
-        }
-        if (market == Market.FR) {
-            return "CPN-FR";
-        }
-        if (market == Market.ES) {
-            return "CPN-ES";
-        }
-        return UNKNOWN_ISSUER;
+        return ISSUER_CODE_PREFIX + market.name();
     }
 }
