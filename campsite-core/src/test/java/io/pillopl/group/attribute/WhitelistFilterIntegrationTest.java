@@ -31,6 +31,19 @@ class WhitelistFilterIntegrationTest extends GroupAttributeIntegrationTestBase {
     }
 
     @Test
+    void savingAFilterAgainChangesTheOneFilterOfTheGroup() {
+        WhitelistFilter first = whitelistFilterService.saveFilter(clubJunior, false, WhitelistFilterType.IMPORT, null);
+
+        WhitelistFilter second = whitelistFilterService.saveFilter(clubJunior, true, null, null);
+
+        assertThat(second.getId()).isEqualTo(first.getId());
+        assertThat(second.getWhitelistFilterType()).isEqualTo(WhitelistFilterType.IMPORT_EXPORT);
+        assertThat(whitelistFilterService.findFiltersOfSubtree(club)).extracting(WhitelistFilter::getGroupId)
+                .containsExactly(clubJunior.getId());
+        assertThat(whitelistFilterService.isSynchronizableForImport(clubJunior.getId())).isTrue();
+    }
+
+    @Test
     void filterWithATargetPartnerAppliesToTheExchangeWithThatPartnerOnly() {
         IssuerPartner federation = partner("FILTER FEDERATION");
         IssuerPartner alliance = partner("FILTER ALLIANCE");
