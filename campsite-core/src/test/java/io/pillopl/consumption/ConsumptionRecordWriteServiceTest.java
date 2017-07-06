@@ -201,6 +201,20 @@ class ConsumptionRecordWriteServiceTest {
     }
 
     @Test
+    void houseCardOfTheSessionIsUsedWhenTheValidationHasNone() {
+        HouseCard houseCard = new HouseCard(HouseCardType.RENTAL, "9002", "HC-2");
+        houseCard.setId(42L);
+        session.setHouseCard(houseCard);
+        when(pricingService.calculateCost(any(PricingInput.class))).thenReturn(PriceCalculation.notBillable());
+
+        ConsumptionRecord record = create(validated(null, null), "3.0", false);
+
+        assertThat(record.getHouseCardId()).isEqualTo(42L);
+        assertThat(record.getCardId()).isNull();
+        assertThat(record.getPaymentChannel()).isEqualTo(PaymentChannel.HOUSE_CARD);
+    }
+
+    @Test
     void campsiteSettlingItsOwnGuestsIsFlaggedOnTheRecord() {
         pedestal.setSettledByCampsite(true);
         priced("1.00");
