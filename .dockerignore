@@ -1,0 +1,7 @@
+**/target
+**/node_modules
+campsite-console/dist
+campsite-console/test-results
+campsite-console/playwright-report
+.git
+.idea
