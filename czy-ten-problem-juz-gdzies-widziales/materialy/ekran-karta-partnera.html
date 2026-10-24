@@ -1,0 +1,66 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>Karta partnera (makieta)</title>
+<style>
+body{margin:0;background:#eef1f4;font:14px/1.45 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;color:#1d2733}
+.app{width:1180px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 0 1px #d6dde5}
+.top{display:flex;align-items:center;gap:16px;padding:12px 24px;background:#16324f;color:#fff}
+.top b{font-size:16px}.top span{opacity:.75}
+.wrap{padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.full{grid-column:1/-1}
+.box{border:1px solid #d6dde5;border-radius:8px;padding:14px 16px}
+h1{margin:0 0 4px;font-size:22px}h2{margin:0 0 10px;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:#4a5a6b}
+label{display:block;font-size:12px;color:#5b6b7c;margin-top:8px}
+input,textarea{width:100%;box-sizing:border-box;border:1px solid #c5ced8;border-radius:5px;padding:6px 8px;font:inherit}
+textarea{height:52px}
+.btn{display:inline-block;border:1px solid #16324f;background:#16324f;color:#fff;border-radius:5px;padding:6px 12px;font-size:13px;margin-top:10px}
+.btn.l{background:#fff;color:#16324f}.btn.off{background:#e3e7ec;color:#9aa6b2;border-color:#d0d6dd}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #e3e7ec;padding:6px 6px;text-align:left}
+th{font-size:11px;color:#5b6b7c;text-transform:uppercase}
+.tag{display:inline-block;border-radius:10px;padding:1px 8px;font-size:11px;background:#e7eef7;color:#24476b}
+.warn{background:#fff6e0;border:1px solid #f0d58a;border-radius:6px;padding:8px 10px;margin-top:10px;font-size:13px}
+.lock{background:#fdeaea;border:1px solid #f1b5b5;border-radius:6px;padding:6px 10px;font-size:13px;margin-bottom:8px}
+.big{font-size:26px;font-weight:700}.muted{color:#6b7a8a;font-size:12px}
+.row{display:flex;gap:24px;align-items:flex-end}
+.toggle{display:inline-block;width:34px;height:18px;border-radius:9px;background:#2e7d4f;vertical-align:middle;position:relative;margin-right:6px}
+.toggle::after{content:"";position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.ok{color:#2e7d4f;font-weight:600}.logo{display:inline-block;padding:2px 6px;border:1px solid #9aa6b2;border-radius:4px;font-size:11px}
+</style></head><body><div class="app">
+<div class="top"><b>Konsola sieci</b><span>Partnerzy › Istria Charge</span><span style="margin-left:auto">operator: m.kowal</span></div>
+<div class="wrap">
+<div class="full"><h1>Istria Charge <span class="tag">partner · wydawca kart · ma słupki</span></h1>
+<div class="muted">Organizacja nadrzędna: EuroCamp Cards · Partner od 2019</div></div>
+
+<div class="box"><h2>Dane partnera</h2>
+<label>Nazwa wyświetlana</label><input value="Istria Charge d.o.o.">
+<label>Osoba kontaktowa</label><input value="Marko Babić">
+<label>E-mail do rozliczeń</label><input value="billing@istriacharge.hr">
+<label>Notatki</label><textarea>Preferują kontakt mailowy. Faktury do 5. dnia miesiąca.</textarea>
+<span class="btn">Zapisz</span></div>
+
+<div class="box"><h2>Liczby</h2>
+<div class="row"><div><div class="big">3 812</div><div class="muted">aktywne karty partnera</div></div>
+<div><div class="big">912</div><div class="muted">ładowania gości partnera w październiku</div></div>
+<div><div class="big">14 260 kWh</div><div class="muted">pobór w tym miesiącu</div></div></div>
+<span class="btn l">Eksport raportu rozliczeniowego (CSV)</span>
+<span class="btn l">Podgląd na dzień…</span></div>
+
+<div class="box full"><h2>Gdzie działają karty partnera u nas</h2>
+<div class="lock">🔒 Umowy tego partnera edytuje teraz: a.horvat (od 2 min)</div>
+<table><tr><th>Kemping</th><th>Źródło</th><th>Rodzaj zasięgu</th><th>Od</th><th>Do</th><th></th></tr>
+<tr><td>Zadar</td><td>własna umowa</td><td>lista kempingów</td><td>01.05.2024</td><td>—</td><td><span class="btn l">Zakończ</span></td></tr>
+<tr><td>Rovinj</td><td>umowa organizacji EuroCamp Cards</td><td>lista kempingów</td><td>01.03.2023</td><td>31.12.2026</td><td><span class="btn off">Zakończ</span></td></tr>
+<tr><td>Split, Šibenik</td><td>własna umowa</td><td>region Dalmacja, obejmuje przyszłe</td><td>15.06.2025</td><td>—</td><td><span class="btn l">Zakończ</span></td></tr></table>
+<span class="btn">+ Dodaj kemping do umowy</span>
+<div class="warn">⚠ Przeniesienie kempingu Pula do regionu Dalmacja doda go do zasięgu partnera (umowa „obejmuje przyszłe”). <b>Pokaż skutki</b></div></div>
+
+<div class="box"><h2>Wymiana kart <span class="logo">IstriaCharge API</span></h2>
+<div><span class="toggle"></span>Wymiana wynika z umowy: <b>tak</b></div>
+<div style="margin-top:8px">Ostatnia wysyłka kart sieci: 23.10 18:40 <span class="ok">✔ 1 240 kart</span></div>
+<div>Ostatni import kart partnera: 23.10 18:42 <span class="ok">✔ 3 812</span>, odrzucone 3</div>
+<span class="btn">Wyślij karty teraz</span> <span class="btn l">Pokaż odrzucone</span></div>
+
+<div class="box"><h2>Karty powitalne dla gości partnera</h2>
+<div>Pula Chorwacja: <b>37 / 500</b> wolnych</div>
+<label>Liczba kart do przydzielenia partnerowi</label><input value="50">
+<span class="btn">Przydziel z puli</span>
+<div class="muted" style="margin-top:6px">Przydzielone karty znikają z puli dla recepcji wszystkich kempingów w Chorwacji.</div></div>
+</div></div></body></html>

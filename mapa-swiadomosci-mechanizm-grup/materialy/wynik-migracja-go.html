@@ -1,0 +1,159 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inny cel: mechanizm grup w Go i PostgreSQL</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+</style></head><body><header class="hero"><div class="wrap"><p class="eyebrow">Rozpoznanie legacy · notatki · cel: migracja stosu</p><h1>Inny cel: mechanizm grup w Go i PostgreSQL</h1></div></header><main class="wrap"><article class="zadanie"><h2>Co to za przebieg</h2>
+<p>Ten sam mechanizm grup co w mapie świadomości, ale inny cel: <strong>czy da się go dziś zbudować od nowa w Go na PostgreSQL, z zachowaniem dzisiejszego zachowania</strong>. Tylko analiza: agent czytał kod, niczego nie budował ani nie uruchamiał.</p>
+<ul><li>Agent <code>general-purpose</code> w świeżym kontekście, Opus, z dostępem do CodeGraph.</li><li>52 wywołania narzędzi, ok. 231 tys. tokenów.</li><li>Każde ustalenie agent oznaczał: <strong>[Z]</strong> sprawdzone w kodzie, <strong>[W]</strong> wniosek. Ustaleń nikt nie sprawdzał osobno.</li><li>W prompcie agent dostał nazwy kopii SQL znalezionych w poprzednim przebiegu (bez indeksu), więc nie szukał ich sam.</li></ul>
+<div class="ramka kod"><span class="etykieta">💬 Prompt</span><button type="button" class="kopiuj">⧉ kopiuj</button><pre><code class="lang-text">TO JEST WYŁĄCZNIE ANALIZA. Nie twórz żadnych plików ani kodu. Nie instaluj niczego, nie uruchamiaj Dockera/Postgresa/Go.
+Tylko czytaj kod i pisz raport w odpowiedzi.
+
+CEL: ocenić, czy mechanizm grup (group) da się dziś zbudować od nowa w Go na PostgreSQL, z zachowaniem dzisiejszego
+zachowania. Każde ustalenie ma odpowiadać na pytanie „co to znaczy dla wersji w Go/Postgres”.
+
+Do ustalenia:
+1. KONTRAKT ZACHOWANIA: reguły do zachowania 1:1; przy każdej: gdzie żyje dziś (Java / SQL / oba) i jakim testem jest pokryta.
+2. GRANICA: konsumenci spoza pakietu group i czego potrzebują (query, komendy, FK); co da się wystawić jako API,
+   a co jest sklejone JOIN-em lub transakcją.
+3. CO PRZENOSI SIĘ ZA DARMO, A CO TRZEBA PRZEPISAĆ (1:1, na SQL, na Go).
+4. MODEL W POSTGRESIE: lista sąsiedztwa + WITH RECURSIVE vs ltree vs closure table; które niezmienniki przenieść do bazy.
+5. GO (tylko opisowo): pakiety, sterownik i biblioteki, transakcje, eventy i job walidacji.
+6. RYZYKA I PUŁAPKI MIGRACJI.
+7. STRATEGIA WERYFIKACJI równoważności.
+
+WYNIK: werdykt, kontrakt zachowania (tabela), mapa konsumentów i granica, model i szkic Go, ryzyka od najpoważniejszego,
+strategia weryfikacji, wycena S/M/L, otwarte pytania do właściciela biznesowego.
+Oznacz, co zweryfikowałeś w kodzie, a co jest wnioskiem.</code></pre></div>
+<h2>Werdykt: tak, pod warunkami</h2>
+<ul><li><strong>Rdzeń jest mały.</strong> Trzy drzewa, umowy akceptacji, atrybuty „najbliższy wygrywa” i reguły z nazw to ok. 2,5 tys. linii Javy i 6 zapytań SQL, które już są pod Postgresa. Każda reguła ma test, kluczowe mają testy „Java = SQL”.</li><li><strong>Warunek 1: wspólna baza na czas przejścia.</strong> Grupy są sklejone z resztą systemu kluczami obcymi z 12 tabel, a rekurencyjne zapytanie „poddrzewo” jest wklejone w ok. 25 zapytań innych modułów. Osobny serwis z własną bazą to inny, dużo większy projekt.</li><li><strong>Warunek 2: decyzje biznesu</strong> tam, gdzie dziś zachowanie jest niejednoznaczne albo przypadkowe: logika w nazwach i mieszana wielkość liter, cichy no-op przy zmianie trybu dostępu, dwie różne reguły „afiliant”. Bez tych decyzji równoważność 1:1 znaczy, że dziwactwa przechodzą razem z resztą.</li></ul>
+<h2>Kontrakt zachowania (17 reguł, skrót)</h2>
+<table><thead><tr><th>Reguła</th><th>Gdzie żyje dziś</th></tr></thead><tbody><tr><td>Trzy drzewa: wystawcy kart, kempingi i słupki, obsługa. Nazwa unikalna w typie, z rozróżnianiem wielkości liter.</td><td>baza + API</td></tr><tr><td>Dziecko ma typ rodzica.</td><td>tylko Java i walidator, baza nie pilnuje</td></tr><tr><td>Zakres zarządzania = poddrzewo razem z grupą, osobno w każdym drzewie.</td><td>SQL i Java (dwie kopie)</td></tr><tr><td>Umowy akceptacji: najbliższy przodek z listą umów zastępuje listy wyżej.</td><td>Java + 3 zapytania SQL</td></tr><tr><td>Umowy tylko od wystawcy do kempingu.</td><td>Java przy dodaniu; usunięcie typów nie sprawdza</td></tr><tr><td>Autoryzacja karty na słupku: karta domowa (suma z całej linii rodziców), QR, karta kempingowa.</td><td>Java + SQL</td></tr><tr><td>Atrybut: wygrywa najbliższy przodek, z wyjątkami (bliższe <code>false</code> przykrywa <code>true</code>, filtry „najbliższy pasujący”, fallbacki nazw).</td><td>Java, część w SQL</td></tr><tr><td>Rynek = najbliższy przodek, którego nazwa zaczyna się od <code>HR </code>, <code>IT </code>, <code>FR </code>, <code>ES </code>.</td><td>tylko Java; kopia listy rynków w CHECK-ach bazy</td></tr><tr><td>Afiliant = kemping o nazwie <code>AFFILIATE &lt;użytkownik&gt;</code>; tryb dostępu = prefiks nazwy rodzica.</td><td>Java</td></tr><tr><td>Zmiana trybu dostępu przepina grupę i ustawia flagi słupków w jednej transakcji. Brak grup rynku daje cichy no-op.</td><td>Java</td></tr><tr><td>Tryb „tylko karty domowe” działa przez topologię i dane (umowę), nie przez osobny warunek.</td><td>dane</td></tr><tr><td>Walidacja spójności: job nocny, mail. Zapisy wymagają uprawnienia CONFIG_EDIT i grupy w zakresie użytkownika.</td><td>Java + job</td></tr></tbody></table>
+<h2>Granica i konsumenci</h2>
+<ul><li>Pakiet <code>group</code> importuje 60 plików spoza pakietu i 20 DAO: autoryzacja kart, lokalne listy kart, taryfy, słupki, goście, użytkownicy, rekordy zużycia i raporty, zamówienia, wymiana z wydawcami, monitoring.</li><li><strong>Da się wystawić jako API:</strong> poddrzewo, linia rodziców, „czy zarządzalna”, rynek, tryb dostępu, „czy afiliant”, umowy w obie strony, „czy karta akceptowana na słupku”, najbliższy atrybut, grupy nazwane, komendy konsoli.</li><li><strong>Sklejone JOIN-em:</strong> raporty i listy z wklejonym poddrzewem, widoki i widoki zmaterializowane. Propozycja: jeden widok <code>group_closure(ancestor_id, descendant_id, depth)</code> jako kontrakt SQL modułu zamiast ok. 30 kopii zapytania.</li><li><strong>Sklejone transakcją:</strong> zmiana trybu dostępu (flagi słupków), adopcja karty powitalnej, tworzenie afilianta razem z zakresem użytkownika. W jednym procesie wystarczy wspólna transakcja; osobny serwis potrzebuje outboxa.</li></ul>
+<h2>Co przechodzi za darmo, a co trzeba przepisać</h2>
+<table><thead><tr><th>Element</th><th>Ocena</th></tr></thead><tbody><tr><td>SQL grup i schemat</td><td>1:1, już Postgres</td></tr><tr><td>Spacery Javy po leniwych relacjach (umowy, linia rodziców, poddrzewo)</td><td>na SQL; dziś to wzorzec N+1</td></tr><tr><td>Wybór „najbliższy z warunkiem”</td><td>czysta funkcja w Go albo jedno zapytanie <code>ORDER BY lvl LIMIT 1</code></td></tr><tr><td>Reguły z nazw (rynek, afiliant, tryb dostępu)</td><td>do Go znak w znak, razem z wielkością liter</td></tr><tr><td>Kolejność list</td><td>jawnie: dziś Java daje DFS po id, SQL daje BFS, a API pokazuje kolejność</td></tr><tr><td>Walidator</td><td>zapytania SQL zwracające naruszenia, część reguł do constraintów</td></tr><tr><td>Event zmiany trybu dostępu</td><td>nie przenosić 1:1: w produkcji nikt go nie słucha</td></tr><tr><td>Martwy kod</td><td>pominąć (kilkanaście metod i klas używanych tylko w testach albo nigdzie)</td></tr></tbody></table>
+<h2>Model w Postgresie i szkic Go</h2>
+<ul><li><strong>Zostaje lista sąsiedztwa + <code>WITH RECURSIVE</code></strong> jako jedyna prawda. Przy głębokości ok. 5 i rzadkich przeniesieniach ltree i closure table nic nie dają, a dokładają drugą prawdę.</li><li><strong>Niezmienniki do bazy</strong>, dziś pilnowane tylko w Javie: typ dziecka = typ rodzica (złożony klucz obcy), umowy tylko od wystawcy do kempingu (CHECK + złożone FK; łata też usuwanie umów bez sprawdzenia typów).</li><li><strong>Go:</strong> pakiety <code>domain</code> (typy, reguły z nazw, „najbliższy z warunkiem”), <code>store</code> (sqlc, zapytania prawie bez zmian), <code>app</code>, <code>attr</code>, <code>validate</code>, <code>httpapi</code> (te same kontrakty JSON). pgx zamiast ORM, bo ORM wprowadziłby z powrotem leniwe spacery. Transakcje jawnie, z blokadą wiersza grupy przy przeniesieniu; dziś blokad nie ma.</li></ul>
+<h2>Ryzyka, od najpoważniejszego</h2>
+<ol><li><strong>Sklejenie SQL-em i kluczami obcymi z innymi modułami.</strong> Blokuje osobny serwis bez przepisania konsumentów.</li><li><strong>Logika w nazwach, które konsola pozwala zmienić.</strong> Grupa <code>IT X</code> pod <code>HR SITES</code> zmienia rynek, a więc taryfy, całego poddrzewa. Go musi to odtworzyć dokładnie.</li><li><strong>Ta sama reguła w kilku kopiach.</strong> Umowy w Javie i 3 SQL-ach (dziś się zgadzają, różnią kolejnością), poddrzewo w SQL i Javie, linia rodziców w Javie i SQL, dwie różne reguły „afiliant”.</li><li><strong>Wielkość liter.</strong> Unikalność ją rozróżnia, część wyszukiwań nie. <code>toUpperCase()</code> w Javie zależy od locale JVM, <code>upper()</code> w Postgresie od collation.</li><li><strong>Kopie grup w innych tabelach.</strong> Rekord zużycia zapisuje grupy z chwili poboru, a widoczność liczy się z bieżącego drzewa: historia „przenosi się” razem z grupą.</li><li><strong>Ciche zachowania</strong> do ujęcia w testach albo odrzucenia przez biznes: no-op zmiany trybu, reset flag przy przełączeniu na ten sam tryb, połykanie wyjątków przy nazwach, „pierwsza pasująca grupa” użytkownika.</li></ol>
+<h2>Jak dowieść równoważności</h2>
+<ol><li><strong>Wyrocznia na wspólnej bazie:</strong> seed demo plus losowe lasy grup (umowy na kilku poziomach, mieszana wielkość liter, atrybuty na różnych poziomach).</li><li><strong>Pełne porównanie:</strong> Java eksportuje wyniki do JSON, Go je porównuje dla wszystkich kombinacji: (wystawca, kemping), (słupek, karta), grupa → rynek, poddrzewo, każdy atrybut, tryb dostępu; (użytkownik, grupa) → zarządzalna.</li><li><strong>Właściwości w Go:</strong> np. „umowy wstecz = odwrotność umów wprost” dla losowych drzew.</li><li><strong>Ruch równoległy:</strong> autoryzacje liczone też w Go, rozbieżności w logu; odczyty konsoli porównywane odpowiedź do odpowiedzi; zapisy przełączane na końcu.</li><li><strong>Testy jako scenariusze niezależne od języka</strong> (given drzewo, umowy, słupki, karty; when zapytanie; then wynik), z dwoma runnerami: JUnit i Go.</li></ol>
+<h2>Wycena</h2>
+<ul><li><strong>M:</strong> moduł Go na tej samej bazie, z pełnym kontraktem. Rdzeń drzewa i umów to S; koszt robią 11 atrybutów z własnymi wyjątkami, reguły z nazw, wyrocznia i ruch równoległy oraz constrainty z audytem danych produkcyjnych.</li><li><strong>L:</strong> osobny serwis z własną bazą: ok. 25 zapytań konsumentów, klucze obce z 12 tabel, kopie w widokach i rekordach zużycia, 4 miejsca sklejone transakcją.</li></ul>
+<h2>Pytania do biznesu</h2>
+<ol><li>Czy logika w nazwach zostaje, czy wprowadzamy jawne kolumny (rynek, rodzaj, tryb dostępu)?</li><li>Czy „hr sites” to to samo co „HR SITES”? Czy w produkcji są duplikaty różniące się wielkością liter?</li><li>Zmiana trybu dostępu: czy cichy no-op i reset flag są zamierzone? Kto ma reagować na zmianę trybu? Dziś nikt.</li><li>Czy widoczność historycznych rekordów zużycia ma iść za przeniesieniem grupy?</li><li>Która reguła „afiliant” jest poprawna?</li><li>Czy użytkownik może mieć kilka grup zakresu w jednym drzewie?</li><li>Czy konsola polega na kolejności list grup i umów?</li><li>Czy Go zastępuje cały backend, czy tylko grupy? Czy wspólna baza na czas przejścia jest do przyjęcia?</li></ol>
+<h2>Co z tego wynika</h2>
+<ul><li><strong>Cel zmienia to, co AI widzi.</strong> Przy migracji pyta, co przenieść i jak dowieść równoważności. Model bierze taki, jaki jest: logika w nazwach i dwie reguły „afiliant” wychodzą jako pytania do biznesu, a nie jako problem modelu.</li><li><strong>Ten sam mechanizm przy celu ewolucji</strong> (concept-explorer w mapie świadomości) daje pytania, decyzje i bolączki: czemu grupa służy i co jest tylko skutkiem wybranej struktury. Zestaw oba wyniki.</li><li><strong>Migracja bywa prostsza niż refaktor</strong> w działającym systemie: przenosi zachowanie bez rozplątywania modelu. Cena: dziwactwa przechodzą razem z resztą, chyba że biznes je rozstrzygnie.</li></ul></article></main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{
+r.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);
+r.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}
+document.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));
+try{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}
+document.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{
+const t=b.parentElement.querySelector('pre:not([hidden]),blockquote');navigator.clipboard.writeText(t.innerText.trim()).then(()=>{
+const s=b.textContent;b.textContent='✓ skopiowane';setTimeout(()=>b.textContent=s,1500)})}))</script></body></html>

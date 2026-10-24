@@ -1,0 +1,178 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Problem classifier</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+
+.blok{position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;box-shadow:var(--cien);margin-top:24px}
+.blok pre{margin:0;padding:22px 22px 26px;white-space:pre-wrap;font:15px/1.65 var(--font-body);color:var(--tekst)}
+.kopiuj{position:sticky;top:12px;float:right;margin:12px 12px 0 0;font:500 .85rem var(--font-mono);color:var(--tlo);background:var(--akcent);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+@media(max-width:600px){.blok pre{padding:16px}}
+
+.tabela{overflow-x:auto;margin:14px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;line-height:1.5}
+th,td{border:1px solid var(--ramka);padding:8px 10px;vertical-align:top;text-align:left}
+th{background:var(--panel);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+pre.diagram{overflow-x:auto;background:var(--kod);border:1px solid var(--ramka);border-radius:10px;padding:14px;font:.76rem/1.45 var(--font-mono)}
+figure{margin:18px 0}figure img{max-width:100%;border:1px solid var(--ramka);border-radius:10px}
+figcaption{font-size:.85rem;color:var(--przygaszony);margin-top:6px}
+main h2{margin-top:40px}
+.komponenty{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 8px}
+@media (max-width:760px){.komponenty{grid-template-columns:1fr 1fr}}
+.k{border:2px solid var(--ramka);border-radius:12px;padding:14px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.k b{font-size:1rem}.k span{font-size:.86rem;color:var(--przygaszony);line-height:1.45}
+.k.crud{border-color:#5b8fd1}.k.tp{border-color:#3fa38b}.k.int{border-color:#c79a3a}.k.rc{border-color:#d0603f}
+.podpis{font-size:.88rem;color:var(--przygaszony)}
+</style></head><body>
+<header class="hero"><div class="wrap"><p class="eyebrow">Moduł 8 Architekta Jutra · anatomia skilla</p>
+<h1>problem-classifier: jaka to klasa problemu</h1>
+<p class="intro">Nowy ficzer albo ekran rozbija na części według klasy modelowania. Najwięcej daje dekompozycja: to, co ekran zlepił, dostaje osobne, prostsze modele.</p></div></header>
+<main class="wrap">
+<h2>Anatomia skilla</h2>
+<p>Bierze wymaganie albo ekran i mówi, do której z czterech klas modelowania należy każda jego część. Klasa podpowiada klocki rozwiązania; zła klasa to przeinżynierowanie (warstwy bez wartości) albo niedoinżynierowanie (brak ochrony przy równoczesnym dostępie). Skill klasyfikuje i podpowiada, decyzja zostaje przy zespole.</p>
+<h3>Cztery klasy</h3>
+<ul><li><strong>CRUD (notatnik)</strong>: zapisz, odczytaj, zmień, usuń. Walidacji może być dużo, ale sprawdza tylko to, co przyszło w żądaniu. Klocek: kontroler i baza.</li><li><strong>Transformacja i prezentacja (T&amp;P)</strong>: tylko czyta i przekształca, nic nie zmienia. Widok, raport, licznik, kalendarz. Da się go skasować i odbudować. Klocek: funkcje, fasada, read model.</li><li><strong>Integracja</strong>: kilka modułów albo systemów, kontrakty, kolejność, częściowe porażki. Klocek: proces (saga) albo adapter.</li><li><strong>Rywalizacja o zasób (RC)</strong>: odpowiedź na „czy mogę zrobić X?” zależy od danych, które ktoś inny zmienia w tej samej chwili. Sprawdzenie i zapis muszą być atomowe. Klocek: agregat.</li></ul>
+<h3>Ekran zamiast opisu</h3>
+<p>Na makiecie skill czyta <strong>każdy element osobno</strong>, bo jeden ekran prawie zawsze łączy kilka klas:</p>
+<ul><li>formularz z „Zapisz”, zawsze aktywnym → CRUD;</li><li>tabela, liczby, eksport, podgląd → T&amp;P;</li><li>licznik „37 / 500”, kolor wolne/zajęte, przyciski „Zarezerwuj”, „Przydziel” → RC;</li><li>przycisk wyszarzony zależnie od stanu, kłódka „ktoś edytuje” → kandydat na RC, do sprawdzenia;</li><li>„Wyślij do…”, logo zewnętrznego systemu, status synchronizacji → Integracja.</li></ul>
+<p>Pytanie przy każdym „Zapisz”: co się zmienia dla innych użytkowników w chwili kliknięcia? Nic → CRUD; blokuje albo zmienia im dostępność → RC.</p>
+<h3>Heurystyki</h3>
+<ol><li><strong>Test zmienności.</strong> Czy dane, które sprawdzam, zanim pozwolę na operację, może ktoś zmienić w tej samej chwili? Tak → RC i agregat. Nie, wszystko przyszło w żądaniu → CRUD z walidacją.</li><li><strong>„Tylko jeden…” to sygnał, nie dowód.</strong> „Tylko jeden właściciel” zmieniany przez jednego administratora po kolei to ograniczenie w bazie, nie agregat.</li><li><strong>Grupowanie to prezentacja.</strong> Etykieta, kategoria, folder, które nie zmieniają, co wolno z obiektem → napis na obiekcie, nie osobna encja.</li><li><strong>Polityka liczona osobno od limitu.</strong> „Ile wolno” liczy funkcja (T&amp;P), „czy już przekroczono” pilnuje agregat (RC).</li><li><strong>Pytania na przykładzie z ekranu.</strong> Skill pyta o konkretny element makiety i daje odpowiedzi do wyboru, każdą z tym, co z niej wynika.</li></ol>
+<h3>Wynik</h3>
+<p>Klasa z pewnością, ścieżka dedukcji (pytanie → odpowiedź → co z tego wynika), czego nie robić, sugerowane podejście, otwarte pytania. Przy kilku klasach: <strong>dekompozycja</strong> (komponent | klasa | uzasadnienie) i diagram powiązań. Przy RC wskazuje następny krok: zaprojektować jednostkę spójności.</p>
+<h3>Ograniczenia</h3>
+<ul><li>Widzi tylko to, co jest na ekranie i w odpowiedziach. Reguły, których makieta nie pokazuje, nie trafią do podziału.</li><li>Klasa części zależy od odpowiedzi człowieka: ta sama kłódka „edytuje teraz” to raz RC, raz tylko UX.</li></ul>
+<h2>Przebieg: nowy ekran „Karta partnera”</h2>
+<p>Makieta nowego ficzera w konsoli sieci. Prompt: <code>/problem-classifier</code>, makieta i jedno zdanie o tym, kim jest partner. Jedna runda, 4 pytania.</p>
+<figure><img src="ekran-karta-partnera.png" alt="Makieta ekranu Karta partnera"><figcaption>Makieta: dane partnera, liczby, zasięg kart z umów, wymiana kart przez API partnera, przydział kart powitalnych z puli.</figcaption></figure>
+<h3>Klasyfikacja: złożony ekran (CRUD + T&amp;P + Integracja + Resource Contention)</h3>
+<p><strong>Pewność</strong>: wysoka. Każdy panel makiety ma swoje mocne sygnały, a Twoje odpowiedzi rozstrzygnęły wszystkie miejsca, gdzie mogło być inaczej.</p>
+<p>Na tym ekranie są cztery klasy problemów. Tylko <strong>jeden</strong> element to prawdziwa rywalizacja o zasób: pula kart powitalnych. Panel „Gdzie działają karty” wygląda najgroźniej (kłódka, „edytuje teraz”, wyszarzone przyciski), a mimo to agregatu nie potrzebuje.</p>
+<h3>Ścieżka dedukcji</h3>
+<div class="tabela"><table><thead><tr><th>#</th><th>Pytanie</th><th>Odpowiedź</th><th>Co z tego wynika</th></tr></thead><tbody><tr><td>1</td><td>Czy „Zapisz” w Danych partnera zmienia coś, co widzą lub mogą zrobić inni?</td><td>wynika z makiety: nazwa, kontakt, e-mail, notatki</td><td>Pola tylko opisowe, więc <strong>CRUD</strong></td></tr><tr><td>2</td><td>Czy liczby (karty, ładowania, kWh), eksport CSV i „Podgląd na dzień…” cokolwiek zapisują?</td><td>wynika z makiety: tylko odczyt</td><td>Wszystko da się odtworzyć z ładowań i kart, więc <strong>T&amp;P</strong></td></tr><tr><td>3</td><td>Pula Chorwacja 37/500: czy recepcje i operator biorą z niej równocześnie, i co przy przydziale 50 przy 37 wolnych?</td><td><strong>Wspólna pula, odmowa</strong></td><td>Sprawdzenie „czy starczy” i zdjęcie kart z puli muszą być atomowe, więc <strong>RC</strong></td></tr><tr><td>4</td><td>Co by się zepsuło, gdyby dwóch operatorów naraz edytowało umowy partnera?</td><td><strong>Nic, to tylko UX</strong></td><td>Kłódka nie chroni żadnej reguły. Umowy to <strong>CRUD</strong> z walidacją</td></tr><tr><td>5</td><td>Pula trafia do Dalmacji. Jak ma się zmienić zasięg?</td><td><strong>Automatycznie, od razu</strong></td><td>Zasięg jest wyliczany z reguł, nie zapisywany. Baner i „Pokaż skutki” to <strong>T&amp;P</strong>. Przeniesienie kempingu niczego nie blokuje, więc nie ma RC między modułami</td></tr><tr><td>6</td><td>Co z ładowaniem, gdy wymiana z API się nie uda albo karta zostanie odrzucona?</td><td><strong>Retry, nic nie blokuje</strong></td><td><strong>Integracja</strong> bez sagi. Obowiązuje ostatnia znana lista, odrzucone karty są tylko do wglądu</td></tr></tbody></table></div>
+<h3>Dlaczego tak</h3>
+<ul><li><strong>„Pula Chorwacja: 37 / 500 wolnych”</strong> i „Przydzielone karty znikają z puli dla recepcji wszystkich kempingów” to licznik współdzielony przez wielu aktorów naraz. To klasyczne RC.</li><li><strong>„Wymiana kart · ISTRIACHARGE API”, „Ostatnia wysyłka… / Ostatni import…, odrzucone 3”</strong> to system zewnętrzny ze statusem synchronizacji, czyli Integracja.</li><li><strong>„Umowy tego partnera edytuje teraz: a.horvat”</strong> wygląda na RC, ale żadna reguła za tym nie stoi (odpowiedź 4). To pułapka.</li><li><strong>Wyszarzone „Zakończ” przy Rovinju (źródło: umowa organizacji EuroCamp Cards)</strong>: przycisk nie jest zablokowany przez stan, tylko przez <strong>własność</strong>. Ten wiersz należy do umowy organizacji nadrzędnej, więc edytuje się go tam. Wystarczy <code>canEdit()</code> liczone ze źródła, nie maszyna stanów.</li><li><strong>„region Dalmacja, obejmuje przyszłe”</strong> to reguła zasięgu, a nie lista kempingów. Efektywny zasięg jest wyliczany, więc to T&amp;P.</li></ul>
+<h3>Czego NIE robić</h3>
+<ul><li><strong>Nie budować agregatu „Umowa partnera” / „Zasięg”</strong> tylko dlatego, że UI ma kłódkę. Nie ma niezmiennika, więc agregat nie miałby czego pilnować. Jeśli chcecie uniknąć nadpisywania się nawzajem, wystarczy wersja wiersza (optimistic) w CRUD-zie. Pesymistyczna blokada „edytuje teraz” jest opcjonalna.</li><li><strong>Nie zapisywać efektywnego zasięgu jako listy kempingów.</strong> Przy „obejmuje przyszłe” taka kopia zestarzeje się przy pierwszym przeniesieniu kempingu.</li><li><strong>Nie wciągać puli kart do agregatu partnera.</strong> Pula należy do kraju (Chorwacja) i korzystają z niej recepcje wszystkich kempingów. Partner jest tylko jednym z biorców.</li><li><strong>Nie robić sagi dla wymiany kart.</strong> Nic nie musi się udać razem z czymś innym.</li></ul>
+<h3>Sugerowane podejście</h3>
+<ol><li><strong>Pula kart powitalnych</strong>: agregat <code>PulaKartPowitalnych(kraj)</code>, z metodą <code>przydziel(partnerId, n)</code> dla operatora i <code>wydaj(kempingId)</code> dla recepcji. Niezmiennik: <code>wolne ≥ 0</code>. Przy braku kart odmowa, np. <code>PrzydziałOdrzucony { żądane: 50, wolne: 37 }</code>. Do tego optimistic locking. W UI warto od razu ostrzec, gdy pole przekracza stan, ale rozstrzyga agregat.</li><li><strong>Dane partnera i umowy</strong>: zwykłe kontrolery na bazie. Walidacja dat od/do i ewentualnie wersja wiersza. „Zakończ” jest aktywne tylko dla umów, których źródłem jest ten partner.</li><li><strong>Zasięg, liczby, podgląd na dzień, „Pokaż skutki”</strong>: czyste funkcje. <code>zasięg(partner, dzień) = własne umowy ∪ umowy organizacji ∪ reguły regionów(przynależność kempingów na dzień)</code>. „Pokaż skutki” to ta sama funkcja wywołana na hipotetycznej przynależności. Liczby budujecie fasadą lub read modelem z ładowań. Wymiana kart (punkt 4) korzysta z tej samej funkcji przy decyzji, czy karta działa na danym kempingu.</li><li><strong>Wymiana kart</strong>: adapter (ACL) do API IstriaCharge, z idempotentną wysyłką całego snapshotu. Wtedy „Wyślij teraz” i job z harmonogramu nie wchodzą sobie w drogę. Import zapisuje ostatnią znaną listę kart partnera, a odrzucone karty trafiają do raportu.</li></ol>
+<h3>Otwarte pytania przed modelowaniem</h3>
+<ul><li><strong>Pula</strong>: czy przydział partnerowi to przesunięcie kart do jego podpuli (recepcja wydaje potem z niej), czy tylko zmniejszenie licznika? To decyduje, czy jest jeden agregat, czy dwa.</li><li><strong>„Podgląd na dzień…”</strong>: czy ma pokazywać stan wstecz, czyli zasięg i przynależność do regionu na wybrany dzień? Jeśli tak, przynależność kempingów do regionów musi mieć historię z datami.</li><li><strong>„Wymiana wynika z umowy: tak”</strong>: przełącznik jest tylko do odczytu, a jego wartość wynika z umowy. Która umowa o nim decyduje, skoro partner ma kilka?</li><li><strong>Równoległe „Wyślij teraz” i job</strong>: czy wysyłka to zawsze pełny snapshot (wtedy jest idempotentna), czy przyrost (wtedy trzeba deduplikacji)?</li></ul>
+<p>---</p>
+<h3>Proponowany podział</h3>
+<div class="tabela"><table><thead><tr><th>Komponent</th><th>Klasa</th><th>Uzasadnienie</th></tr></thead><tbody><tr><td>Dane partnera</td><td>CRUD</td><td>Pola opisowe, nic od nich nie zależy</td></tr><tr><td>Umowy partnera (dodaj / zakończ kemping)</td><td>CRUD + <code>canEdit()</code> liczone ze źródła</td><td>Brak niezmiennika (odp. 4), blokada to tylko UX</td></tr><tr><td>Efektywny zasięg + „Pokaż skutki” + baner</td><td>T&amp;P (funkcja reguł)</td><td>Wyliczany z umów i regionów, liczony od razu (odp. 5)</td></tr><tr><td>Liczby, eksport CSV, podgląd na dzień</td><td>T&amp;P</td><td>Projekcja ładowań i kart</td></tr><tr><td>Wymiana kart z IstriaCharge</td><td>Integracja (ACL + retry)</td><td>System zewnętrzny, porażka niczego nie blokuje (odp. 6)</td></tr><tr><td>Pula kart powitalnych</td><td><strong>Resource Contention</strong></td><td>Wspólny licznik, równoczesne pobrania, odmowa (odp. 3)</td></tr></tbody></table></div>
+<h3>Komponenty ekranu</h3>
+<div class="komponenty">
+<div class="k crud"><b>CRUD</b><span>formularze i zapis: dane opisowe, wpisy bez reguły chroniącej</span></div>
+<div class="k tp"><b>Transformacja i prezentacja</b><span>widoki i liczby wyliczane z innych danych; da się je skasować i odbudować</span></div>
+<div class="k int"><b>Integracja</b><span>wymiana z systemem zewnętrznym: adapter, ponawianie</span></div>
+<div class="k rc"><b>Walka o zasób</b><span>jedno miejsce, gdzie „czy mogę?” zależy od danych zmienianych równocześnie: agregat, sprawdzenie i zapis atomowo</span></div>
+</div>
+<p class="podpis">Jeden ekran, cztery komponenty. Każdy dostaje osobny, prostszy model; agregat jest tylko tam, gdzie jest walka o zasób.</p>
+
+</main></body></html>

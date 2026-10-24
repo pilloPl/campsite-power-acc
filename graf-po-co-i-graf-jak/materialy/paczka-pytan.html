@@ -1,0 +1,233 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Paczka pytań w języku biznesu</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+
+.blok{position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;box-shadow:var(--cien);margin-top:24px}
+.blok pre{margin:0;padding:22px 22px 26px;white-space:pre-wrap;font:15px/1.65 var(--font-body);color:var(--tekst)}
+.kopiuj{position:sticky;top:12px;float:right;margin:12px 12px 0 0;font:500 .85rem var(--font-mono);color:var(--tlo);background:var(--akcent);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+@media(max-width:600px){.blok pre{padding:16px}}
+
+.kopiuj-duzy{display:inline-flex;align-items:center;gap:10px;margin:18px 0;padding:12px 20px;border-radius:999px;border:0;
+  background:var(--akcent);color:#fff;font:600 1rem var(--font-body);cursor:pointer;box-shadow:var(--cien)}
+.kopiuj-duzy:hover{filter:brightness(1.07)}
+.tresc li{margin:6px 0}.tresc code{font-size:.82em;word-break:break-word}
+.rozmiar{font-family:var(--font-mono);font-size:.8rem;color:var(--przygaszony)}
+</style></head><body>
+<header class="hero"><div class="wrap"><p class="eyebrow">Wynik: cel–struktura</p>
+<h1>Paczka pytań w języku biznesu</h1>
+<p class="intro">Pytania jednej paczki opisane bez nazw z kodu. „Kopiuj prompt skanera” daje gotowy prompt do skanera archetypów: ten tekst i kontekst biznesowy. Skan NIE WIDZI kodu.</p></div></header>
+<main class="wrap">
+<p><button type="button" class="kopiuj-duzy">⧉ kopiuj prompt skanera</button> <span class="rozmiar">ok. 14 KB tekstu</span></p>
+<div class="tresc"><h2>Czy ta karta dostanie prąd na tym kempingu?</h2>
+<p>Co się zmienia: w gnieździe płynie prąd albo nie. Kto zauważy: gość przy słupku, personel po odmowie.</p>
+<h3>Pytanie 1: Czy wydawca karty gościa ma z siecią umowę, że jego karty działają na kempingu, na którym stoi ten słupek?</h3>
+<p><strong>Podsumowanie:</strong> Naprawdę pyta tylko słupek, gdy gość przykłada kartę: przy autoryzacji, starcie dostawy, zdalnym starcie z konsoli, próbie na sucho operatora i przy zatrzymaniu cudzą kartą. Ekran umów wydawcy nie pyta o konkretny słupek, tylko pokazuje operatorowi, na których kempingach działają karty wydawcy. Trzy wejścia po stronie kempingu i kodu słupka istnieją, ale w działaniu sieci nikt ich nie używa.</p>
+<ul><li>Operator sieci otwiera umowy wydawcy kart, dodaje albo usuwa umowę z kempingiem i chce zobaczyć, na których kempingach karty tego wydawcy teraz działają i czy te umowy są jego własne, czy przejęte od wydawcy wyżej. Nie pyta o jeden słupek, pyta o cały zasięg umów wydawcy.</li><li>Na których kempingach działają karty tego wydawcy, wliczając kempingi pod kempingami z umowy — to wspólna odpowiedź, z której korzysta słupek przy karcie gościa i ekran umów operatora; samo nie ma swojej sytuacji.</li><li>Gość przykłada kartę do gniazda słupka (albo operator z konsoli uruchamia prąd lub sprawdza kartę na gnieździe): czy wydawca tej karty ma z siecią umowę obejmującą kemping, na którym stoi słupek? Jeśli nie, prąd nie rusza.</li></ul>
+<h3>Pytanie 2: Karty których wydawców przyjmuje kemping tego słupka?</h3>
+<p><strong>Podsumowanie:</strong> Jedno pytanie zadawane, gdy słupek dostaje pełną lokalną listę kart (z konsoli albo przy rozsyłce do wszystkich słupków) i gdy personel ją tylko podgląda. Odpowiedź to wydawcy, których umowa obejmuje kemping słupka lub coś wyżej w drzewie.</p>
+<ul><li>Słupek dostaje pełną listę kart, które rozpozna bez sieci (przy rozsyłce do słupków albo na żądanie z konsoli), albo personel ją podgląda: karty których wydawców przyjmuje kemping tego słupka? Karty innych wydawców nie trafiają na listę, więc bez łączności słupek ich nie wpuści.</li></ul>
+<h3>Pytanie 3: Na których kempingach mogą ładować karty tego wydawcy (tego gościa) i czy to umowa wydawcy, czy odziedziczona po organizacji nadrzędnej?</h3>
+<p><strong>Podsumowanie:</strong> Jedyny żywy przypadek to ekran umów w konsoli: operator sprawdza, na których kempingach działają karty wydawcy i czy to jego własna umowa, czy przejęta po organizacji nadrzędnej (także zaraz po dodaniu lub zdjęciu umowy). Wersja „na których słupkach w moim zakresie gość może ładować” istnieje w kodzie, ale nikt jej nie woła.</p>
+<ul><li>Operator w konsoli otwiera umowy wydawcy: na których kempingach goście z kartami tego wydawcy mogą ładować i czy to umowa samego wydawcy, czy przejęta po organizacji nadrzędnej? Wydawca spoza jego zakresu albo coś, co nie jest wydawcą: odmowa.</li><li>Operator dodał albo zdjął umowę wydawcy z kempingiem (albo tylko ją podgląda): na których kempingach karty tego wydawcy działają teraz i czy wydawca ma już własną umowę, czy nadal korzysta z umowy organizacji nadrzędnej?</li></ul>
+<h3>Pytanie 4: Czy to karta personelu, której wolno ładować na tym kempingu bez ograniczeń (i dla jakiego obszaru ją wydano)?</h3>
+<p><strong>Podsumowanie:</strong> Pytanie zadaje słupek przy każdym przyłożeniu karty (start ładowania, zatrzymanie, zdalny start, sprawdzenie przez personel): karta personelu kempingu lub jego regionu ładuje od razu, bez reszty sprawdzeń. Odpowiedź z góry dostaje też słupek w swojej lokalnej liście kart. Kto ma tę odpowiedź, ustalają dwa miejsca: operator kempingu, który wydaje kartę personelu, i przejęcie karty powitalnej gościa, po którym ta karta staje się kartą personelu.</p>
+<ul><li>Gość albo pracownik przykłada kartę do gniazda słupka i chce ładować: czy to karta personelu tego kempingu lub jego regionu? Jeśli tak, prąd rusza od razu, nawet przy zajętym gnieździe i wyczerpanej mocy sekcji. Jeśli nie, karta przechodzi zwykłe sprawdzenia gościa.</li><li>Operator kempingu zakłada lub zmienia kartę personelu w konsoli. Nie pyta, czy karta jest kartą personelu, tylko ustala odpowiedź: od teraz ta karta ładuje bez ograniczeń na całym jego kempingu (lub przestaje, gdy ją wyłączy). Słupki kempingu mają się o tym dowiedzieć.</li><li>Słupek dostaje z góry listę kart, które może przyjąć bez łączności z siecią: które karty personelu kempingu i jego regionu ma znać? Karta personelu, której nie ma na liście, nie zadziała przy braku łączności. Gdy kart personelu jest więcej niż miejsca, karty gości wypadają z listy.</li><li>Gość z kartą powitalną sieci został odrzucony na słupku kempingu partnerskiego, który wpuszcza tylko karty personelu. Czy kemping zgadza się przejąć tę kartę? Jeśli tak, karta gościa staje się kartą personelu kempingu i odtąd ładuje tam bez ograniczeń. Tu nikt nie pyta, czy to karta personelu, tylko się ją nią robi.</li><li>Przy każdym sprawdzeniu karty na słupku (start ładowania, zatrzymanie inną kartą, zdalny start z konsoli, próbne sprawdzenie przez personel): czy to karta personelu tego kempingu lub jego regionu? Jeśli tak, jest przyjęta od razu, bez sprawdzania, czy kemping przyjmuje karty jej wydawcy i czy karta jest ważna.</li></ul>
+<h3>Pytanie 5: Czy kemping chce przejąć kartę powitalną, którą gość zostawił, jako własną kartę obsługi — i czy to w ogóle karta powitalna z puli tego kraju?</h3>
+<p><strong>Podsumowanie:</strong> Pytanie zadaje naprawdę tylko jedno miejsce: zaraz po tym, jak słupek odmówił karcie, bo kemping jej nie przyjmuje, system w tle sprawdza, czy to karta powitalna z puli kraju słupka i czy kemping afiliowany (tylko karty domowe, z włączonym przejmowaniem) ją przejmie. Ekran grupy pokazuje operatorowi tylko ustawienie „przejmowanie dozwolone”, a recepcja korzysta z tej samej puli w innym celu: sprawdza, czy kartę z puli dowolnego kraju można wydać gościowi.</p>
+<ul><li>Gość przykłada kartę do słupka i dostaje odmowę, bo kemping tej karty nie przyjmuje: czy warto w tle sprawdzić, czy kemping przejmie ją jako własną kartę obsługi? Inne odmowy (np. karta nieważna, gniazdo zajęte) niczego nie uruchamiają.</li><li>Operator ogląda ustawienia grupy (kempingu, regionu), którą zarządza: czy przejmowanie porzuconych kart powitalnych jest tu włączone (wprost albo odziedziczone z wyższego poziomu)? Widzi tylko ustawienie, nie to, czy przejęcie by się udało (kraj karty, tryb tylko karty domowe, afiliacja).</li><li>Słupek właśnie odmówił karcie, bo kemping jej nie przyjmuje: czy to karta powitalna z puli kraju tego kempingu, a kemping afiliowany przyjmuje tylko własne karty i pozwala przejmować porzucone karty powitalne? Jeśli tak, karta staje się kartą obsługi właściciela kempingu i znika z puli; jeśli nie, nic się nie dzieje.</li></ul>
+<h3>Pytanie 6: Czy ten niezależny kemping jest otwarty na karty sieci, czy przyjmuje tylko własne karty obsługi?</h3>
+<p><strong>Podsumowanie:</strong> Tylko jedno miejsce naprawdę pyta, czy niezależny kemping przyjmuje wyłącznie własne karty: odrzucenie karty powitalnej gościa na słupku, które może zamienić ją w kartę obsługi kempingu. Reszta to ekran atrybutów kempingu (pokazanie odpowiedzi) i dwa miejsca, które odpowiedź ustawiają (operator w konsoli i instalator przy uruchamianiu słupków) — przestawienie trybu przenosi kemping w drzewie i zmienia widoczność słupków w aplikacji.</p>
+<ul><li>Instalator kończy uruchamianie słupków na niezależnym kempingu i ustawia, czy kemping ma być otwarty na karty sieci, czy przyjmować tylko własne karty obsługi. Nie pyta o odpowiedź, tylko ją wyznacza; pyta jedynie, czy kemping ma już jakikolwiek tryb. Jeśli nie, uruchomienie kończy się sukcesem, a tryb po cichu się nie zmienia.</li><li>Operator w konsoli przestawia niezależny kemping między „otwarty na karty sieci” a „tylko własne karty obsługi”. Nie pyta o odpowiedź, tylko ją zmienia; pyta jedynie, czy to w ogóle kemping niezależny z ustalonym trybem. Jeśli nie, dostaje odmowę.</li><li>Operator (albo wsparcie) ogląda atrybuty kempingu w konsoli: czy ten niezależny kemping jest otwarty na karty sieci, czy przyjmuje tylko własne karty obsługi? Jeśli tryb nie daje się ustalić, pole jest puste i nie wiadomo dlaczego.</li><li>Gość przykłada do słupka kartę powitalną z puli rynku, a kemping ją odrzucił: czy ten niezależny kemping przyjmuje tylko własne karty obsługi (i zgodził się przygarniać karty powitalne)? Jeśli tak, karta staje się kartą obsługi tego kempingu i znika z puli powitalnej; jeśli kemping jest otwarty na karty sieci, karta zostaje odrzucona i nic się nie dzieje.</li></ul>
+<h3>Pytanie 7: Czy ten słupek ma pamiętać listę kart, które może przyjąć bez pytania centrali, i jakie karty ma na niej trzymać (karty obsługi, karty gości)?</h3>
+<p><strong>Podsumowanie:</strong> Pytanie pada w trzech sytuacjach: operator podgląda w konsoli, co słupek dostanie; słupek dostaje pełną listę (ręcznie z konsoli albo przy rozsyłce do wszystkich); zmiana karty obsługi idzie na słupki, które ją trzymają. Za każdym razem decyduje najbliższe ustawienie wyżej w drzewie sieci, a przy kartach obsługi drzewo karty, nie słupka.</p>
+<ul><li>Operator w konsoli podgląda słupek: jaką listę kart słupek dostałby teraz, żeby wpuszczać bez pytania centrali? Gdy w sieci nad słupkiem nie włączono listy, widzi pustą.</li><li>Słupek dostaje pełną listę kart (operator wysyła ją z konsoli albo lista idzie na wszystkie słupki naraz): które karty obsługi i które karty gości akceptowanych wydawców słupek ma pamiętać, skoro mieści tylko tyle, ile pozwala jego typ? Karty gości wypadają pierwsze.</li><li>Zmieniła się karta osoby z obsługi: które słupki trzymają ją na swojej liście i muszą dostać zmianę? Decyduje ustawienie listy nad kartą (jej miejscem w sieci), a nie nad słupkiem; gdy nad kartą nie włączono kart obsługi na listach, żaden słupek jej nie dostaje.</li><li>Czy w tym miejscu sieci słupki mają pamiętać listę kart i co ma na niej być? Rozstrzyga najbliższe ustawienie wyżej w drzewie: przy podglądzie i wysyłce listy na słupek, przy zmianie karty obsługi i na ekranie ustawień w konsoli.</li></ul>
+<h3>Pytanie 8: Czy karty tego wydawcy wolno wymieniać z tym partnerem — wysyłać mu je i przyjmować od niego?</h3>
+<p><strong>Podsumowanie:</strong> Dwa przypadki w dwóch kierunkach: przy wysyłce listy kart sieci do partnera decyzja zapada osobno dla każdej karty (karta pominięta, ale i tak uznana za wysłaną), a przy przyjmowaniu kart od partnera — dla całego wydawcy partnera (odrzucona każda linia). W obu rozstrzyga najbliższe ustawienie w górę drzewa wydawców.</p>
+<ul><li>Przy wymianie z partnerami (cyklicznie albo na żądanie operatora) sieć wysyła partnerowi listę swoich kart: czy kartę tego gościa wolno pokazać temu partnerowi? Jeśli nie, partner jej nie dostaje i jego słupki jej nie znają.</li><li>Partner przysyła zmiany w swoich kartach: czy od tego wydawcy w ogóle przyjmujemy karty? Jeśli nie, żadna jego karta nie zostaje dodana, zmieniona ani usunięta, więc jego goście nie ładują na nowych kartach.</li><li>Wspólna reguła obu kierunków wymiany: dla wydawcy karty sprawdza się ustawienie na nim samym, a jak go nie ma — na najbliższym wyżej w drzewie wydawców; ono mówi, czy z tym partnerem wymieniamy. Sama nie zna przypadku — ten opisują wysyłka i przyjmowanie kart.</li></ul>
+<h3>Pytanie 9: Czy to karta sieci, czy karta wydana przez partnera — i czy przez tego partnera, który ją teraz przysyła?</h3>
+<p><strong>Podsumowanie:</strong> Jedno pytanie zadawane wyłącznie przy nocnej (albo ręcznie uruchomionej przez administratora) wymianie list kart z partnerem-wydawcą: zanim karta z listy partnera zostanie przyjęta, zmieniona albo wyłączona, system sprawdza, czy to nie karta sieci i czy należy do tego wydawcy, który ją przysyła. Wszystkie pozostałe wiersze to kroki tej samej odpowiedzi, bez osobnych pytających.</p>
+<ul><li>Co noc, albo na żądanie administratora, partner-wydawca przysyła zmiany swojej listy kart: dla każdej karty — czy to nie karta sieci i czy należy do tego partnera, a nie do innego wydawcy? Jeśli nie, ta jedna karta zostaje odrzucona, a pozostałe karty z listy przechodzą dalej.</li><li>Partner przysyła dodanie, zmianę albo wyłączenie karty, którą już znamy jako kartę wydawcy: czy to jego karta, czy innego wydawcy? Jeśli innego, zmiana jest odrzucona i karta zostaje u dotychczasowego wydawcy.</li><li>Partner przysyła kartę, którą sieć już ma: czy to karta wydana przez sieć? Jeśli tak, partner nigdy jej nie przejmie, niezależnie od tego, co chce z nią zrobić.</li><li>Partner przysyła kartę: czy znamy ją już jako kartę jakiegoś wydawcy, wtedy dalej sprawdzamy, czy jego,, czy jest dla nas nowa? Przy dodaniu nowa karta zostaje założona dla partnera; przy zmianie albo wyłączeniu nieznana karta jest odrzucona jako nieznaleziona.</li><li>Które karty są kartami wydanymi przez sieć? Potrzebne tylko po to, by przy wymianie z partnerem odróżnić karty sieci od kart wydawców.</li></ul>
+<h3>Pytanie 10: Jak jest zorganizowana sieć, za którą odpowiadam: które kempingi należą do których regionów i rynków (a wydawcy i zespoły — do kogo)?</h3>
+<p><strong>Podsumowanie:</strong> Jedno pytanie, jeden przypadek: personel w konsoli (zakładka organizacji) ogląda drzewo sieci w swoim zakresie — kempingi, wydawców albo zespoły. Wszyscy wołający to kolejne piętra tej samej ścieżki pokazującej drzewo; nikt nie podejmuje na nim decyzji.</p>
+<ul><li>Osoba z personelu otwiera w konsoli zakładkę organizacji: jak wygląda sieć w jej zakresie — kempingi w regionach i rynkach (albo wydawcy, albo zespoły)? Widzi drzewo od swojego miejsca w dół.</li></ul></div>
+<p><button type="button" class="kopiuj-duzy">⧉ kopiuj prompt skanera</button> <span class="rozmiar">ok. 14 KB tekstu</span></p>
+<script type="text/plain" id="kopia">/archetype-storyteller Skan. Kontekst systemu: `analiza/business-context.md` z zadania „Od czego zacząć z legacy” (jeśli go nie masz, pomiń). Wejście to PROBLEM w języku biznesu. Zapisz wynik do `analiza/archetypy.md`.
+
+# PROBLEM
+
+Paczka pytań: Czy ta karta dostanie prąd na tym kempingu?
+Co się zmienia: w gnieździe płynie prąd albo nie. Kto zauważy: gość przy słupku, personel po odmowie.
+
+Pytanie 1: Czy wydawca karty gościa ma z siecią umowę, że jego karty działają na kempingu, na którym stoi ten słupek?
+Podsumowanie: Naprawdę pyta tylko słupek, gdy gość przykłada kartę: przy autoryzacji, starcie dostawy, zdalnym starcie z konsoli, próbie na sucho operatora i przy zatrzymaniu cudzą kartą. Ekran umów wydawcy nie pyta o konkretny słupek, tylko pokazuje operatorowi, na których kempingach działają karty wydawcy. Trzy wejścia po stronie kempingu i kodu słupka istnieją, ale w działaniu sieci nikt ich nie używa.
+- Operator sieci otwiera umowy wydawcy kart, dodaje albo usuwa umowę z kempingiem i chce zobaczyć, na których kempingach karty tego wydawcy teraz działają i czy te umowy są jego własne, czy przejęte od wydawcy wyżej. Nie pyta o jeden słupek, pyta o cały zasięg umów wydawcy.
+- Na których kempingach działają karty tego wydawcy, wliczając kempingi pod kempingami z umowy — to wspólna odpowiedź, z której korzysta słupek przy karcie gościa i ekran umów operatora; samo nie ma swojej sytuacji.
+- Gość przykłada kartę do gniazda słupka (albo operator z konsoli uruchamia prąd lub sprawdza kartę na gnieździe): czy wydawca tej karty ma z siecią umowę obejmującą kemping, na którym stoi słupek? Jeśli nie, prąd nie rusza.
+
+Pytanie 2: Karty których wydawców przyjmuje kemping tego słupka?
+Podsumowanie: Jedno pytanie zadawane, gdy słupek dostaje pełną lokalną listę kart (z konsoli albo przy rozsyłce do wszystkich słupków) i gdy personel ją tylko podgląda. Odpowiedź to wydawcy, których umowa obejmuje kemping słupka lub coś wyżej w drzewie.
+- Słupek dostaje pełną listę kart, które rozpozna bez sieci (przy rozsyłce do słupków albo na żądanie z konsoli), albo personel ją podgląda: karty których wydawców przyjmuje kemping tego słupka? Karty innych wydawców nie trafiają na listę, więc bez łączności słupek ich nie wpuści.
+
+Pytanie 3: Na których kempingach mogą ładować karty tego wydawcy (tego gościa) i czy to umowa wydawcy, czy odziedziczona po organizacji nadrzędnej?
+Podsumowanie: Jedyny żywy przypadek to ekran umów w konsoli: operator sprawdza, na których kempingach działają karty wydawcy i czy to jego własna umowa, czy przejęta po organizacji nadrzędnej (także zaraz po dodaniu lub zdjęciu umowy). Wersja „na których słupkach w moim zakresie gość może ładować” istnieje w kodzie, ale nikt jej nie woła.
+- Operator w konsoli otwiera umowy wydawcy: na których kempingach goście z kartami tego wydawcy mogą ładować i czy to umowa samego wydawcy, czy przejęta po organizacji nadrzędnej? Wydawca spoza jego zakresu albo coś, co nie jest wydawcą: odmowa.
+- Operator dodał albo zdjął umowę wydawcy z kempingiem (albo tylko ją podgląda): na których kempingach karty tego wydawcy działają teraz i czy wydawca ma już własną umowę, czy nadal korzysta z umowy organizacji nadrzędnej?
+
+Pytanie 4: Czy to karta personelu, której wolno ładować na tym kempingu bez ograniczeń (i dla jakiego obszaru ją wydano)?
+Podsumowanie: Pytanie zadaje słupek przy każdym przyłożeniu karty (start ładowania, zatrzymanie, zdalny start, sprawdzenie przez personel): karta personelu kempingu lub jego regionu ładuje od razu, bez reszty sprawdzeń. Odpowiedź z góry dostaje też słupek w swojej lokalnej liście kart. Kto ma tę odpowiedź, ustalają dwa miejsca: operator kempingu, który wydaje kartę personelu, i przejęcie karty powitalnej gościa, po którym ta karta staje się kartą personelu.
+- Gość albo pracownik przykłada kartę do gniazda słupka i chce ładować: czy to karta personelu tego kempingu lub jego regionu? Jeśli tak, prąd rusza od razu, nawet przy zajętym gnieździe i wyczerpanej mocy sekcji. Jeśli nie, karta przechodzi zwykłe sprawdzenia gościa.
+- Operator kempingu zakłada lub zmienia kartę personelu w konsoli. Nie pyta, czy karta jest kartą personelu, tylko ustala odpowiedź: od teraz ta karta ładuje bez ograniczeń na całym jego kempingu (lub przestaje, gdy ją wyłączy). Słupki kempingu mają się o tym dowiedzieć.
+- Słupek dostaje z góry listę kart, które może przyjąć bez łączności z siecią: które karty personelu kempingu i jego regionu ma znać? Karta personelu, której nie ma na liście, nie zadziała przy braku łączności. Gdy kart personelu jest więcej niż miejsca, karty gości wypadają z listy.
+- Gość z kartą powitalną sieci został odrzucony na słupku kempingu partnerskiego, który wpuszcza tylko karty personelu. Czy kemping zgadza się przejąć tę kartę? Jeśli tak, karta gościa staje się kartą personelu kempingu i odtąd ładuje tam bez ograniczeń. Tu nikt nie pyta, czy to karta personelu, tylko się ją nią robi.
+- Przy każdym sprawdzeniu karty na słupku (start ładowania, zatrzymanie inną kartą, zdalny start z konsoli, próbne sprawdzenie przez personel): czy to karta personelu tego kempingu lub jego regionu? Jeśli tak, jest przyjęta od razu, bez sprawdzania, czy kemping przyjmuje karty jej wydawcy i czy karta jest ważna.
+
+Pytanie 5: Czy kemping chce przejąć kartę powitalną, którą gość zostawił, jako własną kartę obsługi — i czy to w ogóle karta powitalna z puli tego kraju?
+Podsumowanie: Pytanie zadaje naprawdę tylko jedno miejsce: zaraz po tym, jak słupek odmówił karcie, bo kemping jej nie przyjmuje, system w tle sprawdza, czy to karta powitalna z puli kraju słupka i czy kemping afiliowany (tylko karty domowe, z włączonym przejmowaniem) ją przejmie. Ekran grupy pokazuje operatorowi tylko ustawienie „przejmowanie dozwolone”, a recepcja korzysta z tej samej puli w innym celu: sprawdza, czy kartę z puli dowolnego kraju można wydać gościowi.
+- Gość przykłada kartę do słupka i dostaje odmowę, bo kemping tej karty nie przyjmuje: czy warto w tle sprawdzić, czy kemping przejmie ją jako własną kartę obsługi? Inne odmowy (np. karta nieważna, gniazdo zajęte) niczego nie uruchamiają.
+- Operator ogląda ustawienia grupy (kempingu, regionu), którą zarządza: czy przejmowanie porzuconych kart powitalnych jest tu włączone (wprost albo odziedziczone z wyższego poziomu)? Widzi tylko ustawienie, nie to, czy przejęcie by się udało (kraj karty, tryb tylko karty domowe, afiliacja).
+- Słupek właśnie odmówił karcie, bo kemping jej nie przyjmuje: czy to karta powitalna z puli kraju tego kempingu, a kemping afiliowany przyjmuje tylko własne karty i pozwala przejmować porzucone karty powitalne? Jeśli tak, karta staje się kartą obsługi właściciela kempingu i znika z puli; jeśli nie, nic się nie dzieje.
+
+Pytanie 6: Czy ten niezależny kemping jest otwarty na karty sieci, czy przyjmuje tylko własne karty obsługi?
+Podsumowanie: Tylko jedno miejsce naprawdę pyta, czy niezależny kemping przyjmuje wyłącznie własne karty: odrzucenie karty powitalnej gościa na słupku, które może zamienić ją w kartę obsługi kempingu. Reszta to ekran atrybutów kempingu (pokazanie odpowiedzi) i dwa miejsca, które odpowiedź ustawiają (operator w konsoli i instalator przy uruchamianiu słupków) — przestawienie trybu przenosi kemping w drzewie i zmienia widoczność słupków w aplikacji.
+- Instalator kończy uruchamianie słupków na niezależnym kempingu i ustawia, czy kemping ma być otwarty na karty sieci, czy przyjmować tylko własne karty obsługi. Nie pyta o odpowiedź, tylko ją wyznacza; pyta jedynie, czy kemping ma już jakikolwiek tryb. Jeśli nie, uruchomienie kończy się sukcesem, a tryb po cichu się nie zmienia.
+- Operator w konsoli przestawia niezależny kemping między „otwarty na karty sieci” a „tylko własne karty obsługi”. Nie pyta o odpowiedź, tylko ją zmienia; pyta jedynie, czy to w ogóle kemping niezależny z ustalonym trybem. Jeśli nie, dostaje odmowę.
+- Operator (albo wsparcie) ogląda atrybuty kempingu w konsoli: czy ten niezależny kemping jest otwarty na karty sieci, czy przyjmuje tylko własne karty obsługi? Jeśli tryb nie daje się ustalić, pole jest puste i nie wiadomo dlaczego.
+- Gość przykłada do słupka kartę powitalną z puli rynku, a kemping ją odrzucił: czy ten niezależny kemping przyjmuje tylko własne karty obsługi (i zgodził się przygarniać karty powitalne)? Jeśli tak, karta staje się kartą obsługi tego kempingu i znika z puli powitalnej; jeśli kemping jest otwarty na karty sieci, karta zostaje odrzucona i nic się nie dzieje.
+
+Pytanie 7: Czy ten słupek ma pamiętać listę kart, które może przyjąć bez pytania centrali, i jakie karty ma na niej trzymać (karty obsługi, karty gości)?
+Podsumowanie: Pytanie pada w trzech sytuacjach: operator podgląda w konsoli, co słupek dostanie; słupek dostaje pełną listę (ręcznie z konsoli albo przy rozsyłce do wszystkich); zmiana karty obsługi idzie na słupki, które ją trzymają. Za każdym razem decyduje najbliższe ustawienie wyżej w drzewie sieci, a przy kartach obsługi drzewo karty, nie słupka.
+- Operator w konsoli podgląda słupek: jaką listę kart słupek dostałby teraz, żeby wpuszczać bez pytania centrali? Gdy w sieci nad słupkiem nie włączono listy, widzi pustą.
+- Słupek dostaje pełną listę kart (operator wysyła ją z konsoli albo lista idzie na wszystkie słupki naraz): które karty obsługi i które karty gości akceptowanych wydawców słupek ma pamiętać, skoro mieści tylko tyle, ile pozwala jego typ? Karty gości wypadają pierwsze.
+- Zmieniła się karta osoby z obsługi: które słupki trzymają ją na swojej liście i muszą dostać zmianę? Decyduje ustawienie listy nad kartą (jej miejscem w sieci), a nie nad słupkiem; gdy nad kartą nie włączono kart obsługi na listach, żaden słupek jej nie dostaje.
+- Czy w tym miejscu sieci słupki mają pamiętać listę kart i co ma na niej być? Rozstrzyga najbliższe ustawienie wyżej w drzewie: przy podglądzie i wysyłce listy na słupek, przy zmianie karty obsługi i na ekranie ustawień w konsoli.
+
+Pytanie 8: Czy karty tego wydawcy wolno wymieniać z tym partnerem — wysyłać mu je i przyjmować od niego?
+Podsumowanie: Dwa przypadki w dwóch kierunkach: przy wysyłce listy kart sieci do partnera decyzja zapada osobno dla każdej karty (karta pominięta, ale i tak uznana za wysłaną), a przy przyjmowaniu kart od partnera — dla całego wydawcy partnera (odrzucona każda linia). W obu rozstrzyga najbliższe ustawienie w górę drzewa wydawców.
+- Przy wymianie z partnerami (cyklicznie albo na żądanie operatora) sieć wysyła partnerowi listę swoich kart: czy kartę tego gościa wolno pokazać temu partnerowi? Jeśli nie, partner jej nie dostaje i jego słupki jej nie znają.
+- Partner przysyła zmiany w swoich kartach: czy od tego wydawcy w ogóle przyjmujemy karty? Jeśli nie, żadna jego karta nie zostaje dodana, zmieniona ani usunięta, więc jego goście nie ładują na nowych kartach.
+- Wspólna reguła obu kierunków wymiany: dla wydawcy karty sprawdza się ustawienie na nim samym, a jak go nie ma — na najbliższym wyżej w drzewie wydawców; ono mówi, czy z tym partnerem wymieniamy. Sama nie zna przypadku — ten opisują wysyłka i przyjmowanie kart.
+
+Pytanie 9: Czy to karta sieci, czy karta wydana przez partnera — i czy przez tego partnera, który ją teraz przysyła?
+Podsumowanie: Jedno pytanie zadawane wyłącznie przy nocnej (albo ręcznie uruchomionej przez administratora) wymianie list kart z partnerem-wydawcą: zanim karta z listy partnera zostanie przyjęta, zmieniona albo wyłączona, system sprawdza, czy to nie karta sieci i czy należy do tego wydawcy, który ją przysyła. Wszystkie pozostałe wiersze to kroki tej samej odpowiedzi, bez osobnych pytających.
+- Co noc, albo na żądanie administratora, partner-wydawca przysyła zmiany swojej listy kart: dla każdej karty — czy to nie karta sieci i czy należy do tego partnera, a nie do innego wydawcy? Jeśli nie, ta jedna karta zostaje odrzucona, a pozostałe karty z listy przechodzą dalej.
+- Partner przysyła dodanie, zmianę albo wyłączenie karty, którą już znamy jako kartę wydawcy: czy to jego karta, czy innego wydawcy? Jeśli innego, zmiana jest odrzucona i karta zostaje u dotychczasowego wydawcy.
+- Partner przysyła kartę, którą sieć już ma: czy to karta wydana przez sieć? Jeśli tak, partner nigdy jej nie przejmie, niezależnie od tego, co chce z nią zrobić.
+- Partner przysyła kartę: czy znamy ją już jako kartę jakiegoś wydawcy, wtedy dalej sprawdzamy, czy jego,, czy jest dla nas nowa? Przy dodaniu nowa karta zostaje założona dla partnera; przy zmianie albo wyłączeniu nieznana karta jest odrzucona jako nieznaleziona.
+- Które karty są kartami wydanymi przez sieć? Potrzebne tylko po to, by przy wymianie z partnerem odróżnić karty sieci od kart wydawców.
+
+Pytanie 10: Jak jest zorganizowana sieć, za którą odpowiadam: które kempingi należą do których regionów i rynków (a wydawcy i zespoły — do kogo)?
+Podsumowanie: Jedno pytanie, jeden przypadek: personel w konsoli (zakładka organizacji) ogląda drzewo sieci w swoim zakresie — kempingi, wydawców albo zespoły. Wszyscy wołający to kolejne piętra tej samej ścieżki pokazującej drzewo; nikt nie podejmuje na nim decyzji.
+- Osoba z personelu otwiera w konsoli zakładkę organizacji: jak wygląda sieć w jej zakresie — kempingi w regionach i rynkach (albo wydawcy, albo zespoły)? Widzi drzewo od swojego miejsca w dół.
+</script>
+</main>
+<script>
+var tekst=document.getElementById("kopia").textContent.replace(/<\\\//g,"</");
+document.querySelectorAll(".kopiuj-duzy").forEach(function(b){var napis=b.textContent;b.addEventListener("click",function(){navigator.clipboard.writeText(tekst).then(function(){b.textContent="✓ skopiowane";setTimeout(function(){b.textContent=napis},1500)})})});
+</script></body></html>

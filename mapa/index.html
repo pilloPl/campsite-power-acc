@@ -1,0 +1,2123 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mapa szkolenia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+:root{--kropka:color-mix(in oklab,var(--tekst) 13%,transparent);--linia:color-mix(in oklab,var(--tekst) 30%,transparent)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--tlo);color:var(--tekst);font:15px/1.55 var(--font-body);overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:2px;text-decoration-thickness:1.5px}
+a:hover{color:var(--akcent-jasny)}
+
+#widok{position:fixed;inset:0;overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+  background-image:radial-gradient(circle,var(--kropka) 1.1px,transparent 1.5px)}
+#widok.ciagnie{cursor:grabbing}
+#widok.bez-siatki{background-image:none!important}
+.poswiata{position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(70% 60% at 90% -10%,color-mix(in oklab,var(--akcent) 16%,transparent),transparent 60%),
+    radial-gradient(60% 60% at -10% 110%,color-mix(in oklab,var(--cyjan) 15%,transparent),transparent 60%)}
+#swiat{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#krawedzie{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
+
+/* krawędzie */
+.kraw{fill:none;stroke:var(--linia);stroke-width:2.2;stroke-linecap:round}
+.kraw.glowna{stroke:color-mix(in oklab,var(--akcent) 70%,var(--linia));stroke-width:2.6}
+.kraw.boczna{stroke:color-mix(in oklab,var(--cyjan) 70%,var(--linia))}
+.kraw.ducha{stroke:var(--linia);stroke-dasharray:5 8;opacity:.7}
+.kraw.rysuj{stroke-dasharray:1;stroke-dashoffset:1;animation:rysuj .8s cubic-bezier(.6,0,.2,1) forwards}
+@keyframes rysuj{to{stroke-dashoffset:0}}
+.iskra{fill:var(--akcent-jasny);opacity:.85}
+.koniec{fill:var(--panel);stroke-width:2.2}
+.koniec.glowna{stroke:var(--akcent)}.koniec.boczna{stroke:var(--cyjan)}.koniec.ducha{stroke:var(--linia)}
+
+.etykieta{position:absolute;left:0;top:0;width:max-content;max-width:196px;padding:7px 11px 8px;border-radius:12px;font-size:12.5px;line-height:1.4;
+  color:var(--przygaszony);background:color-mix(in oklab,var(--tlo) 88%,transparent);border:1px solid var(--ramka);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.etykieta b{display:block;font:500 9.5px/1 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--akcent);margin-bottom:5px}
+.etykieta.boczna b{color:var(--cyjan)}
+.etykieta{cursor:pointer;transition:border-color .15s}
+.etykieta:hover{border-color:var(--akcent)}
+.etykieta b::after{content:" −";letter-spacing:0}
+.etykieta.zwinieta{padding:6px 10px}
+.etykieta.zwinieta b{margin:0}
+.etykieta.zwinieta b::after{content:" +"}
+.etykieta.zwinieta .txt{display:none}
+.pasek button.wylaczony{color:var(--przygaszony);text-decoration:line-through}
+
+/* węzły */
+.wezel{position:absolute;left:0;top:0;width:290px}
+.wezel.rozwiniety{width:500px}
+.wezel.dziecko{width:262px}
+.wezel.dziecko.rozwiniety{width:440px}
+.karta{position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:20px;box-shadow:var(--cien);
+  padding:18px 20px 16px;cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;overflow:hidden}
+.karta::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--akcent),var(--akcent-jasny))}
+.dziecko .karta::before{background:linear-gradient(90deg,var(--cyjan),color-mix(in oklab,var(--cyjan) 50%,var(--akcent-jasny)))}
+.karta:hover{border-color:var(--akcent);box-shadow:var(--cien),0 0 0 4px color-mix(in oklab,var(--akcent) 12%,transparent)}
+.dziecko .karta:hover{border-color:var(--cyjan);box-shadow:var(--cien),0 0 0 4px color-mix(in oklab,var(--cyjan) 12%,transparent)}
+.rozwiniety .karta{border-color:color-mix(in oklab,var(--akcent) 55%,var(--ramka));cursor:zoom-out}
+.dziecko.rozwiniety .karta{border-color:color-mix(in oklab,var(--cyjan) 55%,var(--ramka))}
+/* podbloki bez ćwiczenia: narzędzie (skill: co robi, ograniczenia) i notatki (na przyszłość) */
+.narzedzie .karta::before{background:repeating-linear-gradient(135deg,#8a6fd1 0 6px,#b49cf0 6px 12px)}
+.narzedzie .nr{color:#8a6fd1}
+.notatka-znak.cwiczenie-znak{color:var(--cyjan);border:1px solid color-mix(in oklab,var(--cyjan) 55%,var(--ramka))}
+.narzedzie .karta{border-color:color-mix(in oklab,#8a6fd1 35%,var(--ramka))}
+.narzedzie .karta:hover,.narzedzie.rozwiniety .karta{border-color:#8a6fd1;box-shadow:var(--cien),0 0 0 4px color-mix(in oklab,#8a6fd1 14%,transparent)}
+.narzedzie .notatka-znak{color:#8a6fd1;border:1px solid color-mix(in oklab,#8a6fd1 50%,var(--ramka))}
+.notatka .karta{border-style:dashed;background:color-mix(in oklab,var(--panel) 70%,var(--tlo))}
+.notatka .karta::before{background:repeating-linear-gradient(90deg,var(--przygaszony) 0 8px,transparent 8px 14px)}
+.notatka .nr{color:var(--przygaszony)}
+.notatka .karta:hover,.notatka.rozwiniety .karta{border-color:var(--przygaszony);box-shadow:var(--cien)}
+.wniosek-wezel .karta{border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka));background:color-mix(in oklab,var(--panel) 82%,var(--tlo))}
+.wniosek-wezel .karta::before{background:linear-gradient(90deg,color-mix(in oklab,var(--cyjan) 60%,transparent),transparent)}
+.wniosek-wezel .karta:hover,.wniosek-wezel.rozwiniety .karta{border-color:var(--cyjan)}
+.notatka-znak.wniosek-znak{color:var(--cyjan);border:1px solid color-mix(in oklab,var(--cyjan) 55%,var(--ramka))}
+.notatka-znak{display:inline-block;font:500 9.5px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--przygaszony);
+  border:1px dashed var(--przygaszony);border-radius:999px;padding:3px 7px;margin-bottom:6px}
+.glowa{display:flex;gap:14px;align-items:flex-start}
+.nr{font:600 2.1rem/1 var(--font-display);color:var(--akcent);min-width:1.1em;font-variant-numeric:tabular-nums}
+.dziecko .nr{font-size:1.25rem;color:var(--cyjan);padding-top:4px}
+.tytuly{flex:1;min-width:0}
+.tytul{font:600 1.32rem/1.2 var(--font-display);color:var(--mocny);margin:2px 0 0;letter-spacing:-.005em}
+.dziecko .tytul{font-size:1.1rem}
+.podtytul{color:var(--przygaszony);font-size:.9rem;margin-top:4px}
+.strzalka{width:26px;height:26px;flex:none;border-radius:50%;border:1px solid var(--ramka);display:grid;place-items:center;
+  color:var(--przygaszony);transition:transform .25s,background .2s;margin-top:2px}
+.rozwiniety .strzalka{transform:rotate(180deg);background:var(--kod)}
+.tresc{display:none;margin-top:14px;cursor:auto}
+.rozwiniety .tresc{display:block;animation:pojaw .35s ease}
+@keyframes pojaw{from{opacity:0;transform:translateY(-4px)}}
+.sekcja{border-top:1px solid var(--ramka);padding-top:12px;margin-top:12px}
+.sekcja h3{font:500 10.5px/1 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--akcent);margin:0 0 9px}
+.dziecko .sekcja h3{color:var(--cyjan)}
+.dlaczego{margin:0;font-style:italic;color:var(--tekst)}
+ul.wnioski{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+ul.wnioski li{position:relative;padding-left:18px}
+ul.wnioski li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;transform:rotate(45deg);
+  background:var(--akcent)}
+.dziecko ul.wnioski li::before{background:var(--cyjan)}
+.pelne{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-weight:600;text-decoration:none}
+.pelne:hover{text-decoration:underline}
+.sekcja .pelne{display:flex;width:fit-content}
+.sekcja .pelne+.pelne{margin-top:4px}
+.zadania{display:grid;gap:8px}
+.zadanie{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0;padding:10px 12px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);
+  color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .15s,transform .15s}
+a.zadanie:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadanie .rodzaj{font:500 9.5px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--przygaszony);
+  border:1px solid var(--ramka);border-radius:999px;padding:4px 7px;margin-left:auto;max-width:100%;
+  white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+.zadanie .ikona{font-size:1rem}
+
+.wezel.duch{width:150px}
+.wezel.duch .karta{padding:14px 16px;background:color-mix(in oklab,var(--panel) 40%,transparent);border-color:var(--linia);border-style:dashed;box-shadow:none;cursor:default}
+.wezel.duch .karta::before{display:none}
+.wezel.duch .karta:hover{border-color:var(--linia);box-shadow:none}
+.wezel.duch .nr{color:var(--przygaszony);opacity:.6}
+.wezel.duch .tytul{color:var(--przygaszony);font-style:italic;font-weight:400;font-size:1rem;padding-top:6px}
+.wezel.duch .nr{font-size:1.5rem}
+.wezel.pusty{width:64px}
+.wezel.pusty .karta{height:64px;border-radius:50%;border-style:dashed;background:transparent;box-shadow:none;padding:0;cursor:default}
+.wezel.pusty .karta::before{display:none}
+.wezel.start{width:max-content}
+.wezel.start .karta{border-radius:999px;padding:10px 18px;cursor:default;background:var(--akcent);border-color:var(--akcent);color:#fff;
+  font:500 11px/1 var(--font-mono);letter-spacing:.2em;text-transform:uppercase}
+.wezel.start .karta::before{display:none}
+.wezel.start .karta:hover{box-shadow:var(--cien)}
+
+ul.wnioski li[data-k]{cursor:pointer;border-radius:6px;transition:background .15s}
+ul.wnioski li[data-k]:hover{background:color-mix(in oklab,var(--kod) 70%,transparent)}
+ul.wnioski li.ukryty .t{display:none}
+ul.wnioski li.ukryty::after{content:"· · ·";font:500 12px/1.4 var(--font-mono);letter-spacing:.2em;color:var(--przygaszony)}
+ul.wnioski li.ukryty::before{opacity:.45}
+ul.drzewo{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+ul.drzewo>li.galaz{position:relative;padding-left:16px;border-left:2px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.galaz-tyt{font:600 .98rem/1.3 var(--font-display);color:var(--mocny);margin:0 0 6px;position:relative}
+.galaz-tyt::before{content:"";position:absolute;left:-18px;top:.65em;width:12px;height:2px;background:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.galaz-tyt[data-kotwica]{color:var(--cyjan)}
+.galaz-tyt[data-kotwica]::after{content:" →";color:var(--cyjan)}
+ul.drzewo ul.wnioski{gap:4px;font-size:13px}
+.kraw.cel{stroke:var(--cyjan);stroke-width:2.2}
+.koniec.cel{stroke:var(--cyjan)}
+.wn-karta{position:absolute;left:0;top:0;width:360px;padding:14px 16px 14px;border-radius:16px;font-size:13.5px;line-height:1.5;
+  background:color-mix(in oklab,var(--panel) 82%,transparent);border:1px solid color-mix(in oklab,var(--cyjan) 35%,var(--ramka));box-shadow:var(--cien);cursor:auto}
+.wn-karta h3{font:500 10.5px/1 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--cyjan);margin:0 0 10px}
+.wn-karta ul.wnioski li::before{background:var(--cyjan)}
+.wn-karta .pelne{font-size:13px}
+.wn-karta h3{cursor:pointer;display:flex;align-items:center;gap:8px}
+.wn-karta h3::after{content:"−";margin-left:auto;font-size:14px;letter-spacing:0;color:var(--przygaszony)}
+.wn-karta h3 .ile{font-size:10px;letter-spacing:0;padding:3px 6px;border-radius:999px;background:var(--kod);color:var(--przygaszony)}
+.wn-karta.zwinieta h3{margin:0}
+.wn-karta.zwinieta h3::after{content:"+"}
+.wn-karta.zwinieta ul,.wn-karta.zwinieta .pelne,.wn-karta.zwinieta .wiecej{display:none}
+.wn-karta li.nadmiar{display:none}
+.wn-karta.pelna li.nadmiar{display:list-item}
+.wn-karta .wiecej{display:block;margin:8px 0 0;padding:0;border:0;background:none;font:500 12px/1.4 var(--font-mono);color:var(--cyjan);cursor:pointer}
+.wn-karta .pelne{display:block;margin-top:8px}
+.kraw.wn{stroke:color-mix(in oklab,var(--cyjan) 55%,var(--linia));stroke-width:1.6;stroke-dasharray:2 6}
+.popup{position:fixed;inset:0;display:none;place-items:center;padding:24px 16px;background:color-mix(in oklab,var(--tlo) 55%,transparent);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:10}
+.popup.otwarty{display:grid;animation:pojaw .25s ease}
+.popup-karta{position:relative;width:min(640px,100%);max-height:80vh;overflow:auto;padding:26px 28px;border-radius:20px;background:var(--panel);
+  border:1px solid color-mix(in oklab,var(--cyjan) 40%,var(--ramka));box-shadow:var(--cien)}
+.popup-karta h3{font:500 11px/1 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:var(--cyjan);margin:0 0 16px}
+.popup-karta ul.wnioski{gap:10px}.popup-karta ul.wnioski li::before{background:var(--cyjan)}
+.popup-karta .pelne{display:inline-block;margin-top:16px}
+.popup .zamknij{position:absolute;right:14px;top:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--ramka);background:var(--tlo);
+  color:var(--tekst);font-size:18px;cursor:pointer}
+.popup .zamknij:hover{border-color:var(--akcent);color:var(--akcent)}
+.wejscie{animation:wejscie .6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes wejscie{from{opacity:0;filter:blur(6px);translate:0 14px}}
+
+/* nakładki */
+.naglowek{position:fixed;left:24px;top:20px;max-width:min(560px,calc(100vw - 48px));pointer-events:none}
+.naglowek .eyebrow{font:500 .7rem/1 var(--font-mono);letter-spacing:.22em;text-transform:uppercase;color:var(--akcent);margin:0 0 10px}
+.naglowek h1{font:600 clamp(1.4rem,3vw,2rem)/1.1 var(--font-display);margin:0;color:var(--mocny);letter-spacing:-.01em}
+.pasek{position:fixed;display:flex;gap:6px;align-items:center;padding:6px;border-radius:999px;background:color-mix(in oklab,var(--panel) 90%,transparent);
+  border:1px solid var(--ramka);box-shadow:var(--cien);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.pasek.zoom{left:24px;bottom:22px}
+.pasek.ster{right:24px;bottom:22px}
+.pasek button{font:500 14px/1 var(--font-body);min-width:36px;height:36px;padding:0 12px;border-radius:999px;border:0;background:transparent;
+  color:var(--tekst);cursor:pointer}
+.pasek button:hover{background:var(--kod);color:var(--akcent)}
+.pasek .proc{font:500 12px/1 var(--font-mono);color:var(--przygaszony);min-width:48px;text-align:center;font-variant-numeric:tabular-nums}
+.panel{position:fixed;right:24px;bottom:84px;width:min(340px,calc(100vw - 32px));max-height:min(70vh,560px);overflow:auto;padding:18px 18px 16px;
+  border-radius:18px;background:var(--panel);border:1px solid var(--ramka);box-shadow:var(--cien);display:none}
+.panel.otwarty{display:block;animation:pojaw .25s ease}
+.panel h2{font:600 1.1rem/1.2 var(--font-display);margin:0 0 4px}
+.panel .opis{color:var(--przygaszony);font-size:.82rem;margin:0 0 12px}
+.panel label{display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:10px;cursor:pointer;font-size:.92rem}
+.panel label:hover{background:var(--kod)}
+.panel label.pod{padding-left:30px;font-size:.86rem;color:var(--przygaszony)}
+.panel input{accent-color:var(--akcent);width:16px;height:16px}
+.panel .przyciski{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--ramka)}
+.panel .przyciski button{font:500 13px/1 var(--font-body);padding:10px 14px;border-radius:999px;border:1px solid var(--ramka);background:var(--tlo);
+  color:var(--tekst);cursor:pointer}
+.panel .przyciski button:hover{border-color:var(--akcent);color:var(--akcent)}
+.panel .przyciski button.glowny{background:var(--akcent);border-color:var(--akcent);color:#fff}
+.panel .przyciski button.glowny:hover{filter:brightness(1.08);color:#fff}
+.podpowiedz{position:fixed;left:50%;bottom:28px;translate:-50% 0;font:500 11px/1 var(--font-mono);letter-spacing:.06em;color:var(--przygaszony);
+  pointer-events:none;transition:opacity .6s;white-space:nowrap}
+@media (max-width:760px){
+  .naglowek{left:16px;top:14px}
+  .pasek.zoom{left:16px;bottom:16px}.pasek.ster{right:16px;bottom:16px}.panel{right:16px;bottom:72px}
+  .podpowiedz{display:none}
+}
+
+/* legenda */
+.legenda{position:fixed;right:24px;top:20px;display:grid;gap:8px;padding:12px 14px;border-radius:14px;
+  background:color-mix(in oklab,var(--panel) 90%,transparent);border:1px solid var(--ramka);box-shadow:var(--cien);
+  font:500 10.5px/1.2 var(--font-mono);letter-spacing:.06em;color:var(--przygaszony);z-index:5}
+.legenda div{display:flex;align-items:center;gap:10px}
+.legenda i{display:inline-block;flex:none;width:26px;height:16px;border-radius:5px;background:var(--panel)}
+.legenda .l-blok{border:2px solid var(--akcent)}
+.legenda .l-cw{border:2px solid var(--cyjan)}
+.legenda .l-nr{border:2px solid #8a6fd1;background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in oklab,#8a6fd1 30%,transparent) 5px 8px)}
+.legenda .l-nt{border:2px dashed var(--przygaszony)}
+.legenda .l-wn{height:10px;border-radius:999px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.legenda .l-duch{border:1.5px dashed var(--linia);background:transparent}
+@media (max-width:760px){.legenda{display:none}}
+
+/* motywy */
+:root[data-motyw=cb]{--tlo:#ffffff;--tlo-2:#f2f2f2;--tekst:#111111;--mocny:#000000;--przygaszony:#666666;--akcent:#111111;--akcent-jasny:#444444;
+  --cyjan:#555555;--ramka:#cfcfcf;--panel:#ffffff;--kod:#f0f0f0;--link:#111111;--cien:0 1px 2px rgba(0,0,0,.06);color-scheme:light}
+:root[data-motyw=cb] .poswiata,:root[data-motyw=cb] .iskra{display:none}
+:root[data-motyw=fancy]{--tlo:#0b0820;--tlo-2:#120d2e;--tekst:#ece8ff;--mocny:#ffffff;--przygaszony:#a79fd0;--akcent:#ff4fd8;--akcent-jasny:#ff9af0;
+  --cyjan:#3ef0ff;--ramka:#2e2758;--panel:#15112e;--kod:#1c1640;--link:#ff9af0;
+  --cien:0 0 0 1px rgba(255,79,216,.08),0 12px 40px -12px rgba(62,240,255,.35);color-scheme:dark}
+:root[data-motyw=fancy] .poswiata{background:radial-gradient(70% 60% at 90% -10%,rgba(255,79,216,.28),transparent 60%),
+  radial-gradient(60% 60% at -10% 110%,rgba(62,240,255,.25),transparent 60%)}
+:root[data-motyw=slodki]{--tlo:#fff0f6;--tlo-2:#ffe4f0;--tekst:#4a2b3d;--mocny:#3a1d2f;--przygaszony:#9b6f86;--akcent:#ff5fa2;--akcent-jasny:#ff8fc0;
+  --cyjan:#8a7bff;--ramka:#ffcfe3;--panel:#ffffff;--kod:#fff3f8;--link:#ff5fa2;
+  --cien:0 2px 0 #ffd6e8,0 14px 30px -14px rgba(255,95,162,.45);color-scheme:light}
+:root[data-motyw=terminal]{--tlo:#050805;--tlo-2:#0a110a;--tekst:#b8f5b0;--mocny:#d9ffd4;--przygaszony:#5f9a58;--akcent:#39ff6a;--akcent-jasny:#8dff9f;
+  --cyjan:#ffd23f;--ramka:#1d3a1d;--panel:#0a120a;--kod:#0f1a0f;--link:#39ff6a;--cien:none;color-scheme:dark;
+  --font-display:var(--font-mono);--font-body:var(--font-mono)}
+:root[data-motyw=terminal] .poswiata{display:none}
+.pasek select{font:500 13px/1 var(--font-body);height:36px;padding:0 10px;border-radius:999px;border:0;background:transparent;color:var(--tekst);cursor:pointer}
+.pasek select:hover{background:var(--kod);color:var(--akcent)}
+
+/* mini-mapa celów: drzewo z góry na dół w karcie */
+.wn-karta.minimapa{width:780px;padding:16px 18px 18px;background-image:radial-gradient(var(--kropka) 1px,transparent 1.2px);background-size:18px 18px}
+.mm-korzen{display:flex;justify-content:center}
+.mm-korzen span{font:600 13px/1 var(--font-display);padding:9px 16px;border-radius:999px;background:var(--akcent);color:#fff;box-shadow:var(--cien)}
+.mm-cele{display:flex;gap:12px;justify-content:center;position:relative;margin-top:22px;padding-top:18px}
+.mm-cele::before{content:"";position:absolute;top:0;left:calc(50% - 1px);width:2px;height:18px;margin-top:-22px;background:var(--linia)}
+.mm-galaz{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;position:relative}
+.mm-galaz::before{content:"";position:absolute;top:-18px;left:0;right:0;height:18px;border-top:2px solid var(--linia)}
+.mm-galaz:first-child::before{left:50%}.mm-galaz:last-child::before{right:50%}
+.mm-galaz:only-child::before{display:none}
+.mm-galaz::after{content:"";position:absolute;top:-18px;left:calc(50% - 1px);width:2px;height:18px;background:var(--linia)}
+.mm-cel{font:600 12.5px/1.25 var(--font-body);text-align:center;padding:9px 12px;border-radius:14px;cursor:pointer;width:100%;
+  border:2px solid var(--cyjan);background:var(--panel);color:var(--mocny);box-shadow:var(--cien)}
+.mm-cel::after{content:" ▾";color:var(--przygaszony)}
+.mm-galaz.zwiniety .mm-cel::after{content:" ▸"}
+.mm-galaz.zwiniety .mm-liscie{display:none}
+.mm-cel[data-kotwica]{border-color:var(--akcent)}
+.mm-liscie{display:grid;gap:8px;width:100%;margin-top:14px;position:relative}
+.mm-liscie::before{content:"";position:absolute;top:-14px;left:calc(50% - 1px);width:2px;height:14px;background:var(--linia)}
+.mm-karta{border:1px solid var(--ramka);border-radius:12px;background:var(--panel);padding:9px 11px}
+.mm-karta h4{margin:0 0 6px;font:500 9.5px/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyjan)}
+.mm-karta ul.wnioski{gap:4px;font-size:12.5px;line-height:1.45}
+
+/* przejście: klik w początek krawędzi pokazuje albo chowa następny blok */
+.przejscie{position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;padding:0;cursor:pointer;z-index:2;
+  border:2px solid color-mix(in oklab,var(--akcent) 55%,transparent);background:var(--tlo);opacity:.35;transition:opacity .15s,transform .15s}
+.przejscie::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--akcent)}
+.przejscie.ukryty{border-style:dashed;border-color:var(--linia)}
+.przejscie.ukryty::after{background:transparent}
+.przejscie:hover{opacity:1}
+
+.popup.szerokie .popup-karta{width:min(980px,calc(100vw - 32px));max-height:calc(100vh - 64px);overflow:auto}
+.popup-karta h4{font:600 1rem/1.3 var(--font-display);color:var(--mocny);margin:20px 0 4px}
+.popup-karta p.meta{font:500 11px/1.4 var(--font-mono);color:var(--przygaszony);margin:0 0 8px}
+.popup-karta p.wstep{margin:0 0 6px;color:var(--przygaszony)}
+@media (prefers-reduced-motion:reduce){.wejscie,.kraw.rysuj,.rozwiniety .tresc{animation:none}.kraw.rysuj{stroke-dasharray:none}.iskra{display:none}}
+</style>
+</head>
+<body>
+<div class="poswiata"></div>
+<div id="widok"><div id="swiat"><svg id="krawedzie"></svg></div></div>
+<header class="naglowek"><div class="eyebrow" id="eyebrow"></div><h1 id="naglowek-tytul"></h1></header>
+<aside class="legenda" aria-label="Legenda"><div><i class="l-blok"></i>Blok tematyczny</div><div><i class="l-cw"></i>Podblok z ćwiczeniem</div><div><i class="l-nr"></i>Narzędzie</div><div><i class="l-nt"></i>Notatki</div><div><i class="l-wn"></i>Karta wniosków</div></aside>
+<div class="pasek zoom" role="toolbar" aria-label="Powiększenie">
+  <button type="button" data-akcja="oddal" title="Oddal (−)">−</button>
+  <span class="proc" id="proc">100%</span>
+  <button type="button" data-akcja="przybliz" title="Przybliż (+)">+</button>
+  <button type="button" data-akcja="calosc" title="Cała mapa (0)">⤢</button>
+</div>
+<div class="pasek ster"><button type="button" data-akcja="zadania" title="Pokaż albo schowaj ćwiczenia (chowa też wnioski)">Zadania</button><button type="button" data-akcja="wnioski" title="Pokaż albo schowaj karty z wnioskami">Wnioski</button><button type="button" data-akcja="dlaczego" title="Pokaż albo schowaj teksty na krawędziach">Dlaczego</button><button type="button" data-akcja="siatka" title="Pokaż albo schowaj kropki w tle">Siatka</button><select id="motyw" title="Motyw mapy" aria-label="Motyw mapy"><option value="">🎨 Domyślny</option><option value="cb">Czarno-biały</option><option value="fancy">Fancy</option><option value="slodki">Ślitaśny</option><option value="terminal">Terminal</option></select><button type="button" data-akcja="panel" title="Które bloki widać">⚙︎ Bloki</button></div>
+<div class="popup" id="popup" role="dialog" aria-modal="true"><div class="popup-karta"><button type="button" class="zamknij" aria-label="Zamknij">×</button><div id="popup-tresc"></div></div></div>
+<div class="panel" id="panel" role="dialog" aria-label="Które bloki widać"></div>
+<div class="podpowiedz" id="podpowiedz">kliknij blok, żeby rozwinąć · przeciągnij · ctrl + przewijanie albo szczypnięcie, żeby przybliżyć</div>
+
+<script type="application/json" id="dane">
+{
+ "id": "accenture",
+ "eyebrow": "Mapa szkolenia · Accenture",
+ "tytul": "AI w pracy z systemami legacy",
+ "baza": "https://pillopl.github.io/campsite-power-acc/",
+ "start": "Start",
+ "bloki": [
+  {
+   "id": "ai-harness",
+   "tytul": "AI Harness",
+   "podtytul": "Jak działa model i narzędzie wokół niego",
+   "dlaczego": "To technikalia, ale bez nich nie ocenisz wyniku. Trzeba wiedzieć, co robi model, a co harness.",
+   "wnioski": [
+    "Model odpowiada raz: tekstem albo prośbą o narzędzie. Harness wykonuje narzędzie, dokleja wynik i pyta model znowu; tak powstaje pętla agenta.",
+    "O długości pętli decyduje model, limit ustawia harness. Słabsze modele kończą po kilku krokach, mocniejsze czytają dziesiątki plików.",
+    "Ten sam model w dwóch harnessach potrafi dać różne wyniki. Porównanie modeli jest zawsze też porównaniem harnessów.",
+    "Reasoning i praca agentowa to osobne umiejętności. Model może dobrze rozumować i mimo to nie sięgać po narzędzia.",
+    "Effort ustawia, ile tokenów model jest skłonny wydać na zadanie. Wysoki effort nie zrobi ze słabego modelu dobrego agenta.",
+    "Harness dokleja do promptu zasady projektu, stan gita i spis skilli. Model dostaje to razem z Twoim tekstem."
+   ],
+   "dzieci": [
+    {
+     "id": "harness-lens",
+     "tytul": "harness-lens",
+     "podtytul": "Co naprawdę idzie do modelu",
+     "dlaczego": "Na żywo widać, co harness dokleja do promptu, zanim model cokolwiek przeczyta.",
+     "zadania": [
+      {
+       "tytul": "Co naprawdę idzie do modelu",
+       "zadanie": "co-naprawde-idzie-do-modelu",
+       "rodzaj": "ćwiczenie · harness-lens"
+      }
+     ],
+     "wnioski_grupy": [
+      {
+       "tytul": "Co idzie do modelu",
+       "punkty": [
+        "Przed Twoim promptem harness dokleja zasady projektu, stan gita i spis skilli, a po nim środowisko i listę narzędzi. Model dostaje to razem z Twoim tekstem.",
+        "Część narzędzi model dostaje z pełnym opisem, resztę tylko z nazwy. Opis dociąga, gdy narzędzia potrzebuje.",
+        "Skill w kontekście to tylko pozycja w spisie. Jego treść trafia do modelu dopiero po wywołaniu.",
+        "Większość każdego kolejnego requestu idzie z cache, więc koszt rośnie wolniej niż kontekst.",
+        "Blokada z hooka wraca do modelu jak zwykły wynik narzędzia.",
+        "Pętla kończy się, gdy model odpowie tekstem zamiast prośby o narzędzie."
+       ],
+       "link": "co-naprawde-idzie-do-modelu/wnioski/"
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "uklad": "kolumna",
+   "widoczny": true
+  },
+  {
+   "id": "rozpoznanie-legacy",
+   "tytul": "Rozpoznanie legacy",
+   "podtytul": "Od czego zacząć z obcym systemem",
+   "dlaczego": "Znając model i harness, sprawdzamy, co AI umie powiedzieć o obcym systemie i skąd to wie.",
+   "uklad": "drzewo",
+   "dzieci": [
+    {
+     "id": "cele-analizy",
+     "bez_numeru": true,
+     "tytul": "Cel",
+     "podtytul": "Cel definiuje wszystko, co dalej",
+     "rodzaj_bloku": "notatki",
+     "dlaczego": "Zanim cokolwiek uruchomisz, ustal cel. Od niego zależy, czego szukasz i gdzie.",
+     "sekcje": [
+      {
+       "tytul": "Cele analizy legacy",
+       "drzewo": [
+        {
+         "tytul": "Ewolucja architektury w działającym systemie",
+         "punkty": [
+          "Obecna struktura, także ta zła, bo system działa przez cały czas zmiany.",
+          "Miejsca cięcia: gdzie da się postawić granicę bez zmiany zachowania.",
+          "Dane zapisywane z wielu miejsc, które najczęściej blokują wydzielenie.",
+          "Zachowanie do zabezpieczenia testami i droga odwrotu."
+         ]
+        },
+        {
+         "tytul": "Nowa architektura w tym samym stosie",
+         "punkty": [
+          "Kompatybilność techniczna: co się da przenieść, a czego nie.",
+          "Co jest naprawdę używane: logi, dane, raporty.",
+          "Reguły biznesowe oddzielone od logiki technicznej.",
+          "Zmiany w schemacie danych."
+         ]
+        },
+        {
+         "tytul": "Migracja do nowego stosu",
+         "punkty": [
+          "Specyficzne użycia technologii i ich odpowiedniki.",
+          "Zachowania, które stary stos robił sam: transakcje, współbieżność, błędy, zaokrąglenia, strefy czasowe.",
+          "Logika w bazie, jobach i konfiguracji.",
+          "Kontrakty z otoczeniem i porównanie wyników starego i nowego systemu."
+         ]
+        }
+       ]
+      }
+     ],
+     "dzieci": [
+      {
+       "id": "migracja-go",
+       "tytul": "Inny cel: migracja do Go",
+       "podtytul": "Mechanizm grup przepisany na Go i PostgreSQL, tylko analiza",
+       "rodzaj_bloku": "notatki",
+       "dlaczego": "Ten sam system przy innym celu wygląda inaczej. Przy migracji AI pyta, co przenieść i jak dowieść równoważności, a model bierze taki, jaki jest.",
+       "sekcje": [
+        {
+         "tytul": "Wynik",
+         "punkty": [
+          "Werdykt: tak, pod warunkami. Na czas przejścia zostaje wspólna baza, bo grupy są sklejone kluczami obcymi z 12 tabelami i wklejone w ok. 25 zapytań innych modułów.",
+          "Kontrakt zachowania: 17 reguł do zachowania 1:1, przy każdej miejsce w kodzie (Java, SQL albo oba) i test, który ją pokrywa.",
+          "Co przechodzi za darmo, a co trzeba przepisać: SQL jest już pod Postgresa, spacery Javy po leniwych relacjach idą do SQL, reguły z nazw do Go znak w znak, razem z wielkością liter.",
+          "Czego nie przenosić: martwy kod i event, którego nikt w produkcji nie słucha.",
+          "Wycena: M jako moduł Go na tej samej bazie, L jako osobny serwis z własną bazą.",
+          "Koszt przebiegu: 52 wywołania narzędzi, ok. 231 tys. tokenów."
+         ],
+         "linki": [
+          {
+           "tytul": "Podsumowanie przebiegu",
+           "url": "mapa-swiadomosci-mechanizm-grup/materialy/wynik-migracja-go.html"
+          }
+         ]
+        },
+        {
+         "tytul": "Co pokazuje",
+         "punkty": [
+          "Model przechodzi 1:1. Logika w nazwach i dwie różne reguły „afiliant” wracają jako pytania do biznesu, a nie jako problem modelu.",
+          "Dowód równoważności: stary i nowy kod liczą na tych samych danych wyniki dla wszystkich kombinacji wejść, potem nowy liczy równolegle na żywym ruchu i loguje rozbieżności.",
+          "Przy celu ewolucji ten sam mechanizm daje pytania, decyzje i bolączki (mapa świadomości). Zestaw oba wyniki."
+         ]
+        }
+       ],
+       "numer": "2.2",
+       "widoczny": true
+      },
+      {
+       "id": "wstepna-analiza",
+       "tytul": "Wstępna analiza legacy z AI",
+       "dlaczego": "Badamy, jak cel i źródła zmieniają to, co AI mówi o obcym systemie.",
+       "zadania": [
+        {
+         "tytul": "Pierwsze spotkanie z nieznanym systemem",
+         "zadanie": "pierwsze-spotkanie",
+         "rodzaj": "ćwiczenie"
+        },
+        {
+         "tytul": "Od czego zacząć z legacy",
+         "zadanie": "od-czego-zaczac-z-legacy",
+         "rodzaj": "ćwiczenie · legacy-init"
+        }
+       ],
+       "wnioski_grupy": [
+        {
+         "tytul": "Cel wybiera źródła",
+         "punkty": [
+          "Przy migracji stosu prawdę mówi kod: jak technologia jest użyta i co od niej zależy. Ludzie dorzucą najwyżej znane obejścia i triki.",
+          "Przy ewolucji architektury w działającym systemie zgłoszenia i rozmowy ważą więcej, bo pokazują, gdzie zmiany bolą.",
+          "Przy nowej architekturze w tym samym stosie liczą się dane o użyciu: pokazują, co da się okroić.",
+          "W rozmowach objawy są rozrzucone, a przyczyna zwykle nie pada wprost. Połączyć je musi człowiek, z kodem w ręku.",
+          "Zgłoszenia pokazują prośby o zmianę, które utknęły. W kodzie tego nie widać."
+         ]
+        },
+        {
+         "tytul": "Cel specyfikuje model",
+         "punkty": [
+          "Do mapy miejsc, od których zacząć czytanie, wystarczy mniejszy model. Do wyjaśnienia mechanizmu potrzebny jest najmocniejszy.",
+          "Częściej ogranicza długość pętli niż okno kontekstu.",
+          "Wskazanie z plikiem i linią sprawdzisz w minutę. Opis całego obszaru trudno sprawdzić w ogóle.",
+          "W językach, których model widział mało (COBOL, PL/I, Harbour), częściej zmyśla API i myli wersje.",
+          "Przy kodzie klienta model zawęża najpierw umowa: dokąd kod może wyjść."
+         ]
+        }
+       ],
+       "dzieci": [
+        {
+         "id": "legacy-init",
+         "tytul": "legacy-init",
+         "podtytul": "Kalibracja analizy modelu i architektury",
+         "dlaczego": "Ten cel bada model i architekturę logiki biznesowej. Do tego służy legacy-init.",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Zapisuje cel, który dostał albo wyczytał z kontekstu. Migracji na inną technologię nie obsługuje.",
+            "Rejestruje dowody: kod, git, zgłoszenia, dokumentację, wiedzę ludzi, przy każdym datę i ograniczenia.",
+            "Wybiera kilka przesłanek pod cel, każdą z uzasadnieniem i pierwszym krokiem sprawdzenia.",
+            "Czyta tickety z kluczy w commitach, jeśli ma dostęp do trackera.",
+            "Wskazuje kandydatów z lokalizacją, powodem i dowodami; rozmiar i nazwa klasy to tylko poszlaki.",
+            "Wynik to kalibracja: tabela kandydat × przesłanka z poziomami 0–3 do recenzji przez człowieka.",
+            "Obok kalibracji pisze opis biznesowy systemu (business context): kto, co i z kim, wyłącznie w języku domeny, każde zdanie ze źródłem. Ten opis dostają później agenci, którzy nie mogą widzieć kodu, np. przy archetypach."
+           ],
+           "linki": [
+            {
+             "tytul": "Anatomia skilla",
+             "url": "od-czego-zaczac-z-legacy/wnioski/"
+            },
+            {
+             "tytul": "Wyniki: przykładowa kalibracja",
+             "url": "od-czego-zaczac-z-legacy/materialy/kalibracja-przyklad.html"
+            },
+            {
+             "tytul": "Wyniki: opis biznesowy systemu",
+             "url": "od-czego-zaczac-z-legacy/materialy/business-context-przyklad.html"
+            }
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "Wiki i zapisu rozmowy sam nie otwiera; źródła trzeba wskazać w prompcie.",
+            "Poziomy 0–3 w kalibracji to ocena modelu z uzasadnieniem, nie pomiar.",
+            "Z samego kodu wskazuje kilku kandydatów naraz; wybór rozstrzygają zgłoszenia i rozmowa.",
+            "Cel migracji na inną technologię jest poza zakresem."
+           ]
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "numer": "2.1",
+       "widoczny": true
+      },
+      {
+       "id": "zrodla-analizy",
+       "bez_numeru": true,
+       "tytul": "Źródła",
+       "podtytul": "Kod, historia, zgłoszenia, wiki, ludzie",
+       "rodzaj_bloku": "notatki",
+       "dlaczego": "Co AI może przeczytać o obcym systemie i co musi mu wskazać człowiek.",
+       "wnioski_grupy": [
+        {
+         "tytul": "Źródła i synteza",
+         "punkty": [
+          "Kod i testy, historia gita, schemat i migracje bazy.",
+          "Zgłoszenia i incydenty, dokumentacja i wiki, zapisy rozmów zespołu, wiedza ludzi.",
+          "AI czyta i grupuje setki zgłoszeń i godziny rozmów w kilka minut i podpina je pod miejsca w kodzie. Ręcznie zajęłoby to dni.",
+          "AI samo sięga po kod, gita i tracker. Wiki i zapisy rozmów trzeba mu wskazać.",
+          "Człowiek wskazuje źródła i ocenia, co z syntezy się zgadza.",
+          "Dokumentacja i ludzie czasem opisują inną kolejność działań niż kod. Rozbieżności sprawdzamy w kodzie.",
+          "Kalibrację zestaw z własną intuicją z pierwszego spotkania: co wskazało AI, a co ty, i skąd różnica."
+         ]
+        }
+       ],
+       "widoczny": true
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "widoczny": true
+  },
+  {
+   "id": "mapa-swiadomosci",
+   "tytul": "Mapa świadomości",
+   "podtytul": "Wokół systemu, modułu, komponentu albo pojęcia",
+   "dlaczego": "Całego systemu nie ogarnie ani człowiek, ani model. Świadomość budujemy wokół miejsca, które wskazała kalibracja.",
+   "dzieci": [
+    {
+     "id": "mechanizm-a-potrzeba",
+     "tytul": "Pogłębienie hipotezy",
+     "dlaczego": "Bierzemy jedną hipotezę z kalibracji i badamy ją głębiej: wyłuskujemy reguły, problemy i triki z kodu.",
+     "zadania": [
+      {
+       "tytul": "Mapa świadomości: mechanizm grup",
+       "zadanie": "mapa-swiadomosci-mechanizm-grup",
+       "rodzaj": "ćwiczenie · concept-explorer"
+      }
+     ],
+     "wnioski_grupy": [
+      {
+       "tytul": "Mapa zależy od celu",
+       "korzen": "Mapa zależy od celu",
+       "punkty": [
+        ""
+       ]
+      },
+      {
+       "tytul": "Mechanizm a potrzeba",
+       "punkty": [
+        "Mechanizm i potrzeba biznesowa, której służy, to dwie różne rzeczy. Mechanizm bywa trafnym wyborem, a bywa nośnikiem kilku niezwiązanych reguł.",
+        "W legacy jeden mechanizm często niesie kilka różnych decyzji: każda liczona osobno, ta sama operacja w kilku implementacjach, zmiana wychodzi w innym miejscu.",
+        "Rozdzielenie takich decyzji jest trudne, bo każda ma innych czytelników.",
+        "Prosty prompt często opisuje, jak mechanizm działa. Czemu służy, wychodzi dopiero po osobnych pytaniach.",
+        "Część pytań istnieje tylko dlatego, że wybrano taki mechanizm. Po jego zmianie znikają."
+       ],
+       "link": "mapa-swiadomosci-mechanizm-grup/wnioski/"
+      },
+      {
+       "tytul": "Oddzielanie mechanizmu",
+       "punkty": [
+        "Czy ktoś spoza systemu pyta o to pojęcie?",
+        "Czy słowo występuje poza systemem: w prawie, standardach, formatach wymiany, u innych firm z branży?",
+        "Co zostaje z pytania po wyrzuceniu z niego słowa mechanizmu?",
+        "Czy jedno pojęcie odpowiada na pytania z kilku niezwiązanych dziedzin?",
+        "Czy istnieje kod, który naprawia samą strukturę?",
+        "Jakie pojęcia domeny mechanizm koduje? Od nich analiza startuje od nowa."
+       ]
+      },
+      {
+       "tytul": "Decyzje poziom wyżej",
+       "punkty": [
+        "Przy każdej decyzji: co się zmieni po akcji, kto to zauważy, czy to wartość, czy środek, czy to ta sama decyzja w innym momencie.",
+        "Trzy niezależne okna; liczy się to, co się powtarza. We wszystkich: „czy karta dostanie prąd”, „kto komu płaci”, „kto odpowiada i widzi”.",
+        "Wspólny dla wszystkich decyzji jest mechanizm (najbliższy na linii przodków). Poziom domeny nad nimi każde okno nazwało inaczej.",
+        "Człowiek sprawdza: czy się pokrywa, czy to domena, czy mechanizm (czy rzeczy istnieją bez drzewa), co to znaczy dla zmiany."
+       ],
+       "link": "mapa-swiadomosci-mechanizm-grup/wnioski/"
+      },
+      {
+       "tytul": "Wynik concept-explorera",
+       "punkty": [
+        "Pytania, na które odpowiada pojęcie „grupa”.",
+        "Jak pytania się grupują: według kodu, decyzja → pytania.",
+        "Jak decyzje grupują się dalej: według skutku, kto zauważa zmianę.",
+        "Największe bolączki: oceniane na grupach pytań (pytaniach najwyższego poziomu), środek czy cel."
+       ],
+       "link": "mapa-swiadomosci-mechanizm-grup/materialy/wynik-concept-explorer.html",
+       "link_tytul": "Otwórz wynik"
+      },
+      {
+       "tytul": "Dowody i drugie okno",
+       "punkty": [
+        "Na poziomie szczegółu każdy wniosek potrzebuje dowodu w kodzie.",
+        "Drugie okno z osobnym kontekstem dostaje same pliki z wynikiem, bez rozumowania, i próbuje obalić każde pytanie.",
+        "Sam kod nie powie, kto i dlaczego czegoś potrzebuje; to dołożą zgłoszenia, wiki i rozmowy."
+       ]
+      },
+      {
+       "tytul": "Wnioski poboczne",
+       "punkty": [
+        "Przy celu migracji AI przenosi model 1:1 i nie rozdziela mechanizmu od pojęć domeny.",
+        "Indeks kodu skraca drogę do sedna mechanizmu. Kopie tej samej reguły wychodzą dopiero przy przejściu wszystkich miejsc użycia."
+       ],
+       "szczegoly": {
+        "przycisk": "przebiegi: co odkrył model",
+        "tytul": "Mechanizm grup: trzy przebiegi analizy",
+        "wstep": "Ten sam mechanizm (pakiet group, GroupService) w trzech przebiegach na Opusie. Ustaleń nikt nie sprawdzał osobno; w przebiegu 3 agent sam oznaczał, co sprawdził w kodzie, a co wnioskuje.",
+        "sekcje": [
+         {
+          "tytul": "1. Z indeksem kodu (CodeGraph), rozmowa w sesji głównej",
+          "meta": "9 wywołań narzędzi · pytanie zadane wprost w rozmowie, więc węższy zakres",
+          "punkty": [
+           "Jedna tabela grup mieści trzy drzewa: kempingi i słupki, wystawców kart z gośćmi i kartami, obsługę z użytkownikami konsoli.",
+           "Część logiki siedzi w nazwach: rynek to prefiks nazwy liczony w górę po rodzicach, kemping afiliacyjny i tryb dostępu też wynikają z nazw.",
+           "Trzy reguły na drzewie: zasięg zarządzania (cała gałąź pod grupą), umowy akceptacji kart (wygrywa najbliższy przodek z listą, lista zastępuje listy wyżej) i dziedziczone atrybuty (najbliższy przodek, karty domowe sumują się po całej linii).",
+           "Zgodność typów w drzewie sprawdza walidator w kodzie, baza jej nie pilnuje."
+          ]
+         },
+         {
+          "tytul": "2. Bez indeksu, sam grep i czytanie plików",
+          "meta": "38 wywołań · ok. 156 tys. tokenów · ok. 4,5 min · ok. 45 przeczytanych plików",
+          "punkty": [
+           "Raport pełniejszy niż w przebiegu 1, bo agent przeszedł wszystkie miejsca użycia, a nie odpowiadał na węższe pytanie.",
+           "Znalazł kolejne kopie tych samych reguł: umowy akceptacji w Javie i w kilku zapytaniach SQL, dziedziczenie atrybutów w trzech wersjach, sprawdzenie „czy afiliant” w trzech wersjach, także we froncie.",
+           "Rozdźwięk w czasie: rekord zużycia zapisuje grupy z chwili poboru, a widoczność liczy się z bieżącego drzewa.",
+           "Homonim: „grupa bezpieczeństwa” to pakiet ról, a nie grupa organizacyjna.",
+           "Najdroższe bez indeksu było połączenie zapytań SQL z pliku XML z kodem Javy, które łączy tylko napis klucza."
+          ]
+         },
+         {
+          "tytul": "3. Ocena: czy da się to zbudować w Go i PostgreSQL (cel: migracja stosu)",
+          "meta": "52 wywołania · ok. 231 tys. tokenów · ok. 9 min · tylko analiza, bez kodu",
+          "punkty": [
+           "Werdykt: tak, pod warunkami. Rdzeń jest mały i reguły mają testy, także porównujące Javę z SQL.",
+           "Warunek 1: na czas przejścia wspólna baza, bo grupy są sklejone z resztą systemu kluczami obcymi i zapytaniami innych modułów.",
+           "Warunek 2: biznes rozstrzyga dziwactwa (logika w nazwach, dwie reguły „afiliant”, wielkość liter), inaczej „zachowanie 1:1” przeniesie je razem z resztą.",
+           "Model przechodzi taki, jaki jest: rodzic i rekurencyjne zapytanie, plus ograniczenia w bazie. Rozdzielenia mechanizmu od pojęć domeny ten cel nie wymaga i agent go nie robi.",
+           "Weryfikacja: stary i nowy kod liczą wyniki na tych samych danych dla wszystkich kombinacji wejść, potem nowy liczy równolegle na żywym ruchu i loguje rozbieżności.",
+           "Uwaga: w prompcie agent dostał nazwy kopii SQL znalezionych w przebiegu 2, więc nie znalazł ich sam."
+          ]
+         },
+         {
+          "tytul": "Co z tego wynika",
+          "punkty": [
+           "Indeks skraca drogę do sedna; kopie tej samej reguły wychodzą dopiero przy przejściu wszystkich miejsc użycia.",
+           "Zakres pytania zmienia wynik bardziej niż narzędzie.",
+           "Cel zmienia to, czego model szuka: przy migracji stosu opisuje mechanizm, by go przenieść, a nie pyta, czemu służy."
+          ]
+         }
+        ]
+       },
+       "linki": [
+        {
+         "tytul": "Przebiegi bez skilla: z indeksem, bez indeksu, Go",
+         "url": "mapa-swiadomosci-mechanizm-grup/materialy/wyniki-przebiegow.html"
+        }
+       ]
+      }
+     ],
+     "podtytul": "Reguły, problemy i triki w jednym miejscu",
+     "widoczny": true
+    },
+    {
+     "id": "concept-explorer",
+     "tytul": "concept-explorer",
+     "podtytul": "Pytania, które system już zadaje",
+     "od": "cel-ewolucja-mapa",
+     "dlaczego": "Przy ewolucji architektury pytamy, czemu służy mechanizm. Do tego służy concept-explorer.",
+     "rodzaj_bloku": "narzedzie",
+     "sekcje": [
+      {
+       "tytul": "Co robi",
+       "punkty": [
+        "Szuka pytań, na które system już odpowiada, także tych, które zadaje sobie w trakcie komend, zdarzeń i jobów.",
+        "Każde pytanie zapisuje w języku systemu i w języku domeny.",
+        "Sprawdza, czy pojęcie startowe to byt domeny, czy mechanizm; mechanizm rozpisuje na pojęcia, które koduje.",
+        "Pytania wymuszone strukturą odkłada do osobnego koszyka.",
+        "Przy każdym słowie z modelu sprawdza, skąd pochodzi i czy ma kilka znaczeń; opcjonalnie porównuje je z branżą.",
+        "Wynik to drzewo pytań (decyzja → pytanie → kryterium) do przejrzenia; krytyk w osobnym oknie próbuje je obalić.",
+        "Bolączki ocenia tylko na pytaniach najwyższego poziomu (grupach decyzji), nigdy na pojedynczym pytaniu."
+       ],
+       "linki": [
+        {
+         "tytul": "Anatomia skilla",
+         "url": "mapa-swiadomosci-mechanizm-grup/materialy/anatomia-skilli.html"
+        },
+        {
+         "tytul": "Wyniki: przebieg na mechanizmie grup",
+         "url": "mapa-swiadomosci-mechanizm-grup/materialy/wynik-concept-explorer.html"
+        }
+       ]
+      },
+      {
+       "tytul": "Ograniczenia",
+       "punkty": [
+        "Dwa przebiegi na tym samym kodzie dały różne wyspy, różniące się o kilkanaście klas.",
+        "Kod czyta próbką; kopie tej samej reguły w innych miejscach może przeoczyć.",
+        "Grupowanie decyzji różni się między przebiegami; wspólny poziom ocenia człowiek.",
+        "Krytyk sprawdza wybiórczo i domyślnie odrzuca: pytanie domeny ze słabym dowodem może wypaść."
+       ]
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "uklad": "kolumna",
+   "widoczny": true
+  },
+  {
+   "id": "reguly-decyzje-logika",
+   "tytul": "Zbadanie problematycznego miejsca: reguły, decyzje, rodzaje logiki",
+   "podtytul": "Świat problemu nałożony na świat rozwiązania",
+   "dlaczego": "Zanim zmienimy problematyczne miejsce, chcemy zobaczyć, kto i z jaką intencją woła wyspę, czego przy zmianie nie zgubimy, jacy są klienci i jak daleki jest blast radius.",
+   "dzieci": [
+    {
+     "id": "nalozenie-swiatow",
+     "tytul": "Nałożenie dwóch światów",
+     "dlaczego": "Zanim zmienimy problematyczne miejsce, szukamy wszystkich, którzy z niego korzystają. Potem świat problemu (pytania, bolączki) nakładamy na świat rozwiązania: klasy wyspy i ich klientów.",
+     "zadania": [
+      {
+       "tytul": "Wyciąganie reguł",
+       "zadanie": "graf-po-co-i-graf-jak",
+       "rodzaj": "ćwiczenie"
+      }
+     ],
+     "wnioski_grupy": [
+      {
+       "tytul": "Po co ta mapa",
+       "punkty": [
+        "Dokładna mapa problematycznego miejsca pomaga odwiązać się od rozwiązania: poprawiać w obecnej reprezentacji czy zmienić reprezentację problemu (np. wyrzucić grupy)?",
+        "Decyzję przechodzisz sam; AI pomoże, jeśli ma bazę znanych problemów. Jedną taką bazą są archetypy: kolejne zadanie."
+       ],
+       "link": "graf-po-co-i-graf-jak/wnioski/"
+      },
+      {
+       "tytul": "Wyniki do kolejnego zadania",
+       "punkty": [
+        "Paczka pytań w języku biznesu: wejście skanera archetypów, bez nazw z kodu.",
+        "Bolączki z adresami w kodzie: miejsce, co jest robione, jak kod robi to dziś i co zwraca. Wejście pogłębienia.",
+        "Na obu stronach przycisk „kopiuj” daje gotowy tekst do promptu."
+       ],
+       "linki": [
+        {
+         "tytul": "Paczka pytań",
+         "url": "graf-po-co-i-graf-jak/materialy/paczka-pytan.html"
+        },
+        {
+         "tytul": "Bolączki z adresami w kodzie",
+         "url": "graf-po-co-i-graf-jak/materialy/bolaczki-z-kodem.html"
+        }
+       ]
+      },
+      {
+       "tytul": "Wszystkich nie znajdziesz",
+       "punkty": [
+        "Pełnej listy klientów w legacy nie da jedno źródło: indeks nie widzi wywołań w działaniu, parser tego, czego nie rozwiąże, nikt kodu w innych repo i SQL.",
+        "Zamiast „czy mam wszystkich?”: skąd wiem, kogo nie mam, i jak się dowiem przed szkodą. Licznik pozostałych klientów po każdym przepięciu i obserwacja w działaniu."
+       ],
+       "link": "graf-po-co-i-graf-jak/wnioski/"
+      },
+      {
+       "tytul": "Mapę trzeba skalibrować",
+       "punkty": [
+        "Skrypt na CodeGraph, Claude, Claude z CodeGraph i entry-flows dają różne listy klientów; dokładność zależy od technologii.",
+        "W mikroserwisach dochodzą wywołania przez sieć i inne repozytoria, których indeks jednego repo nie widzi."
+       ]
+      },
+      {
+       "tytul": "Claude z indeksem a skrypt",
+       "punkty": [
+        "Claude poproszony o klientów przez CodeGraph porzucał indeks i pisał własny parser: 95% zgodności między próbami, ponad 4 minuty i ok. 120 tys. tokenów na próbę.",
+        "Skrypt na indeksie: ta sama lista w ułamku sekundy, ale tylko tak pełna jak indeks."
+       ]
+      },
+      {
+       "tytul": "Czy złapałeś API?",
+       "punkty": [
+        "Endpoint woła wyspę przez generyczne getBean(); w indeksie nie ma tej drogi.",
+        "Skrypt go nie widzi, Claude złapał w 2 z 3 prób, entry-flows łapie regułą."
+       ]
+      },
+      {
+       "tytul": "Intencja klienta",
+       "punkty": [
+        "Nazwy metod klientów mówią, po co wołają mechanizm: zmiana, pokazanie, sprawdzenie użytkownika.",
+        "Jedna reguła wołana z kilkoma intencjami to kandydat do rozcięcia."
+       ]
+      }
+     ],
+     "widoczny": true
+    },
+    {
+     "id": "island-call-graph",
+     "tytul": "island-call-graph",
+     "podtytul": "Kto woła wyspę",
+     "dlaczego": "Pełna lista klientów wyspy, za każdym razem ta sama.",
+     "rodzaj_bloku": "narzedzie",
+     "sekcje": [
+      {
+       "tytul": "Co robi",
+       "punkty": [
+        "Bierze klasy wyspy z wyniku concept-explorera (pliki z artifacts).",
+        "Jednym zapytaniem do indeksu CodeGraph wypisuje dla każdej metody wszystkich wołających z kodu produkcyjnego, z linią.",
+        "Skrypt Node bez instalacji pakietów; działa tak samo na Windows.",
+        "Ten sam format z wyniku entry-flows: krawędzie dołożone regułami i wejścia (HTTP, joby)."
+       ],
+       "linki": [
+        {
+         "tytul": "Anatomia skilla",
+         "url": "graf-po-co-i-graf-jak/wnioski/"
+        }
+       ]
+      },
+      {
+       "tytul": "Ograniczenia",
+       "punkty": [
+        "Widzi tylko to, co rozwiązał indeks: bez getBean(), DI, refleksji, części wywołań łańcuchowych i SQL na tabelach wyspy.",
+        "Jednostką jest klasa; w kodzie bez klas trzeba wybrać plik, pakiet, moduł albo procedurę.",
+        "Tryb entry-flows łata część dziur, ale entry-flows to osobne, cięższe narzędzie."
+       ]
+      }
+     ],
+     "widoczny": true
+    },
+    {
+     "id": "entry-flows",
+     "tytul": "entry-flows",
+     "podtytul": "Wejścia aż do wyspy",
+     "dlaczego": "Kto z zewnątrz (HTTP, joby, kolejki) dochodzi do wyspy i którą drogą.",
+     "wnioski_grupy": [
+      {
+       "tytul": "Wyniki na wyspie grup",
+       "punkty": [
+        "116 wejść dochodzi do wyspy: 111 endpointów HTTP i 5 jobów.",
+        "90 krawędzi dołożonych regułami, w tym 9 przez getBean(): konsola drzewa grup widoczna tylko dzięki regule projektowej.",
+        "Ponad skrypt: mappery DTO i serwisy łącza słupka (wywołania łańcuchowe, których indeks nie rozwiązał)."
+       ],
+       "linki": [
+        {
+         "tytul": "Problem na rozwiązaniu z tych danych",
+         "url": "graf-po-co-i-graf-jak/materialy/graf-po-co-graf-jak.html"
+        }
+       ]
+      },
+      {
+       "tytul": "W porównaniu",
+       "punkty": [
+        "Pary metoda wyspy ↔ klasa wołająca: skrypt 392, entry-flows 422, Claude 413–425 w 3 próbach.",
+        "Endpoint GroupWebService: skrypt nie, entry-flows tak, Claude w próbach 2 i 3.",
+        "Najbliżej pytania z zadania, bo zaczyna od wejść: widać, który endpoint i job dochodzi do której metody."
+       ]
+      }
+     ],
+     "rodzaj_bloku": "narzedzie",
+     "sekcje": [
+      {
+       "tytul": "Co robi",
+       "punkty": [
+        "Startuje od indeksu CodeGraph; wejście to metoda bez wołającego, którą reguła technologii rozpoznaje jako endpoint, job albo listener.",
+        "Reguły dokładają krawędzie, których indeks nie widzi: interfejsy, przeciążenia, wywołania łańcuchowe, getBean().",
+        "Grep tylko łata graf: SQL na tabelach celu, XML, skrypty bazy.",
+        "Sprawdza ścieżki w źródłach i wypisuje użytkowników celu, do których nie dochodzi żadne wejście."
+       ],
+       "linki": [
+        {
+         "tytul": "Notatki: anatomia, wyniki, porównanie",
+         "url": "graf-po-co-i-graf-jak/materialy/entry-flows.html"
+        }
+       ]
+      },
+      {
+       "tytul": "Ograniczenia",
+       "punkty": [
+        "Ciężki: Python, kilka kroków, reguły per technologia; dla nowego systemu zwykle reguła projektowa.",
+        "Ścieżka świadka to przykład, nie wszystkie drogi; brak ścieżki nie dowodzi, że jej nie ma.",
+        "Metody celu bez drogi od wejścia trzeba obejrzeć ręcznie."
+       ]
+      }
+     ],
+     "widoczny": true
+    },
+    {
+     "id": "purpose-structure-map",
+     "tytul": "purpose-structure-map",
+     "podtytul": "Problem nałożony na rozwiązanie",
+     "dlaczego": "Gdzie w kodzie jest odpowiedź na pytanie i kto o nie pyta.",
+     "rodzaj_bloku": "narzedzie",
+     "sekcje": [
+      {
+       "tytul": "Co robi",
+       "punkty": [
+        "Kładzie pytanie na każdej metodzie, której linie obejmują miejsce cytowane przy pytaniu: dowód, wołający, decyzja, kryterium.",
+        "Po lewej rozwiązanie (obecna struktura): wyspa jako całość, do 10 klientów i 10 klas, reszta pod „…”.",
+        "Po prawej problem: grupa → decyzja → pytanie.",
+        "Złącz przenosi pytania do klas; wtedy zaznaczenie pytania, decyzji albo grupy podświetla klasy, które odpowiadają, i klientów, którzy pytają, z ich krawędziami.",
+        "Krzyżowanie: dla pytań z grup z bolączką i każdego wołającego osobno co (język problemu) i jak (kod, z dowodem); tabela pod mapą, zwijana po grupach."
+       ],
+       "linki": [
+        {
+         "tytul": "Anatomia skilla",
+         "url": "graf-po-co-i-graf-jak/wnioski/"
+        },
+        {
+         "tytul": "Wynik: mechanizm grup",
+         "url": "graf-po-co-i-graf-jak/materialy/graf-po-co-graf-jak.html"
+        }
+       ]
+      },
+      {
+       "tytul": "Ograniczenia",
+       "punkty": [
+        "Dziury grafu wywołań przechodzą na mapę: klient, którego nie widzi indeks, nie pyta tu o nic.",
+        "Pytanie przypięte do zwykłego gettera dostaje za szeroki zasięg: nie każdy, kto czyta pole, zadaje to pytanie.",
+        "Pytanie leży tam, gdzie explorer cytuje linię; złe miejsce w wyniku explorera daje złe miejsce na mapie.",
+        "Pytanie bez miejsca w kodzie nie trafia na stronę; nie wiadomo, czy odpowiedź jest poza kodem, czy explorer jej nie wskazał."
+       ]
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "uklad": "kolumna",
+   "widoczny": true
+  },
+  {
+   "id": "archetypy",
+   "tytul": "Wybór drogi naprawy",
+   "podtytul": "Co zrobić z problematycznym miejscem",
+   "dlaczego": "Po mapie problemu i rozwiązania wybieramy, jak go naprawić. Dróg jest kilka; na szkoleniu idziemy w głąb archetypów.",
+   "dzieci": [
+    {
+     "id": "co-dalej",
+     "tytul": "Co dalej z problemem",
+     "rodzaj_bloku": "notatki",
+     "dzieci": [
+      {
+       "id": "granice-spojnosci",
+       "tytul": "Odtworzenie przebiegów transakcji na żywo",
+       "rodzaj_bloku": "notatki",
+       "dzieci": [
+        {
+         "id": "flow-lens",
+         "tytul": "flow-lens",
+         "podtytul": "EKSPERYMENTALNY · którędy idzie przebieg",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Najpierw rozpoznaje stos (OpenTelemetry, frameworki, logi, baza) i proponuje tryb; niczego przy tym nie uruchamia.",
+            "Z indeksu CodeGraph buduje mapę klas: wejście, aplikacja, domena, repozytorium. Rysuje tylko klasy z mapy.",
+            "Z działającej aplikacji zbiera wywołania klas, SQL, transakcje (kto otwiera, kto zatwierdza) i wywołania innych systemów.",
+            "Bez OpenTelemetry: log wstrzyknięty do kopii, logi frameworka, log bazy i szkielet z kodu.",
+            "Na przebieg nakładasz własne warstwy: kolory i etykiety z linkami."
+           ],
+           "linki": [
+            {
+             "tytul": "Skill (EKSPERYMENTALNY)",
+             "url": "https://github.com/pilloPl/legacy-ai-skille/tree/eksperymentalne-flow-lens/flow-lens"
+            }
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "EKSPERYMENTALNY: wynik sprawdzaj z kodem i z człowiekiem.",
+            "Pokazuje jeden przebieg naraz; to, że dwa przebiegi zderzają się na tych samych danych, wnioskujesz sam."
+           ]
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "sekcje": [
+        {
+         "tytul": "Wnioski",
+         "punkty": [
+          "Najpierw zobacz, którędy idzie przebieg: które klasy, SQL i transakcje biorą udział w jednym requeście, jobie albo wiadomości.",
+          "Przebiegi, które w jednej transakcji piszą do tych samych danych, to kandydaci na wspólną jednostkę spójności albo do rozcięcia."
+         ]
+        }
+       ],
+       "widoczny": true
+      },
+      {
+       "id": "znany-problem",
+       "tytul": "Archetypy",
+       "zadania": [
+        {
+         "tytul": "Czy ten problem już gdzieś widziałeś",
+         "zadanie": "czy-ten-problem-juz-gdzies-widziales",
+         "rodzaj": "ćwiczenie"
+        }
+       ],
+       "wnioski": [
+        "Problem da się przyłożyć do znanego modelu dopiero wtedy, gdy jest opisany w języku problemu, odwiązany od kodu. Na nazwach z kodu dopasowanie wychodzi wszędzie albo nigdzie.",
+        "To, co w systemie dziwne, wygląda na coś jedynego w swoim rodzaju. Świeże oko, także AI, sprawdza, czy to znany model pod innym słowem.",
+        "Fit-check decyduje o wyniku. Warto puścić go kilka razy na tym samym wejściu i porównać werdykty, zanim zacznie się mapować.",
+        "Na pytanie pokazane na przykładzie z domeny (sytuacja A, B, C i co z niej wychodzi) człowiek odpowiada od razu. Przy pytaniu o kategorię zgaduje.",
+        "NIEROZSTRZYGNIĘTE to prawie PASUJE: agent złapał trop i chce się upewnić jednym pytaniem."
+       ],
+       "dzieci": [
+        {
+         "id": "archetype-storyteller",
+         "tytul": "archetype-storyteller",
+         "podtytul": "Które archetypy naprawdę tu są",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Dzieli wejście między 9 agentów, po jednym na archetyp, każdy w świeżym kontekście i z własną kartą: pytanie główne, elementy, anty-sygnały, fałszywi przyjaciele.",
+            "Każdy agent oddaje werdykt PASUJE, NIE PASUJE albo NIEROZSTRZYGNIĘTE. Przy NIEROZSTRZYGNIĘTE dołącza jedno pytanie i regułę, która je rozstrzyga.",
+            "Pytania wszystkich agentów zadaje człowiekowi naraz, każde na przykładzie z domeny wejścia.",
+            "Skan NIE WIDZI kodu. Kończy się propozycją jednego archetypu i gotowym promptem pogłębienia.",
+            "Pogłębienie to osobne uruchomienie: bez fit-checku, z bolączkami z adresami w kodzie. Mapper pyta od razu i oddaje CO | JAK stare | JAK w archetypie oraz 3 ficzery.",
+            "Łączy wystąpienia tylko według reguł połączeń: strzałka wychodzi wyłącznie od Orderingu, Oferty i Rules, a identyfikator albo rzut może trzymać każdy."
+           ],
+           "linki": [
+            {
+             "tytul": "Anatomia skilla",
+             "url": "czy-ten-problem-juz-gdzies-widziales/materialy/anatomia-archetype-storyteller.html"
+            },
+            {
+             "tytul": "Wynik: skan i pogłębienie Party",
+             "url": "czy-ten-problem-juz-gdzies-widziales/materialy/wynik-archetypy.html"
+            },
+            {
+             "tytul": "Ten sam skan sześć razy",
+             "url": "czy-ten-problem-juz-gdzies-widziales/materialy/powtarzalnosc-fit-check.html"
+            }
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "Trzeba z góry znać problem i myśleć nieleniwie: wybrać, do jakich struktur mapujemy. Polecenie „zmapuj na cokolwiek ze znanych wzorców” rozmywa wynik, dlatego skaner ma zamknięty rejestr archetypów i kartę dla każdego."
+           ]
+          }
+         ],
+         "dzieci": [
+          {
+           "id": "accounting-mapper",
+           "tytul": "Mapper Accounting",
+           "podtytul": "Ruch wartości przez konta",
+           "rodzaj_bloku": "narzedzie",
+           "sekcje": [
+            {
+             "tytul": "Co robi",
+             "punkty": [
+              "Ten sam protokół co mapper Party: wystąpienie ze skanu, bolączki z adresami, pytania od razu, CO | JAK, 3 ficzery.",
+              "Model: zasoby, konta, transakcje, wpisy, korekta wpisem odwrotnym, ważność i kolejność schodzenia."
+             ],
+             "linki": [
+              {
+               "tytul": "Mapper Accounting",
+               "url": "https://github.com/pilloPl/legacy-ai-skille/tree/czy-ten-problem-juz-gdzies-widziales/archetype-storyteller/mappers/accounting"
+              }
+             ]
+            }
+           ],
+           "widoczny": true
+          },
+          {
+           "id": "party-mapper",
+           "tytul": "Mapper Party",
+           "podtytul": "Pogłębienie jednego archetypu",
+           "rodzaj_bloku": "narzedzie",
+           "sekcje": [
+            {
+             "tytul": "Co robi",
+             "punkty": [
+              "Dostaje wystąpienie z pliku skanu i bolączki z adresami w kodzie; fit-checku nie powtarza.",
+              "Od razu pyta na przykładzie z domeny o decyzje, które zmieniają model.",
+              "Oddaje tabelę CO | JAK stare | JAK w archetypie (zdanie, szczegóły do rozwinięcia) i 3 ficzery, których nie ma w wejściu.",
+              "Kod czyta tylko pod adresem z bolączki: klasa i jej najbliższe otoczenie."
+             ],
+             "linki": [
+              {
+               "tytul": "Mapper Party",
+               "url": "https://github.com/pilloPl/legacy-ai-skille/tree/czy-ten-problem-juz-gdzies-widziales/archetype-storyteller/mappers/party"
+              },
+              {
+               "tytul": "Wynik: skan i pogłębienie Party",
+               "url": "czy-ten-problem-juz-gdzies-widziales/materialy/wynik-archetypy.html"
+              }
+             ]
+            },
+            {
+             "tytul": "Ograniczenia",
+             "punkty": [
+              "Mapuje tylko to, co archetyp obejmuje; reszta wraca jako pojęcia poza archetypem i trzeba ją rozwiązać inaczej."
+             ]
+            }
+           ],
+           "widoczny": true
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "widoczny": true
+      },
+      {
+       "id": "klasa-problemu",
+       "tytul": "Klasa problemu",
+       "rodzaj_bloku": "notatki",
+       "dzieci": [
+        {
+         "id": "problem-classifier",
+         "tytul": "problem-classifier",
+         "podtytul": "Jaka to klasa problemu",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Cztery klasy: CRUD, transformacja i prezentacja, integracja, rywalizacja o zasób. Każda ma swój klocek: kontroler, funkcje, proces, agregat.",
+            "Na makiecie czyta każdy element osobno: formularz, tabelę, licznik „37 / 500”, wyszarzony przycisk, kłódkę, „Wyślij do…”.",
+            "Pyta o konkretny element ekranu, z odpowiedziami do wyboru i tym, co z każdej wynika.",
+            "Oddaje dekompozycję (komponent, klasa, uzasadnienie), diagram powiązań i przy rywalizacji o zasób następny krok: jednostkę spójności."
+           ],
+           "linki": [
+            {
+             "tytul": "Anatomia i przebieg na nowym ekranie",
+             "url": "czy-ten-problem-juz-gdzies-widziales/materialy/problem-classifier.html"
+            }
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "Widzi tylko ekran i odpowiedzi; reguły, których makieta nie pokazuje, nie trafią do podziału.",
+            "Klasa części zależy od odpowiedzi człowieka: ten sam element bywa rywalizacją o zasób albo tylko wygodą."
+           ]
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "sekcje": [
+        {
+         "tytul": "Wnioski",
+         "punkty": [
+          "Jeden ekran to zwykle kilka klas: dane opisowe (CRUD), widok liczony z innych danych, przydział z ograniczonej puli (rywalizacja o zasób), wysyłka do innego systemu (integracja).",
+          "Poprawka bywa samą dekompozycją: rozdzielasz to, co ekran zlepił, i każda część dostaje prostszy model. To się powtarza w każdym systemie.",
+          "Element, który wygląda groźnie (kłódka „ktoś edytuje”, wyszarzony przycisk), nie musi chronić żadnej reguły. Rozstrzyga pytanie, co by się zepsuło przy dwóch równoczesnych zmianach."
+         ]
+        }
+       ],
+       "widoczny": true
+      },
+      {
+       "id": "reprezentacja-modelu-notatka",
+       "tytul": "Reprezentacja modelu",
+       "rodzaj_bloku": "notatki",
+       "sekcje": [
+        {
+         "tytul": "Wnioski",
+         "punkty": [
+          "Koncept może być w porządku, a przeszkadza przyzwyczajenie do jednej stylówki: encja i serwis.",
+          "Pomóż sobie odwiązać to myślenie: spójrz na ten sam koncept w zupełnie innej reprezentacji (graf, agregat, model matematyczny) i sprawdź, które pytania stają się prostsze."
+         ]
+        }
+       ],
+       "dzieci": [
+        {
+         "id": "representation-lens-explorer",
+         "tytul": "representation-lens-explorer",
+         "podtytul": "Inna reprezentacja dla tych samych pytań",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Bierze pytania, na które system już odpowiada, i szuka dla nich lepszej reprezentacji.",
+            "Każdą propozycję uzasadnia kształtem pytania: pytanie → potrzebna operacja → operacja, którą reprezentacja ma natywnie.",
+            "Proponuje też nowe pytania, na które dałoby się odpowiedzieć w innej reprezentacji, jeśli są na nie dowody w danych."
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "Proponuje soczewki, nie decyzję; czy nowa reprezentacja się opłaca, rozstrzyga człowiek z kosztem zmiany przed oczami."
+           ]
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "widoczny": true
+      }
+     ],
+     "sekcje": [
+      {
+       "tytul": "Drogi",
+       "punkty": [
+        "Spec-driven od nowa: zbieramy wymagania, reguły już mamy, rzeźbimy nowy model.",
+        "Refaktor bolączek: lokalne promptowanie i lokalne spec-driven na zastanym modelu. Czasem wystarczy poprawić jedno miejsce, np. wydajność.",
+        "Model wyraźnie oderwany od rzeczywistości, a wartość trzeba dowieźć szybko: sprawdź, czy problem mapuje się na znany archetyp (Archetypy)."
+       ]
+      },
+      {
+       "tytul": "Inne możliwe sytuacje",
+       "punkty": [
+        "Problem siedzi w danych, a nie w modelu: najpierw porządek danych i ich migracja, model zostaje.",
+        "Przebiegi zabierają sobie te same dane: zobacz prawdziwe transakcje i blokady, zanim przetniesz granice.",
+        "Przychodzi nowy ficzer, który nie pasuje do tego, co jest: rozbij go według klasy problemu.",
+        "Bolączka jest rzadka, a zmiana droga: zostaw model, dodaj obserwację i wróć, gdy zacznie boleć częściej."
+       ]
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "uklad": "drzewo",
+   "widoczny": true
+  },
+  {
+   "id": "spec-driven",
+   "tytul": "Spec-driven",
+   "podtytul": "Łatwe w greenfield, ale jak w brownfield?",
+   "uklad": "drzewo",
+   "dlaczego": "Poprawa kodu za pomocą AI: generowanie, refaktoring, testy, konwencje.",
+   "dzieci": [
+    {
+     "id": "konwencje",
+     "tytul": "Konwencje",
+     "rodzaj_bloku": "notatki",
+     "sekcje": [
+      {
+       "tytul": "Wnioski",
+       "punkty": [
+        "Konwencje w legacy są, ale często do zmiany. Obecne może wyciągnąć AI z kodu; zanim je przyjmiesz za specyfikację, zdecyduj, które zostają."
+       ]
+      }
+     ],
+     "widoczny": true
+    },
+    {
+     "id": "testy",
+     "tytul": "Obserwowalne zachowania i ich znajdowanie",
+     "rodzaj_bloku": "notatki",
+     "sekcje": [
+      {
+       "tytul": "Wnioski",
+       "punkty": [
+        "Jak obtestujesz koncept, który chcesz wyrzucić, najpewniej się zabetonujesz: koncept przenika do testów (dane testowe, asercje, nazwy).",
+        "Co zrobić: scenariusze w języku problemu, z asercją na skutku, który widzi biznes, a nie na strukturze modelu."
+       ]
+      }
+     ],
+     "dzieci": [
+      {
+       "id": "scenariusze-testowe",
+       "tytul": "Scenariusze testowe z bolączek",
+       "zadania": [
+        {
+         "tytul": "Scenariusze testowe z bolączek",
+         "zadanie": "scenariusze-testowe-z-bolaczek",
+         "rodzaj": "ćwiczenie"
+        }
+       ],
+       "wnioski_grupy": [
+        {
+         "tytul": "Wnioski",
+         "punkty": [
+          "Do uzupełnienia po zadaniu."
+         ]
+        }
+       ],
+       "widoczny": true
+      },
+      {
+       "id": "observable-behavior-test-advisor",
+       "tytul": "observable-behavior-test-advisor",
+       "podtytul": "Jak testować przez obserwowalne zachowania",
+       "rodzaj_bloku": "narzedzie",
+       "sekcje": [
+        {
+         "tytul": "Co robi",
+         "punkty": [
+          "Czyta kod produkcyjny i proponuje, jak go testować przez obserwowalne zachowania: opis testu w języku biznesu i podpowiedź techniczna.",
+          "Działa z istniejącymi testami i bez nich; mówi, na czym robić asercję, a czego nie dotykać."
+         ]
+        },
+        {
+         "tytul": "Ograniczenia",
+         "punkty": [
+          "Proponuje testy na dzisiejszym kodzie; to, czy zachowanie ma przetrwać zmianę modelu, rozstrzyga człowiek."
+         ]
+        }
+       ],
+       "widoczny": true
+      }
+     ],
+     "podtytul": "Co system naprawdę robi, a nie co się wydaje",
+     "widoczny": true
+    },
+    {
+     "id": "agenci-testy-implementacja",
+     "tytul": "Agenci: testy, implementacja, weryfikacja",
+     "podtytul": "Czy budować łańcuch ról?",
+     "rodzaj_bloku": "notatki",
+     "sekcje": [
+      {
+       "tytul": "Wnioski",
+       "punkty": [
+        "Opus 5.5 sam rozbije zadanie i odpali podagentów do testów, implementacji i przeglądu. Stały łańcuch ról na wzór działu (tester, programista, QA) niewiele do tego dodaje.",
+        "Liczy się, kto co widzi. Testy pisane przez kogoś, kto zna implementację albo jej plan, odtwarzają kod, a nie specyfikację. Recenzent, który zna tok rozumowania autora, zwykle się z nim zgadza.",
+        "Podagent odpalony przez model dostaje prompt od tego modelu, razem z jego założeniami. Niezależność ustawiasz sam: piszący testy widzi tylko specyfikację, weryfikator specyfikację i diff.",
+        "Model chętnie ogłasza sukces. Działają bramki, których nie obejdzie: test czerwony przed implementacją, testy zablokowane do zmian, wynik porównany ze starym systemem na tych samych danych.",
+        "Przy małym zadaniu jeden model w pętli test, kod, uruchom jest szybszy i tańszy. Na każdym przekazaniu między agentami ginie kontekst.",
+        "Bez spisanych założeń trzeci agent nie ma czego sprawdzać. Wąskim gardłem jest specyfikacja, nie liczba agentów."
+       ]
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "widoczny": true
+  },
+  {
+   "id": "parallel-models",
+   "tytul": "Parallel Models",
+   "podtytul": "Nowy model obok starego",
+   "uklad": "drzewo",
+   "dlaczego": "Nowy model budujemy obok starego i porównujemy wyniki, zamiast przepisywać wszystko naraz.",
+   "dzieci": [
+    {
+     "id": "stary-i-nowy",
+     "tytul": "Stary i nowy model obok siebie",
+     "zadania": [
+      {
+       "tytul": "Stary i nowy model obok siebie",
+       "zadanie": "stary-i-nowy-model-obok-siebie",
+       "rodzaj": "ćwiczenie"
+      }
+     ],
+     "dzieci": [
+      {
+       "id": "swappable-dsl",
+       "tytul": "swappable-dsl",
+       "podtytul": "Jedno API dla starego i nowego modelu",
+       "rodzaj_bloku": "narzedzie",
+       "sekcje": [
+        {
+         "tytul": "Co robi",
+         "punkty": [
+          "Buduje podmienialne API (DSL) metodą czterech warstw testów: scenariusze → DSL → sterownik → system.",
+          "Czasowniki DSL to język CO z mapy problemu na rozwiązaniu; sterowniki to stary kod i nowy model.",
+          "Ten sam zestaw scenariuszy biegnie przez oba modele: stary musi być zielony, czerwone na nowym to zmiany zachowania do decyzji biznesu."
+         ]
+        },
+        {
+         "tytul": "Ograniczenia",
+         "punkty": [
+          "Kontrakt trzeba zamrozić, zanim powstanie nowy model; zmiana kontraktu później znaczy przepisanie scenariuszy."
+         ]
+        }
+       ],
+       "dzieci": [
+        {
+         "id": "model-router",
+         "tytul": "model-router",
+         "podtytul": "Przełączanie starego i nowego flagą",
+         "rodzaj_bloku": "narzedzie",
+         "sekcje": [
+          {
+           "tytul": "Co robi",
+           "punkty": [
+            "Na zamrożonym kontrakcie dodaje router między starym a nowym modelem, bez big-bangu.",
+            "Proponuje, po czym routować: flaga, klient, pojęcie, pytanie, pora dnia, eksperyment na jednym kliencie.",
+            "Dobiera flagę zmienianą bez redeployu, opcjonalnie rekonsyliator porównujący oba modele, i testy przełącznika."
+           ]
+          },
+          {
+           "tytul": "Ograniczenia",
+           "punkty": [
+            "Router przełącza zachowanie, nie dane; to, czy nowy model ma dane, które rozumie, to osobna sprawa (migracja danych)."
+           ]
+          }
+         ],
+         "widoczny": true
+        }
+       ],
+       "widoczny": true
+      }
+     ],
+     "widoczny": true
+    },
+    {
+     "id": "migracja-danych",
+     "tytul": "Migracja danych",
+     "rodzaj_bloku": "notatki",
+     "sekcje": [
+      {
+       "tytul": "Wnioski",
+       "punkty": [
+        "Niejawna semantyka danych decyduje, czy nowy model naprawdę przejmie odpowiedzialność."
+       ]
+      }
+     ],
+     "widoczny": true
+    }
+   ],
+   "widoczny": true
+  }
+ ],
+ "stan_startowy": {
+  "wnioski": true,
+  "zadania": true,
+  "dlaczego": true,
+  "siatka": true,
+  "motyw": "",
+  "ukryte": {
+   "concept-explorer": true,
+   "nalozenie-swiatow": true
+  },
+  "karty": {
+   "mechanizm-a-potrzeba#w0": false,
+   "mechanizm-a-potrzeba#w0#c1": false,
+   "mechanizm-a-potrzeba#w0#c0": true,
+   "mechanizm-a-potrzeba#w0#c2": true,
+   "mechanizm-a-potrzeba#w0#c3": false
+  },
+  "punkty": {}
+ }
+}
+</script>
+<script>
+(() => {
+  const DANE = JSON.parse(document.getElementById("dane").textContent);
+  const widok = document.getElementById("widok"), swiat = document.getElementById("swiat"), svg = document.getElementById("krawedzie");
+  const NS = "http://www.w3.org/2000/svg";
+  const RUCH = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ODSTEP_X = 250, ODSTEP_Y = 96, SZYNA = 34;
+
+  // tryb ustawia tylko lokalny serwer (./szkolenie mapa): "admin" = edytor pod /admin/, "podglad" = mapa jak po publikacji
+  const HOST_LOKALNY = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const ADMIN = HOST_LOKALNY && window.MAPA_TRYB === "admin", PODGLAD = HOST_LOKALNY && window.MAPA_TRYB === "podglad";
+  const naglowek = () => {
+    document.getElementById("eyebrow").textContent = (DANE.eyebrow || "Mapa szkolenia") + (ADMIN ? " · edycja" : PODGLAD ? " · podgląd publikacji" : HOST_LOKALNY ? " · tryb lokalny (ze szkicami)" : "");
+    document.getElementById("naglowek-tytul").textContent = DANE.tytul || "";
+    if (DANE.tytul) document.title = (ADMIN ? "Edycja · " : "Mapa · ") + DANE.tytul;
+  };
+  naglowek();
+
+  // ---- dane: drzewo bloków ----
+  let bloki = [];               // wszystkie, w kolejności
+  let glowne = [];              // oś pozioma
+  const START = {id: "__start", start: true, poziom: 0};
+  function przygotuj() {
+    bloki = []; glowne = [];
+    (function zbierz(lista, rodzic, poziom) {
+      lista.forEach((b, i) => {
+        b.id = b.id || (rodzic ? rodzic.id + "-" : "b") + i;
+        b.rodzic = rodzic; b.poziom = poziom; b.poprzedni = null; b.zrodlo = null;
+        b.nr = rodzic ? "" : String(i + 1);
+        bloki.push(b);
+        if (!rodzic) glowne.push(b);
+        zbierz(b.dzieci || [], b, poziom + 1);
+      });
+    })(DANE.bloki, null, 0);
+    // numer mają tylko karty tematyczne, kolejno w głąb bloku (5.1, 5.2…); narzędzia i notatki z "bez_numeru" są bez numeru; "numer" ustawia go wprost (np. gdy kolejność w rzędzie drzewa jest inna niż numeracja)
+    glowne.forEach(g => { let n = 0;
+      (function numeruj(lista) { lista.forEach(b => { if (b.numer) b.nr = b.numer; else if (b.rodzaj_bloku !== "narzedzie" && b.rodzaj_bloku !== "wniosek" && !b.bez_numeru) b.nr = g.nr + "." + (++n); numeruj(b.dzieci || []); }); })(g.dzieci || []); });
+    // osiągalność w grafie: blok na osi zależy od poprzedniego, podblok od rodzica, blok ze strzałką „od” od bloku z kotwicą
+    glowne.forEach((b, i) => { b.poprzedni = glowne[i - 1] || null; });
+    const wlascicielKotwicy = {};
+    bloki.forEach(b => (b.wnioski_grupy || []).forEach(g => [...(g.drzewo || []), ...(g.cele || [])]
+      .forEach(x => { if (x.kotwica) wlascicielKotwicy[x.kotwica] = b; })));
+    bloki.forEach(b => { if (b.od) b.zrodlo = wlascicielKotwicy[b.od] || null; });
+  }
+  przygotuj();
+
+  // ---- stan widoczności ----
+  // punkt startowy z danych (widoczny + stan_startowy, ustawia go edytor); u oglądającego jego zmiany w tej przeglądarce,
+  // ważne do następnej publikacji ("wersja"); w edytorze każda zmiana od razu staje się punktem startowym
+  const KLUCZ = "mapa-szkolenia:" + (DANE.id || "domyslna");
+  let nadpisania = {}, ukryteDlaczego = {}, wszystkieDlaczego = true, pokazWnioski = true, pokazZadania = true, zwinieteKarty = {}, ukrytePunkty = {};
+  let siatka = true, motyw = "";
+  function wczytajStan() {
+    const S = JSON.parse(JSON.stringify(DANE.stan_startowy || {}));
+    let z = {};
+    if (!ADMIN && !PODGLAD) try { z = JSON.parse(localStorage.getItem(KLUCZ) || "{}"); if ((z.wersja || "") !== (DANE.wersja || "")) z = {}; } catch (e) {}
+    const v = (k, d) => (k in z ? z[k] : k in S ? S[k] : d);
+    nadpisania = z.widoczne || {};
+    ukryteDlaczego = v("ukryte", {}); wszystkieDlaczego = v("dlaczego", true) !== false; pokazWnioski = v("wnioski", true) !== false;
+    pokazZadania = v("zadania", true) !== false; zwinieteKarty = v("karty", {}); ukrytePunkty = v("punkty", {});
+    siatka = S.siatka !== false; motyw = S.motyw || "";
+    if (!ADMIN && !PODGLAD) try { const s = localStorage.getItem("mapa-siatka"); if (s) siatka = s !== "0"; const m = localStorage.getItem("mapa-motyw"); if (m != null) motyw = m; } catch (e) {}
+  }
+  wczytajStan();
+  const zapisz = () => {
+    if (ADMIN) {
+      bloki.forEach(b => { if (wlasnaWidocznosc(b)) b.widoczny = true; else delete b.widoczny; }); nadpisania = {};
+      DANE.stan_startowy = {wnioski: pokazWnioski, zadania: pokazZadania, dlaczego: wszystkieDlaczego, siatka, motyw, ukryte: ukryteDlaczego, karty: zwinieteKarty, punkty: ukrytePunkty};
+      if (window.__mapaZmiana) window.__mapaZmiana("stan");
+      return;
+    }
+    if (PODGLAD) return;
+    try { localStorage.setItem(KLUCZ, JSON.stringify({wersja: DANE.wersja || "", widoczne: nadpisania, ukryte: ukryteDlaczego, dlaczego: wszystkieDlaczego, wnioski: pokazWnioski, zadania: pokazZadania, karty: zwinieteKarty, punkty: ukrytePunkty})); } catch (e) {}
+  };
+  const domyslnie = b => b.widoczny === true;   // pierwsze wejście: to, co odkrył prowadzący w edytorze (reszta ukryta)
+  const wlasnaWidocznosc = b => (b.id in nadpisania ? nadpisania[b.id] : domyslnie(b));
+  const widoczny = b => wlasnaWidocznosc(b) && (!b.rodzic || widoczny(b.rodzic))
+    && (!b.poprzedni || widoczny(b.poprzedni)) && (!b.zrodlo || widoczny(b.zrodlo));
+  const rozwiniete = new Set();
+  // teksty na krawędziach: domyślnie odkryte; zwinięte pojedynczo (klik) albo wszystkie (przycisk)
+  const zwiniete = id => (id in ukryteDlaczego ? ukryteDlaczego[id] : !wszystkieDlaczego);
+
+  // ---- DOM węzłów ----
+  const el = (tag, klasa, tekst) => { const e = document.createElement(tag); if (klasa) e.className = klasa; if (tekst != null) e.textContent = tekst; return e; };
+  // na własnej maszynie (./szkolenie mapa) linki idą do lokalnej strony prowadzącego, także do szkiców; podgląd linkuje jak po publikacji
+  const LOKALNIE = HOST_LOKALNY && !PODGLAD;
+  const BAZA = LOKALNIE ? "../" : (DANE.baza || "");
+  const url = z => z.url || (z.zadanie ? BAZA + z.zadanie + "/" : null);
+  const maTresc = b => !!(b.dlaczego || (b.sekcje || []).length || (pokazWnioski && !b.rodzic && (b.wnioski || []).length) || (pokazZadania && (b.zadania || []).length));
+  const grupyWnioskow = b => (!b.rodzic || b.pokaz_wnioski === false) ? [] :
+    (b.wnioski_grupy || ((b.wnioski || []).length ? [{tytul: "Wnioski", punkty: b.wnioski, link: b.wnioski_link}] : []));
+  // pojedynczy punkt wniosku: klik chowa tekst (zostaje znacznik), drugi klik go przywraca
+  function punkt(klucz, tekst) {
+    const li = el("li", ukrytePunkty[klucz] ? "ukryty" : ""); li.dataset.k = klucz; li.title = "Kliknij, żeby schować albo pokazać";
+    li.append(el("span", "t", tekst)); return li;
+  }
+  const MAX_PUNKTOW = 3, MAX_W_KARCIE = 6;   // powyżej MAX_W_KARCIE: reszta w popupie
+  const adres = u => (u.startsWith("http") ? u : BAZA + u);
+
+  function zbudujKarte(b) {
+    const w = el("div", "wezel" + (b.poziom ? " dziecko" : ""));
+    w.dataset.id = b.id;
+    const k = el("div", "karta"); w.appendChild(k);
+    if (b.start) { w.className = "wezel start"; k.textContent = DANE.start || "Start"; return w; }
+    if (b.pusty) { w.classList.add("pusty"); return w; }
+    if (!widoczny(b)) {
+      w.classList.add("duch");
+      const g = el("div", "glowa"); g.append(el("div", "nr", b.nr), Object.assign(el("div", "tytuly"), {}));
+      g.lastChild.append(el("div", "tytul", "…"));
+      k.appendChild(g); return w;
+    }
+    const g = el("div", "glowa");
+    const t = el("div", "tytuly");
+    if (b.rodzaj_bloku === "narzedzie") { w.classList.add("narzedzie"); t.append(el("div", "notatka-znak", "🛠 narzędzie")); }
+    if (b.rodzaj_bloku === "notatki") { w.classList.add("notatka"); t.append(el("div", "notatka-znak", "📝 notatki")); }
+    if (b.rodzaj_bloku === "wniosek") { w.classList.add("wniosek-wezel"); t.append(el("div", "notatka-znak wniosek-znak", "💡 wniosek")); }
+    if (b.rodzaj_bloku === "cwiczenie" || (!b.rodzaj_bloku && b.rodzic && (b.zadania || []).length)) t.append(el("div", "notatka-znak cwiczenie-znak", "🧩 ćwiczenie"));
+    t.append(el("div", "tytul", b.tytul || ""));
+    if (b.podtytul) t.append(el("div", "podtytul", b.podtytul));
+    if (b.nr) g.append(el("div", "nr", b.nr), t); else g.append(t);
+    if (maTresc(b)) { const s = el("div", "strzalka"); s.innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4.5 6 8.5 10 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'; g.append(s); }
+    k.appendChild(g);
+
+    // wnioski bloku głównego są w środku; bloku pod spodem – obok, jako osobne karty
+    const pokazW = pokazWnioski && !b.rodzic && b.pokaz_wnioski !== false && (b.wnioski || []).length;
+    const pokazZ = pokazZadania && b.pokaz_zadania !== false && (b.zadania || []).length;
+
+    const tr = el("div", "tresc");
+    if (b.dlaczego) { const s = el("div", "sekcja"); s.append(el("h3", "", "Dlaczego"), el("p", "dlaczego", b.dlaczego)); tr.append(s); }
+    // sekcje w środku karty (narzędzie: co robi, ograniczenia)
+    (b.sekcje || []).forEach((g, i) => {
+      const s = el("div", "sekcja"); s.append(el("h3", "", g.tytul));
+      if (g.drzewo) {
+        // drzewko w sekcji: gałąź = tytuł, liście = punkty
+        const ul = el("ul", "drzewo");
+        g.drzewo.forEach((gal, gi) => {
+          const lg = el("li", "galaz"), ul2 = el("ul", "wnioski");
+          (gal.punkty || []).forEach((x, j) => ul2.append(punkt(b.id + "#s" + i + "#" + gi + "#" + j, x)));
+          lg.append(el("div", "galaz-tyt", gal.tytul), ul2); ul.append(lg);
+        });
+        s.append(ul);
+      } else {
+        const ul = el("ul", "wnioski"); (g.punkty || []).forEach((x, j) => ul.append(punkt(b.id + "#s" + i + "#" + j, x))); s.append(ul);
+      }
+      [...(g.linki || []), ...(g.link ? [{tytul: "Więcej", url: g.link}] : [])].forEach(l => { const a = el("a", "pelne", l.tytul + " →"); a.href = adres(l.url); a.target = "_blank"; a.rel = "noopener"; s.append(a); });
+      tr.append(s);
+    });
+    if (pokazZ) {
+      const s = el("div", "sekcja"); s.append(el("h3", "", "Ćwiczenia"));
+      const l = el("div", "zadania");
+      b.zadania.forEach(z => {
+        const u = url(z), a = el(u ? "a" : "div", "zadanie");
+        if (u) { a.href = u; a.target = "_blank"; a.rel = "noopener"; }
+        a.append(el("span", "ikona", u ? "🎯" : "👀"), el("span", "", z.tytul));
+        if (z.rodzaj) a.append(el("span", "rodzaj", z.rodzaj));
+        l.append(a);
+      });
+      s.append(l); tr.append(s);
+    }
+    if (pokazW) {
+      const s = el("div", "sekcja"); s.append(el("h3", "", "Wnioski"));
+      const ul = el("ul", "wnioski"); b.wnioski.forEach((x, j) => ul.append(punkt(b.id + "#in#" + j, x))); s.append(ul);
+      if (b.wnioski_link) { const a = el("a", "pelne", "Pełne wnioski →"); a.href = adres(b.wnioski_link); a.target = "_blank"; a.rel = "noopener"; s.append(a); }
+      tr.append(s);
+    }
+    if (tr.childNodes.length) k.appendChild(tr);
+    if (rozwiniete.has(b.id)) w.classList.add("rozwiniety");
+    return w;
+  }
+
+  // ---- krawędzie ----
+  function krawedzie() {
+    const lista = [];
+    const os = [START, ...glowne];
+    for (let i = 1; i < os.length; i++) lista.push({z: os[i - 1], do: os[i], rodzaj: "glowna"});
+    bloki.filter(b => b.rodzic).forEach(b => {
+      const kt = b.od && kotwice.get(b.od);
+      if (kt) lista.push({z: kt.pb, do: b, rodzaj: "cel", kotwica: kt.el});
+      else if (uklad(b.rodzic) === "drzewo") lista.push({z: b.rodzic, do: b, rodzaj: "boczna", pierwsze: true, drzewo: true, wielu: b.rodzic.dzieci.length > 1});
+      else lista.push({z: b.rodzic, do: b, rodzaj: "boczna", pierwsze: b.rodzic.dzieci[0] === b});
+    });
+    return lista.filter(k => obecny(k.z) && obecny(k.do));
+  }
+  const obecny = b => b.start || b.karta || !b.rodzic || widoczny(b.rodzic);
+
+  // ---- render + layout ----
+  let kotwice = new Map(), karty = new Map(), wezly = new Map(), kraw = [], poz = new Map(), cel = new Map(), rozm = new Map();
+
+  function zbuduj(animuj) {
+    swiat.querySelectorAll(".wezel,.etykieta,.wn-karta,.przejscie").forEach(e => e.remove());
+    svg.replaceChildren();
+    wezly = new Map();
+    const kolejka = [START, ...bloki].filter(obecny);
+    kolejka.forEach(b => { const w = zbudujKarte(b); wezly.set(b.id, {b, w}); swiat.appendChild(w); });
+    karty = new Map(); kotwice = new Map();
+    if (pokazWnioski) kolejka.filter(b => !b.start && widoczny(b)).forEach(b => {
+      const lista = grupyWnioskow(b).map((g, i) => {
+        const pb = {id: b.id + "#w" + i, karta: true, rodzic: b};
+        const w = el("div", "wn-karta" + (zwinieteKarty[pb.id] === false ? "" : " zwinieta"));   // domyślnie zwinięte
+        w.dataset.id = pb.id;
+        const pk = g.punkty || [];
+        const h3 = el("h3", "", g.tytul || "Wnioski"); if (!g.drzewo) h3.append(el("span", "ile", String(pk.length))); w.append(h3);
+        if (g.drzewo) w.classList.add("szeroka");
+        if (g.minimapa) {
+          w.classList.add("minimapa"); w.classList.remove("zwinieta");
+          const k = el("div", "mm-korzen"); k.append(el("span", "", g.korzen || g.tytul)); w.append(k);
+          const rz = el("div", "mm-cele");
+          g.cele.forEach((c, ci) => {
+            const gal = el("div", "mm-galaz" + (zwinieteKarty[pb.id + "#c" + ci] === false ? "" : (c.rozwiniety ? "" : " zwiniety")));
+            if (zwinieteKarty[pb.id + "#c" + ci] === true) gal.classList.add("zwiniety");
+            gal.dataset.id = pb.id + "#c" + ci;
+            const t = el("div", "mm-cel", c.tytul);
+            if (c.kotwica) { t.dataset.kotwica = c.kotwica; kotwice.set(c.kotwica, {pb, el: t}); }
+            const li = el("div", "mm-liscie");
+            (c.grupy || []).forEach((gr, gi) => {
+              const kk = el("div", "mm-karta"); kk.append(el("h4", "", gr.tytul));
+              const ul = el("ul", "wnioski"); (gr.punkty || []).forEach((x, j) => ul.append(punkt(pb.id + "#c" + ci + "#" + gi + "#" + j, x)));
+              kk.append(ul); li.append(kk);
+            });
+            gal.append(t, li); rz.append(gal);
+          });
+          w.append(rz);
+          h3.remove();
+        } else if (g.drzewo) {
+          // drzewko: gałąź = cel, liście = na co patrzeć; gałąź może być kotwicą strzałki do bloku
+          const ul = el("ul", "drzewo");
+          g.drzewo.forEach((gal, gi) => {
+            const lg = el("li", "galaz"); const t = el("div", "galaz-tyt", gal.tytul);
+            if (gal.kotwica) { t.dataset.kotwica = gal.kotwica; kotwice.set(gal.kotwica, {pb, el: t}); }
+            const ul2 = el("ul", "wnioski"); (gal.punkty || []).forEach((x, j) => ul2.append(punkt(pb.id + "#" + gi + "#" + j, x)));
+            lg.append(t, ul2); ul.append(lg);
+          });
+          w.append(ul);
+        } else {
+        const ul = el("ul", "wnioski"); pk.forEach((x, j) => { const li = punkt(pb.id + "#" + j, x); if (j >= MAX_PUNKTOW) li.classList.add("nadmiar"); ul.append(li); }); w.append(ul);
+        }
+        if (pk.length > MAX_W_KARCIE) { const m = el("button", "wiecej", "wszystkie (" + pk.length + ") ↗"); m.type = "button"; m.dataset.popup = "1"; m.onclick = () => popup(g); w.append(m); }
+        else if (pk.length > MAX_PUNKTOW) { const m = el("button", "wiecej", "jeszcze " + (pk.length - MAX_PUNKTOW) + " ↓"); m.type = "button"; w.append(m); }
+        if (g.szczegoly) { const m = el("button", "wiecej", (g.szczegoly.przycisk || "szczegóły") + " ↗"); m.type = "button"; m.dataset.popup = "1"; m.onclick = () => popup(g.szczegoly); w.append(m); }
+        (g.linki || []).forEach(l => { const a = el("a", "pelne", l.tytul + " →"); a.href = adres(l.url); a.target = "_blank"; a.rel = "noopener"; w.append(a); });
+        if (g.link) { const a = el("a", "pelne", (g.link_tytul || "Pełne wnioski") + " →"); a.href = adres(g.link); a.target = "_blank"; a.rel = "noopener"; w.append(a); }
+        wezly.set(pb.id, {b: pb, w}); swiat.appendChild(w);
+        return pb;
+      });
+      if (lista.length) karty.set(b.id, lista);
+    });
+    kraw = krawedzie().map((k, i) => {
+      const p = document.createElementNS(NS, "path");
+      const duch = !k.do.start && !widoczny(k.do);
+      p.setAttribute("class", "kraw " + (duch ? "ducha" : k.rodzaj));
+      p.setAttribute("id", "k" + i); p.setAttribute("pathLength", "1");
+      svg.appendChild(p);
+      const kon = document.createElementNS(NS, "circle"); kon.setAttribute("r", "4.5");
+      kon.setAttribute("class", "koniec " + (duch ? "ducha" : k.rodzaj)); svg.appendChild(kon);
+      let iskra = null;
+      if (RUCH && !duch && k.rodzaj === "glowna") {
+        iskra = document.createElementNS(NS, "circle"); iskra.setAttribute("r", "3.2"); iskra.setAttribute("class", "iskra");
+        const am = document.createElementNS(NS, "animateMotion");
+        am.setAttribute("dur", "3.6s"); am.setAttribute("repeatCount", "indefinite"); am.setAttribute("begin", (i * 0.45) + "s");
+        const mp = document.createElementNS(NS, "mpath"); mp.setAttribute("href", "#k" + i);
+        am.appendChild(mp); iskra.appendChild(am); svg.appendChild(iskra);
+      }
+      let et = null;
+      if (!duch && k.do.dlaczego) {
+        et = el("div", "etykieta " + k.rodzaj + (zwiniete(k.do.id) ? " zwinieta" : "")); et.dataset.id = k.do.id;
+        et.title = "Kliknij, żeby zwinąć albo rozwinąć"; et.append(el("b", "", "dlaczego"), el("span", "txt", k.do.dlaczego));
+        swiat.appendChild(et);
+      }
+      let prz = null;
+      if (k.rodzaj === "glowna" || k.rodzaj === "boczna" || k.rodzaj === "cel") {
+        const cel = k.do; prz = el("button", "przejscie" + (duch ? " ukryty" : "")); prz.type = "button";
+        prz.title = (duch ? "Pokaż" : "Schowaj") + ": " + (cel.tytul || "blok");
+        prz.onclick = e => { e.stopPropagation(); const nowy = !wlasnaWidocznosc(cel);
+          if (nowy === domyslnie(cel)) delete nadpisania[cel.id]; else nadpisania[cel.id] = nowy;
+          if (nowy) {   // pokazanie odsłania tylko sąsiada: wszystko, co od niego zależy, zostaje schowane
+            const zalezy = x => [x.rodzic, x.poprzedni, x.zrodlo].some(y => y && (y === cel || zalezy(y)));
+            bloki.forEach(x => { if (zalezy(x) && wlasnaWidocznosc(x)) {
+              if (domyslnie(x) === false) delete nadpisania[x.id]; else nadpisania[x.id] = false; rozwiniete.delete(x.id); } });
+          }
+          if (!nowy) rozwiniete.delete(cel.id); zapisz(); odswiez(false); panelBuduj(); };
+        swiat.appendChild(prz);
+      }
+      let hit = null;   // w edytorze: szeroki, niewidoczny pas do klikania i przeciągania krawędzi
+      if (ADMIN && k.rodzaj !== "glowna") { hit = document.createElementNS(NS, "path"); hit.setAttribute("class", "kraw-hit"); hit.dataset.do = k.do.id; svg.appendChild(hit); }
+      return {...k, p, kon, iskra, et, duch, prz, hit};
+    });
+    karty.forEach((lista, id) => {
+      const p = document.createElementNS(NS, "path"); p.setAttribute("class", "kraw wn"); svg.appendChild(p);
+      kraw.push({z: wezly.get(id).b, do: lista[0], rodzaj: "wn", p, kon: document.createElementNS(NS, "g")});
+    });
+    if (animuj && RUCH) odtworz();
+    if (window.__mapaPoZbudowaniu) window.__mapaPoZbudowaniu();
+  }
+
+  function odtworz() {
+    const kolej = new Map(); let n = 0;
+    [START, ...glowne].forEach(g => {
+      kolej.set(g.id, n++);
+      bloki.filter(b => b.rodzic && korzen(b) === g).forEach((b, j) => kolej.set(b.id, n - 1 + 0.55 * (j + 1)));
+    });
+    const krok = 0.32;
+    wezly.forEach(({b}) => { if (b.karta) kolej.set(b.id, kolej.get(b.rodzic.id) + 0.3); });
+    wezly.forEach(({b, w}) => { w.classList.remove("wejscie"); void w.offsetWidth; w.style.animationDelay = (kolej.get(b.id) * krok + 0.15) + "s"; w.classList.add("wejscie"); });
+    kraw.forEach(k => {
+      const d = (kolej.get(k.do.id) * krok) + "s";
+      k.p.classList.remove("rysuj"); void k.p.getBBox();
+      k.p.style.animationDelay = d; k.p.classList.add("rysuj");
+      k.p.addEventListener("animationend", () => k.p.classList.remove("rysuj"), {once: true});
+      [k.kon, k.et].forEach(e => { if (!e) return; e.classList.remove("wejscie"); void (e.offsetWidth); e.style.animationDelay = (kolej.get(k.do.id) * krok + 0.35) + "s"; e.classList.add("wejscie"); });
+    });
+  }
+  const korzen = b => (b.rodzic ? korzen(b.rodzic) : b);
+  // rozkład dzieci węzła: "drzewo" (domyślnie) = w rzędzie pod rodzicem, od lewej do prawej; "kolumna" = jedno pod drugim
+  const uklad = b => (b.uklad === "kolumna" ? "kolumna" : "drzewo");
+
+  function odstepY(b) {
+    const k = kraw.find(k => k.do === b && k.pierwsze);
+    return Math.max(ODSTEP_Y, k && k.et ? k.et.offsetHeight + 36 : 0);
+  }
+  function mierz() { wezly.forEach(({b, w}) => rozm.set(b.id, {w: w.offsetWidth, h: w.offsetHeight})); }
+
+  // poddrzewo węzła: położenia względem środka (x) i góry (y) węzła oraz zasięg w lewo (L) i w prawo (R) razem z etykietami
+  const OD_X = 40;
+  function poddrzewo(b) {
+    const r = rozm.get(b.id), poz = [[b.id, -r.w / 2, 0]];
+    let L = -r.w / 2, R = r.w / 2, y = r.h;
+    (karty.get(b.id) || []).forEach((pb, i) => {
+      const rk = rozm.get(pb.id); y += i ? 14 : 34; poz.push([pb.id, -rk.w / 2, y]); y += rk.h;
+      L = Math.min(L, -rk.w / 2); R = Math.max(R, rk.w / 2);
+    });
+    const etyk = c => kraw.find(k => k.do === c && k.et);
+    const kc = kraw.find(k => k.do === b && k.rodzaj === "cel");   // strzałka z kotwicy obchodzi węzeł z prawej
+    if (kc) R = Math.max(R, r.w / 2 + 54 + (kc.et ? kc.et.offsetWidth : 0));
+    const dzieci = (b.dzieci || []).filter(d => wezly.has(d.id));
+    let H = y;
+    const wstaw = (s, dx, dy) => { s.poz.forEach(([id, x, yy]) => poz.push([id, x + dx, yy + dy])); };
+    if (uklad(b) === "kolumna") {
+      dzieci.forEach((c, j) => {
+        y += odstepY(c); const s = poddrzewo(c); wstaw(s, 0, y);
+        L = Math.min(L, s.L); R = Math.max(R, s.R);
+        const e = etyk(c);
+        if (e && e.rodzaj === "boczna" && j === 0) R = Math.max(R, 16 + e.et.offsetWidth);
+        if (j > 0) L = Math.min(L, Math.min(-r.w / 2, -rozm.get(c.id).w / 2) - SZYNA - (e && e.rodzaj === "boczna" ? 14 + e.et.offsetWidth : 0));
+        y += s.H;
+      });
+      H = y;
+    } else if (dzieci.length) {
+      const pod = dzieci.map(poddrzewo), suma = pod.reduce((s, p) => s + p.R - p.L, 0) + OD_X * (dzieci.length - 1);
+      let xc = -suma / 2;
+      dzieci.forEach((c, j) => {
+        const s = pod[j], dy = y + odstepY(c); wstaw(s, xc - s.L, dy); H = Math.max(H, dy + s.H); xc += s.R - s.L + OD_X;
+      });
+      L = Math.min(L, -suma / 2); R = Math.max(R, suma / 2);
+      const e = dzieci.length === 1 && etyk(dzieci[0]);
+      if (e && e.rodzaj === "boczna") R = Math.max(R, 16 + e.et.offsetWidth);
+    }
+    return {poz, L, R, H};
+  }
+
+  function uloz() {
+    mierz();
+    cel = new Map();
+    let x = 0;
+    [START, ...glowne].forEach(g => {
+      const s = poddrzewo(g), cx = x - s.L, y0 = -rozm.get(g.id).h / 2;
+      s.poz.forEach(([id, dx, dy]) => cel.set(id, {x: cx + dx, y: y0 + dy}));
+      const nast = glowne[glowne.indexOf(g) + 1];
+      x = cx + s.R + (nast && !widoczny(nast) ? ODSTEP_X * 0.45 : ODSTEP_X);
+    });
+  }
+
+  // ---- animacja położeń ----
+  let anim = null;
+  function przesun(natychmiast) {
+    uloz();
+    const od = new Map();
+    wezly.forEach(({b}) => od.set(b.id, poz.get(b.id) || cel.get(b.id)));
+    if (natychmiast || !RUCH) { cel.forEach((v, k) => poz.set(k, {...v})); rysuj(); return; }
+    const t0 = performance.now(), T = 520;
+    cancelAnimationFrame(anim);
+    const krok = t => {
+      const p = Math.min(1, (t - t0) / T), e = 1 - Math.pow(1 - p, 3);
+      cel.forEach((c, k) => { const a = od.get(k) || c; poz.set(k, {x: a.x + (c.x - a.x) * e, y: a.y + (c.y - a.y) * e}); });
+      rysuj();
+      if (p < 1) anim = requestAnimationFrame(krok);
+    };
+    anim = requestAnimationFrame(krok);
+  }
+
+  function rysuj() {
+    wezly.forEach(({b, w}) => { const p = poz.get(b.id); if (p) w.style.transform = `translate(${p.x}px,${p.y}px)`; });
+    const pud = id => { const p = poz.get(id), r = rozm.get(id); return {l: p.x, t: p.y, r: p.x + r.w, b: p.y + r.h, cx: p.x + r.w / 2, cy: p.y + r.h / 2}; };
+    kraw.forEach(k => {
+      const a = pud(k.z.id), c = pud(k.do.id);
+      let d, ex, ey, lx, ly, lt;
+      if (k.rodzaj === "wn") { k.p.setAttribute("d", `M${a.cx},${a.b} V${c.t}`); return; }
+      if (k.rodzaj === "cel") {
+        const kr = k.kotwica.getBoundingClientRect(), wr = wezly.get(k.z.id).w.getBoundingClientRect();
+        const ay = k.kotwica.offsetParent ? a.t + (kr.top - wr.top + kr.height / 2) / V.k : a.cy, xr = Math.max(a.r, c.r) + 40, rr = 14;
+        const d = `M${a.r},${ay} H${xr - rr} Q${xr},${ay} ${xr},${ay + rr} V${c.cy - rr} Q${xr},${c.cy} ${xr - rr},${c.cy} H${c.r}`;
+        k.p.setAttribute("d", d); if (k.hit) k.hit.setAttribute("d", d); k.kon.setAttribute("cx", c.r); k.kon.setAttribute("cy", c.cy);
+        if (k.prz) k.prz.style.transform = `translate(${a.r}px,${ay}px) translate(-50%,-50%)`;
+        if (k.et) { k.et.style.left = (xr + 14) + "px"; k.et.style.top = ((ay + c.cy) / 2) + "px"; k.et.style.transform = "translate(0,-50%)"; }
+        return;
+      }
+      if (k.rodzaj === "glowna") {
+        const dx = (c.l - a.r) / 2;
+        d = `M${a.r},${a.cy} C${a.r + dx},${a.cy} ${c.l - dx},${c.cy} ${c.l},${c.cy}`;
+        ex = c.l; ey = c.cy; lx = (a.r + c.l) / 2; ly = (a.cy + c.cy) / 2 - 16; lt = "translate(-50%,-100%)";
+      } else if (k.pierwsze) {
+        const kz = k.drzewo && karty.get(k.z.id), y0 = kz ? pud(kz[kz.length - 1].id).b : a.b, y1 = c.t, m = (y0 + y1) / 2;
+        d = `M${a.cx},${y0} C${a.cx},${m} ${c.cx},${m} ${c.cx},${y1}`;
+        ex = c.cx; ey = y1;
+        if (k.wielu) { lx = c.cx; ly = m - 4; lt = "translate(-50%,-50%)"; }   // kilkoro dzieci w rzędzie: etykieta nad swoim dzieckiem
+        else { lx = a.cx + 16; ly = m; lt = "translate(0,-50%)"; }
+      } else {
+        const sx = Math.min(a.l, c.l) - SZYNA, y0 = a.b - 26, y1 = c.cy, rr = 12;
+        d = `M${a.l},${y0} H${sx + rr} Q${sx},${y0} ${sx},${y0 + rr} V${y1 - rr} Q${sx},${y1} ${sx + rr},${y1} H${c.l}`;
+        ex = c.l; ey = y1; lx = sx - 14; ly = (y0 + y1) / 2; lt = "translate(-100%,-50%)";
+      }
+      k.p.setAttribute("d", d); if (k.hit) k.hit.setAttribute("d", d); k.kon.setAttribute("cx", ex); k.kon.setAttribute("cy", ey);
+      if (k.prz) { const [px, py] = k.rodzaj === "glowna" ? [a.r, a.cy] : k.drzewo ? [c.cx, c.t - 14] : k.pierwsze ? [a.cx, a.b] : [a.l, a.b - 26];
+        k.prz.style.transform = `translate(${px}px,${py}px) translate(-50%,-50%)`; }
+      if (k.et) { k.et.style.left = lx + "px"; k.et.style.top = ly + "px"; k.et.style.transform = lt; }
+    });
+  }
+
+  // ---- widok: przesuwanie i zoom ----
+  let V = {x: 0, y: 0, k: 1};
+  const KMIN = 0.15, KMAX = 2.4;
+  const ogr = k => Math.min(KMAX, Math.max(KMIN, k));
+  function ustawWidok() {
+    swiat.style.transform = `translate(${V.x}px,${V.y}px) scale(${V.k})`;
+    const s = 26 * V.k; widok.style.backgroundSize = `${s}px ${s}px`; widok.style.backgroundPosition = `${V.x}px ${V.y}px`;
+    document.getElementById("proc").textContent = Math.round(V.k * 100) + "%";
+  }
+  let animW = null;
+  function leć(doV, T = 600) {
+    cancelAnimationFrame(animW);
+    if (!RUCH) { V = doV; ustawWidok(); return; }
+    const od = {...V}, t0 = performance.now();
+    const krok = t => {
+      const p = Math.min(1, (t - t0) / T), e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      V = {x: od.x + (doV.x - od.x) * e, y: od.y + (doV.y - od.y) * e, k: od.k + (doV.k - od.k) * e};
+      ustawWidok(); if (p < 1) animW = requestAnimationFrame(krok);
+    };
+    animW = requestAnimationFrame(krok);
+  }
+  function zoomWokol(k, px, py) {
+    k = ogr(k); const wx = (px - V.x) / V.k, wy = (py - V.y) / V.k;
+    return {k, x: px - wx * k, y: py - wy * k};
+  }
+  function ramka(ids) {
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
+    ids.forEach(id => { const p = cel.get(id), s = rozm.get(id); if (!p) return; l = Math.min(l, p.x); t = Math.min(t, p.y); r = Math.max(r, p.x + s.w); b = Math.max(b, p.y + s.h); });
+    return {l, t, r, b};
+  }
+  function widokNa(rm, maxK, gora) {
+    const W = innerWidth - (window.__mapaZajete ? window.__mapaZajete() : 0), H = innerHeight, pad = 60, top = gora ?? (innerWidth < 760 ? 90 : 140), dol = 90;
+    const k = ogr(Math.min((W - 2 * pad) / (rm.r - rm.l), (H - top - dol) / (rm.b - rm.t), maxK));
+    return {k, x: W / 2 - ((rm.l + rm.r) / 2) * k, y: top + (H - top - dol) / 2 - ((rm.t + rm.b) / 2) * k};
+  }
+  // cała mapa = widoczne bloki; „…” wystają w prawo jako zapowiedź (gdy nic nie widać: wszystko)
+  const calosc = () => {
+    const ids = [...wezly.values()].filter(({b}) => b.start || widoczny(b)).map(({b}) => b.id);
+    return widokNa(ramka(ids.length > 1 ? ids : [...wezly.keys()]), 1.05);
+  };
+
+  // ---- interakcja ----
+  const wskazniki = new Map(); let ciag = null, ruszyl = false, celWcisniecia = null;
+  widok.addEventListener("pointerdown", e => {
+    if (e.target.closest("a,button")) { celWcisniecia = null; return; }   // przyciski i linki obsługują się same
+    celWcisniecia = e.target;
+    widok.setPointerCapture(e.pointerId);
+    wskazniki.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    cancelAnimationFrame(animW);
+    ruszyl = false;
+    ciag = {V: {...V}, pkt: srodek(), dyst: dystans()};
+    widok.classList.add("ciagnie");
+  });
+  widok.addEventListener("pointermove", e => {
+    if (!wskazniki.has(e.pointerId)) return;
+    wskazniki.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    const s = srodek(), d = dystans();
+    if (Math.hypot(s.x - ciag.pkt.x, s.y - ciag.pkt.y) > 5) ruszyl = true;
+    let n = {...ciag.V, x: ciag.V.x + s.x - ciag.pkt.x, y: ciag.V.y + s.y - ciag.pkt.y};
+    if (wskazniki.size > 1 && ciag.dyst) {
+      const k = ogr(ciag.V.k * d / ciag.dyst), wx = (ciag.pkt.x - ciag.V.x) / ciag.V.k, wy = (ciag.pkt.y - ciag.V.y) / ciag.V.k;
+      n = {k, x: s.x - wx * k, y: s.y - wy * k}; ruszyl = true;
+    }
+    V = n; ustawWidok();
+  });
+  const koniec = e => {
+    wskazniki.delete(e.pointerId);
+    if (wskazniki.size) ciag = {V: {...V}, pkt: srodek(), dyst: dystans()};
+    else widok.classList.remove("ciagnie");
+  };
+  widok.addEventListener("pointerup", koniec); widok.addEventListener("pointercancel", koniec);
+  function srodek() { const p = [...wskazniki.values()]; return {x: p.reduce((s, a) => s + a.x, 0) / p.length, y: p.reduce((s, a) => s + a.y, 0) / p.length}; }
+  function dystans() { const p = [...wskazniki.values()]; return p.length > 1 ? Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) : 0; }
+
+  widok.addEventListener("wheel", e => {
+    e.preventDefault(); cancelAnimationFrame(animW);
+    const mysz = e.deltaMode === 1 || (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 50);
+    if (e.ctrlKey || e.metaKey || mysz) {
+      const f = Math.exp(-e.deltaY * (e.ctrlKey ? 0.012 : 0.0022));
+      V = zoomWokol(V.k * f, e.clientX, e.clientY);
+    } else { V = {...V, x: V.x - e.deltaX, y: V.y - e.deltaY}; }
+    ustawWidok(); schowajPodpowiedz();
+  }, {passive: false});
+
+  widok.addEventListener("click", e => {
+    if (ruszyl || !celWcisniecia) return;
+    const t = celWcisniecia;
+    const li = t.closest("ul.wnioski li[data-k]");
+    if (li) { li.classList.toggle("ukryty"); if (li.classList.contains("ukryty")) ukrytePunkty[li.dataset.k] = true; else delete ukrytePunkty[li.dataset.k]; zapisz(); przesun(); return; }
+    const mc = t.closest(".mm-cel");
+    if (mc) { const g = mc.parentElement; g.classList.toggle("zwiniety"); zwinieteKarty[g.dataset.id] = g.classList.contains("zwiniety"); zapisz(); przesun(); return; }
+    const wk = t.closest(".wn-karta h3");
+    if (wk) { const k = wk.parentElement; k.classList.toggle("zwinieta"); zwinieteKarty[k.dataset.id] = k.classList.contains("zwinieta"); zapisz(); przesun(); return; }
+    const et = t.closest(".etykieta");
+    if (et) { ukryteDlaczego[et.dataset.id] = !et.classList.contains("zwinieta"); et.classList.toggle("zwinieta"); zapisz(); przesun(); return; }
+    if (t.closest("a,.tresc")) return;
+    const w = t.closest(".wezel"); if (!w) return;
+    const b = wezly.get(w.dataset.id)?.b;
+    if (!b || b.start || b.pusty || !widoczny(b) || !maTresc(b)) return;
+    przelacz(b);
+  });
+  swiat.addEventListener("click", e => {
+    const m = e.target.closest(".wiecej"); if (!m || m.dataset.popup) return;
+    const k = m.parentElement; k.classList.toggle("pelna"); m.textContent = k.classList.contains("pelna") ? "mniej ↑" : "jeszcze " + k.querySelectorAll(".nadmiar").length + " ↓"; przesun();
+  });
+  widok.addEventListener("dblclick", e => { if (!(celWcisniecia || e.target).closest?.(".wezel")) leć(calosc()); });
+
+  function przelacz(b) {
+    const w = wezly.get(b.id).w;
+    if (rozwiniete.has(b.id)) { rozwiniete.delete(b.id); w.classList.remove("rozwiniety"); przesun(); return; }
+    rozwiniete.add(b.id); w.classList.add("rozwiniety"); przesun();
+    leć(widokNa(ramka([b.id, ...(karty.get(b.id) || []).map(x => x.id)]), 1.15, innerWidth < 760 ? 80 : 120), 650);
+    schowajPodpowiedz();
+  }
+
+  const wyborMotywu = document.getElementById("motyw");
+  const ustawMotyw = m => { if (![...wyborMotywu.options].some(o => o.value === m)) m = ""; motyw = m; if (m) document.documentElement.dataset.motyw = m; else delete document.documentElement.dataset.motyw; wyborMotywu.value = m; };
+  // siatka (kropki w tle) i motyw: u oglądającego zapamiętane w przeglądarce, w edytorze część punktu startowego
+  function ustawSiatke(bez) { siatka = !bez; document.getElementById("widok").classList.toggle("bez-siatki", bez);
+    document.querySelector('[data-akcja="siatka"]').classList.toggle("wylaczony", bez); }
+  const ustawWarstwy = () => {
+    ustawSiatke(!siatka); ustawMotyw(motyw);
+    document.querySelector('[data-akcja="dlaczego"]').classList.toggle("wylaczony", !wszystkieDlaczego);
+    document.querySelector('[data-akcja="wnioski"]').classList.toggle("wylaczony", !pokazWnioski);
+    document.querySelector('[data-akcja="zadania"]').classList.toggle("wylaczony", !pokazZadania);
+  };
+  const zapiszWyglad = () => { if (ADMIN) zapisz(); else if (!PODGLAD) try { localStorage.setItem("mapa-siatka", siatka ? "1" : "0"); localStorage.setItem("mapa-motyw", motyw); } catch (e) {} };
+  wyborMotywu.addEventListener("change", () => { ustawMotyw(wyborMotywu.value); zapiszWyglad(); });
+  document.querySelectorAll("[data-akcja]").forEach(btn => btn.addEventListener("click", () => {
+    const a = btn.dataset.akcja, W = innerWidth / 2, H = innerHeight / 2;
+    if (a === "przybliz") leć(zoomWokol(V.k * 1.3, W, H), 280);
+    if (a === "oddal") leć(zoomWokol(V.k / 1.3, W, H), 280);
+    if (a === "calosc") leć(calosc());
+    if (a === "panel") panel.classList.toggle("otwarty");
+    if (a === "dlaczego") ustawDlaczego(!wszystkieDlaczego);
+    if (a === "siatka") { ustawSiatke(siatka); zapiszWyglad(); }
+    if (a === "zadania") { pokazZadania = !pokazZadania; pokazWnioski = pokazZadania; zapisz(); btn.classList.toggle("wylaczony", !pokazZadania);
+      document.querySelector('[data-akcja="wnioski"]').classList.toggle("wylaczony", !pokazWnioski); odswiez(false); }
+    if (a === "wnioski") { pokazWnioski = !pokazWnioski; zapisz(); btn.classList.toggle("wylaczony", !pokazWnioski); odswiez(false); }
+  }));
+  addEventListener("keydown", e => {
+    if (e.target.closest("input,textarea,select,[contenteditable]")) return;
+    if (e.key === "+" || e.key === "=") leć(zoomWokol(V.k * 1.3, innerWidth / 2, innerHeight / 2), 280);
+    if (e.key === "-") leć(zoomWokol(V.k / 1.3, innerWidth / 2, innerHeight / 2), 280);
+    if (e.key === "0") leć(calosc());
+    if (e.key === "Escape" && pop.classList.contains("otwarty")) { pop.classList.remove("otwarty"); return; }
+    if (e.key === "Escape") { if (panel.classList.contains("otwarty")) panel.classList.remove("otwarty"); else { rozwiniete.clear(); wezly.forEach(({w}) => w.classList.remove("rozwiniety")); przesun(); leć(calosc()); } }
+  });
+  let podp = true;
+  function schowajPodpowiedz() { if (podp) { podp = false; document.getElementById("podpowiedz").style.opacity = 0; } }
+  setTimeout(schowajPodpowiedz, 9000);
+
+  // ---- panel: które bloki widać ----
+  const panel = document.getElementById("panel");
+  function panelBuduj() {
+    panel.replaceChildren(el("h2", "", "Które bloki widać"),
+      el("p", "opis", ADMIN ? "To, co tu odkryjesz, jest punktem startowym publikowanej mapy. Ukryty blok zostaje na mapie jako „…”." : "Zmiana tylko w tej przeglądarce. Ukryty blok zostaje na mapie jako „…”."));
+    bloki.forEach(b => {
+      const l = el("label", b.rodzic ? "pod" : "");
+      const c = el("input"); c.type = "checkbox"; c.checked = wlasnaWidocznosc(b); c.disabled = !!b.rodzic && !widoczny(b.rodzic);
+      c.addEventListener("change", () => {
+        if (c.checked === domyslnie(b)) delete nadpisania[b.id]; else nadpisania[b.id] = c.checked;
+        if (!c.checked) rozwiniete.delete(b.id);
+        zapisz(); odswiez(false); panelBuduj();
+      });
+      l.append(c, el("span", "", (b.nr ? b.nr + ". " : "") + (b.tytul || "(pusty)")));
+      panel.append(l);
+    });
+    const p = el("div", "przyciski");
+    const b1 = el("button", "", "Pokaż wszystko"); b1.type = "button";
+    b1.onclick = () => { bloki.forEach(b => { if (domyslnie(b)) delete nadpisania[b.id]; else nadpisania[b.id] = true; }); zapisz(); odswiez(false); panelBuduj(); };
+    const b2 = el("button", "glowny", "Przebuduj mapę"); b2.type = "button"; b2.title = "Wróć do punktu startowego i odtwórz mapę od początku";
+    b2.onclick = () => { if (!ADMIN && !PODGLAD) try { localStorage.removeItem(KLUCZ); } catch (e) {} wczytajStan(); ustawWarstwy(); zapisz(); rozwiniete.clear(); panel.classList.remove("otwarty"); odswiez(true); panelBuduj(); };
+    p.append(b1, b2); panel.append(p);
+  }
+
+  const pop = document.getElementById("popup");
+  function popup(g) {
+    const t = document.getElementById("popup-tresc");
+    const ul = el("ul", "wnioski"); (g.punkty || []).forEach(x => ul.append(el("li", "", x)));
+    t.replaceChildren(el("h3", "", g.tytul || "Wnioski"));
+    if (g.wstep) t.append(el("p", "wstep", g.wstep));
+    if ((g.punkty || []).length) t.append(ul);
+    (g.sekcje || []).forEach(sk => { t.append(el("h4", "", sk.tytul)); if (sk.meta) t.append(el("p", "meta", sk.meta));
+      const u = el("ul", "wnioski"); (sk.punkty || []).forEach(x => u.append(el("li", "", x))); t.append(u); });
+    pop.classList.toggle("szerokie", !!g.sekcje);
+    if (g.link) { const a = el("a", "pelne", (g.link_tytul || "Pełne wnioski") + " →"); a.href = adres(g.link); a.target = "_blank"; a.rel = "noopener"; t.append(a); }
+    pop.classList.add("otwarty");
+  }
+  pop.addEventListener("click", e => { if (e.target === pop || e.target.closest(".zamknij")) pop.classList.remove("otwarty"); });
+  function ustawDlaczego(wl) {
+    wszystkieDlaczego = wl; ukryteDlaczego = {}; zapisz();
+    document.querySelector('[data-akcja="dlaczego"]').classList.toggle("wylaczony", !wl);
+    document.querySelectorAll(".etykieta").forEach(e => e.classList.toggle("zwinieta", !wl));
+    przesun();
+  }
+  function odswiez(odNowa) {
+    zbuduj(odNowa);
+    if (odNowa) { poz = new Map(); przesun(true); leć(calosc(), 700); }
+    else { przesun(); leć(calosc(), 600); }
+  }
+
+  // ---- start ----
+  const uruchom = () => {
+    zbuduj(true); przesun(true); V = calosc(); ustawWidok(); panelBuduj(); ustawWarstwy();
+  };
+  // API dla edytora (/admin/): dane bez pól wyliczanych, przeładowanie po zmianie, lot do węzła
+  const WYLICZANE = new Set(["rodzic", "poziom", "nr", "poprzedni", "zrodlo"]);
+  window.__mapa = {
+    DANE, ADMIN,
+    bloki: () => bloki, wezly: () => wezly, widoczny: b => widoczny(b), widok: () => V,
+    przelacz: id => { const w = wezly.get(id); if (w && widoczny(w.b) && maTresc(w.b)) przelacz(w.b); },
+    czyste: () => JSON.parse(JSON.stringify(DANE, (k, v) => (WYLICZANE.has(k) ? undefined : v))),
+    przeladuj(stanTez) { przygotuj(); naglowek(); if (stanTez) { wczytajStan(); ustawWarstwy(); } zbuduj(false); przesun(); panelBuduj(); },
+    pokaz(id) { const w = wezly.get(id); if (!w) return; leć(widokNa(ramka([id, ...(karty.get(id) || []).map(x => x.id)]), 1.05, innerWidth < 760 ? 80 : 120), 600); },
+    calosc: () => leć(calosc()),
+  };
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(uruchom);
+  let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => leć(calosc(), 300), 150); });
+})();
+</script>
+</body>
+</html>
