@@ -1,0 +1,313 @@
+<!doctype html><html lang="pl"><head><script>(function(){var d=document.documentElement;d.style.visibility="hidden";
+var pokaz=function(){d.style.visibility=""};var t=setTimeout(pokaz,4000);
+fetch("../../wyniki.json",{cache:"no-store"}).then(function(r){return r.json()}).then(function(w){clearTimeout(t);var n=Date.now();
+if(w.od&&w.do&&n>=Date.parse(w.od)&&n<Date.parse(w.do)&&(w.opublikowane||[]).indexOf("czy-ten-problem-juz-gdzies-widziales")<0){
+document.open();document.write("<!doctype html><html lang=\"pl\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Czy ten problem ju\u017c gdzie\u015b widzia\u0142e\u015b \u2013 wynik<\/title><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap\"><style>\n:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;\n  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;\n  --font-display:\"Fraunces\",Georgia,serif;--font-body:\"IBM Plex Sans\",\"Segoe UI\",sans-serif;--font-mono:\"IBM Plex Mono\",ui-monospace,Menlo,monospace;\n  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}\n@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}\n:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}\n*{box-sizing:border-box}\nhtml{background:var(--tlo)}\nbody{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;\n  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}\n.wrap{max-width:900px;margin:0 auto;padding-inline:20px}\n.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);\n  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),\n    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),\n    linear-gradient(160deg,var(--tlo),var(--tlo-2))}\n.hero::before{content:\"\";position:absolute;inset:0;pointer-events:none;opacity:.45;\n  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);\n  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}\n.hero .wrap{position:relative}\n.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}\n.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}\n.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}\n.metryczka strong{color:var(--akcent);font-weight:500}\n.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}\nmain{padding-block:clamp(28px,5vw,56px) 96px}\nh1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}\nh2{font-size:clamp(1.5rem,3.2vw,2rem)}\nh3{font-size:1.2rem}\nmain>h2:first-child,article>h2:first-child{margin-top:0}\na{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}\na:hover{color:var(--akcent-jasny)}\np{margin:.8em 0}\nstrong{color:var(--mocny)}\n.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.film:hover{color:#fff;filter:brightness(1.07)}\nol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}\nol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}\nol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}\nol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}\n.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}\n.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}\n.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}\n.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}\nnav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}\nnav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}\nnav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}\n.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}\n.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}\n.zmiany>h2,.zmiany>h3{color:#c0392b}\n.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}\n.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}\n.wnioski h2{margin-top:.6em;font-size:1.3rem}\n.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}\n.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}\npre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}\ncode{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}\npre code{background:none;padding:0}\nblockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}\n/* polecenie: kroki, prompty, komendy */\n.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);\n  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}\n.czat .scena{display:block;width:100%;height:96px}\n.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}\n.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}\n.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}\n.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}\n.czat .scena .namiot{fill:var(--akcent)}\n.czat .scena .slupek{fill:var(--mocny)}\n.czat .scena .iskra{fill:#f3c74a}\n.czat .tresc{padding:4px 20px 18px}\n.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}\n.czat p{margin:0 0 12px;color:var(--przygaszony)}\n.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}\n.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}\n.czat li img{width:38px;height:38px;border-radius:50%;flex:none}\n.czat li b{color:var(--mocny)}\n.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}\n.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}\n.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}\n.czat a:hover{background:var(--cyjan);color:var(--panel)}\n.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}\n.czat.asystent .tresc{padding-top:16px}\narticle.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}\narticle.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;\n  padding:18px 22px 16px 64px;box-shadow:var(--cien)}\narticle.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;\n  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}\n.ramka{position:relative;margin:14px 0}\n.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;\n  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}\n.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;\n  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}\n.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}\n.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);\n  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}\n.ramka.prompt>blockquote p{margin:.3em 0}\n.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}\n.ramka.kod>pre{margin:0;padding-top:50px}\n.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}\n.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--tlo);color:var(--przygaszony)}\n.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\ntable{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}\nth,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}\nth{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}\ntr:last-child td{border-bottom:0}\ntd code{color:var(--akcent)}\nimg{max-width:100%;border-radius:10px}\nfigure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}\nfigure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}\nfigure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}\nhr{border:none;border-top:1px solid var(--ramka);margin:32px 0}\nfooter.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}\n.drogi{margin:14px 0}\n.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}\n.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--panel);color:var(--przygaszony)}\n.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}\n.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\n.drogi>section>h3:first-child{margin-top:.9em}\n@media print{\n  .drogi .wybor{display:none}\n  .drogi>section[hidden]{display:block}\n  body{background:#fff;color:#000;font-size:11pt}\n  .hero{background:none;border:none;padding:0}\n  .hero::before{display:none}\n  .wrap{max-width:none;padding:0}\n  main{padding:0}\n  a{color:#000;text-decoration:underline}\n  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}\n  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}\n  figure.video{border:1px solid #ccc;box-shadow:none;background:none}\n  figure.video video{display:none}\n  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}\n  .zadanie+.zadanie{page-break-before:always;border:none}\n  nav,footer.stopka{display:none}\n  pre,table,blockquote{page-break-inside:avoid}\n}\n<\/style><\/head><body><header class=\"hero\"><div class=\"wrap\"><p class=\"eyebrow\">\ud83d\udcca Wynik zadania<\/p><h1>Czy ten problem ju\u017c gdzie\u015b widzia\u0142e\u015b<\/h1><\/div><\/header><main class=\"wrap\"><p class=\"intro\">\u23f3 Wynik zostanie opublikowany po zadaniu.<\/p><footer class=\"stopka\">Materia\u0142y szkolenia \u201eAI w pracy z systemami legacy\".<\/footer><\/main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{\nr.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);\nr.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}\ndocument.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));\ntry{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}\nfunction ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];\nif(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);\ng.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}\ndocument.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));\ntry{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}\ndocument.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{\nconst t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();\n// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z blok\u00f3w bash wycinamy # \u2026\nconst k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))\nx=x.split('\\n').filter(l=>!/^\\s*#/.test(l)).map(l=>l.replace(/\\s+#\\s.*$/,'')).join('\\n').replace(/\\n{3,}/g,'\\n\\n').trim();\nnavigator.clipboard.writeText(x).then(()=>{\nconst s=b.textContent;b.textContent='\u2713 skopiowane';setTimeout(()=>b.textContent=s,1500)})}))<\/script><\/body><\/html>");document.close();}else pokaz();}).catch(function(){clearTimeout(t);pokaz()});})();</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Soczewki na rekordzie zużycia</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+</style></head><body><style>
+.soczewka{margin-top:36px;padding-top:18px;border-top:1px solid var(--ramka)}
+.soczewka h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.lid{font-family:var(--font-mono);font-size:14px;color:var(--akcent)}
+.pewn{font-size:13px;color:var(--przygaszony);font-weight:400}
+.dlaczego{color:var(--przygaszony)}
+.pod{margin:8px 0 2px;font-size:15px;color:var(--przygaszony)}
+ul.model{columns:2;column-gap:28px}@media (max-width:640px){ul.model{columns:1}}
+.rys{font-size:15px}
+.ops code{display:inline-block;margin:0 6px 6px 0;padding:2px 8px;background:var(--kod);border-radius:6px;font-size:14px}
+ul.spis{columns:2;column-gap:28px;padding-left:20px}@media (max-width:640px){ul.spis{columns:1}}
+:root{--node:color-mix(in oklab,var(--cyjan) 16%,var(--panel));--node-ink:var(--mocny);--edge:color-mix(in oklab,var(--przygaszony) 55%,var(--ramka));--hl:var(--akcent);--hl-soft:color-mix(in oklab,var(--akcent) 20%,var(--panel))}
+.diagram{width:100%;max-width:100%;aspect-ratio:16/10;background:var(--panel);border:1px solid var(--ramka);border-radius:10px;overflow:hidden;margin-top:10px}
+.diagram svg{display:block;width:100%;height:100%}
+.node-c{fill:var(--node);stroke:var(--edge);stroke-width:1.5}.node-c.hl{fill:var(--hl-soft);stroke:var(--hl);stroke-width:2.5}
+.node-t{fill:var(--node-ink);font-size:12px;font-weight:600;text-anchor:middle;font-family:var(--font-body)}
+.edge-l{stroke:var(--edge);stroke-width:1.6;fill:none}.edge-l.hl{stroke:var(--hl);stroke-width:3}
+.edge-t{fill:var(--przygaszony);font-size:10.5px;text-anchor:middle;font-family:var(--font-body)}
+.qbar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 2px}
+.qbtn{border:1px solid var(--ramka);background:var(--panel);color:var(--tekst);border-radius:999px;padding:3px 10px;font:500 12px/1.4 var(--font-mono);cursor:pointer}
+.qbtn[aria-pressed="true"]{background:var(--hl-soft);border-color:var(--hl);color:var(--hl)}
+.qcap{font-size:13.5px;color:var(--przygaszony);min-height:1.4em;margin:4px 0 0}.qcap b{color:var(--tekst)}
+.sheet{fill:var(--panel);stroke:var(--edge);stroke-width:1.5}.sheet.hl{stroke:var(--hl);stroke-width:2.5}
+.card{fill:var(--node);stroke:var(--edge);stroke-width:1.5}.card.hl{fill:var(--hl-soft);stroke:var(--hl);stroke-width:2.5}
+.row-hl{fill:var(--hl-soft);stroke:none}
+.sheet-t{fill:var(--node-ink);font-size:14px;font-weight:600;font-family:var(--font-body)}
+.col-t{fill:var(--przygaszony);font-size:12px;font-weight:600;font-family:var(--font-body)}
+.row-t{fill:var(--tekst);font-size:13px;font-family:var(--font-body)}
+.grid{stroke:var(--ramka);stroke-width:1}
+.cell-ok{fill:var(--panel);stroke:var(--ramka);stroke-width:1.5}.cell-bad{fill:color-mix(in oklab,var(--akcent) 28%,var(--panel));stroke:var(--akcent);stroke-width:1.5}
+.cell-bad.hl,.cell-ok.hl{stroke:var(--hl);stroke-width:3}
+.cell-t{fill:var(--tekst);font-size:15px;font-weight:700;font-family:var(--font-body)}
+.tok{fill:var(--node);stroke:var(--edge);stroke-width:1}.tok.hl{fill:var(--hl-soft);stroke:var(--hl)}
+</style><header class="hero"><div class="wrap"><p class="eyebrow">Reprezentacja modelu · anatomia skilla</p><h1>Soczewki na rekordzie zużycia</h1>
+<p class="intro">Cztery inne reprezentacje dla tego, co dziś siedzi w jednej encji ConsumptionRecord. Każda w trzech punktach: jak by wyglądała, na jakie pytania odpowiada, jakie operacje ma za darmo.</p></div></header>
+<main class="wrap"><article class="zadanie">
+<p>Wejście: pytania o rekordzie zużycia z concept-explorera (18 pytań), bez pytań do człowieka. Skill nie mówi, czy się opłaca. Mówi, która reprezentacja odpowiada na pytanie jedną własną operacją, zamiast kopią statusu albo osobnym SQL-em.</p>
+<ul class="spis"><li><a href="#L1">L1 Księga należności</a></li><li><a href="#L3">L3 Ograniczenia</a></li><li><a href="#L7">L7 Kolejka</a></li><li><a href="#L8">L8 Przestrzeń cech</a></li></ul>
+<section class="soczewka" id="L1">
+<h2><span class="lid">L1</span> Księga należności <span class="pewn">wykonalność: wysoka</span></h2>
+<p class="dlaczego">Q13 i Q14 pytają, co jest należne w okresie, co zostało zaksięgowane i co trzeba wycofać; akumulacja w okresie, storno i śledzenie składników pozycji to natywne operacje księgi, a dziś odtwarza je kopia statusu w każdym wierszu.</p>
+<h3>Jak by wyglądała</h3>
+<ul class="model"><li>Należność (pobór, kwota, waluta)</li><li>Konto płatnika (gość z kontem, partner, kemping)</li><li>Zapis: obciążenie / storno / korekta</li><li>Okres księgowania</li><li>Pozycja rachunku → zapisy</li><li>Potwierdzenie księgowości (przyjęte / odrzucone) na pozycji</li></ul><p class="rys"><b>Na rysunku</b> (kliknij nazwę zapytania, żeby zobaczyć, co obejmuje): Księga: konto gościa z zapisami po stronie Dt i Ct oraz saldem, obok pozycja rachunku, z której zapisów się składa. Pobór tylko rodzi pierwszy zapis.</p>
+<div class="diagram" data-lens="L1"><svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="rysunek soczewki L1"></svg></div><div class="qbar" data-lens="L1"></div><p class="qcap" data-lens="L1"></p>
+<h3>Na jakie pytania odpowiada</h3>
+<p class="pod">Pytania, które system już zadaje, a tu mają prostszą odpowiedź:</p><ul class=""><li>Czy ten pobór jest już na rachunku gościa, w którym okresie, i czy księgowość (ERP) go przyjęła?</li><li>Co i za ile gość z kontem w sieci zapłaci za ten miesiąc: abonament, energia ponad pakiet umowy sezonowej, pozostałe pobory?</li><li>Ile gość płacący w aplikacji zapłaci za pobór: teraz szacunkowo, po zakończeniu ostatecznie?</li></ul><p class="pod">Nowe pytania, na które dałoby się odpowiedzieć:</p><ul class=""><li>Które należności zmieniły się po zaksięgowaniu i wymagają storna?</li><li>Z których poborów składa się ta odrzucona linia ERP?</li><li>Ile należności za pobory nie ma płatnika dłużej niż N dni, według rodzaju płatnika?</li></ul>
+<h3>Operacje natywne</h3>
+<p class="ops"><code>balance(konto, okres)</code> <code>reverse(zapis)</code> <code>contributionsTo(pozycja)</code> <code>reconcile(odpowiedź ERP)</code> <code>postedIn(okres)</code></p>
+</section><section class="soczewka" id="L3">
+<h2><span class="lid">L3</span> Ograniczenia <span class="pewn">wykonalność: wysoka</span></h2>
+<p class="dlaczego">Q2 pyta, czy pomiar spełnia jednocześnie kilka warunków i który go łamie; spełnialność i lista naruszonych ograniczeń z powodem to natywne operacje modelu ograniczeń, a dziś warunki leżą w trzech miejscach i część poprawia dane po cichu.</p>
+<h3>Jak by wyglądała</h3>
+<ul class="model"><li>Pomiar (start, stop, odczyty, źródło odczytu)</li><li>Ograniczenie z nazwą i powodem</li><li>Naruszenie</li><li>Próg (konfiguracja)</li><li>Kontekst słupka (generacja łącza)</li></ul><p class="rys"><b>Na rysunku</b> (kliknij nazwę zapytania, żeby zobaczyć, co obejmuje): Tablica: pobory w wierszach, ograniczenia w kolumnach, ✗ tam, gdzie pobór łamie ograniczenie. Jeden rzut oka mówi, co wstrzymuje pobór i które ograniczenie wstrzymuje najwięcej.</p>
+<div class="diagram" data-lens="L3"><svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="rysunek soczewki L3"></svg></div><div class="qbar" data-lens="L3"></div><p class="qcap" data-lens="L3"></p>
+<h3>Na jakie pytania odpowiada</h3>
+<p class="pod">Pytania, które system już zadaje, a tu mają prostszą odpowiedź:</p><ul class=""><li>Czy zmierzony pobór (czas, energia, energia na noc) jest wiarygodny, czy ktoś musi go sprawdzić, zanim gość zapłaci?</li><li>Ile energii gość pobrał w tym poborze i czy da się to w ogóle ustalić?</li><li>Kiedy gość pobierał prąd (od kiedy do kiedy, przez ile nocy)?</li></ul><p class="pod">Nowe pytania, na które dałoby się odpowiedzieć:</p><ul class=""><li>Które ograniczenie najczęściej wstrzymuje pobory i na jakich słupkach (generacji łącza)?</li><li>Które pobory z ostatniego sezonu wstrzymałoby nowe ograniczenie (0 kWh przy długim podpięciu, data sprzed instalacji), a przeszły?</li></ul>
+<h3>Operacje natywne</h3>
+<p class="ops"><code>violations(pomiar)</code> <code>explain(naruszenie)</code> <code>satisfiable(pomiar)</code> <code>whatIf(nowe ograniczenie, pobory z okresu)</code></p>
+</section><section class="soczewka" id="L7">
+<h2><span class="lid">L7</span> Kolejka <span class="pewn">wykonalność: średnia</span></h2>
+<p class="dlaczego">Zgłoszenie CRD-353 mówi, że kolejka rośnie w szczycie; pytanie &#x27;ile czekają i kiedy przybywa&#x27; to czas czekania i napływ, natywne operacje modelu kolejki.</p>
+<h3>Jak by wyglądała</h3>
+<ul class="model"><li>Sprawa do wyjaśnienia (powód, wejście, wyjście)</li><li>Przeglądający</li><li>Czas czekania</li><li>Napływ na dzień</li></ul><p class="rys"><b>Na rysunku</b> (kliknij nazwę zapytania, żeby zobaczyć, co obejmuje): Etapy drogi poboru do rachunku z kolejkami czekających: wysokość stosu to liczba poborów w etapie, podpis to czas czekania i odsetek, który tą drogą idzie.</p>
+<div class="diagram" data-lens="L7"><svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="rysunek soczewki L7"></svg></div><div class="qbar" data-lens="L7"></div><p class="qcap" data-lens="L7"></p>
+<h3>Na jakie pytania odpowiada</h3>
+<p class="pod">Nowe pytania, na które dałoby się odpowiedzieć:</p><ul class=""><li>Jak długo pobory czekają na wyjaśnienie w szczycie sezonu i z jakiego powodu najdłużej?</li></ul>
+<h3>Operacje natywne</h3>
+<p class="ops"><code>waitingTime()</code> <code>wip(T)</code> <code>arrivalRate()</code> <code>bottleneck()</code></p>
+</section><section class="soczewka" id="L8">
+<h2><span class="lid">L8</span> Przestrzeń cech <span class="pewn">wykonalność: niska</span></h2>
+<p class="dlaczego">Pytanie &#x27;które pobory wyglądają jak te zgłoszone 0 kWh&#x27; to bliskość w kilku cechach naraz; najbliżsi sąsiedzi i obserwacje odstające to natywne operacje modelu wektorowego, czego ograniczenia z L3 nie dają dla nieznanych jeszcze wzorców.</p>
+<h3>Jak by wyglądała</h3>
+<ul class="model"><li>Punkt = pobór</li><li>Wymiary: kWh na godzinę, czas, noce, typ słupka, stanowisko, powód stopu</li><li>Odległość</li><li>Sąsiedzi znanych złych poborów</li></ul><p class="rys"><b>Na rysunku</b> (kliknij nazwę zapytania, żeby zobaczyć, co obejmuje): Każdy pobór to punkt w przestrzeni cech: oś X to czas podpięcia, oś Y to kWh na godzinę. Odległość między punktami to podobieństwo.</p>
+<div class="diagram" data-lens="L8"><svg width="100%" height="100%" preserveAspectRatio="xMidYMid meet" role="img" aria-label="rysunek soczewki L8"></svg></div><div class="qbar" data-lens="L8"></div><p class="qcap" data-lens="L8"></p>
+<h3>Na jakie pytania odpowiada</h3>
+<p class="pod">Nowe pytania, na które dałoby się odpowiedzieć:</p><ul class=""><li>Które pobory z tego tygodnia są najbliżej poborów, które okazały się złe?</li></ul>
+<h3>Operacje natywne</h3>
+<p class="ops"><code>nearest(pobór)</code> <code>outliers()</code> <code>cluster()</code></p>
+</section>
+<section class="soczewka" id="graf"><h2><span class="lid">—</span> Graf <span class="pewn">odrzucony przez skill</span></h2>
+<p class="dlaczego">Graf zależności: żadne pytanie nie wymaga ścieżek ani osiągalności; drzewo grup jest tematem analizy drzewo-grup.</p>
+<h3>Jak by wyglądał</h3><p>Pobory, gości, kempingi i wydawców jako węzły, a „kto płaci komu za co” jako krawędzie.</p>
+<h3>Dlaczego nie tu</h3><p>Żadne z 18 pytań nie pyta o ścieżkę, osiągalność ani sąsiedztwo. Graf ma te operacje natywnie, ale nikt ich tu nie potrzebuje. Drzewo grup, gdzie graf ma sens, to osobna analiza.</p>
+<h3>Operacje natywne</h3><p class="ops"><code>path(a, b)</code> <code>reachable(a)</code> <code>neighbours(a)</code></p>
+</section>
+</article></main>
+<script type="application/json" id="rysunki">{"L1": {"kind": "graph", "title": "Zapisy jako węzły, wpływ na saldo jako krawędzie", "sample": {"directed": true, "nodes": [{"id": "p1", "label": "pobór 12 kWh", "x": 0.1, "y": 0.25}, {"id": "z1", "label": "obciążenie 8,40", "x": 0.4, "y": 0.25}, {"id": "s1", "label": "storno −8,40", "x": 0.4, "y": 0.6}, {"id": "z2", "label": "korekta 11,20", "x": 0.4, "y": 0.9}, {"id": "k", "label": "konto gościa", "x": 0.8, "y": 0.5}, {"id": "l", "label": "pozycja 2026_07", "x": 0.8, "y": 0.15}], "edges": [{"from": "p1", "to": "z1", "label": "rodzi"}, {"from": "z1", "to": "k"}, {"from": "s1", "to": "z1", "label": "wycofuje"}, {"from": "s1", "to": "k"}, {"from": "z2", "to": "k"}, {"from": "z1", "to": "l", "label": "w pozycji"}]}, "queries": [{"name": "reverse", "finds": "zapis wycofany i jego storno", "why": "poprawka bez drugiej linii", "highlight": {"nodes": ["z1", "s1"], "edges": [["s1", "z1"]]}}, {"name": "contribution", "finds": "z czego składa się pozycja rachunku", "why": "które pobory poprawić po odrzuceniu", "highlight": {"nodes": ["l", "z1", "p1"], "edges": [["z1", "l"], ["p1", "z1"]]}}, {"name": "balance", "finds": "saldo konta po korekcie (11,20)", "why": "co gość naprawdę jest winien", "highlight": {"nodes": ["k", "z1", "s1", "z2"], "edges": [["z1", "k"], ["s1", "k"], ["z2", "k"]]}}]}, "L3": {"kind": "bipartite", "title": "Pobory po lewej, ograniczenia po prawej", "sample": {"directed": false, "nodes": [{"id": "a", "label": "pobór A", "group": "pobór"}, {"id": "b", "label": "pobór B", "group": "pobór"}, {"id": "c", "label": "pobór C", "group": "pobór"}, {"id": "d", "label": "pobór D", "group": "pobór"}, {"id": "k1", "label": "czas ≥ 0", "group": "ogr"}, {"id": "k2", "label": "kWh/noc ≤ próg", "group": "ogr"}, {"id": "k3", "label": "0 kWh przy > 4 h", "group": "ogr"}, {"id": "k4", "label": "data po instalacji", "group": "ogr"}], "edges": [{"from": "a", "to": "k3"}, {"from": "b", "to": "k4"}, {"from": "c", "to": "k3"}, {"from": "c", "to": "k4"}, {"from": "d", "to": "k2"}]}, "queries": [{"name": "violations(C)", "finds": "pobór C łamie dwa ograniczenia naraz", "why": "przeglądający widzi oba powody", "highlight": {"nodes": ["c", "k3", "k4"], "edges": [["c", "k3"], ["c", "k4"]]}}, {"name": "most violated", "finds": "'0 kWh przy > 4 h' wstrzymuje najwięcej", "why": "gdzie szukać przyczyny w słupkach", "highlight": {"nodes": ["k3", "a", "c"], "edges": [["a", "k3"], ["c", "k3"]]}}]}, "L7": {"kind": "graph", "title": "Etapy jako węzły, przepływ poborów jako krawędzie", "sample": {"directed": true, "nodes": [{"id": "z", "label": "zapisany", "x": 0.08, "y": 0.5}, {"id": "w", "label": "w wyjaśnieniu", "x": 0.38, "y": 0.2}, {"id": "u", "label": "uznany", "x": 0.65, "y": 0.2}, {"id": "c", "label": "wyceniony", "x": 0.65, "y": 0.75}, {"id": "r", "label": "na rachunku", "x": 0.92, "y": 0.5}], "edges": [{"from": "z", "to": "w", "label": "4% · 0 dni"}, {"from": "z", "to": "c", "label": "96%"}, {"from": "w", "to": "u", "label": "med. 6 dni"}, {"from": "u", "to": "c"}, {"from": "c", "to": "r", "label": "do 30 dni"}]}, "queries": [{"name": "bottleneck", "finds": "najdłużej czeka się w wyjaśnieniu", "why": "gdzie dodać przeglądających", "highlight": {"nodes": ["w"], "edges": [["w", "u"]]}}]}, "L8": {"kind": "vector", "title": "Pobory w przestrzeni kWh na godzinę × czas", "sample": {"points": [{"id": "p1", "label": "zgłoszony 0 kWh", "x": 0.8, "y": 0.92, "group": "zły"}, {"id": "p2", "label": "nowy A", "x": 0.75, "y": 0.9}, {"id": "p3", "label": "nowy B", "x": 0.3, "y": 0.4}, {"id": "p4", "label": "nowy C", "x": 0.85, "y": 0.88}, {"id": "p5", "label": "zwykły", "x": 0.4, "y": 0.35}, {"id": "p6", "label": "zwykły", "x": 0.55, "y": 0.45}]}, "queries": [{"name": "nearest(zgłoszony)", "finds": "nowe A i C wyglądają jak zgłoszony zły odczyt", "why": "do sprawdzenia przed rachunkiem", "highlight": {"points": ["p1", "p2", "p4"]}}]}}</script>
+<script>(function(){
+var DANE=JSON.parse(document.getElementById("rysunki").textContent);
+var NS="http://www.w3.org/2000/svg";
+function s(t,a){var e=document.createElementNS(NS,t);if(a)for(var k in a)e.setAttribute(k,a[k]);return e;}
+function el(t,c,txt){var e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;}
+function txt(svg,x,y,t,cls,anchor){var e=s("text",{x:x,y:y,"class":cls||"node-t"});if(anchor)e.style.textAnchor=anchor;e.textContent=t;svg.appendChild(e);return e;}
+function ek(a,b){return a+"|"+b;}
+function hl(q){var hn={},he={};if(q&&q.highlight){(q.highlight.nodes||[]).forEach(function(i){hn[i]=1;});(q.highlight.points||[]).forEach(function(i){hn[i]=1;});(q.highlight.edges||[]).forEach(function(e){he[ek(e[0],e[1])]=1;he[ek(e[1],e[0])]=1;});}return {hn:hn,he:he};}
+function clear(svg,W,H){svg.setAttribute("viewBox","0 0 "+W+" "+H);while(svg.firstChild)svg.removeChild(svg.firstChild);}
+function arrowDefs(svg,id){var defs=s("defs");["edge","hl"].forEach(function(k){var m=s("marker",{id:"arrow-"+k+"-"+id,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"7",markerHeight:"7",orient:"auto-start-reverse"});var p=s("path",{d:"M0,0 L10,5 L0,10 z"});p.setAttribute("fill",k==="hl"?"var(--hl)":"var(--edge)");m.appendChild(p);defs.appendChild(m);});svg.appendChild(defs);}
+function arrow(svg,id,x1,y1,x2,y2,on){var ln=s("line",{x1:x1,y1:y1,x2:x2,y2:y2,"class":"edge-l"+(on?" hl":"")});ln.setAttribute("marker-end","url(#arrow-"+(on?"hl":"edge")+"-"+id+")");svg.appendChild(ln);return ln;}
+
+/* KSIĘGA: konto z zapisami Dt/Ct i saldem, pozycja rachunku, pobór jako źródło */
+function drawLedger(svg,v,q){
+  var W=800,H=500;clear(svg,W,H);arrowDefs(svg,v.__id);var H2=hl(q);
+  var sm=v.sample||{},nodes=sm.nodes||[],edges=sm.edges||[];
+  var konto=nodes.filter(function(n){return /konto/i.test(n.label);})[0],poz=nodes.filter(function(n){return /pozycja/i.test(n.label);})[0],
+      src=nodes.filter(function(n){return /pob/i.test(n.label);})[0],
+      zap=nodes.filter(function(n){return n!==konto&&n!==poz&&n!==src;});
+  var wycofuje={};edges.forEach(function(e){if(/wycof/i.test(e.label||""))wycofuje[e.from]=e.to;});
+  var wPoz={};edges.forEach(function(e){if(poz&&e.to===poz.id)wPoz[e.from]=1;});
+  // arkusz konta
+  var X=230,Y=60,Wk=380,rowH=52,Hk=70+zap.length*rowH+60;
+  svg.appendChild(s("rect",{x:X,y:Y,width:Wk,height:Hk,rx:10,"class":"sheet"+(konto&&H2.hn[konto.id]?" hl":"")}));
+  txt(svg,X+16,Y+30,"Konto: "+(konto?konto.label.replace(/^konto\s*/i,""):""),"sheet-t","start");
+  txt(svg,X+Wk-150,Y+30,"Dt","col-t","middle");txt(svg,X+Wk-60,Y+30,"Ct","col-t","middle");
+  svg.appendChild(s("line",{x1:X+10,y1:Y+44,x2:X+Wk-10,y2:Y+44,"class":"edge-l"}));
+  svg.appendChild(s("line",{x1:X+Wk-200,y1:Y+44,x2:X+Wk-200,y2:Y+Hk-56,"class":"edge-l"}));
+  var saldo=0,ys={};
+  zap.forEach(function(z,i){var y=Y+44+rowH*(i+1)-rowH/2+6,on=H2.hn[z.id];ys[z.id]=y;
+    var m=(z.label.match(/(-|−)?\s*(\d+[.,]\d+)/)||[]);var kwota=m[2]?parseFloat(m[2].replace(",", ".")):0,ujemna=!!m[1]||!!wycofuje[z.id];saldo+=ujemna?-kwota:kwota;
+    if(on)svg.appendChild(s("rect",{x:X+8,y:y-22,width:Wk-16,height:rowH-8,rx:6,"class":"row-hl"}));
+    txt(svg,X+16,y+5,z.label.replace(/\s*(-|−)?\s*\d+[.,]\d+$/,""),"row-t","start");
+    txt(svg,ujemna?X+Wk-60:X+Wk-150,y+5,(m[2]||"").replace(".",","),"row-t","middle");
+    if(wycofuje[z.id]&&ys[wycofuje[z.id]]!=null){var yy=ys[wycofuje[z.id]];var onE=H2.he[ek(z.id,wycofuje[z.id])];
+      var p=s("path",{d:"M"+(X+Wk+8)+" "+y+" C "+(X+Wk+40)+" "+y+", "+(X+Wk+40)+" "+yy+", "+(X+Wk+8)+" "+yy,"class":"edge-l"+(onE?" hl":"")});p.setAttribute("marker-end","url(#arrow-"+(onE?"hl":"edge")+"-"+v.__id+")");svg.appendChild(p);
+      txt(svg,X+Wk+46,(y+yy)/2+4,"wycofuje","edge-t","start");}
+  });
+  svg.appendChild(s("line",{x1:X+10,y1:Y+Hk-56,x2:X+Wk-10,y2:Y+Hk-56,"class":"edge-l"}));
+  txt(svg,X+16,Y+Hk-24,"saldo","sheet-t","start");txt(svg,X+Wk-150,Y+Hk-24,saldo.toFixed(2).replace(".",","),"sheet-t","middle");
+  // pobór jako źródło
+  if(src){var on=H2.hn[src.id];svg.appendChild(s("rect",{x:40,y:Y+40,width:140,height:52,rx:8,"class":"card"+(on?" hl":"")}));txt(svg,110,Y+71,src.label,"row-t","middle");
+    var first=zap[0];if(first){var onE=H2.he[ek(src.id,first.id)];arrow(svg,v.__id,182,Y+66,X-4,ys[first.id],onE);txt(svg,(182+X)/2,Y+56,"rodzi","edge-t","middle");}}
+  // pozycja rachunku
+  if(poz){var on=H2.hn[poz.id],ids=Object.keys(wPoz);var Py=Y+Hk+20;if(Py>H-70)Py=H-70;
+    svg.appendChild(s("rect",{x:X,y:Py,width:Wk,height:46,rx:8,"class":"card"+(on?" hl":"")}));
+    txt(svg,X+16,Py+28,poz.label.replace(/^pozycja\s*/i,"Pozycja rachunku ")+":  "+ids.map(function(i){var n=nodes.filter(function(x){return x.id===i;})[0];return n?n.label:i;}).join(", "),"row-t","start");
+    ids.forEach(function(i){if(ys[i]!=null){var onE=H2.he[ek(i,poz.id)];var p=s("path",{d:"M"+(X-10)+" "+ys[i]+" C "+(X-40)+" "+ys[i]+", "+(X-40)+" "+(Py+23)+", "+(X-4)+" "+(Py+23),"class":"edge-l"+(onE?" hl":"")});p.setAttribute("marker-end","url(#arrow-"+(onE?"hl":"edge")+"-"+v.__id+")");svg.appendChild(p);}});}
+}
+
+/* OGRANICZENIA: tablica pobory × ograniczenia */
+function drawMatrix(svg,v,q){
+  var W=800,H=500;clear(svg,W,H);var H2=hl(q);var sm=v.sample||{},nodes=sm.nodes||[],edges=sm.edges||[];
+  var gk=[];nodes.forEach(function(n){if(gk.indexOf(n.group)<0)gk.push(n.group);});
+  var rows=nodes.filter(function(n){return n.group===gk[0];}),cols=nodes.filter(function(n){return n.group===gk[1];});
+  var lam={};edges.forEach(function(e){lam[ek(e.from,e.to)]=1;lam[ek(e.to,e.from)]=1;});
+  var X0=200,Y0=120,cw=(W-X0-30)/cols.length,rh=(H-Y0-30)/rows.length;
+  txt(svg,X0-20,Y0-70,"ograniczenia →","col-t","end");txt(svg,X0-20,H-16,"↓ pobory","col-t","end");
+  cols.forEach(function(c,j){var x=X0+cw*j+cw/2,on=H2.hn[c.id];if(on)svg.appendChild(s("rect",{x:X0+cw*j+4,y:Y0-60,width:cw-8,height:H-Y0+50,rx:8,"class":"row-hl"}));
+    var words=c.label.split(" "),l1=words.slice(0,Math.ceil(words.length/2)).join(" "),l2=words.slice(Math.ceil(words.length/2)).join(" ");
+    txt(svg,x,Y0-36,l1,"col-t","middle");if(l2)txt(svg,x,Y0-18,l2,"col-t","middle");});
+  rows.forEach(function(r,i){var y=Y0+rh*i+rh/2,on=H2.hn[r.id];if(on)svg.appendChild(s("rect",{x:20,y:Y0+rh*i+4,width:W-50,height:rh-8,rx:8,"class":"row-hl"}));
+    txt(svg,X0-20,y+5,r.label,"row-t","end");svg.appendChild(s("line",{x1:X0,y1:Y0+rh*i,x2:W-30,y2:Y0+rh*i,"class":"grid"}));
+    cols.forEach(function(c,j){var x=X0+cw*j+cw/2,bad=lam[ek(r.id,c.id)],onE=H2.he[ek(r.id,c.id)];
+      svg.appendChild(s("circle",{cx:x,cy:y,r:16,"class":(bad?"cell-bad":"cell-ok")+(onE?" hl":"")}));
+      txt(svg,x,y+6,bad?"✗":"✓","cell-t","middle");});});
+  svg.appendChild(s("line",{x1:X0,y1:Y0+rh*rows.length,x2:W-30,y2:Y0+rh*rows.length,"class":"grid"}));
+  cols.forEach(function(c,j){svg.appendChild(s("line",{x1:X0+cw*j,y1:Y0,x2:X0+cw*j,y2:Y0+rh*rows.length,"class":"grid"}));});
+}
+
+/* KOLEJKA: etapy ze stosami czekających, strzałki z czasem i odsetkiem */
+function drawQueue(svg,v,q){
+  var W=800,H=500;clear(svg,W,H);arrowDefs(svg,v.__id);var H2=hl(q);var sm=v.sample||{},nodes=sm.nodes||[],edges=sm.edges||[];
+  var waiting={};edges.forEach(function(e){var m=(e.label||"").match(/(\d+)\s*dni/);if(m)waiting[e.from]=Math.max(waiting[e.from]||0,parseInt(m[1],10));});
+  var pos={},bw=118,bh=44;
+  nodes.forEach(function(n){pos[n.id]={x:40+n.x*(W-80-bw)+bw/2,y:50+n.y*(H-190)+bh/2};});
+  edges.forEach(function(e){var a=pos[e.from],b=pos[e.to];if(!a||!b)return;var onE=H2.he[ek(e.from,e.to)];
+    var x1=a.x+bw/2+2,y1=a.y,x2=b.x-bw/2-8,y2=b.y;if(Math.abs(y2-y1)>10){var p=s("path",{d:"M"+x1+" "+y1+" C "+((x1+x2)/2)+" "+y1+", "+((x1+x2)/2)+" "+y2+", "+x2+" "+y2,"class":"edge-l"+(onE?" hl":"")});p.setAttribute("marker-end","url(#arrow-"+(onE?"hl":"edge")+"-"+v.__id+")");svg.appendChild(p);}else arrow(svg,v.__id,x1,y1,x2,y2,onE);
+    if(e.label)txt(svg,(x1+x2)/2,(y1+y2)/2-9,e.label,"edge-t","middle");});
+  nodes.forEach(function(n){var p=pos[n.id],on=H2.hn[n.id];
+    var k=waiting[n.id]||0,tok=k?Math.min(6,Math.max(2,k)):0;
+    for(var i=0;i<tok;i++)svg.appendChild(s("rect",{x:p.x-bw/2+10+i*3,y:p.y+bh/2+8+i*7,width:bw-20,height:12,rx:3,"class":"tok"+(on?" hl":"")}));
+    svg.appendChild(s("rect",{x:p.x-bw/2,y:p.y-bh/2,width:bw,height:bh,rx:8,"class":"card"+(on?" hl":"")}));
+    txt(svg,p.x,p.y+5,n.label,"row-t","middle");
+    if(k)txt(svg,p.x,p.y+bh/2+8+tok*7+18,"czeka ~"+k+" dni","edge-t","middle");});
+  txt(svg,40,H-16,"stos pod etapem: pobory czekające w tym etapie. Przy strzałce: odsetek i czas przejścia.","edge-t","start");
+}
+
+/* WEKTOR: punkty w przestrzeni cech */
+function drawVector(svg,v,q){
+  var W=800,H=500,PAD=48;clear(svg,W,H);
+  svg.appendChild(s("line",{x1:PAD,y1:H-PAD,x2:W-PAD,y2:H-PAD,"class":"edge-l"}));svg.appendChild(s("line",{x1:PAD,y1:PAD,x2:PAD,y2:H-PAD,"class":"edge-l"}));
+  txt(svg,W-PAD,H-PAD+18,"czas podpięcia →","edge-t","end");txt(svg,PAD+6,PAD-8,"↑ kWh na godzinę","edge-t","start");
+  var pts=(v.sample&&v.sample.points)||[],H2=hl(q),hi=pts.filter(function(p){return H2.hn[p.id];});
+  if(hi.length>=2){var cx=0,cy=0;hi.forEach(function(p){cx+=p.x;cy+=p.y;});cx/=hi.length;cy/=hi.length;var rr=0;hi.forEach(function(p){rr=Math.max(rr,Math.hypot(p.x-cx,p.y-cy));});
+    var ring=s("circle",{cx:PAD+cx*(W-2*PAD),cy:PAD+(1-cy)*(H-2*PAD),r:rr*(W-2*PAD)+26,"class":"edge-l hl"});ring.setAttribute("fill","none");ring.setAttribute("stroke-dasharray","5 4");svg.appendChild(ring);}
+  pts.forEach(function(p){var X=PAD+p.x*(W-2*PAD),Y=PAD+(1-p.y)*(H-2*PAD),on=H2.hn[p.id];svg.appendChild(s("circle",{cx:X,cy:Y,r:on?9:6,"class":"node-c"+(on?" hl":"")}));txt(svg,X,Y-12,p.label||p.id,"node-t","middle");});
+}
+var RYS={ledger:drawLedger,constraint:drawMatrix,bipartite:drawMatrix,queue:drawQueue,vector:drawVector,graph:drawQueue};
+var KIND={L1:"ledger",L3:"constraint",L7:"queue",L8:"vector"};
+Object.keys(DANE).forEach(function(id){
+  var v=DANE[id];v.__id=id;var draw=RYS[KIND[id]||v.kind]||drawQueue;
+  var svg=document.querySelector('.diagram[data-lens="'+id+'"] svg'),bar=document.querySelector('.qbar[data-lens="'+id+'"]'),cap=document.querySelector('.qcap[data-lens="'+id+'"]');
+  if(!svg)return;var act=-1,qs=v.queries||[];
+  function paint(){var q=act>=0?qs[act]:null;draw(svg,v,q);
+    Array.prototype.forEach.call(bar.children,function(b,i){b.setAttribute("aria-pressed",i===act?"true":"false");});
+    if(q){cap.innerHTML="";cap.appendChild(el("b",null,q.name));cap.appendChild(document.createTextNode(": "+(q.finds||"")+(q.why?". "+q.why+".":"")));}else cap.textContent=qs.length?"Zapytania natywne: kliknij, żeby podświetlić.":"";}
+  qs.forEach(function(q,i){var b=el("button","qbtn",q.name);b.type="button";b.addEventListener("click",function(){act=act===i?-1:i;paint();});bar.appendChild(b);});
+  paint();
+});
+})();</script>
+</body></html>

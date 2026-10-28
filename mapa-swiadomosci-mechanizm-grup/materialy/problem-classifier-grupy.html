@@ -1,0 +1,222 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>problem-classifier</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+
+.blok{position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;box-shadow:var(--cien);margin-top:24px}
+.blok pre{margin:0;padding:22px 22px 26px;white-space:pre-wrap;font:15px/1.65 var(--font-body);color:var(--tekst)}
+.kopiuj{position:sticky;top:12px;float:right;margin:12px 12px 0 0;font:500 .85rem var(--font-mono);color:var(--tlo);background:var(--akcent);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+@media(max-width:600px){.blok pre{padding:16px}}
+
+.tabela{overflow-x:auto;margin:14px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:.88rem;line-height:1.5}
+th,td{border:1px solid var(--ramka);padding:8px 10px;vertical-align:top;text-align:left}
+th{background:var(--panel);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+pre.diagram{overflow-x:auto;background:var(--kod);border:1px solid var(--ramka);border-radius:10px;padding:14px;font:.76rem/1.45 var(--font-mono)}
+figure{margin:18px 0}figure img{max-width:100%;border:1px solid var(--ramka);border-radius:10px}
+figcaption{font-size:.85rem;color:var(--przygaszony);margin-top:6px}
+main h2{margin-top:40px}
+.komponenty{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 8px}
+@media (max-width:760px){.komponenty{grid-template-columns:1fr 1fr}}
+.k{border:2px solid var(--ramka);border-radius:12px;padding:14px;background:var(--panel);display:flex;flex-direction:column;gap:6px}
+.k b{font-size:1rem}.k span{font-size:.86rem;color:var(--przygaszony);line-height:1.45}
+.k.crud{border-color:#5b8fd1}.k.tp{border-color:#3fa38b}.k.int{border-color:#c79a3a}.k.rc{border-color:#d0603f}
+.podpis{font-size:.88rem;color:var(--przygaszony)}
+</style></head><body>
+<header class="hero"><div class="wrap"><p class="eyebrow">Mapa świadomości · notatki</p><h1>problem-classifier</h1>
+<p class="intro">Pierwsza mapa świadomości przy pogłębianiu hipotezy: jak jest pod względem reguł. Co ten mechanizm robi, gdzie dziwnie liczy, czy to nie jest po prostu bardzo skomplikowany CRUD? Ten sam skill, który w bloku archetypów czyta makietę nowego ekranu, tu dostał kod istniejącego mechanizmu. Jest szybszy niż concept-explorer, który odpowiada na inne pytanie: po co ten mechanizm w ogóle istnieje.</p></div></header>
+<main class="wrap"><article class="zadanie">
+<h2>Anatomia skilla na kodzie</h2>
+<p><strong>Wejście:</strong> wymaganie, makieta albo kod. Tu kod: nazwa mechanizmu i repo (<code>GroupService</code> i jego otoczenie w campsite-power). Na kodzie skill mówi, <strong>jak jest</strong>, a nie jak powinno być, i zaczyna wynik od takiej uwagi. <strong>Wyjście:</strong> klasa problemu z pewnością, ścieżka dedukcji, dekompozycja na składowe, czego nie robić, sugerowane podejście.</p>
+<ul><li>Cztery klasy jak przy makiecie: CRUD, transformacja i prezentacja (T&amp;P), integracja, rywalizacja o zasób (RC). Każda ma swój klocek: kontroler, funkcje, proces, agregat.</li>
+<li>Przy makiecie pytania doprecyzowujące dostaje człowiek. Tu rozstrzyga je kod. „Kto zmienia te dane i kiedy” czyta z praw użytkownika i adnotacji transakcji, „czy ktoś ściga się o te dane” z braku blokad, wersji i ograniczeń w bazie, „czy to tylko odczyt” z liczby metod <code>readOnly</code>.</li>
+<li>Najpierw indeks CodeGraph (jedno zapytanie o serwis, encję, DAO i wołających), potem lektura czterech klas pakietu <code>group</code>, lista klientów kluczowych pytań i migracje bazy pod kątem UNIQUE.</li>
+<li>Test rozstrzygający jest ten sam co zawsze: czy dane, które sprawdzam przed decyzją, może ktoś zmienić w tej samej chwili. Przy kodzie odpowiada na niego nie makieta, tylko to, kto ma prawo do zapisu i czy zapis jest chroniony.</li></ul>
+<h3>Ograniczenia</h3>
+<ul><li>Kod mówi, jak jest, nie jak ma być, i to w obie strony: blokada mogła trafić do kodu z przyzwyczajenia, a jej brak może być błędem. Jeśli admini w praktyce równolegle przepinają umowy, kod tego nie pokaże; to założenie trzeba potwierdzić u ludzi.</li>
+<li>Skill klasyfikuje mechanizm, nie nazywa potrzeb. Że w jednej tabeli siedzi pięć pojęć, widać dopiero w dekompozycji, a nazwy dla nich trzeba dać samemu (albo zapytać archetypów).</li></ul>
+
+<h2>Przebieg: mechanizm grup w campsite-power</h2>
+<p>Prompt: <code>/problem-classifier na koncepcie grup GroupService z naszego repo szkoleniowego</code>. Skill nie zadał człowiekowi żadnego pytania, bo każde miało jednoznaczną odpowiedź w kodzie.</p>
+<p><strong>Źródło: kod.</strong> Kod pokazuje, jak system działa dziś, a nie jak powinien. Blokada mogła trafić tu z przyzwyczajenia, a jej brak może być błędem; założenia z sekcji „Otwarte” potwierdź u ludzi, zanim zaczniesz modelować.</p>
+<h3>Klasyfikacja: złożona, CRUD (konfiguracja drzew) + T&amp;P (pytania pochodne). Bez rywalizacji o zasób</h3>
+<p><strong>Pewność</strong>: wysoka dla drzewa, umów i atrybutów. Trzy drzewa (ISSUER, SITE, STAFF) w jednej tabeli, lista „grupy powiązane” jako umowy akceptacji kart, jedenaście tabel atrybutów dziedziczonych po linii rodziców. Mimo ponad sześćdziesięciu miejsc, które pytają grupy o zakres, i walidacji kart, która pyta o akceptację, grupy nie chronią żadnej decyzji przed wyścigiem. Dwa zapisy w pakiecie wykraczają poza CRUD i są opisane osobno.</p>
+<h3>Ścieżka dedukcji</h3>
+<div class="tabela"><table><thead><tr><th>#</th><th>Pytanie</th><th>Odpowiedź z kodu</th><th>Co z tego wynika</th></tr></thead><tbody>
+<tr><td>1</td><td>Czy operacja zmienia stan, czy tylko czyta?</td><td>35 z 38 metod <code>GroupService</code> jest <code>readOnly</code>. Zapisy to tworzenie grupy i dodanie lub usunięcie umowy akceptacji</td><td>Dominuje <strong>T&amp;P</strong>, zapisy są konfiguracją</td></tr>
+<tr><td>2</td><td>Kto zmienia grupy i kiedy?</td><td>Użytkownik konsoli z prawem <code>CONFIG_EDIT</code>, tylko w zasięgu własnego drzewa</td><td>Konfiguracja administracyjna, nie ruch operacyjny</td></tr>
+<tr><td>3</td><td>Czy dane, o które system pyta (poddrzewo, umowy), może ktoś zmienić w trakcie pytania?</td><td>Teoretycznie admin, praktycznie rzadko. W całym <code>campsite-core</code> nie ma <code>@Version</code>, <code>@Lock</code> ani <code>for update</code></td><td>Brak wyścigu sprawdź-i-zapisz, więc <strong>nie RC</strong></td></tr>
+<tr><td>4</td><td>Czy grupy same decydują „czy można X”?</td><td>Nie. <code>isCardAcceptedAt</code> zwraca zbiór grup; decyzję o karcie podejmuje <code>ValidationService</code></td><td>Grupy liczą politykę (T&amp;P), egzekucja jest gdzie indziej</td></tr>
+<tr><td>5</td><td>„Tylko jedna grupa o tej nazwie w typie”: RC?</td><td>Sprawdzenie przed insertem w <code>GroupApiService.createGroup</code> plus UNIQUE(NAME, TYPENAME) w bazie</td><td>Ograniczenie bazy wystarcza, agregat zbędny</td></tr>
+<tr><td>6</td><td>Czy nocna walidacja drzewa chroni niezmiennik?</td><td>Nie, to raport po fakcie. Typ dziecka jest kopiowany z rodzica przy tworzeniu i nigdy nie zmieniany</td><td>Kontrola kompensacyjna, nie sygnał RC</td></tr>
+<tr><td>7</td><td>Czy pola grupy są czysto opisowe?</td><td>Nie: nazwa niesie logikę (prefiks rynku „HR ”, „IT ”, „FR ”, prefiks afiliata, korzenie szukane po nazwie), co przyznaje komentarz w <code>Group.java</code></td><td><strong>Przebrany CRUD</strong>: pole regułowe w tabeli opisowej</td></tr>
+<tr><td>8</td><td>Czy coś blokuje zapis grupy, umowy albo atrybutu zależnie od stanu systemu?</td><td>Tak, ale tylko: duplikat nazwy w typie (stan bazy, chroni UNIQUE), brak umowy przy jej usuwaniu (404), taryfa z innego rynku niż grupa. Typ ISSUER/SITE/STAFF jest stały od utworzenia, więc sprawdzenia typu nie zależą od stanu. Grupy nie da się usunąć, przenieść ani przemianować przez API</td><td>Blokady są ograniczeniami wejścia i bazy, nie regułami wymagającymi atomowości. Brak usuwania i przenoszenia trzyma niezmienniki drzewa „z konstrukcji”</td></tr>
+<tr><td>9</td><td>Czy w pakiecie <code>group</code> jest zapis, który robi więcej niż CRUD?</td><td>Dwa. <code>switchAccessMode</code> przepina grupę afiliata pod innego rodzica (tryb dostępu to nazwa rodzica), przepisuje flagi wszystkich jej słupków i wysyła zdarzenie. <code>checkAndAdopt</code> zamienia kartę powitalną w kartę domową i kasuje ją z puli</td><td>Pierwsze to maszyna stanów zakodowana w drzewie, z rozlaniem na słupki, bez blokady. Drugie to decyzja o kartach, która tylko leży w pakiecie grup. Oba poza klasą CRUD, patrz dekompozycja</td></tr>
+</tbody></table></div>
+<h3>Czy coś blokuje zapis, gdy coś jest „dziwnego”?</h3>
+<p>Pytanie z sali po przebiegu. W kodzie są cztery rodzaje odmowy:</p>
+<ul><li><strong>Uprawnienie</strong>: każda grupa z wywołania musi leżeć w zasięgu drzewa wołającego (<code>fetchManageable</code>). To T&amp;P użyte jako bramka, nie reguła o zasobie.</li>
+<li><strong>Typ</strong>: umowa tylko ISSUER → SITE, taryfa domyślna tylko na SITE, filtr whitelist tylko na ISSUER. Typ jest kopiowany z rodzica przy tworzeniu i nigdy nie zmieniany, więc to walidacja wejścia.</li>
+<li><strong>Stan bazy</strong>: druga grupa o tej nazwie w typie, usunięcie umowy, której nie ma, taryfa z rynku innego niż rynek grupy (a rynek czyta się z prefiksu nazwy przodka). Jedyne sprawdzenie, które może się ścigać, to nazwa, i je domyka UNIQUE(NAME, TYPENAME).</li>
+<li><strong>Czego nie ma</strong>: usuwania, przenoszenia i przemianowania grup. Dlatego „typ dziecka = typ rodzica” i „umowy tylko ISSUER → SITE” nie potrzebują strażnika przy zapisie, a nocna walidacja łapie tylko ręczne zmiany w bazie.</li></ul>
+<p>Wyjątkiem jest <strong>tryb dostępu kempingu afiliacyjnego</strong>. Nie ma go w żadnym polu. Wynika z tego, pod którym z dwóch rodziców („NETWORK ACCESS…”, „HOUSE CARDS ONLY…”) wisi grupa. Przełączenie przepina rodzica, przepisuje flagi wszystkich słupków grupy i wysyła zdarzenie, bez żadnej blokady. Dwóch adminów przełączających naraz albo słupek dodany w trakcie zostawi słupki w stanie innego trybu niż grupa. To jedyne miejsce w mechanizmie grup, gdzie sprawdzenie i zapis powinny iść razem.</p>
+<h3>Dlaczego tak</h3>
+<ul><li><strong>„A group manages its whole subtree”</strong>: pytanie pochodne z drzewa, czyste czytanie. T&amp;P. Pytają o to zamówienia, karty, goście, słupki, taryfy.</li>
+<li><strong>„Cards of the issuer group are accepted in the subtree of the site group”</strong>: umowę zapisuje admin (CRUD), odczytuje rekurencyjny SQL albo spacer po drzewie w pamięci (T&amp;P). Obie drogi liczą to samo.</li>
+<li><strong>„Setting attached to a group and inherited by its subtree, nearest ancestor-or-self wins”</strong>: jedenaście tabel atrybutów z UNIQUE(GROUP_ID). Zapis to CRUD, rozwiązanie po linii rodziców to T&amp;P.</li>
+<li><strong>„Walks up the parent line until a name starts with a market prefix”</strong>: rynek wyliczany ze stringa. T&amp;P, ale z zapachem modelu.</li></ul>
+<h3>Czego NIE robić</h3>
+<ul><li><strong>Nie przerabiać <code>Group</code> na agregat</strong> z dziećmi i umowami. Drzewo organizacji jako jedna jednostka spójności blokowałoby całą sieć przy każdej zmianie kempingu, a nie ma wyścigu, przed którym miałoby chronić.</li>
+<li><strong>Nie wkładać decyzji „czy karta wejdzie na słupek” do grup.</strong> Ta decyzja ma już swoje miejsce w walidacji karty.</li>
+<li><strong>Nie dopisywać warstw do tworzenia grup.</strong> To konfiguracja z ograniczeniem w bazie; wystarczy przetłumaczyć naruszenie UNIQUE na konflikt.</li></ul>
+<h3>Sugerowane podejście</h3>
+<ol><li><strong>Zapis grup i umów</strong>: kontroler z walidacją wejścia plus ograniczenia bazy, tak jak jest.</li>
+<li><strong>Pytania pochodne</strong> (zakres, akceptacja, dziedziczone ustawienia, rynek): czyste funkcje nad drzewem, osobno testowalne. Dziś żyją w jednym serwisie z pięcioma DAO i są rozdwojone na spacer w pamięci i rekurencyjny SQL.</li>
+<li><strong>Atomowe „czy karta wejdzie”</strong>, jeśli ktoś go potrzebuje, należy do walidacji karty albo sesji zasilania. Grupy dostarczają gotowy zbiór X.</li></ol>
+<h3>Dekompozycja</h3>
+<div class="tabela"><table><thead><tr><th>Składowa</th><th>Klasa</th><th>Uzasadnienie</th></tr></thead><tbody>
+<tr><td>Struktura organizacji: węzły, nazwy, trzy typy drzew</td><td>CRUD</td><td>Admin, <code>CONFIG_EDIT</code>, UNIQUE w bazie, brak blokad</td></tr>
+<tr><td>Zakres administracyjny (<code>isManageable</code>, <code>findManageable</code>)</td><td>T&amp;P</td><td>Czyste pytanie o poddrzewo, ponad 60 klientów</td></tr>
+<tr><td>Umowy akceptacji ISSUER → SITE: zapis</td><td>CRUD</td><td>Lista grup powiązanych, zmienia admin</td></tr>
+<tr><td>Umowy akceptacji: pytanie (<code>isCardAcceptedAt</code>, <code>findAcceptingSiteGroupIds</code>)</td><td>T&amp;P</td><td>Zbiór X dla decyzji podejmowanej w walidacji karty</td></tr>
+<tr><td>Atrybuty dziedziczone (taryfa domyślna, whitelist, powiadomienia, tenant…)</td><td>CRUD + T&amp;P</td><td>Zapis per grupa, rozwiązanie „najbliższy przodek wygrywa”</td></tr>
+<tr><td>Rynek z prefiksu nazwy</td><td>T&amp;P</td><td>Funkcja nad stringiem; zapach modelu</td></tr>
+<tr><td>Nocna walidacja drzewa</td><td>T&amp;P</td><td>Raport spójności, kontrola kompensacyjna</td></tr>
+<tr><td>Tryb dostępu afiliata (<code>switchAccessMode</code>)</td><td>maszyna stanów + Integracja</td><td>Stan zakodowany w rodzicu, zapis rozlany na słupki, zdarzenie na zewnątrz, brak blokady. Jedyny kandydat na atomowość w pakiecie</td></tr>
+<tr><td>Adopcja karty powitalnej (<code>checkAndAdopt</code>)</td><td>decyzja o karcie, poza grupami</td><td>Zmienia karty, nie grupy; grupy dają tylko rynek i zgodę kempingu. Klasę rozstrzyga się po stronie kart (ta sama karta na dwóch słupkach naraz)</td></tr>
+</tbody></table></div>
+<pre>                     [Konsola admina, CONFIG_EDIT]
+                                |
+                createGroup / add|removeAcceptanceAgreement / atrybuty
+                                v
+      ┌──────── TBL_GROUP + GROUP_ASSOCIATEDGROUP + GRP_ATTR_* ────────┐
+      │                  (CRUD, UNIQUE w bazie)                        │
+      └───────────────────────────┬────────────────────────────────────┘
+                                  │ czytają
+      ┌──────────────┬────────────┼──────────────┬──────────────────┐
+      v              v            v              v                  v
+ [zakres:       [akceptacja:  [atrybut:      [rynek          [walidacja
+  isManageable]  zbiór X]      najbliższy     z nazwy]        drzewa]
+  (T&amp;P)          (T&amp;P)         przodek] (T&amp;P) (T&amp;P)           (T&amp;P, nocny job)
+      |              |            |              |
+      v              v            v              v
+ 60+ serwisów   ValidationService TariffResolver, TariffResolver,
+ API (bramka    decyduje o karcie LocalCardList…  IssuerCode…
+ uprawnień)</pre>
+<h3>Otwarte przed modelowaniem</h3>
+<ul><li>Założenie do potwierdzenia: zmiany drzewa są rzadkie i sekwencyjne. Jeśli admini równolegle przepinają umowy, a w tym czasie masowo walidują się karty, do sprawdzenia jest spójność odczytu, nie RC.</li>
+<li>Czy nazwa ma dalej nieść rynek i afiliację, czy to ma być jawne pole lub atrybut. To pytanie o model, nie o klasę.</li></ul>
+
+<h2>Co z tego dla mapy</h2>
+<ul><li>Jeden mechanizm niesie pięć potrzeb (struktura organizacji, zakres uprawnień, umowa akceptacji, dziedziczona konfiguracja, segmentacja rynkowa) o dwóch klasach. Żadnej rywalizacji o zasób.</li>
+<li>Setki wywołań nie czynią miejsca agregatem. O klasie decyduje, kto zmienia dane i czy ktoś się o nie ściga, nie liczba czytających.</li>
+<li>Na pytanie z sali „czy coś blokuje zapis” odpowiedź brzmi: odmowy są, ale prawie wszystkie to uprawnienie, typ albo ograniczenie bazy. Jedyne miejsce, gdzie sprawdzenie i zapis powinny iść razem, to przełączanie trybu dostępu afiliata, bo stan siedzi w rodzicu, a skutki w słupkach.</li>
+<li>Przepisanie grup na agregat byłoby przeinżynierowaniem. Realny problem to brak nazwanych pojęć w jednej tabeli, a to już pytanie dla archetypów i mapy pojęć, nie dla klasyfikatora.</li></ul>
+</article></main>
+</body></html>

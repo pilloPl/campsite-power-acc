@@ -1,0 +1,628 @@
+<!doctype html><html lang="pl"><head><script>(function(){var d=document.documentElement;d.style.visibility="hidden";
+var pokaz=function(){d.style.visibility=""};var t=setTimeout(pokaz,4000);
+fetch("../../wyniki.json",{cache:"no-store"}).then(function(r){return r.json()}).then(function(w){clearTimeout(t);var n=Date.now();
+if(w.od&&w.do&&n>=Date.parse(w.od)&&n<Date.parse(w.do)&&(w.opublikowane||[]).indexOf("od-czego-zaczac-z-legacy")<0){
+document.open();document.write("<!doctype html><html lang=\"pl\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Od czego zacz\u0105\u0107 z legacy \u2013 wynik<\/title><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap\"><style>\n:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;\n  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;\n  --font-display:\"Fraunces\",Georgia,serif;--font-body:\"IBM Plex Sans\",\"Segoe UI\",sans-serif;--font-mono:\"IBM Plex Mono\",ui-monospace,Menlo,monospace;\n  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}\n@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}\n:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}\n*{box-sizing:border-box}\nhtml{background:var(--tlo)}\nbody{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;\n  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}\n.wrap{max-width:900px;margin:0 auto;padding-inline:20px}\n.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);\n  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),\n    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),\n    linear-gradient(160deg,var(--tlo),var(--tlo-2))}\n.hero::before{content:\"\";position:absolute;inset:0;pointer-events:none;opacity:.45;\n  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);\n  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}\n.hero .wrap{position:relative}\n.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}\n.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}\n.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}\n.metryczka strong{color:var(--akcent);font-weight:500}\n.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}\nmain{padding-block:clamp(28px,5vw,56px) 96px}\nh1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}\nh2{font-size:clamp(1.5rem,3.2vw,2rem)}\nh3{font-size:1.2rem}\nmain>h2:first-child,article>h2:first-child{margin-top:0}\na{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}\na:hover{color:var(--akcent-jasny)}\np{margin:.8em 0}\nstrong{color:var(--mocny)}\n.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.film:hover{color:#fff;filter:brightness(1.07)}\nol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}\nol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}\nol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}\nol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}\n.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}\n.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}\n.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}\n.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}\nnav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}\nnav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}\nnav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}\n.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}\n.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}\n.zmiany>h2,.zmiany>h3{color:#c0392b}\n.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}\n.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}\n.wnioski h2{margin-top:.6em;font-size:1.3rem}\n.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}\n.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}\npre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}\ncode{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}\npre code{background:none;padding:0}\nblockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}\n/* polecenie: kroki, prompty, komendy */\n.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);\n  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}\n.czat .scena{display:block;width:100%;height:96px}\n.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}\n.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}\n.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}\n.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}\n.czat .scena .namiot{fill:var(--akcent)}\n.czat .scena .slupek{fill:var(--mocny)}\n.czat .scena .iskra{fill:#f3c74a}\n.czat .tresc{padding:4px 20px 18px}\n.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}\n.czat p{margin:0 0 12px;color:var(--przygaszony)}\n.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}\n.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}\n.czat li img{width:38px;height:38px;border-radius:50%;flex:none}\n.czat li b{color:var(--mocny)}\n.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}\n.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}\n.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}\n.czat a:hover{background:var(--cyjan);color:var(--panel)}\n.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}\n.czat.asystent .tresc{padding-top:16px}\narticle.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}\narticle.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;\n  padding:18px 22px 16px 64px;box-shadow:var(--cien)}\narticle.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;\n  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}\n.ramka{position:relative;margin:14px 0}\n.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;\n  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}\n.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;\n  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}\n.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}\n.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);\n  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}\n.ramka.prompt>blockquote p{margin:.3em 0}\n.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}\n.ramka.kod>pre{margin:0;padding-top:50px}\n.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}\n.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--tlo);color:var(--przygaszony)}\n.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\ntable{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}\nth,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}\nth{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}\ntr:last-child td{border-bottom:0}\ntd code{color:var(--akcent)}\nimg{max-width:100%;border-radius:10px}\nfigure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}\nfigure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}\nfigure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}\nhr{border:none;border-top:1px solid var(--ramka);margin:32px 0}\nfooter.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}\n.drogi{margin:14px 0}\n.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}\n.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--panel);color:var(--przygaszony)}\n.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}\n.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\n.drogi>section>h3:first-child{margin-top:.9em}\n@media print{\n  .drogi .wybor{display:none}\n  .drogi>section[hidden]{display:block}\n  body{background:#fff;color:#000;font-size:11pt}\n  .hero{background:none;border:none;padding:0}\n  .hero::before{display:none}\n  .wrap{max-width:none;padding:0}\n  main{padding:0}\n  a{color:#000;text-decoration:underline}\n  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}\n  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}\n  figure.video{border:1px solid #ccc;box-shadow:none;background:none}\n  figure.video video{display:none}\n  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}\n  .zadanie+.zadanie{page-break-before:always;border:none}\n  nav,footer.stopka{display:none}\n  pre,table,blockquote{page-break-inside:avoid}\n}\n<\/style><\/head><body><header class=\"hero\"><div class=\"wrap\"><p class=\"eyebrow\">\ud83d\udcca Wynik zadania<\/p><h1>Od czego zacz\u0105\u0107 z legacy<\/h1><\/div><\/header><main class=\"wrap\"><p class=\"intro\">\u23f3 Wynik zostanie opublikowany po zadaniu.<\/p><footer class=\"stopka\">Materia\u0142y szkolenia \u201eAI w pracy z systemami legacy\".<\/footer><\/main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{\nr.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);\nr.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}\ndocument.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));\ntry{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}\nfunction ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];\nif(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);\ng.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}\ndocument.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));\ntry{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}\ndocument.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{\nconst t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();\n// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z blok\u00f3w bash wycinamy # \u2026\nconst k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))\nx=x.split('\\n').filter(l=>!/^\\s*#/.test(l)).map(l=>l.replace(/\\s+#\\s.*$/,'')).join('\\n').replace(/\\n{3,}/g,'\\n\\n').trim();\nnavigator.clipboard.writeText(x).then(()=>{\nconst s=b.textContent;b.textContent='\u2713 skopiowane';setTimeout(()=>b.textContent=s,1500)})}))<\/script><\/body><\/html>");document.close();}else pokaz();}).catch(function(){clearTimeout(t);pokaz()});})();</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Upgrade Spring Boot w campsite-power-acc — analiza z dowodami</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}
+.zmiany>h2,.zmiany>h3{color:#c0392b}
+.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);
+  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}
+.czat .scena{display:block;width:100%;height:96px}
+.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}
+.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}
+.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}
+.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}
+.czat .scena .namiot{fill:var(--akcent)}
+.czat .scena .slupek{fill:var(--mocny)}
+.czat .scena .iskra{fill:#f3c74a}
+.czat .tresc{padding:4px 20px 18px}
+.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}
+.czat p{margin:0 0 12px;color:var(--przygaszony)}
+.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}
+.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}
+.czat li img{width:38px;height:38px;border-radius:50%;flex:none}
+.czat li b{color:var(--mocny)}
+.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}
+.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}
+.czat a:hover{background:var(--cyjan);color:var(--panel)}
+.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}
+.czat.asystent .tresc{padding-top:16px}
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:50px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+.drogi{margin:14px 0}
+.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--panel);color:var(--przygaszony)}
+.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}
+.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+.drogi>section>h3:first-child{margin-top:.9em}
+@media print{
+  .drogi .wybor{display:none}
+  .drogi>section[hidden]{display:block}
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+</style></head><body><header class="hero"><div class="wrap"><p class="eyebrow">Gdybyśmy podbijali Spring Boota · wynik</p><h1>Upgrade Spring Boot w campsite-power-acc — analiza z dowodami</h1></div></header><main class="wrap"><p><strong>Repo:</strong> <code>pilloPl/campsite-power-acc</code>, <code>master</code>, commit <code>938d4ab53e242d72c3f48bccb5be6196cccaeaf8</code>.</p>
+<p><strong>Wniosek:</strong> przejście z Boota <strong>3.5.7 do 4.1.2</strong> obejmuje backend, infrastrukturę testów i kontrakt OpenAPI konsumowany przez frontend. Samo przestawienie numeru wersji nie przechodzi nawet <code>mvn validate</code>. Nie znalazłem wymuszenia podbicia Javy 21, PostgreSQL 16 ani Reacta 18. Największy koszt to zachowanie semantyki JSON, autokonfiguracji, transakcji i integracji HTTP.</p>
+<p>To analiza gotowości i zasięgu zmiany. Oryginalne repo pozostało bez zmian. Eksperymenty dotyczą POM-ów w osobnych kopiach; nie stanowią ukończonej migracji. <strong>Nie uruchomiono kompilacji, testów aplikacji ani serwera</strong> — dostępne środowisko ma JRE 17, bez JDK 21 i Dockera. Udane rozwiązywanie zależności nie dowodzi zgodności binarnej ani poprawnego zachowania.</p>
+<h2>1. Jak daleko sięga drzewo</h2>
+<p>Policzyłem wynik <code>dependency:tree -Dverbose</code> dla wdrażanego modułu <code>campsite-server</code>, obejmujący także zależności testowe. Wiersze odrzucone przez Maven jako duplikaty/konflikty pomijam. To unikalne współrzędne <code>groupId:artifactId:type[:classifier]</code>, bez wewnętrznych <code>io.pillopl</code>; nie liczba plików faktycznie spakowanych w JAR.</p>
+<table><thead><tr><th>Miara</th><th>Boot 3.5.7</th><th>Model Boot 4.1.2</th></tr></thead><tbody><tr><td>Unikalne zewnętrzne artefakty, wszystkie scope</td><td>134</td><td>158</td></tr><tr><td>Wśród nich compile/runtime</td><td>93</td><td>117</td></tr><tr><td>Największa pokazana głębokość</td><td>6</td><td>8</td></tr></tbody></table>
+<p>Wspólne współrzędne ze zmienioną wersją: <strong>105</strong>. Nowe współrzędne: <strong>39</strong>. Usunięte: <strong>15</strong>. Zmiana nazwy/modularizacja liczy się jako usunięcie starego i dodanie nowego artefaktu.</p>
+<p>Wariant docelowy ma Boot 4.1.2, springdoc 3.2.0, nowe nazwy modułów Testcontainers i jawne startery opisane w sekcji 7. Wyniki są zależne od tego wariantu. Głębokość oznacza najgłębszą zachowaną ścieżkę w wydruku Maven, z korzeniem <code>campsite-server</code> na poziomie 0; nie jest teoretyczną maksymalną długością wszystkich ścieżek w grafie przed eliminacją duplikatów. Nie obejmuje grafu npm ani zależności pluginów Maven.</p>
+<p><strong>105 zmian wersji nie oznacza 105 osobnych decyzji.</strong> Większość wynika z BOM-a. Praca ręczna skupia się w sześciu pakietach: POM-y i startery, Jackson, infrastruktura testowa, springdoc/typy klienta, regresja danych/transakcji, regresja security/integracji.</p>
+<table><thead><tr><th>Łańcuch wymuszenia</th><th>Dokąd dochodzi w tym repo</th><th>Co trzeba zrobić / gdzie się zatrzymuje</th></tr></thead><tbody><tr><td>Boot → Framework 7 → moduły autokonfiguracji</td><td>Flyway oraz trzy klienty <code>RestClient</code></td><td>Ujawnić startery. Sama obecność biblioteki nie wystarcza do zakładania obecności dotychczasowego beana.</td></tr><tr><td>Boot → Jackson 3 → mapper → HTTP i zapis logów</td><td>Dwie klasy produkcyjne, pięć testowych; wszystkie DTO na granicy HTTP</td><td>Zmienić bezpośrednie użycia i zweryfikować format danych.</td></tr><tr><td>Boot → Security 7 → matchery/filtry → przeglądarka i aplikacja QR</td><td>Sesja, CSRF, CORS, Basic Auth</td><td>Testować rzeczywisty HTTP i cookies. Nie stwierdzono potrzeby zmiany protokołu logowania.</td></tr><tr><td>Boot → Spring Data → Hibernate 7.4 → JDBC/PostgreSQL</td><td>57 encji, ręczny SQL, funkcje DB, dirty checking</td><td>Zweryfikować mapowania i transakcje; PostgreSQL 16 spełnia minimum dialektu.</td></tr><tr><td>Boot → Flyway 12 → uruchomienie migracji → istniejący schemat</td><td>Migracje SQL oraz <code>ddl-auto: validate</code></td><td>Sprawdzić pustą bazę i kopię istniejącej bazy. Nie przepisywać historycznych migracji automatycznie.</td></tr><tr><td>Boot → Testcontainers 2 → współdzielone fixture → kolejne moduły</td><td><code>core</code>, <code>endpoints</code>, <code>server</code></td><td>Sześć zmian współrzędnych w POM-ach; wspólna konfiguracja kontenera wymaga przeglądu.</td></tr><tr><td>Boot → springdoc 3 → OpenAPI → generator → TypeScript</td><td><code>schema.d.ts</code>, <code>client.ts</code>, użycia klienta</td><td>Regeneracja i porównanie kontraktu; ewentualna poprawka typów. Nie wymusza Reacta 19.</td></tr><tr><td>Boot parent → pluginy Maven + Lombok → budowanie obrazu</td><td>Kompilator, Surefire, pakowanie, procesor adnotacji</td><td>Wersje zmieniają się przez parent. Java 21 i Maven 3.9 pozostają odpowiednie.</td></tr></tbody></table>
+<p><strong>Najdalsza granica organizacyjna:</strong> urządzenia słupków, system wydawcy kart, aplikacja QR i użytkownicy konsoli. Upgrade nie upoważnia do zmiany ich payloadów, identyfikatorów, błędów ani kolejności efektów. Ich własne aktualizacje byłyby potrzebne dopiero przy niezgodnej zmianie kontraktu — tego należy uniknąć.</p>
+<h2>2. Wersje: stan obecny, etap przejściowy, cel</h2>
+<p>Boot 4.1.2 jest aktualnym stabilnym wydaniem sprawdzonym na dzień analizy; 4.2.0-RC1 jest preview. Źródła: <a href="https://spring.io/blog/2026/10/23/spring-boot-4-1-2-available-now/">wydanie 4.1.2</a>, <a href="https://docs.spring.io/spring-boot/">lista linii</a>.</p>
+<p>Wersje poniżej odczytano z opublikowanych BOM-ów, nie dobrano każdej biblioteki niezależnie do „najnowszej”. Konfiguracja repo: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/pom.xml#L7">parent, Java, springdoc</a>.</p>
+<table><thead><tr><th>Składnik</th><th>3.5.7 obecnie</th><th>3.5.16 checkpoint</th><th>4.0.9 checkpoint</th><th>4.1.2 cel</th></tr></thead><tbody><tr><td>Spring Framework</td><td>6.2.12</td><td>6.2.19</td><td>7.0.10</td><td>7.0.10</td></tr><tr><td>Spring Security</td><td>6.5.6</td><td>6.5.11</td><td>7.0.8</td><td>7.1.2</td></tr><tr><td>Spring Data BOM</td><td>2025.0.5</td><td>2025.0.13</td><td>2025.1.8</td><td>2026.0.2</td></tr><tr><td>Hibernate ORM</td><td>6.6.33.Final</td><td>6.6.53.Final</td><td>7.2.25.Final</td><td>7.4.13.Final</td></tr><tr><td>Jackson domyślny</td><td>2.19.2</td><td>2.21.4</td><td>3.1.7</td><td>3.1.7</td></tr><tr><td>Flyway</td><td>11.7.2</td><td>11.7.2</td><td>11.14.1</td><td>12.4.0</td></tr><tr><td>Sterownik PostgreSQL</td><td>42.7.8</td><td>42.7.11</td><td>42.7.14</td><td>42.7.14</td></tr><tr><td>Tomcat</td><td>10.1.48</td><td>10.1.55</td><td>11.0.27</td><td>11.0.27</td></tr><tr><td>Quartz</td><td>2.5.0</td><td>2.5.2</td><td>2.5.2</td><td>2.5.2</td></tr><tr><td>Lombok</td><td>1.18.42</td><td>1.18.46</td><td>1.18.48</td><td>1.18.48</td></tr><tr><td>Testcontainers</td><td>1.21.3</td><td>1.21.4</td><td>2.0.5</td><td>2.0.5</td></tr><tr><td>JUnit Jupiter</td><td>5.12.2</td><td>5.12.2</td><td>6.0.3</td><td>6.0.3</td></tr><tr><td>Mockito</td><td>5.17.0</td><td>5.17.0</td><td>5.20.0</td><td>5.23.0</td></tr><tr><td>Byte Buddy</td><td>1.17.8</td><td>1.17.8</td><td>1.17.8</td><td>1.18.15</td></tr></tbody></table>
+<p>Źródła maszynowe: <a href="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/3.5.7/spring-boot-dependencies-3.5.7.pom">BOM 3.5.7</a>, <a href="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/3.5.16/spring-boot-dependencies-3.5.16.pom">3.5.16</a>, <a href="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.0.9/spring-boot-dependencies-4.0.9.pom">4.0.9</a>, <a href="https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-dependencies/4.1.2/spring-boot-dependencies-4.1.2.pom">4.1.2</a>.</p>
+<p>springdoc jest zarządzany osobno: <strong>2.8.17 → 3.2.0</strong> dla docelowego Boota 4.1.2. <a href="https://springdoc.org/#what-is-the-compatibility-matrix-of-springdoc-openapi-with-spring-boot">Macierz projektu</a> przypisuje Boot 4.1 do springdoc 3.1–3.2, a Boot 4.0 do springdoc 3.0. Etapów 4.0 i 4.1 nie należy więc traktować jako identycznego zestawu zależności.</p>
+<p>Effective POM potwierdził też: compiler plugin <strong>3.14.1 → 3.15.0</strong>, Surefire <strong>3.5.4 → 3.5.6</strong>, jar plugin <strong>3.4.2 → 3.5.1</strong>, Boot Maven plugin <strong>3.5.7 → 4.1.2</strong>. Lombok jest już poprawnie podłączony do procesora adnotacji przez <code>${lombok.version}</code>: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/pom.xml#L91">POM</a>.</p>
+<h2>3. „Z tym będziesz się szarpać” — konkretne znaleziska</h2>
+<h3>A. Pierwsza blokada jest przed kompilacją</h3>
+<p>W kopii repo zmieniłem wyłącznie parent <code>3.5.7 → 4.1.2</code> i uruchomiłem <code>mvn validate</code>. Wynik:</p>
+<pre><code class="lang-text">&#x27;dependencies.dependency.version&#x27; for org.testcontainers:junit-jupiter:jar is missing.
+&#x27;dependencies.dependency.version&#x27; for org.testcontainers:postgresql:jar is missing.
+The build could not read 3 projects</code></pre>
+<p>Każdy z błędów występuje w <code>core</code>, <code>endpoints</code> i <code>server</code>: łącznie sześć. Przyczyna: BOM nowej linii zarządza przemianowanymi artefaktami. Dowody w repo: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/pom.xml#L80">core</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/pom.xml#L65">endpoints</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-server/pom.xml#L57">server</a>; <a href="https://github.com/testcontainers/testcontainers-java/releases/tag/2.0.0">wydanie Testcontainers 2</a>.</p>
+<p>Zamiana na <code>testcontainers-junit-jupiter</code> i <code>testcontainers-postgresql</code> wystarczyła, aby <strong>validate oraz effective-pom przeszły</strong>. Nie wystarcza do ukończenia migracji.</p>
+<p>Wspólna konfiguracja używa <code>org.testcontainers.containers.PostgreSQLContainer&lt;?&gt;</code>: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/test/java/io/pillopl/test/PostgresTestcontainersConfiguration.java#L6">plik</a>. Inspekcja JAR-a 2.0.5 potwierdziła <strong>zarówno nową klasę <code>org.testcontainers.postgresql.PostgreSQLContainer</code>, jak i klasę w starym pakiecie</strong>. Nie zgłaszam więc nieistniejącego dowodu „stary import na pewno się nie skompiluje”. Docelowo należy przejść na nowe API, sprawdzając także deklarację typu i konstruktor. Fixture jest eksportowane jako test-JAR: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/pom.xml#L93">konfiguracja</a>, więc jego zmiana propaguje się dalej.</p>
+<h3>B. Jackson: nie tylko importy</h3>
+<p>Bezpośrednie importy Jacksona 2 występują w <strong>2 plikach produkcyjnych i 5 testowych</strong>. Najważniejsze:</p>
+<ul><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/main/java/io/pillopl/webservice/security/ConsoleAuthenticationEntryPoint.java#L3">ConsoleAuthenticationEntryPoint</a>: wstrzykuje <code>com.fasterxml.jackson.databind.ObjectMapper</code> i serializuje błędy security.</li><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/PedestalCommunicationLogListener.java#L78">PedestalCommunicationLogListener</a>: serializuje atrybuty zdarzenia do danych zapisywanych w bazie; przechwytuje <code>JsonProcessingException</code>.</li><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/test/java/io/pillopl/event/PedestalCommunicationLogListenerTest.java#L31">test listenera</a>: ręcznie konstruuje mapper i rejestruje <code>JavaTimeModule</code>.</li><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/test/java/io/pillopl/webservice/console/WebServiceIntegrationTest.java#L30">baza testów HTTP</a>: wspólny mapper wpływa na całą rodzinę testów.</li></ul>
+<p>Boot 4 domyślnie konfiguruje Jacksona 3 i <code>JsonMapper</code>; API databind/core przechodzi do <code>tools.jackson</code>. Potrzebna jest adaptacja konstrukcji mappera i obsługi wyjątków, a nie globalny replace wszystkich pakietów. Adnotacje Jacksona mają odrębne zasady. <a href="https://docs.spring.io/spring-boot/4.1/reference/features/json.html">Dokumentacja JSON Boot 4.1</a>.</p>
+<p><strong>Ryzyko semantyczne:</strong> daty, enumy, null/missing, liczby, nazwy pól oraz błędy dekodowania mogą zmienić kontrakt nawet przy zielonej kompilacji. Testować payloady wejściowe ze słupków i wyjściowe z konsoli oraz JSON zapisany w logu komunikacji. Sam test z nowym mapperem po obu stronach może zamaskować regresję — potrzebne są utrwalone przykłady z wersji obecnej.</p>
+<p>Dokumentacja 4.1 nadal opisuje przejściowy moduł <code>spring-boot-jackson2</code>. To możliwy sposób etapowania, lecz oznacza utrzymywanie dwóch stosów i jawny wybór konwerterów. Model docelowy w tym raporcie zakłada Jacksona 3; nie dodano mostka.</p>
+<h3>C. Flyway i RestClient: aplikacja może stracić konfigurację bez oczywistego błędu kompilatora</h3>
+<p><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/pom.xml#L27">Core POM</a> deklaruje <code>spring-web</code>, <code>flyway-core</code> i moduł PostgreSQL, a <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-server/src/main/resources/application.yml#L8">application.yml</a> wymaga migracji przed walidacją schematu. W nowym układzie modułów należy zapewnić <code>spring-boot-starter-flyway</code> i zachować <code>flyway-database-postgresql</code>.</p>
+<p>Trzy klienty stosują <code>ObjectProvider&lt;RestClient.Builder&gt;.getIfAvailable(RestClient::builder)</code>: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/pedestallink/v1/PedestalLinkClientV1.java#L63">V1</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/pedestallink/v2/PedestalLinkClientV2.java#L63">V2</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/issuer/IssuerExchangeV2.java#L43">IssuerExchangeV2</a>. <strong>Brak beana nie musi zatrzymać startu: kod tworzy własny builder.</strong> To miejsce, gdzie można po cichu utracić konwertery i customizery. Zapewnić starter <code>restclient</code> oraz test obecności i konfiguracji beana. Timeouty i <code>SimpleClientHttpRequestFactory</code> są ustawiane jawnie w tych klasach; należy zachować ich działanie.</p>
+<p>Dowód platformowy: <a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide">Boot 4 migration guide</a>; inspekcja <code>spring-boot-restclient-4.1.2.jar</code> pokazała <code>RestClientAutoConfiguration</code> w tym module. Nie zaobserwowano rzeczywistego startu z brakującym beanem — jest to ryzyko wynikające z kodu i podziału modułów.</p>
+<h3>D. Testy MockMvc zmieniają moduł i pakiet</h3>
+<p><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/test/java/io/pillopl/webservice/console/WebServiceIntegrationTest.java#L7">WebServiceIntegrationTest:7</a> importuje starą <code>AutoConfigureMockMvc</code>. W JAR-ze 4.1.2 potwierdziłem nową klasę:</p>
+<pre><code class="lang-text">org/springframework/boot/webmvc/test/autoconfigure/AutoConfigureMockMvc.class</code></pre>
+<p>Wariant docelowy zapewnia <code>spring-boot-starter-webmvc-test</code>. Zmiana wspólnej klasy testowej ma duży zasięg. Starter security-test porządkuje integrację testów security; nie twierdzę, że każde obecne wywołanie <code>SecurityMockMvcRequestPostProcessors</code> wymaga go zamiast samego <code>spring-security-test</code>. Repo już używa <code>@MockitoBean</code>; nie znaleziono potrzeby hurtowej migracji <code>@MockBean</code>.</p>
+<h3>E. OpenAPI może uszkodzić TypeScript bez zmiany Reacta</h3>
+<p><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-console/src/api/client.ts#L19">client.ts:19</a> zakłada odpowiedź <code>200</code> z <code>content[&#x27;*/*&#x27;]</code>; request oczekuje <code>application/json</code>. Jeśli nowy springdoc opisze odpowiedź bardziej precyzyjnie jako <code>application/json</code>, typ <code>ResponseOf</code> może spaść do <code>unknown</code>. <strong>To hipoteza do sprawdzenia diffem schematu</strong>, a nie zaobserwowany wynik nowego serwera.</p>
+<p>Sprawdzić <code>/v3/api-docs</code>, uruchomić <code>npm run generate-api</code>, obejrzeć diff <code>schema.d.ts</code>, następnie <code>npm run typecheck</code> i testy klienta. <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-console/package.json#L7">Skrypty</a>. Ważny szczegół: <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/Dockerfile#L7">Dockerfile:7</a> wykonuje samo <code>npx vite build</code>, więc budowa obrazu nie zastępuje osobnego sprawdzenia typów.</p>
+<h2>4. Ukryta semantyka, którą trzeba zachować</h2>
+<p>Poniższe zachowania są udowodnione kodem. <strong>Nie twierdzę, że nowy Spring już je zmienił</strong> — to miejsca do porównania przed/po, ponieważ wymieniamy ich technologiczne podłoże.</p>
+<table><thead><tr><th>Obszar</th><th>Dowód w kodzie</th><th>Co ma pozostać prawdą</th></tr></thead><tbody><tr><td>Wspólna transakcja JPA + JDBC</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/persistence/dao/impl/CampingCardDaoImpl.java#L60">CampingCardDaoImpl:60</a>: <code>flush → CARD_UTILS.UPSERT_CARD → clear</code></td><td>Funkcja widzi zapisane zmiany, rollback obejmuje właściwą operację, persistence context nie zwraca starego stanu.</td></tr><tr><td>Dirty checking i kolejność SQL</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/pricing/TariffService.java#L148">TariffService:148</a>: czyszczenie dzieci i jawny flush</td><td>Wymiana elementów taryfy nie łamie unikalności ani orphan removal.</td></tr><tr><td>Niezależny commit audytu</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/audit/AuditService.java#L45">AuditService:45</a>: TransactionTemplate z REQUIRES_NEW</td><td>Rollback operacji nie usuwa automatycznie audytu; testy nadal sprzątają osobno zatwierdzone rekordy.</td></tr><tr><td>Widoczność QR między requestami</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/qrpay/QrPayProcessSupervisor.java#L50">QrPayProcessSupervisor:50</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/qrpay/state/QrPayStateFactory.java#L37">factory:37</a></td><td>Supervisor nie obejmuje całego procesu jedną transakcją; stan ma być zatwierdzony przed odpowiedzią urządzenia. Zachować <code>saveAndFlush</code> i granice proxy.</td></tr><tr><td>Kolejki i wątki</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/EventService.java#L23">EventService:23</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/EventTaskExecutorFactory.java#L13">factory:13</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/EventListener.java#L136">listener:136</a></td><td>Kolejki 100000 i 10000, pojedynczy worker domyślnie, reakcja na przepełnienie oraz zamykanie executorów. To własny mechanizm, nie samo <code>@Async</code>.</td></tr><tr><td>Quartz</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-server/src/main/java/io/pillopl/jobs/ArchiveQrPayProcessJob.java#L11">ArchiveQrPayProcessJob:11</a> i pozostałe joby</td><td>Zachować znaczenie <code>@DisallowConcurrentExecution</code>, tożsamości jobów i harmonogramy. Adnotacja nie jest dowodem globalnej blokady między niezależnymi instancjami aplikacji.</td></tr><tr><td>Niszowe mapowania Hibernate</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/infrastructure/Pedestal.java#L60">Pedestal:60</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/guest/Guest.java#L163">Guest:163</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/user/UserinfoSummary.java#L20">UserinfoSummary:20</a></td><td>Filtrowanie usuniętych elementów przez <code>@SQLRestriction</code> i odczyt modelu <code>@Immutable</code> zachowują wyniki oraz brak niezamierzonych zapisów.</td></tr><tr><td>Zaokrąglenia</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/pricing/PricingService.java#L136">PricingService:136</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/erp/ErpBillingLine.java#L150">ErpBillingLine:150</a></td><td>BigDecimal, skala pieniężna 2 i HALF_UP w tych miejscach; porównać także wartości po przejściu JSON/JDBC. Nie ma dowodu, że sam upgrade zmienia BigDecimal.</td></tr><tr><td>Strefy czasowe</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/util/DateService.java#L17">DateService:17</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/monitoring/DashboardApiService.java#L224">DashboardApiService:224</a></td><td>Domyślna strefa JVM i jawny UTC są używane różnie. Porównać DST, granice dni, epoch oraz odczyt/zapis LocalDateTime; nie „naprawiać” wszystkich dat na UTC przy okazji.</td></tr><tr><td>Błędy i logowanie</td><td><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/main/java/io/pillopl/webservice/security/ConsoleAuthenticationEntryPoint.java#L25">entry point</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-console/src/api/client.ts#L27">client.ts:27</a></td><td>Zachować statusy oraz <code>{errorCode,message}</code>. Domyślna odpowiedź frameworka nie może przypadkiem zastąpić kontraktu aplikacji.</td></tr></tbody></table>
+<p>Hibernate 7.4 wprowadza m.in. inne wykonanie limitów przy fetch joinach. W repo są zarówno fetch joiny, jak i paginacja, ale nie ustaliłem, że konkretny znaleziony query łączy paginację z fetchowaniem kolekcji. Nie zapisuję tego jako potwierdzonej regresji. <a href="https://docs.hibernate.org/orm/7.4/migration-guide/">Migration guide 7.4</a>.</p>
+<h2>5. Kontrakty i rzeczywiste użycie</h2>
+<p><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/main/java/io/pillopl/webservice/security/ConsoleSecurityConfiguration.java#L24">ConsoleSecurityConfiguration</a> definiuje trzy różne ścieżki: konsola z sesją i CSRF, aplikacja QR z Basic Auth oraz otwarty pedestal-link identyfikujący urządzenie kodem. Zachować nazwy <code>XSRF-TOKEN</code>, <code>X-XSRF-TOKEN</code>, CORS z credentials, cookies i zakresy wyłączenia CSRF. Konfiguracja już używa lambda DSL. Security 7 zmienia domyślne dopasowywanie ścieżek; obecne wzorce wyglądają prosto, ale wymagają testów dostępu. <a href="https://docs.spring.io/spring-security/reference/6.5/migration-7/web.html">Dokumentacja migracji matcherów</a>.</p>
+<p>Istniejący <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-endpoints/src/test/java/io/pillopl/webservice/console/auth/ConsoleLoginHttpIntegrationTest.java#L19">ConsoleLoginHttpIntegrationTest</a> używa <code>java.net.http.HttpClient</code> i <code>CookieManager</code>, nie TestRestTemplate. Nie przypisuję mu więc mechanicznie zmian cookie handling z release notes TestRestTemplate.</p>
+<p>Klienty V1/V2 i IssuerExchangeV2 są granicami protokołu: adresy, request/response DTO, timeouty i mapowanie błędów należy porównać na przykładach obu stron. Zmiana bibliotek nie dowodzi konieczności aktualizacji firmware ani systemu partnera.</p>
+<p><strong>Co faktycznie jest używane produkcyjnie: nieustalone.</strong> Analiza objęła źródła, konfigurację i testy; nie otrzymałem logów produkcyjnych, traces, metryk ruchu ani parametrów rzeczywistego wdrożenia. W POM-ach i konfiguracji nie znalazłem jawnego eksportera tracingu. Obecność <code>micrometer-observation</code> tranzytywnie nie jest dowodem, że ktoś zbiera traces.</p>
+<p>Są punkty, z których można pozyskać dowód użycia:</p>
+<ul><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/EventListener.java#L111">EventListener:111</a>: logi obciążenia executorów i błędów obsługi.</li><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/event/PedestalCommunicationLogListener.java#L69">PedestalCommunicationLogListener:69</a>: warunkowo zapisywane komunikaty urządzeń. Brak wpisu może wynikać z konfiguracji logowania, a nie braku użycia.</li><li><a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/main/java/io/pillopl/qrpay/QrPayProcessSupervisor.java#L136">QrPayProcessSupervisor:136</a>: przebiegi operacji QR.</li></ul>
+<p>Do priorytetyzacji potrzebne są częstotliwości endpointów/wersji protokołu, aktywne joby, rozkłady opóźnień, błędy i wywołania integracji z reprezentatywnego okresu. Bez nich nie oznaczam żadnej funkcji jako martwej ani nieważnej.</p>
+<h2>6. Gdzie kaskada się zatrzymuje</h2>
+<table><thead><tr><th>Element</th><th>Ocena</th></tr></thead><tbody><tr><td>Java 21</td><td>Pozostaje. Repo już wymaga 21; Boot 4.1.2 wymaga co najmniej 17. Brak potrzeby skoku do 25/27 z samego tego upgrade'u.</td></tr><tr><td>Maven 3.9</td><td>Pozostaje jako linia narzędzia; zmieniają się pluginy dziedziczone z parenta.</td></tr><tr><td>PostgreSQL 16</td><td>Pozostaje według jawnej konfiguracji testowej i kontenerowej. Dialekt Hibernate 7.4 wymaga PostgreSQL co najmniej 14; tabela wsparcia Flyway obejmuje 16. Produkcyjna wersja serwera pozostaje do potwierdzenia.</td></tr><tr><td>React 18, Vite, Node 22</td><td>Brak wykazanego wymuszenia major upgrade'u przez Boota. Wymagane sprawdzenie wygenerowanych typów i zachowania HTTP.</td></tr><tr><td>Tomcat</td><td>Embedded Tomcat podbija się przez BOM do 11. Nie znaleziono osobnego serwera aplikacyjnego do aktualizacji; Docker uruchamia <code>java -jar</code>.</td></tr><tr><td>Spring Cloud, Kafka, Redis, GraalVM</td><td>Brak potwierdzonego użycia w deklaracjach tego repo; nie doliczam fikcyjnych migracji.</td></tr><tr><td>Schemat DB i protokoły partnerów</td><td>Mogą pozostać, o ile testy zgodności przejdą. Konieczność migracji schematu musi wynikać z konkretnego wyniku walidacji/mapowania.</td></tr></tbody></table>
+<p>Źródła: <a href="https://docs.spring.io/spring-boot/system-requirements.html">wymagania Boot</a>, <a href="https://docs.hibernate.org/orm/7.4/javadocs/org/hibernate/dialect/package-use.html">dialekty Hibernate</a>, <a href="https://documentation.red-gate.com/fd/supported-databases-and-versions-143754067.html">wsparcie Flyway</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/Dockerfile#L9">Dockerfile</a>, <a href="https://github.com/pilloPl/campsite-power-acc/blob/938d4ab53e242d72c3f48bccb5be6196cccaeaf8/campsite-core/src/test/java/io/pillopl/test/PostgresTestcontainersConfiguration.java#L16">kontener PostgreSQL w testach</a>.</p>
+<h2>7. Minimalny zakres prac i kolejność</h2>
+<ol><li><strong>Utrwalić punkt odniesienia na 3.5.7.</strong> Build na JDK 21, istniejące testy, przykładowe odpowiedzi JSON i OpenAPI, wyniki najważniejszych operacji SQL oraz cookies. Zweryfikować istniejącą bazę na kopii.</li><li><strong>Przejść na najnowsze 3.5.x, obecnie 3.5.16.</strong> Osobno sprawdzić regresje i deprecacje. To zalecany punkt przygotowania do Boot 4, nie warunek narzucony przez Maven.</li><li><strong>Przygotować spójny zestaw dla Boot 4.</strong> Wariant eksperymentalny 4.1.2 zawiera zmiany z poniższej tabeli; kod nadal wymaga adaptacji Jacksona i testów. Opcjonalny checkpoint 4.0.9 musi mieć własną zgodną wersję springdoc i osobną walidację; nie zakładać, że przejście 4.0 → 4.1 jest puste.</li><li><strong>Sprawdzić start i dane.</strong> Flyway na pustej i istniejącej bazie, schema validation, beany klientów, auth, działanie jobów; następnie regresja z sekcji 4.</li><li><strong>Sprawdzić granice systemu.</strong> OpenAPI diff, generacja i typecheck TS, scenariusze sesji/CSRF, odtworzenie komunikatów V1/V2 i QR. Utrwalić wyniki, nie tylko zielony build.</li><li><strong>Próba wdrożenia i powrotu.</strong> Sprawdzić start w limitach pamięci z Dockerfile, kończenie requestów i executorów. Powrót do starego obrazu jest bezpieczny tylko przy potwierdzonej zgodności schematu i zapisanych danych; samo zachowanie obrazu nie wystarcza.</li></ol>
+<table><thead><tr><th>Plik / miejsce</th><th>Zmiana w modelu POM użytym do porównania</th></tr></thead><tbody><tr><td>root <code>pom.xml</code></td><td>parent 4.1.2, springdoc 3.2.0</td></tr><tr><td>core/endpoints/server POM</td><td><code>junit-jupiter</code> → <code>testcontainers-junit-jupiter</code>, <code>postgresql</code> w grupie Testcontainers → <code>testcontainers-postgresql</code></td></tr><tr><td>core POM</td><td><code>spring-web</code> → starter-restclient; <code>flyway-core</code> → starter-flyway; zachowany moduł Flyway PostgreSQL</td></tr><tr><td>endpoints/server POM</td><td>starter-web → starter-webmvc</td></tr><tr><td>endpoints POM</td><td>starter-test → starter-webmvc-test; spring-security-test → starter-security-test</td></tr></tbody></table>
+<p><strong>Uwaga o wymaganiach:</strong> starter-web w 4.1.2 nadal istnieje i jest oznaczony jako deprecated w swoim POM-ie. Zamiana na webmvc jest porządkowaniem docelowego zestawu, nie przyczyną sześciu błędów <code>validate</code>. Podobnie liczby artefaktów dotyczą powyższego konkretnego wariantu, a nie dowolnej możliwej migracji.</p>
+<h2>8. Co rzeczywiście sprawdzono</h2>
+<table><thead><tr><th>Sprawdzenie</th><th>Wynik i granica dowodu</th></tr></thead><tbody><tr><td>Git master / snapshot</td><td>SHA podany na początku; oryginalny checkout czysty po analizie</td></tr><tr><td>Baseline <code>help:effective-pom</code></td><td>SUCCESS; rozwiązany model wszystkich dziewięciu projektów reaktora (parent + 8 modułów)</td></tr><tr><td>Baseline <code>dependency:tree -Dverbose</code></td><td>SUCCESS dla całego reaktora</td></tr><tr><td>Tylko parent 4.1.2 + <code>validate</code></td><td>FAILURE: 6 brakujących wersji Testcontainers w 3 modułach</td></tr><tr><td>Parent 4.1.2 + nowe współrzędne Testcontainers</td><td><code>validate</code> i <code>help:effective-pom</code>: SUCCESS</td></tr><tr><td>Wariant ze spójnymi POM-ami z sekcji 7</td><td><code>dependency:tree</code>: SUCCESS dla całego reaktora; nie kompilowano źródeł</td></tr><tr><td>Inspekcja opublikowanych JAR-ów/POM-ów</td><td>Potwierdzone pakiety MockMvc, obie klasy PostgreSQLContainer, moduł autokonfiguracji RestClient, istnienie starego starter-web</td></tr><tr><td>Kompilacja / testy / uruchomienie / baza</td><td>NIE WYKONANO; brak JDK 21 i Dockera w środowisku analizy</td></tr><tr><td>Produkcyjne logi, traces, częstość użycia</td><td>BRAK DANYCH; brak rankingu opartego na rzeczywistym ruchu</td></tr></tbody></table>
+<p>Pierwsze próby Maven napotkały problem konfiguracji dostępu do sieci; po skonfigurowaniu proxy wykonano powyższe zakończone polecenia. Nie zaliczono błędów sieciowych jako wad repo.</p>
+<p>Polecenia do odtworzenia, osobno na snapshotcie bazowym i eksperymentalnej kopii POM-ów:</p>
+<pre><code class="lang-bash">mvn -B -ntp help:effective-pom -Doutput=effective-pom.xml
+mvn -B -ntp validate
+mvn -B -ntp dependency:tree -Dverbose
+# Dopiero po adaptacji kodu, na JDK 21 z działającym Dockerem:
+mvn -B -ntp verify
+# W katalogu campsite-console, przy działającym docelowym backendzie:
+npm ci
+npm run generate-api
+npm run typecheck
+npm test</code></pre>
+<p>Nie ma podstaw do wiarygodnej wyceny w dniach bez pierwszego pełnego builda i uruchomienia testów. Jest natomiast konkretny zakres: cztery POM-y, dwie produkcyjne klasy z bezpośrednim Jacksonem, pięć testowych z Jacksonem, wspólna konfiguracja Testcontainers, baza MockMvc oraz ewentualna korekta typów klienta. Zakres regresji jest szerszy niż lista plików do edycji.</p>
+<h2>Załącznik: pomiar drzew i dokładne zmiany wersji</h2>
+<h3>Wspólne współrzędne, których wersja się zmienia</h3>
+<details>
+<summary>105 zmian wersji z rozwiązanego drzewa serwera</summary>
+<table><thead><tr><th>Artefakt</th><th>Przed</th><th>Po</th></tr></thead><tbody><tr><td><code>ch.qos.logback:logback-classic:jar</code></td><td>1.5.20</td><td>1.5.38</td></tr><tr><td><code>ch.qos.logback:logback-core:jar</code></td><td>1.5.20</td><td>1.5.38</td></tr><tr><td><code>com.fasterxml.jackson.core:jackson-annotations:jar</code></td><td>2.19.2</td><td>2.21</td></tr><tr><td><code>com.fasterxml.jackson.core:jackson-core:jar</code></td><td>2.19.2</td><td>2.21.7</td></tr><tr><td><code>com.fasterxml.jackson.core:jackson-databind:jar</code></td><td>2.19.2</td><td>2.21.7</td></tr><tr><td><code>com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar</code></td><td>2.19.2</td><td>2.21.7</td></tr><tr><td><code>com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar</code></td><td>2.19.2</td><td>2.21.7</td></tr><tr><td><code>com.fasterxml:classmate:jar</code></td><td>1.7.1</td><td>1.7.3</td></tr><tr><td><code>com.github.docker-java:docker-java-api:jar</code></td><td>3.4.2</td><td>3.7.1</td></tr><tr><td><code>com.github.docker-java:docker-java-transport-zerodep:jar</code></td><td>3.4.2</td><td>3.7.1</td></tr><tr><td><code>com.github.docker-java:docker-java-transport:jar</code></td><td>3.4.2</td><td>3.7.1</td></tr><tr><td><code>com.jayway.jsonpath:json-path:jar</code></td><td>2.9.0</td><td>2.10.0</td></tr><tr><td><code>com.zaxxer:HikariCP:jar</code></td><td>6.3.3</td><td>7.0.2</td></tr><tr><td><code>io.micrometer:micrometer-commons:jar</code></td><td>1.15.5</td><td>1.17.2</td></tr><tr><td><code>io.micrometer:micrometer-observation:jar</code></td><td>1.15.5</td><td>1.17.2</td></tr><tr><td><code>io.swagger.core.v3:swagger-annotations-jakarta:jar</code></td><td>2.2.47</td><td>2.2.55</td></tr><tr><td><code>io.swagger.core.v3:swagger-core-jakarta:jar</code></td><td>2.2.47</td><td>2.2.55</td></tr><tr><td><code>io.swagger.core.v3:swagger-models-jakarta:jar</code></td><td>2.2.47</td><td>2.2.55</td></tr><tr><td><code>jakarta.annotation:jakarta.annotation-api:jar</code></td><td>2.1.1</td><td>3.0.0</td></tr><tr><td><code>jakarta.persistence:jakarta.persistence-api:jar</code></td><td>3.1.0</td><td>3.2.0</td></tr><tr><td><code>jakarta.validation:jakarta.validation-api:jar</code></td><td>3.0.2</td><td>3.1.1</td></tr><tr><td><code>jakarta.xml.bind:jakarta.xml.bind-api:jar</code></td><td>4.0.4</td><td>4.0.5</td></tr><tr><td><code>net.bytebuddy:byte-buddy-agent:jar</code></td><td>1.17.8</td><td>1.18.15</td></tr><tr><td><code>net.bytebuddy:byte-buddy:jar</code></td><td>1.17.8</td><td>1.18.15</td></tr><tr><td><code>net.java.dev.jna:jna:jar</code></td><td>5.13.0</td><td>5.18.1</td></tr><tr><td><code>net.minidev:accessors-smart:jar</code></td><td>2.5.2</td><td>2.6.0</td></tr><tr><td><code>net.minidev:json-smart:jar</code></td><td>2.5.2</td><td>2.6.0</td></tr><tr><td><code>org.antlr:antlr4-runtime:jar</code></td><td>4.13.0</td><td>4.13.2</td></tr><tr><td><code>org.apache.commons:commons-compress:jar</code></td><td>1.24.0</td><td>1.28.0</td></tr><tr><td><code>org.apache.commons:commons-lang3:jar</code></td><td>3.17.0</td><td>3.20.0</td></tr><tr><td><code>org.apache.logging.log4j:log4j-api:jar</code></td><td>2.24.3</td><td>2.25.5</td></tr><tr><td><code>org.apache.logging.log4j:log4j-to-slf4j:jar</code></td><td>2.24.3</td><td>2.25.5</td></tr><tr><td><code>org.apache.tomcat.embed:tomcat-embed-core:jar</code></td><td>10.1.48</td><td>11.0.27</td></tr><tr><td><code>org.apache.tomcat.embed:tomcat-embed-el:jar</code></td><td>10.1.48</td><td>11.0.27</td></tr><tr><td><code>org.apache.tomcat.embed:tomcat-embed-websocket:jar</code></td><td>10.1.48</td><td>11.0.27</td></tr><tr><td><code>org.aspectj:aspectjweaver:jar</code></td><td>1.9.24</td><td>1.9.25.1</td></tr><tr><td><code>org.assertj:assertj-core:jar</code></td><td>3.27.6</td><td>3.27.7</td></tr><tr><td><code>org.awaitility:awaitility:jar</code></td><td>4.2.2</td><td>4.3.0</td></tr><tr><td><code>org.checkerframework:checker-qual:jar</code></td><td>3.49.5</td><td>3.55.1</td></tr><tr><td><code>org.flywaydb:flyway-core:jar</code></td><td>11.7.2</td><td>12.4.0</td></tr><tr><td><code>org.flywaydb:flyway-database-postgresql:jar</code></td><td>11.7.2</td><td>12.4.0</td></tr><tr><td><code>org.freemarker:freemarker:jar</code></td><td>2.3.34</td><td>2.3.35</td></tr><tr><td><code>org.glassfish.jaxb:jaxb-core:jar</code></td><td>4.0.6</td><td>4.0.9</td></tr><tr><td><code>org.glassfish.jaxb:jaxb-runtime:jar</code></td><td>4.0.6</td><td>4.0.9</td></tr><tr><td><code>org.glassfish.jaxb:txw2:jar</code></td><td>4.0.6</td><td>4.0.9</td></tr><tr><td><code>org.hibernate.orm:hibernate-core:jar</code></td><td>6.6.33.Final</td><td>7.4.13.Final</td></tr><tr><td><code>org.hibernate.validator:hibernate-validator:jar</code></td><td>8.0.3.Final</td><td>9.1.5.Final</td></tr><tr><td><code>org.jboss.logging:jboss-logging:jar</code></td><td>3.6.1.Final</td><td>3.6.3.Final</td></tr><tr><td><code>org.jspecify:jspecify:jar</code></td><td>1.0.0</td><td>1.0.1</td></tr><tr><td><code>org.junit.jupiter:junit-jupiter-api:jar</code></td><td>5.12.2</td><td>6.0.3</td></tr><tr><td><code>org.junit.jupiter:junit-jupiter-engine:jar</code></td><td>5.12.2</td><td>6.0.3</td></tr><tr><td><code>org.junit.jupiter:junit-jupiter-params:jar</code></td><td>5.12.2</td><td>6.0.3</td></tr><tr><td><code>org.junit.jupiter:junit-jupiter:jar</code></td><td>5.12.2</td><td>6.0.3</td></tr><tr><td><code>org.junit.platform:junit-platform-commons:jar</code></td><td>1.12.2</td><td>6.0.3</td></tr><tr><td><code>org.junit.platform:junit-platform-engine:jar</code></td><td>1.12.2</td><td>6.0.3</td></tr><tr><td><code>org.mockito:mockito-core:jar</code></td><td>5.17.0</td><td>5.23.0</td></tr><tr><td><code>org.mockito:mockito-junit-jupiter:jar</code></td><td>5.17.0</td><td>5.23.0</td></tr><tr><td><code>org.postgresql:postgresql:jar</code></td><td>42.7.8</td><td>42.7.14</td></tr><tr><td><code>org.projectlombok:lombok:jar</code></td><td>1.18.42</td><td>1.18.48</td></tr><tr><td><code>org.quartz-scheduler:quartz:jar</code></td><td>2.5.0</td><td>2.5.2</td></tr><tr><td><code>org.slf4j:jul-to-slf4j:jar</code></td><td>2.0.17</td><td>2.0.20</td></tr><tr><td><code>org.slf4j:slf4j-api:jar</code></td><td>2.0.17</td><td>2.0.20</td></tr><tr><td><code>org.springdoc:springdoc-openapi-starter-common:jar</code></td><td>2.8.17</td><td>3.2.0</td></tr><tr><td><code>org.springdoc:springdoc-openapi-starter-webmvc-api:jar</code></td><td>2.8.17</td><td>3.2.0</td></tr><tr><td><code>org.springdoc:springdoc-openapi-starter-webmvc-ui:jar</code></td><td>2.8.17</td><td>3.2.0</td></tr><tr><td><code>org.springframework.boot:spring-boot-autoconfigure:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-data-jpa:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-freemarker:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-jdbc:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-json:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-logging:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-mail:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-quartz:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-security:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-test:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter-tomcat:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-starter:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-test-autoconfigure:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-test:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot-testcontainers:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.boot:spring-boot:jar</code></td><td>3.5.7</td><td>4.1.2</td></tr><tr><td><code>org.springframework.data:spring-data-commons:jar</code></td><td>3.5.5</td><td>4.1.2</td></tr><tr><td><code>org.springframework.data:spring-data-jpa:jar</code></td><td>3.5.5</td><td>4.1.2</td></tr><tr><td><code>org.springframework.security:spring-security-config:jar</code></td><td>6.5.6</td><td>7.1.2</td></tr><tr><td><code>org.springframework.security:spring-security-core:jar</code></td><td>6.5.6</td><td>7.1.2</td></tr><tr><td><code>org.springframework.security:spring-security-crypto:jar</code></td><td>6.5.6</td><td>7.1.2</td></tr><tr><td><code>org.springframework.security:spring-security-web:jar</code></td><td>6.5.6</td><td>7.1.2</td></tr><tr><td><code>org.springframework:spring-aop:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-aspects:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-beans:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-context-support:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-context:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-core:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-expression:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-jdbc:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-orm:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-test:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-tx:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-web:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.springframework:spring-webmvc:jar</code></td><td>6.2.12</td><td>7.0.10</td></tr><tr><td><code>org.testcontainers:testcontainers:jar</code></td><td>1.21.3</td><td>2.0.5</td></tr><tr><td><code>org.webjars:swagger-ui:jar</code></td><td>5.32.2</td><td>5.34.0</td></tr><tr><td><code>org.webjars:webjars-locator-lite:jar</code></td><td>1.1.2</td><td>1.1.5</td></tr><tr><td><code>org.xmlunit:xmlunit-core:jar</code></td><td>2.10.4</td><td>2.11.0</td></tr><tr><td><code>org.yaml:snakeyaml:jar</code></td><td>2.4</td><td>2.6</td></tr></tbody></table>
+</details>
+<h3>Dodane i usunięte współrzędne</h3>
+<details>
+<summary>39 dodanych, 15 usuniętych</summary>
+<p>Dodane:</p>
+<pre><code class="lang-text">commons-codec:commons-codec:jar
+commons-io:commons-io:jar
+commons-logging:commons-logging:jar
+jakarta.mail:jakarta.mail-api:jar
+org.eclipse.angus:angus-mail:jar
+org.hibernate.models:hibernate-models:jar
+org.springframework.boot:spring-boot-data-commons:jar
+org.springframework.boot:spring-boot-data-jpa:jar
+org.springframework.boot:spring-boot-flyway:jar
+org.springframework.boot:spring-boot-freemarker:jar
+org.springframework.boot:spring-boot-hibernate:jar
+org.springframework.boot:spring-boot-http-client:jar
+org.springframework.boot:spring-boot-http-converter:jar
+org.springframework.boot:spring-boot-jackson:jar
+org.springframework.boot:spring-boot-jdbc:jar
+org.springframework.boot:spring-boot-jpa:jar
+org.springframework.boot:spring-boot-mail:jar
+org.springframework.boot:spring-boot-persistence:jar
+org.springframework.boot:spring-boot-quartz:jar
+org.springframework.boot:spring-boot-restclient:jar
+org.springframework.boot:spring-boot-security:jar
+org.springframework.boot:spring-boot-servlet:jar
+org.springframework.boot:spring-boot-sql:jar
+org.springframework.boot:spring-boot-starter-flyway:jar
+org.springframework.boot:spring-boot-starter-jackson:jar
+org.springframework.boot:spring-boot-starter-restclient:jar
+org.springframework.boot:spring-boot-starter-tomcat-runtime:jar
+org.springframework.boot:spring-boot-starter-webmvc:jar
+org.springframework.boot:spring-boot-tomcat:jar
+org.springframework.boot:spring-boot-transaction:jar
+org.springframework.boot:spring-boot-validation:jar
+org.springframework.boot:spring-boot-web-server:jar
+org.springframework.boot:spring-boot-webmvc:jar
+org.testcontainers:testcontainers-database-commons:jar
+org.testcontainers:testcontainers-jdbc:jar
+org.testcontainers:testcontainers-junit-jupiter:jar
+org.testcontainers:testcontainers-postgresql:jar
+tools.jackson.core:jackson-core:jar
+tools.jackson.core:jackson-databind:jar</code></pre>
+<p>Usunięte:</p>
+<pre><code class="lang-text">com.fasterxml.jackson.dataformat:jackson-dataformat-toml:jar
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar
+com.fasterxml.jackson.module:jackson-module-parameter-names:jar
+io.smallrye:jandex:jar
+junit:junit:jar
+org.eclipse.angus:jakarta.mail:jar
+org.hamcrest:hamcrest-core:jar
+org.hibernate.common:hibernate-commons-annotations:jar
+org.springframework.boot:spring-boot-starter-validation:jar
+org.springframework.boot:spring-boot-starter-web:jar
+org.springframework:spring-jcl:jar
+org.testcontainers:database-commons:jar
+org.testcontainers:jdbc:jar
+org.testcontainers:junit-jupiter:jar
+org.testcontainers:postgresql:jar</code></pre>
+</details>
+<h3>Drzewo bazowe serwera</h3>
+<details>
+<summary>Rozwiązane zależności; pominięto wiersze odrzuconych duplikatów i konfliktów</summary>
+<pre><code class="lang-text">io.pillopl:campsite-server:jar:1.0.0-SNAPSHOT
++- io.pillopl:campsite-endpoints:jar:1.0.0-SNAPSHOT:compile
+|  +- io.pillopl:campsite-core:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  +- io.pillopl:campsite-api:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  +- io.pillopl:campsite-transfer-objects:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  |  +- io.pillopl:campsite-value-objects:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  \- io.pillopl:campsite-commons:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  +- org.springframework.boot:spring-boot-starter-security:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  +- org.springframework:spring-aop:jar:6.2.12:compile (version managed from 6.2.12)
+|  |  +- org.springframework.security:spring-security-config:jar:6.5.6:compile (version managed from 6.5.6)
+|  |  |  +- org.springframework.security:spring-security-core:jar:6.5.6:compile (version managed from 6.5.6)
+|  |  \- org.springframework.security:spring-security-web:jar:6.5.6:compile (version managed from 6.5.6)
+|  \- org.springdoc:springdoc-openapi-starter-webmvc-ui:jar:2.8.17:compile (version managed from 2.8.17)
+|     +- org.springdoc:springdoc-openapi-starter-webmvc-api:jar:2.8.17:compile
+|     |  +- org.springdoc:springdoc-openapi-starter-common:jar:2.8.17:compile
+|     |  |  +- org.springframework.boot:spring-boot-starter-validation:jar:3.5.7:compile (version managed from 3.5.13)
+|     |  |  |  \- org.hibernate.validator:hibernate-validator:jar:8.0.3.Final:compile (version managed from 8.0.3.Final)
+|     |  |  \- io.swagger.core.v3:swagger-core-jakarta:jar:2.2.47:compile
+|     |  |     +- org.apache.commons:commons-lang3:jar:3.17.0:compile (version managed from 3.20.0)
+|     |  |     +- io.swagger.core.v3:swagger-annotations-jakarta:jar:2.2.47:compile
+|     |  |     +- io.swagger.core.v3:swagger-models-jakarta:jar:2.2.47:compile
+|     |  |     +- jakarta.validation:jakarta.validation-api:jar:3.0.2:compile (version managed from 3.0.2)
+|     |  |     +- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.19.2:compile (version managed from 2.21.1)
+|     +- org.webjars:swagger-ui:jar:5.32.2:compile
+|     \- org.webjars:webjars-locator-lite:jar:1.1.2:compile (version managed from 1.1.3)
+|        \- org.jspecify:jspecify:jar:1.0.0:compile (version managed from 1.0.0)
++- io.pillopl:campsite-db-migrations:jar:1.0.0-SNAPSHOT:runtime
++- org.springframework.boot:spring-boot-starter-web:jar:3.5.7:compile
+|  +- org.springframework.boot:spring-boot-starter:jar:3.5.7:compile (version managed from 3.5.7; scope not updated to compile)
+|  |  +- org.springframework.boot:spring-boot:jar:3.5.7:compile (version managed from 3.5.7; scope not updated to compile)
+|  |  +- org.springframework.boot:spring-boot-starter-logging:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  |  +- ch.qos.logback:logback-classic:jar:1.5.20:compile (version managed from 1.5.20)
+|  |  |  |  +- ch.qos.logback:logback-core:jar:1.5.20:compile (version managed from 1.5.20)
+|  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile (version managed from 2.24.3)
+|  |  |  |  +- org.apache.logging.log4j:log4j-api:jar:2.24.3:compile (version managed from 2.24.3)
+|  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.17:compile (version managed from 2.0.17)
+|  |  +- jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile (version managed from 2.1.1)
+|  |  \- org.yaml:snakeyaml:jar:2.4:compile (version managed from 2.4)
+|  +- org.springframework.boot:spring-boot-starter-json:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.19.2:compile (version managed from 2.19.2)
+|  |  |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.19.2:compile (version managed from 2.19.2)
+|  |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.19.2:compile (version managed from 2.19.2)
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.19.2:compile (version managed from 2.19.2)
+|  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.19.2:compile (version managed from 2.19.2)
+|  |  \- com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.19.2:compile (version managed from 2.19.2)
+|  +- org.springframework.boot:spring-boot-starter-tomcat:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.48:compile (version managed from 10.1.48)
+|  |  +- org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.48:compile (version managed from 10.1.48)
+|  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.48:compile (version managed from 10.1.48)
+|  +- org.springframework:spring-web:jar:6.2.12:compile (version managed from 6.2.12; scope not updated to compile)
+|  |  +- org.springframework:spring-beans:jar:6.2.12:compile (version managed from 6.2.12)
+|  |  \- io.micrometer:micrometer-observation:jar:1.15.5:compile (version managed from 1.14.12)
+|  |     \- io.micrometer:micrometer-commons:jar:1.15.5:compile (version managed from 1.15.5)
+|  \- org.springframework:spring-webmvc:jar:6.2.12:compile (version managed from 6.2.12)
+|     +- org.springframework:spring-context:jar:6.2.12:compile (version managed from 6.2.12)
+|     +- org.springframework:spring-expression:jar:6.2.12:compile (version managed from 6.2.12)
++- org.springframework.boot:spring-boot-starter-quartz:jar:3.5.7:compile
+|  +- org.springframework:spring-context-support:jar:6.2.12:compile (version managed from 6.2.12)
+|  +- org.springframework:spring-tx:jar:6.2.12:compile (version managed from 6.2.12)
+|  \- org.quartz-scheduler:quartz:jar:2.5.0:compile (version managed from 2.5.0)
+|     +- org.slf4j:slf4j-api:jar:2.0.17:compile (version managed from 2.0.16)
++- org.projectlombok:lombok:jar:1.18.42:compile
++- io.pillopl:campsite-core:test-jar:tests:1.0.0-SNAPSHOT:test
+|  +- org.springframework.boot:spring-boot-starter-data-jpa:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  +- org.springframework.boot:spring-boot-starter-jdbc:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  |  +- com.zaxxer:HikariCP:jar:6.3.3:compile (version managed from 6.3.3)
+|  |  |  \- org.springframework:spring-jdbc:jar:6.2.12:compile (version managed from 6.2.12)
+|  |  +- org.hibernate.orm:hibernate-core:jar:6.6.33.Final:compile (version managed from 6.6.33.Final)
+|  |  |  +- jakarta.persistence:jakarta.persistence-api:jar:3.1.0:compile (version managed from 3.1.0)
+|  |  |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile (version managed from 2.0.1)
+|  |  |  +- org.jboss.logging:jboss-logging:jar:3.6.1.Final:compile (version managed from 3.5.0.Final; scope not updated to compile)
+|  |  |  +- org.hibernate.common:hibernate-commons-annotations:jar:7.0.3.Final:runtime
+|  |  |  +- io.smallrye:jandex:jar:3.2.0:runtime
+|  |  |  +- com.fasterxml:classmate:jar:1.7.1:compile (version managed from 1.5.1; scope not updated to compile)
+|  |  |  +- org.glassfish.jaxb:jaxb-runtime:jar:4.0.6:runtime (version managed from 4.0.2)
+|  |  |  |  \- org.glassfish.jaxb:jaxb-core:jar:4.0.6:runtime (version managed from 4.0.6)
+|  |  |  |     +- org.glassfish.jaxb:txw2:jar:4.0.6:runtime (version managed from 4.0.6)
+|  |  |  |     \- com.sun.istack:istack-commons-runtime:jar:4.1.2:runtime (version managed from 4.1.2)
+|  |  |  +- jakarta.inject:jakarta.inject-api:jar:2.0.1:runtime (version managed from 2.0.1)
+|  |  |  \- org.antlr:antlr4-runtime:jar:4.13.0:compile
+|  |  +- org.springframework.data:spring-data-jpa:jar:3.5.5:compile (version managed from 3.5.5)
+|  |  |  +- org.springframework.data:spring-data-commons:jar:3.5.5:compile (version managed from 3.5.5)
+|  |  |  +- org.springframework:spring-orm:jar:6.2.12:compile (version managed from 6.2.12)
+|  |  \- org.springframework:spring-aspects:jar:6.2.12:compile (version managed from 6.2.12)
+|  |     \- org.aspectj:aspectjweaver:jar:1.9.24:compile (version managed from 1.9.22.1)
+|  +- org.springframework.security:spring-security-crypto:jar:6.5.6:compile (version managed from 6.5.6)
+|  +- org.springframework.boot:spring-boot-starter-freemarker:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  +- org.freemarker:freemarker:jar:2.3.34:compile (version managed from 2.3.34)
+|  +- org.springframework.boot:spring-boot-starter-mail:jar:3.5.7:compile (version managed from 3.5.7)
+|  |  \- org.eclipse.angus:jakarta.mail:jar:2.0.5:compile (version managed from 2.0.5)
+|  |     \- org.eclipse.angus:angus-activation:jar:2.0.3:runtime (version managed from 2.0.3)
+|  +- org.flywaydb:flyway-core:jar:11.7.2:compile (version managed from 11.7.2)
+|  |  +- com.fasterxml.jackson.dataformat:jackson-dataformat-toml:jar:2.19.2:compile (version managed from 2.15.2)
+|  +- org.flywaydb:flyway-database-postgresql:jar:11.7.2:compile (version managed from 11.7.2)
+|  \- org.postgresql:postgresql:jar:42.7.8:runtime (version managed from 42.7.8; scope not updated to runtime)
+|     \- org.checkerframework:checker-qual:jar:3.49.5:runtime
++- org.springframework.boot:spring-boot-starter-test:jar:3.5.7:test
+|  +- org.springframework.boot:spring-boot-test:jar:3.5.7:test (version managed from 3.5.7)
+|  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:3.5.7:test (version managed from 3.5.7)
+|  +- com.jayway.jsonpath:json-path:jar:2.9.0:test (version managed from 2.9.0)
+|  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.4:compile (version managed from 4.0.4; scope not updated to compile)
+|  |  \- jakarta.activation:jakarta.activation-api:jar:2.1.4:compile (version managed from 2.1.4)
+|  +- net.minidev:json-smart:jar:2.5.2:test (version managed from 2.5.2)
+|  |  \- net.minidev:accessors-smart:jar:2.5.2:test
+|  |     \- org.ow2.asm:asm:jar:9.7.1:test
+|  +- org.assertj:assertj-core:jar:3.27.6:test (version managed from 3.27.6)
+|  |  \- net.bytebuddy:byte-buddy:jar:1.17.8:runtime (version managed from 1.17.7; scope not updated to runtime)
+|  +- org.awaitility:awaitility:jar:4.2.2:test (version managed from 4.2.2)
+|  +- org.hamcrest:hamcrest:jar:3.0:test (version managed from 3.0)
+|  +- org.junit.jupiter:junit-jupiter:jar:5.12.2:test (version managed from 5.12.2)
+|  |  +- org.junit.jupiter:junit-jupiter-api:jar:5.12.2:test (version managed from 5.12.2)
+|  |  |  +- org.opentest4j:opentest4j:jar:1.3.0:test
+|  |  |  +- org.junit.platform:junit-platform-commons:jar:1.12.2:test (version managed from 1.12.2)
+|  |  |  \- org.apiguardian:apiguardian-api:jar:1.1.2:test
+|  |  +- org.junit.jupiter:junit-jupiter-params:jar:5.12.2:test (version managed from 5.12.2)
+|  |  \- org.junit.jupiter:junit-jupiter-engine:jar:5.12.2:test (version managed from 5.12.2)
+|  |     +- org.junit.platform:junit-platform-engine:jar:1.12.2:test (version managed from 1.12.2)
+|  +- org.mockito:mockito-core:jar:5.17.0:test (version managed from 5.17.0)
+|  |  +- net.bytebuddy:byte-buddy-agent:jar:1.17.8:test (version managed from 1.15.11)
+|  |  \- org.objenesis:objenesis:jar:3.3:test
+|  +- org.mockito:mockito-junit-jupiter:jar:5.17.0:test (version managed from 5.17.0)
+|  +- org.skyscreamer:jsonassert:jar:1.5.3:test (version managed from 1.5.3)
+|  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
+|  +- org.springframework:spring-core:jar:6.2.12:compile (version managed from 6.2.12; scope not updated to compile)
+|  |  \- org.springframework:spring-jcl:jar:6.2.12:compile (version managed from 6.2.12)
+|  +- org.springframework:spring-test:jar:6.2.12:test (version managed from 6.2.12)
+|  \- org.xmlunit:xmlunit-core:jar:2.10.4:test (version managed from 2.10.4)
++- org.springframework.boot:spring-boot-testcontainers:jar:3.5.7:test
+|  +- org.springframework.boot:spring-boot-autoconfigure:jar:3.5.7:compile (version managed from 3.5.7; scope not updated to compile)
+|  \- org.testcontainers:testcontainers:jar:1.21.3:test (version managed from 1.21.3)
+|     +- junit:junit:jar:4.13.2:test (version managed from 4.13.2)
+|     |  \- org.hamcrest:hamcrest-core:jar:3.0:test (version managed from 1.3)
+|     +- org.apache.commons:commons-compress:jar:1.24.0:test
+|     +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+|     |  \- org.jetbrains:annotations:jar:17.0.0:test
+|     +- com.github.docker-java:docker-java-api:jar:3.4.2:test
+|     \- com.github.docker-java:docker-java-transport-zerodep:jar:3.4.2:test
+|        +- com.github.docker-java:docker-java-transport:jar:3.4.2:test
+|        \- net.java.dev.jna:jna:jar:5.13.0:test
++- org.testcontainers:junit-jupiter:jar:1.21.3:test
+\- org.testcontainers:postgresql:jar:1.21.3:test
+   \- org.testcontainers:jdbc:jar:1.21.3:test (version managed from 1.21.3)
+      \- org.testcontainers:database-commons:jar:1.21.3:test (version managed from 1.21.3)</code></pre>
+</details>
+<p>SHA-256 pełnego surowego wydruku <code>server-baseline-tree.txt</code>: <code>46adb5b95c92bb15921e624ac3f063d43eb019fa7dd4ae8754c0db3c23d55d0a</code>.</p>
+<h3>Drzewo docelowego modelu POM</h3>
+<details>
+<summary>Rozwiązane zależności; pominięto wiersze odrzuconych duplikatów i konfliktów</summary>
+<pre><code class="lang-text">io.pillopl:campsite-server:jar:1.0.0-SNAPSHOT
++- io.pillopl:campsite-endpoints:jar:1.0.0-SNAPSHOT:compile
+|  +- io.pillopl:campsite-core:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  +- io.pillopl:campsite-api:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  +- io.pillopl:campsite-transfer-objects:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  |  +- io.pillopl:campsite-value-objects:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  |  \- io.pillopl:campsite-commons:jar:1.0.0-SNAPSHOT:compile (version managed from 1.0.0-SNAPSHOT)
+|  +- org.springframework.boot:spring-boot-starter-security:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  +- org.springframework.boot:spring-boot-security:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  +- org.springframework.security:spring-security-config:jar:7.1.2:compile (version managed from 7.1.2)
+|  |  |  |  +- org.springframework.security:spring-security-core:jar:7.1.2:compile (version managed from 7.1.2)
+|  |  |  \- org.springframework.security:spring-security-web:jar:7.1.2:compile (version managed from 7.1.2)
+|  |  \- org.springframework:spring-aop:jar:7.0.10:compile (version managed from 7.0.10)
+|  |     +- org.springframework:spring-beans:jar:7.0.10:compile (version managed from 7.0.10)
+|  \- org.springdoc:springdoc-openapi-starter-webmvc-ui:jar:3.2.0:compile (version managed from 3.2.0)
+|     +- org.springdoc:springdoc-openapi-starter-webmvc-api:jar:3.2.0:compile
+|     |  +- org.springdoc:springdoc-openapi-starter-common:jar:3.2.0:compile
+|     |  |  +- org.springframework.boot:spring-boot-validation:jar:4.1.2:compile (version managed from 4.1.2)
+|     |  |  |  \- org.hibernate.validator:hibernate-validator:jar:9.1.5.Final:compile (version managed from 9.1.5.Final)
+|     |  |  |     \- com.fasterxml:classmate:jar:1.7.3:compile (version managed from 1.7.1)
+|     |  |  +- io.swagger.core.v3:swagger-core-jakarta:jar:2.2.55:compile
+|     |  |  |  +- io.swagger.core.v3:swagger-annotations-jakarta:jar:2.2.55:compile
+|     |  |  |  +- io.swagger.core.v3:swagger-models-jakarta:jar:2.2.55:compile
+|     |  |  |  \- jakarta.validation:jakarta.validation-api:jar:3.1.1:compile (version managed from 3.0.2)
+|     |  |  +- com.fasterxml.jackson.core:jackson-databind:jar:2.21.7:compile (version managed from 2.21.7)
+|     |  |  |  \- com.fasterxml.jackson.core:jackson-core:jar:2.21.7:compile (version managed from 2.21.7)
+|     |  |  +- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.21.7:compile (version managed from 2.21.7)
+|     |  |  +- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.21.7:compile (version managed from 2.21.7)
+|     |  \- org.springframework.boot:spring-boot-web-server:jar:4.1.2:compile (version managed from 4.1.2)
+|     +- org.webjars:swagger-ui:jar:5.34.0:compile
+|     \- org.webjars:webjars-locator-lite:jar:1.1.5:compile (version managed from 1.1.5)
++- io.pillopl:campsite-db-migrations:jar:1.0.0-SNAPSHOT:runtime
++- org.springframework.boot:spring-boot-starter-webmvc:jar:4.1.2:compile
+|  +- org.springframework.boot:spring-boot-starter:jar:4.1.2:compile (version managed from 4.1.2; scope not updated to compile)
+|  |  +- org.springframework.boot:spring-boot-starter-logging:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  +- ch.qos.logback:logback-classic:jar:1.5.38:compile (version managed from 1.5.38)
+|  |  |  |  +- ch.qos.logback:logback-core:jar:1.5.38:compile (version managed from 1.5.38)
+|  |  |  +- org.apache.logging.log4j:log4j-to-slf4j:jar:2.25.5:compile (version managed from 2.25.5)
+|  |  |  |  +- org.apache.logging.log4j:log4j-api:jar:2.25.5:compile (version managed from 2.25.5)
+|  |  |  \- org.slf4j:jul-to-slf4j:jar:2.0.20:compile (version managed from 2.0.20)
+|  |  +- jakarta.annotation:jakarta.annotation-api:jar:3.0.0:compile (version managed from 3.0.0; scope not updated to compile)
+|  |  \- org.yaml:snakeyaml:jar:2.6:compile (version managed from 2.6)
+|  +- org.springframework.boot:spring-boot-starter-jackson:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  \- org.springframework.boot:spring-boot-jackson:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     \- tools.jackson.core:jackson-databind:jar:3.1.7:compile (version managed from 3.1.7)
+|  |        \- tools.jackson.core:jackson-core:jar:3.1.7:compile (version managed from 3.1.7)
+|  +- org.springframework.boot:spring-boot-starter-tomcat:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  +- org.springframework.boot:spring-boot-starter-tomcat-runtime:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  +- org.apache.tomcat.embed:tomcat-embed-core:jar:11.0.27:compile (version managed from 11.0.27)
+|  |  |  +- org.apache.tomcat.embed:tomcat-embed-el:jar:11.0.27:compile (version managed from 11.0.27)
+|  |  |  \- org.apache.tomcat.embed:tomcat-embed-websocket:jar:11.0.27:compile (version managed from 11.0.27)
+|  |  \- org.springframework.boot:spring-boot-tomcat:jar:4.1.2:compile (version managed from 4.1.2)
+|  +- org.springframework.boot:spring-boot-http-converter:jar:4.1.2:compile (version managed from 4.1.2; scope not updated to compile)
+|  |  +- org.springframework.boot:spring-boot:jar:4.1.2:compile (version managed from 4.1.2; scope not updated to compile)
+|  |  |  \- org.springframework:spring-context:jar:7.0.10:compile (version managed from 7.0.10)
+|  |  \- org.springframework:spring-web:jar:7.0.10:compile (version managed from 7.0.10)
+|  |     \- io.micrometer:micrometer-observation:jar:1.17.2:compile (version managed from 1.16.8)
+|  |        \- io.micrometer:micrometer-commons:jar:1.17.2:compile (version managed from 1.17.2)
+|  \- org.springframework.boot:spring-boot-webmvc:jar:4.1.2:compile (version managed from 4.1.2)
+|     +- org.springframework.boot:spring-boot-servlet:jar:4.1.2:compile (version managed from 4.1.2)
+|     +- org.springframework:spring-webmvc:jar:7.0.10:compile (version managed from 7.0.10)
+|     |  +- org.springframework:spring-expression:jar:7.0.10:compile (version managed from 7.0.10)
++- org.springframework.boot:spring-boot-starter-quartz:jar:4.1.2:compile
+|  \- org.springframework.boot:spring-boot-quartz:jar:4.1.2:compile (version managed from 4.1.2)
+|     +- org.springframework.boot:spring-boot-transaction:jar:4.1.2:compile (version managed from 4.1.2)
+|     |  +- org.springframework.boot:spring-boot-persistence:jar:4.1.2:compile (version managed from 4.1.2)
+|     |  \- org.springframework:spring-tx:jar:7.0.10:compile (version managed from 7.0.10)
+|     +- org.quartz-scheduler:quartz:jar:2.5.2:compile (version managed from 2.5.2)
+|     \- org.springframework:spring-context-support:jar:7.0.10:compile (version managed from 7.0.10)
++- org.projectlombok:lombok:jar:1.18.48:compile
++- io.pillopl:campsite-core:test-jar:tests:1.0.0-SNAPSHOT:test
+|  +- org.springframework.boot:spring-boot-starter-data-jpa:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  +- org.springframework.boot:spring-boot-starter-jdbc:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  \- com.zaxxer:HikariCP:jar:7.0.2:compile (version managed from 7.0.2)
+|  |  +- org.springframework.boot:spring-boot-data-jpa:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  +- org.springframework.boot:spring-boot-data-commons:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  |  \- org.springframework.data:spring-data-commons:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  +- org.springframework.boot:spring-boot-hibernate:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  |  +- org.springframework.boot:spring-boot-jpa:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  |  |  +- jakarta.persistence:jakarta.persistence-api:jar:3.2.0:compile (version managed from 3.2.0)
+|  |  |  |  +- org.hibernate.orm:hibernate-core:jar:7.4.13.Final:compile (version managed from 7.4.13.Final)
+|  |  |  |  |  +- jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile (version managed from 2.0.1)
+|  |  |  |  |  +- org.jboss.logging:jboss-logging:jar:3.6.3.Final:compile (version managed from 3.6.1.Final; scope not updated to compile)
+|  |  |  |  |  +- org.hibernate.models:hibernate-models:jar:1.1.2:runtime
+|  |  |  |  |  +- org.glassfish.jaxb:jaxb-runtime:jar:4.0.9:runtime (version managed from 4.0.7)
+|  |  |  |  |  |  \- org.glassfish.jaxb:jaxb-core:jar:4.0.9:runtime (version managed from 4.0.9)
+|  |  |  |  |  |     +- org.glassfish.jaxb:txw2:jar:4.0.9:runtime (version managed from 4.0.9)
+|  |  |  |  |  |     \- com.sun.istack:istack-commons-runtime:jar:4.1.2:runtime
+|  |  |  |  |  +- jakarta.inject:jakarta.inject-api:jar:2.0.1:runtime (version managed from 2.0.1)
+|  |  |  |  \- org.springframework:spring-orm:jar:7.0.10:compile (version managed from 7.0.10)
+|  |  |  +- org.springframework.data:spring-data-jpa:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  |  |  +- org.antlr:antlr4-runtime:jar:4.13.2:compile
+|  |  |  \- org.springframework:spring-aspects:jar:7.0.10:compile (version managed from 7.0.10)
+|  |  |     \- org.aspectj:aspectjweaver:jar:1.9.25.1:compile (version managed from 1.9.25.1)
+|  |  \- org.springframework.boot:spring-boot-jdbc:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     +- org.springframework.boot:spring-boot-sql:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     \- org.springframework:spring-jdbc:jar:7.0.10:compile (version managed from 7.0.10)
+|  +- org.springframework.boot:spring-boot-starter-restclient:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  \- org.springframework.boot:spring-boot-restclient:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     +- org.springframework.boot:spring-boot-http-client:jar:4.1.2:compile (version managed from 4.1.2)
+|  +- org.springframework.security:spring-security-crypto:jar:7.1.2:compile (version managed from 7.1.2)
+|  +- org.springframework.boot:spring-boot-starter-json:jar:4.1.2:compile (version managed from 4.1.2)
+|  +- org.springframework.boot:spring-boot-starter-freemarker:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  \- org.springframework.boot:spring-boot-freemarker:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     +- org.freemarker:freemarker:jar:2.3.35:compile (version managed from 2.3.35)
+|  +- org.springframework.boot:spring-boot-starter-mail:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  \- org.springframework.boot:spring-boot-mail:jar:4.1.2:compile (version managed from 4.1.2)
+|  |     +- jakarta.mail:jakarta.mail-api:jar:2.1.5:compile (version managed from 2.1.5; scope not updated to compile)
+|  |     \- org.eclipse.angus:angus-mail:jar:2.0.5:runtime (version managed from 2.0.5)
+|  |        \- org.eclipse.angus:angus-activation:jar:2.0.3:runtime
+|  +- org.springframework.boot:spring-boot-starter-flyway:jar:4.1.2:compile (version managed from 4.1.2)
+|  |  +- org.springframework.boot:spring-boot-flyway:jar:4.1.2:compile (version managed from 4.1.2)
+|  +- org.flywaydb:flyway-database-postgresql:jar:12.4.0:compile (version managed from 12.4.0)
+|  |  \- org.flywaydb:flyway-core:jar:12.4.0:compile (version managed from 12.4.0)
+|  \- org.postgresql:postgresql:jar:42.7.14:runtime (version managed from 42.7.14; scope not updated to runtime)
+|     \- org.checkerframework:checker-qual:jar:3.55.1:runtime
++- org.springframework.boot:spring-boot-starter-test:jar:4.1.2:test
+|  +- org.springframework.boot:spring-boot-test:jar:4.1.2:test (version managed from 4.1.2)
+|  +- org.springframework.boot:spring-boot-test-autoconfigure:jar:4.1.2:test (version managed from 4.1.2)
+|  +- com.jayway.jsonpath:json-path:jar:2.10.0:test (version managed from 2.10.0)
+|  |  \- org.slf4j:slf4j-api:jar:2.0.20:compile (version managed from 2.0.17)
+|  +- jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.5:compile (version managed from 4.0.5; scope not updated to compile)
+|  |  \- jakarta.activation:jakarta.activation-api:jar:2.1.4:compile (version managed from 2.1.4)
+|  +- net.minidev:json-smart:jar:2.6.0:test (version managed from 2.6.0)
+|  |  \- net.minidev:accessors-smart:jar:2.6.0:test
+|  |     \- org.ow2.asm:asm:jar:9.7.1:test
+|  +- org.assertj:assertj-core:jar:3.27.7:test (version managed from 3.27.7)
+|  |  \- net.bytebuddy:byte-buddy:jar:1.18.15:runtime (version managed from 1.18.3; scope not updated to runtime)
+|  +- org.awaitility:awaitility:jar:4.3.0:test (version managed from 4.3.0)
+|  +- org.hamcrest:hamcrest:jar:3.0:test (version managed from 3.0)
+|  +- org.junit.jupiter:junit-jupiter:jar:6.0.3:test (version managed from 6.0.3)
+|  |  +- org.junit.jupiter:junit-jupiter-api:jar:6.0.3:test (version managed from 6.0.3)
+|  |  |  +- org.opentest4j:opentest4j:jar:1.3.0:test
+|  |  |  +- org.junit.platform:junit-platform-commons:jar:6.0.3:test (version managed from 6.0.3)
+|  |  |  +- org.apiguardian:apiguardian-api:jar:1.1.2:test
+|  |  +- org.junit.jupiter:junit-jupiter-params:jar:6.0.3:test (version managed from 6.0.3)
+|  |  \- org.junit.jupiter:junit-jupiter-engine:jar:6.0.3:test (version managed from 6.0.3)
+|  |     +- org.junit.platform:junit-platform-engine:jar:6.0.3:test (version managed from 6.0.3)
+|  +- org.mockito:mockito-core:jar:5.23.0:test (version managed from 5.23.0)
+|  |  +- net.bytebuddy:byte-buddy-agent:jar:1.18.15:test (version managed from 1.17.7)
+|  |  \- org.objenesis:objenesis:jar:3.3:test
+|  +- org.mockito:mockito-junit-jupiter:jar:5.23.0:test (version managed from 5.23.0)
+|  +- org.skyscreamer:jsonassert:jar:1.5.3:test (version managed from 1.5.3)
+|  |  \- com.vaadin.external.google:android-json:jar:0.0.20131108.vaadin1:test
+|  +- org.springframework:spring-core:jar:7.0.10:compile (version managed from 7.0.10; scope not updated to compile)
+|  |  +- commons-logging:commons-logging:jar:1.3.6:compile (version managed from 1.3.5)
+|  |  \- org.jspecify:jspecify:jar:1.0.1:compile (version managed from 1.0.1; scope not updated to compile)
+|  +- org.springframework:spring-test:jar:7.0.10:test (version managed from 7.0.10)
+|  \- org.xmlunit:xmlunit-core:jar:2.11.0:test (version managed from 2.11.0)
++- org.springframework.boot:spring-boot-testcontainers:jar:4.1.2:test
+|  +- org.springframework.boot:spring-boot-autoconfigure:jar:4.1.2:compile (version managed from 4.1.2; scope not updated to compile)
+|  \- org.testcontainers:testcontainers:jar:2.0.5:test (version managed from 2.0.5)
+|     +- org.apache.commons:commons-compress:jar:1.28.0:test
+|     |  +- commons-codec:commons-codec:jar:1.21.0:test (version managed from 1.19.0)
+|     |  +- commons-io:commons-io:jar:2.20.0:test
+|     |  \- org.apache.commons:commons-lang3:jar:3.20.0:compile (version managed from 3.18.0; scope not updated to compile)
+|     +- org.rnorth.duct-tape:duct-tape:jar:1.0.8:test
+|     |  \- org.jetbrains:annotations:jar:17.0.0:test
+|     +- com.github.docker-java:docker-java-api:jar:3.7.1:test
+|     |  +- com.fasterxml.jackson.core:jackson-annotations:jar:2.21:compile (version managed from 2.20)
+|     \- com.github.docker-java:docker-java-transport-zerodep:jar:3.7.1:test
+|        +- com.github.docker-java:docker-java-transport:jar:3.7.1:test
+|        \- net.java.dev.jna:jna:jar:5.18.1:test
++- org.testcontainers:testcontainers-junit-jupiter:jar:2.0.5:test
+\- org.testcontainers:testcontainers-postgresql:jar:2.0.5:test
+   \- org.testcontainers:testcontainers-jdbc:jar:2.0.5:test (version managed from 2.0.5)
+      \- org.testcontainers:testcontainers-database-commons:jar:2.0.5:test (version managed from 2.0.5)</code></pre>
+</details>
+<p>SHA-256 pełnego surowego wydruku <code>target-dependency-tree.txt</code>: <code>bfa42e23df70da2dca52092f790b32899746393cc998cc1b612cf0afa642dd7a</code>.</p></main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{
+r.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);
+r.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}
+document.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));
+try{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}
+function ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];
+if(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);
+g.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}
+document.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));
+try{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}
+document.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{
+const t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();
+// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z bloków bash wycinamy # …
+const k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))
+x=x.split('\n').filter(l=>!/^\s*#/.test(l)).map(l=>l.replace(/\s+#\s.*$/,'')).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+navigator.clipboard.writeText(x).then(()=>{
+const s=b.textContent;b.textContent='✓ skopiowane';setTimeout(()=>b.textContent=s,1500)})}))</script></body></html>

@@ -1,0 +1,235 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Obserwowalne przeniesienie grupy</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+
+.tabela{overflow-x:auto;margin:14px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:.86rem;line-height:1.5}
+th,td{border:1px solid var(--ramka);padding:8px 10px;vertical-align:top;text-align:left}
+th{background:var(--panel);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+td code{font-size:.8rem;word-break:break-word}
+.wstep{margin:22px 0;padding:14px 18px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+</style></head><body><header class="hero"><div class="wrap"><p class="eyebrow">Obserwowalne zachowania · wynik skilla</p><h1>Obserwowalne skutki przeniesienia grupy w drzewie</h1></div></header><main class="wrap"><article class="zadanie"><p class="wstep">Analiza <code>observable-behavior-test-advisor</code> (tryb interaktywny), 2026-10-24.
+Zakres: <code>AffiliateGroupService.switchAccessMode</code>, <code>Group.parent</code> / <code>setParent</code> i wszystko, co czyta linię rodziców.
+Pytanie: co zauważy gość przy słupku, obsługa, operator w konsoli i back office, gdy kemping zmienia miejsce w drzewie
+(przełączenie NETWORK ACCESS ↔ HOUSE CARDS ONLY albo przeniesienie pod inny region)? Jak to testować przez
+obserwowalne zachowanie?</p><h2>Główna myśl</h2>
+<p>Rodzic grupy sam w sobie nie jest zachowaniem. Nikt poza programistą nie widzi pola <code>PARENT_ID</code>. Rodzic jest <strong>wejściem do kilkunastu decyzji liczonych po linii rodziców</strong> (najbliższy atrybut wygrywa, poddrzewo umowy, zasięg obsługi, rynek z prefiksu nazwy). Przeniesienie kempingu jest więc obserwowalne tylko przez te decyzje: czy karta daje prąd, ile kosztuje prąd, kto widzi kemping w konsoli, jak oznaczony jest rekord zużycia. Test ma sprawdzać te decyzje, a nie <code>getParent().getName()</code>.</p>
+<h2>Ustalenia z rozmowy</h2>
+<div class="tabela"><table><thead><tr><th>#</th><th>Pytanie</th><th>Odpowiedź</th></tr></thead><tbody><tr><td>1</td><td>Jak przenosi się kemping między regionami?</td><td>Skryptem SQL / ręcznie w bazie. W aplikacji <code>setParent</code> wołają tylko <code>GroupManager.createChildGroup</code> i <code>switchAccessMode</code>.</td></tr><tr><td>2</td><td>Czy wejścia są kompletne?</td><td>Tak: konsola (<code>GroupApi.switchAccessMode</code>), uruchomienie słupka afilianta (<code>AffiliatePedestalService</code>), założenie kempingu afilianta (<code>createAffiliateSiteGroup</code>).</td></tr><tr><td>3</td><td>Poziom testów zmiany trybu</td><td>Oba: uprawnienia i odmowy przez <code>GroupApi</code>, skutki przez <code>AffiliateGroupService</code> i read-modele.</td></tr><tr><td>4</td><td>Zachowania 1–8</td><td>Wszystkie zostają.</td></tr><tr><td>5</td><td>Gdzie wskazuje umowa NETWORK CARD?</td><td>Nie wiadomo, trzeba sprawdzić fixture. W <code>AcceptanceAgreementIntegrationTest</code> wskazuje „NETWORK ACCESS HR”, w seedzie demo konkretne regiony i kempingy. <strong>Testy ustawiają umowę jawnie w Given.</strong></td></tr><tr><td>6</td><td><code>AccessModeSwitchedEvent</code></td><td>Nikt go nie konsumuje, to szczegół. Bez asercji na zdarzeniu.</td></tr><tr><td>7</td><td>Punkty asercji dla obsługi i back office</td><td><code>findManageableGroups</code>/mapa, <code>getGroupAttributes</code>, <code>settledByCampsite</code> na rekordzie zużycia, taryfa rozwiązana dla słupka.</td></tr><tr><td>8</td><td>Warianty z osobnym testem</td><td><code>listedInApp</code> true/false, kemping z sekcjami, przeniesienie do innego rynku.</td></tr><tr><td>9</td><td>Abstrakcje pośrednie</td><td>(B): tylko przez obserwowalne zachowanie.</td></tr><tr><td>10</td><td>Zakres</td><td>Testy cross-module na <code>IntegrationTest</code> (wszystko żywe).</td></tr><tr><td>11</td><td>Snapshot przy odmowach</td><td>Atrybuty grupy w konsoli, słupki (<code>PedestalDTO</code>), wynik autoryzacji karty.</td></tr></tbody></table></div>
+<h2>Step 0: punkty wejścia</h2>
+<div class="tabela"><table><thead><tr><th>Wejście</th><th>Rola</th><th>Poziom testu</th></tr></thead><tbody><tr><td><code>GroupApi.switchAccessMode</code> → <code>GroupApiService</code></td><td>operator w konsoli przełącza tryb afilianta</td><td><strong>warstwa API</strong>: ma logikę (CONFIG_EDIT, zasięg <code>fetchManageable</code>, odmowa dla nie-afilianta, <code>null</code> → <code>ConflictException</code>)</td></tr><tr><td><code>AffiliatePedestalService</code> (commissioning)</td><td>uruchomienie słupka afilianta ustawia tryb z commissioningu</td><td>przez commissioning, jeden scenariusz</td></tr><tr><td><code>AffiliateGroupService.createAffiliateSiteGroup</code></td><td>pierwsze miejsce kempingu afilianta w drzewie</td><td>Given w innych testach</td></tr><tr><td><code>AffiliateGroupService.switchAccessMode</code></td><td>właściwe przełączenie</td><td><strong>warstwa serwisu</strong>: skutki dla słupka, kart, konsoli</td></tr><tr><td>skrypt SQL (poza aplikacją)</td><td>przeniesienie kempingu pod inny region</td><td>Given symuluje skrypt (patrz *Testability*)</td></tr></tbody></table></div>
+<h2>Step 1b: kto co zauważy</h2>
+<p>Wszyscy czytelnicy linii rodziców w kodzie produkcyjnym:</p>
+<div class="tabela"><table><thead><tr><th>Kto</th><th>Co system liczy po linii rodziców</th><th>Kod</th><th>Co ta osoba widzi</th></tr></thead><tbody><tr><td><strong>Gość przy słupku</strong></td><td>umowa akceptacji wydawcy obejmuje poddrzewo wskazanej grupy</td><td><code>GroupService.isCardAcceptedAt</code> → <code>GroupServiceHelper.extractAllAcceptingSiteGroupIds</code></td><td>karta sieciowa daje prąd albo dostaje <code>CARD_NOT_ACCEPTED_AT_SITE</code></td></tr><tr><td></td><td>karty domowe grupy słupka <strong>i wszystkich przodków</strong></td><td><code>HouseCardService.getHouseCardsForPedestal</code> (<code>fetchParentLineIds</code>)</td><td>karta domowa regionu działa albo nie działa</td></tr><tr><td></td><td>przygarnięcie karty powitalnej: najbliższy atrybut <strong>i</strong> tryb HOUSE CARDS ONLY</td><td><code>WelcomeCardAdoptionService.checkPedestal</code></td><td>zostawiona karta powitalna zaczyna działać jako karta domowa albo nie</td></tr><tr><td></td><td>domyślna taryfa: najbliższy atrybut na linii, rynek z linii</td><td><code>DefaultTariffService</code>, <code>TariffResolver</code></td><td>cena prądu</td></tr><tr><td><strong>Gość w aplikacji</strong></td><td>flagi słupka ustawiane przy przełączeniu</td><td><code>Pedestal.listedInApp</code>, <code>remoteControl</code>; <code>SupplyControlUnitImpl.checkRemoteControl</code></td><td>słupek w aplikacji; zdalny/QR start działa albo jest odrzucony</td></tr><tr><td><strong>Obsługa / kierownik regionu</strong></td><td>zasięg = poddrzewo grupy użytkownika</td><td><code>GroupService.isManageable</code>, <code>findManageableGroups</code>, <code>MapApiService</code></td><td>kemping znika z konsoli/mapy jednych, pojawia się u drugich</td></tr><tr><td><strong>Operator w konsoli</strong></td><td>tryb z nazwy rodzica, rynek z prefiksu, atrybuty dziedziczone</td><td><code>GroupApi.getGroupAttributes</code></td><td><code>accessMode</code>, <code>market</code>, przygarnianie, lista lokalna, nazwa eksportowa</td></tr><tr><td><strong>Back office</strong></td><td><code>settledByCampsite</code> słupka trafia na nowy rekord zużycia; rynek</td><td><code>ConsumptionRecordWriteService</code> (<code>SettlementFlags</code>)</td><td>nowe rekordy są albo nie są „rozliczane przez kemping”; kemping w innym rynku</td></tr></tbody></table></div>
+<p>Klasyfikacja: to nie jest CRUD. Zapisany rodzic jest stanem wewnętrznym, a obserwowalne są decyzje z tabeli.</p>
+<h2>Step 2: wzorce</h2>
+<div class="tabela"><table><thead><tr><th>Wzorzec</th><th>Gdzie</th></tr></thead><tbody><tr><td><strong>EVENTUAL-EFFECT / MODULE-BOUNDARY</strong> (cross-module, wszystko żywe)</td><td>skutki w kartach, zasilaniu, cenniku, zużyciu, konsoli</td></tr><tr><td><strong>SIDE-EFFECT + twin</strong></td><td>flagi słupka i zmiana akceptacji: zawsze para „przed / po” albo „ten tryb / tamten tryb”</td></tr><tr><td><strong>PERMISSION-GATE</strong></td><td><code>GroupApi.switchAccessMode</code>: CONFIG_EDIT, zasięg</td></tr><tr><td><strong>NOTHING-HAPPENED + snapshot</strong></td><td>odmowy: atrybuty konsoli, <code>PedestalDTO</code>, wynik autoryzacji przed == po</td></tr><tr><td><strong>HISTORY-DEPENDENT</strong></td><td>przygarnięcie karty powitalnej: karta odrzucona → przygarnięta → przy następnym przyłożeniu przyjęta</td></tr></tbody></table></div>
+<h2>Step 3: propozycje testów</h2>
+<p>Wspólne Given dla scenariuszy z kartą sieciową (zgodnie z ustaleniem 5): <code>groupManager.addAcceptanceAgreement(networkCard, groupService.fetchSiteGroup("NETWORK ACCESS HR"))</code>. Wtedy test nie zależy od seeda.</p>
+<p>---</p>
+<h3>T1. Po przełączeniu na NETWORK ACCESS karta sieciowa daje prąd na słupku afilianta</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: kemping afilianta „marko” w trybie HOUSE CARDS ONLY, słupek <code>HR-MARKO-P1</code>, gość z kartą sieciową; umowa NETWORK CARD → NETWORK ACCESS HR. Przyłożenie karty daje odmowę.</li><li>When: operator przełącza kemping na NETWORK ACCESS.</li><li>Then: ta sama karta przy tym samym gnieździe daje <code>ACCEPTED</code>.</li></ul>
+<p><strong>Dlaczego ta asercja</strong>: gość widzi tylko to, czy gniazdo dało prąd. Test zostaje zielony, jeśli tryb dostępu kiedyś przestanie być zapisany jako rodzic.</p>
+<p><strong>Anty-przykład</strong>: <code>assertThat(affiliate.getParent().getName()).isEqualTo("NETWORK ACCESS HR")</code>. Zamraża model „tryb = nazwa rodzica”, a niczego nie mówi o gościu.</p>
+<p><strong>Technicznie</strong></p>
+<ul><li>Asercja: <code>authorization.authenticate("RFID", SocketLinkId.of("HR-MARKO-P1", 1)).getStatus()</code>: przed <code>CARD_NOT_ACCEPTED_AT_SITE</code>, po <code>ACCEPTED</code>.</li><li>Setup: <code>affiliateGroupService.createAffiliateSiteGroup(...)</code>, <code>fixture.pedestal(...)</code>, <code>cards.card(rfid, cards.guest(..., groupService.fetchNetworkCardIssuerGroup()))</code>.</li><li>Wzorzec: SIDE-EFFECT (twin przed/po), cross-module.</li></ul>
+<h3>T2. Po przełączeniu na HOUSE CARDS ONLY karta sieciowa jest odrzucana, a karta domowa dalej działa</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: kemping w NETWORK ACCESS, karta sieciowa i karta domowa kempingu, obie dają prąd.</li><li>When: przełączenie na HOUSE CARDS ONLY.</li><li>Then: karta sieciowa dostaje <code>CARD_NOT_ACCEPTED_AT_SITE</code>, karta domowa <code>ACCEPTED</code>.</li></ul>
+<p><strong>Dlaczego</strong>: to właśnie znaczy „tylko karty domowe”. Para kart w jednym teście pokazuje, że przełączenie zawęża akceptację, a nie wyłącza słupka.</p>
+<p><strong>Anty-przykład</strong>: <code>assertThat(pedestal.isListedInApp()).isFalse()</code> jako jedyny dowód „house cards only”. Flaga aplikacji nie decyduje o akceptacji karty.</p>
+<p><strong>Technicznie</strong></p>
+<ul><li>Karta domowa przez <code>HouseCardApi.saveHouseCard(owner, ...)</code> (tak jak robi to afiliant), nie wpis do DAO.</li><li>Asercja: dwa wywołania <code>authorization.authenticate(...)</code>.</li></ul>
+<h3>T3. Kemping w HOUSE CARDS ONLY znika z aplikacji, nie da się go uruchomić zdalnie, a jego nowe pobory nie są rozliczane przez kemping</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: kemping w NETWORK ACCESS, <code>listedInApp=true</code>, słupek rozliczany przez kemping.</li><li>When: przełączenie na HOUSE CARDS ONLY.</li><li>Then: (a) <code>PedestalDTO</code> słupka mówi „nie w aplikacji”, (b) zdalny start gniazda jest odrzucony, (c) nowy rekord zużycia z tego słupka ma <code>settledByCampsite = false</code>.</li></ul>
+<p><strong>Dlaczego</strong>: każda z trzech osób (gość w aplikacji, operator zdalnego startu, back office) widzi inny skutek, więc każdy ma swoją asercję w jej punkcie obserwacji.</p>
+<p><strong>Anty-przykład</strong>: <code>pedestal.isRemoteControl()</code> / <code>pedestal.isSettledByCampsite()</code> na encji. To flagi, nie skutki: test nie zauważy, że zdalny start mimo flagi przechodzi albo że rekord bierze flagę skądinąd.</p>
+<p><strong>Technicznie</strong></p>
+<ul><li>(a) <code>pedestalApi.getPedestal(user, PedestalCode.of("HR-MARKO-P1"))</code> → pole listed-in-app w DTO.</li><li>(b) <code>supplyControlUnit.requestSupplyStart(socket, rfid)</code> → wyjątek „cannot be controlled remotely” (albo endpoint zdalnego startu z konsoli).</li><li>(c) pełny pobór jak w <code>SupplySessionIntegrationTest</code> (autoryzacja → start → stop) → rekord przez API rekordów zużycia, flaga rozliczenia.</li><li>Wzorzec: SIDE-EFFECT w trzech modułach, cross-module.</li></ul>
+<h3>T4. NETWORK ACCESS „z aplikacją” i „bez aplikacji” to dwa różne kempingi dla gościa (para testów)</h3>
+<p><strong>Scenariusz A</strong>: przełączenie na NETWORK ACCESS z <code>listedInApp=true</code> → słupek w aplikacji, zdalny start przyjęty. <strong>Scenariusz B</strong>: to samo z <code>listedInApp=false</code> → słupka nie ma w aplikacji, zdalny start odrzucony, <strong>ale</strong> karta sieciowa przy słupku daje prąd.</p>
+<p><strong>Dlaczego</strong>: B pokazuje, że „bez aplikacji” nie znaczy „zamknięty dla sieci”. Bez tej asercji test B przeszedłby także wtedy, gdyby przełączenie nic nie zrobiło.</p>
+<p><strong>Technicznie</strong>: jak T1 + T3(a)(b), parametryzacja po <code>listedInApp</code>.</p>
+<h3>T5. Karta powitalna jest przygarniana tylko w HOUSE CARDS ONLY</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: kemping afilianta w HOUSE CARDS ONLY z włączonym przygarnianiem, karta z puli kart powitalnych.</li><li>When / Then (twin):</li></ul>
+<p>  - bez przełączenia: przyłożenie karty → odmowa → przygarnięcie → <strong>następne przyłożenie daje <code>ACCEPTED</code></strong>;   - po przełączeniu na NETWORK ACCESS: przyłożenie → odmowa → próba przygarnięcia → <strong>następne przyłożenie dalej odmowa</strong>.</p>
+<p><strong>Dlaczego</strong>: gość i kemping widzą „karta zaczęła działać”, a nie „checkAndAdopt zwróciło true”. Historia budowana operacjami (HISTORY-DEPENDENT).</p>
+<p><strong>Anty-przykład</strong>: <code>affiliate.setParent(networkAccess)</code> w Given (dziś tak robi <code>campsiteWithNetworkAccessDoesNotAdopt</code>). Wstrzykuje stan, którego żadna operacja biznesowa tak nie ustawia, bo pomija zmianę flag słupków.</p>
+<p><strong>Technicznie</strong>: <code>welcomeCardAdoptionService.checkAndAdopt(pedestalCode, rfid)</code> jako krok słuchacza <code>CHECK_WELCOME_CARD_ADOPTION</code> (synchronicznie w teście), asercja na <code>authorization.authenticate</code>. Przełączenie przez <code>affiliateGroupService.switchAccessMode</code>.</p>
+<h3>T6. Konsola pokazuje nowy tryb dostępu, a rynek zostaje</h3>
+<p><strong>Scenariusz</strong>: kemping HR w HOUSE CARDS ONLY → przełączenie → <code>getGroupAttributes</code> zwraca <code>accessMode = NETWORK_ACCESS</code>, <code>market = HR</code>. Operator dostaje nowy tryb także w odpowiedzi samego <code>switchAccessMode</code>.</p>
+<p><strong>Dlaczego</strong>: operator widzi to w konsoli. Rynek w asercji pilnuje, że przełączenie trybu nie wyrzuca kempingu z rynku (CAMP-204: „zmiana nazwy zepsuła rynek”).</p>
+<p><strong>Technicznie</strong>: <code>groupApi.switchAccessMode(operator, GroupId.of(id), "network access", true)</code> → <code>"NETWORK_ACCESS"</code>; <code>groupApi.getGroupAttributes(operator, id)</code> → <code>accessMode()</code>, <code>market()</code>.</p>
+<h3>T7. Kto widzi kemping w konsoli po przełączeniu (twin zasięgów)</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: użytkownik obsługi z zasięgiem „NETWORK ACCESS HR”, administrator rynku z zasięgiem „HR SITES”, właściciel afilianta z zasięgiem swojego kempingu.</li><li>When: przełączenie kempingu na HOUSE CARDS ONLY.</li><li>Then: obsługa NETWORK ACCESS <strong>traci</strong> kemping w <code>findManageableGroups</code>/mapie, a administrator rynku i właściciel <strong>dalej go widzą</strong>.</li></ul>
+<p><strong>Dlaczego</strong>: OPS-202 („administrator rynku nie widzi kempingów → staje fakturowanie”) i OPS-205 („kto zyska, kto straci”). Trzy osoby w jednym scenariuszu pokazują regułę zasięgu, nie pojedynczy przypadek.</p>
+<p><strong>Technicznie</strong>: <code>groupApi.findManageableGroups(user, "SITE", null)</code> dla każdego użytkownika; użytkownicy z <code>ConsoleFixture</code>/<code>UserinfoService</code> z ustawioną grupą SITE.</p>
+<h3>T8. Przełączenie z uruchomienia słupka afilianta</h3>
+<p><strong>Scenariusz</strong>: afiliant uruchamia słupek z commissioningiem „network access, listed in app”. Po uruchomieniu karta sieciowa daje prąd, a słupek jest w aplikacji.</p>
+<p><strong>Dlaczego</strong>: to druga droga do przełączenia (wejście 2). Wystarczy jeden scenariusz, bo reguły są już pokryte w T1–T4.</p>
+<p><strong>Technicznie</strong>: przez publiczną operację commissioningu (<code>CommissioningWebServiceIntegrationTest</code> pokazuje wywołanie z <code>"house cards only"</code>), asercje jak w T1/T3(a).</p>
+<h3>T9. Odmowy przełączenia niczego nie zmieniają (snapshot)</h3>
+<p>Trzy przypadki: (a) grupa, która nie jest afiliantem, np. zwykły kemping albo sama „NETWORK ACCESS HR”; (b) użytkownik bez CONFIG_EDIT; (c) użytkownik spoza zasięgu kempingu.</p>
+<p><strong>Scenariusz</strong></p>
+<ol><li><code>przed</code> = { <code>getGroupAttributes(kemping)</code>, <code>getPedestal(słupek)</code>, <code>authenticate(kartaSieciowa, gniazdo).status</code> }</li><li><code>groupApi.switchAccessMode(...)</code> → (a) <code>ConflictException</code>, (b)(c) <code>AccessNotAllowedException</code></li><li><code>po</code> = to samo co w kroku 1</li><li>asercja: wyjątek <strong>i</strong> <code>przed == po</code></li></ol>
+<p><strong>Twin</strong>: ten sam operator z prawem i w zasięgu przełącza ten sam kemping, a <code>po != przed</code>. Bez tego bliźniaka snapshot mógłby przechodzić, bo niczego nie mierzy.</p>
+<p><strong>Anty-przykład</strong>: <code>assertThat(networkAccess.getParent().getName()).isEqualTo("HR SITES")</code> (dzisiejszy <code>groupThatIsNoAffiliateCampsiteIsNotSwitched</code>). Sprawdza drzewo, a nie to, czy gość i operator widzą to samo co przed odmową.</p>
+<p><strong>Uwaga</strong>: autoryzacja zapisuje użycie karty domowej (<code>recordUse</code>). Do snapshotu użyj karty sieciowej albo porównuj tylko status.</p>
+<h3>T10. Kemping z sekcjami: słupek w sekcji po przełączeniu</h3>
+<p><strong>Scenariusz</strong>: kemping afilianta ma sekcję (podgrupę), słupek wisi w sekcji. Po przełączeniu na HOUSE CARDS ONLY sprawdzamy dla słupka <strong>w sekcji</strong> to samo co w T2 i T3: akceptację karty sieciowej, widoczność w aplikacji, zdalny start, rozliczenie.</p>
+<p><strong>Dlaczego</strong>: z punktu widzenia gościa słupek w sekcji należy do tego samego kempingu. Test pokaże, czy słupek w sekcji zachowuje się tak samo jak słupek bezpośrednio pod kempingiem (akceptacja liczy się po poddrzewie, a flagi są ustawiane słupkom znalezionym przez <code>findByGroupIds(kemping)</code>). Oczekiwany wynik dla flag trzeba potwierdzić z biznesem przed napisaniem testu.</p>
+<p><strong>Technicznie</strong>: <code>groupManager.createChildGroup(affiliate, "MARKO NORTH SECTION", ...)</code>, <code>fixture.pedestal("HR-MARKO-N1", section, 1)</code>, asercje jak w T2/T3.</p>
+<h3>T11. Kemping przeniesiony pod inny region: karty domowe regionu</h3>
+<p><strong>Scenariusz</strong></p>
+<ul><li>Given: regiony „ISTRIA” i „DALMATIA” pod „HR SITES”, w każdym karta domowa regionu (np. dozorcy, CAMP-211). Kemping „BAY” w ISTRIA, karta ISTRIA działa na słupku BAY, karta DALMATIA nie.</li><li>When: skrypt przenosi BAY pod DALMATIA.</li><li>Then: karta DALMATIA daje <code>ACCEPTED</code>, karta ISTRIA dostaje odmowę. Karty domowe samego kempingu BAY działają dalej.</li></ul>
+<p><strong>Dlaczego</strong>: business-context: „po przeniesieniu karty domowe przestają działać”. To najczęstsza niespodzianka po porządkach w sieci.</p>
+<p><strong>Technicznie</strong>: przeniesienie przez helper symulujący skrypt (patrz *Testability*), asercje przez <code>authorization.authenticate</code>.</p>
+<h3>T12. Kemping przeniesiony pod inny region: domyślna taryfa</h3>
+<p><strong>Scenariusz</strong> (dwa przypadki)</p>
+<ul><li>kemping bez własnej taryfy domyślnej: po przeniesieniu cena gniazda pochodzi z domyślnej taryfy <strong>nowego</strong> regionu;</li><li>kemping z własną taryfą domyślną: po przeniesieniu cena się nie zmienia.</li></ul>
+<p><strong>Dlaczego</strong>: CAMP-232 („domyślna taryfa regionu raz przechodzi na nowe kempingi, a raz nie”). Para przypadków pokazuje regułę „najbliższy wygrywa” przez cenę, bez wołania <code>findDefaultTariff</code>.</p>
+<p><strong>Technicznie</strong>: taryfy przez <code>PricingFixture</code>/<code>TariffApi</code> (ustawienie domyślnej na regionie i na kempingu), asercja <code>tariffResolver.resolve(socketId, cardId, now)</code> → identyfikator/nazwa taryfy albo cena z <code>ResolvedTariff</code>.</p>
+<h3>T13. Kemping przeniesiony do regionu innego rynku (HR → IT)</h3>
+<p><strong>Scenariusz</strong>: BAY przeniesiony pod region w „IT SITES”. <strong>Then</strong>:</p>
+<ul><li>konsola: <code>getGroupAttributes(BAY).market == IT</code>;</li><li>administrator rynku IT widzi BAY w <code>findManageableGroups</code>, a administrator HR już nie;</li><li>cena gniazda pochodzi z domyślnej taryfy rynku IT (gdy brak bliższej);</li><li>karta sieciowa HR z umową na region HR dostaje odmowę na BAY.</li></ul>
+<p><strong>Dlaczego</strong>: back office „odpowiada za rynek” i oczekuje wszystkich kempingów rynku (CAMP-203). Przeniesienie między rynkami zmienia jednocześnie widoczność, cenę i akceptację. Jeden scenariusz z kilkoma asercjami w punktach obserwacji różnych osób.</p>
+<p><strong>Technicznie</strong>: jak T7 + T12 + T1, przeniesienie helperem skryptu.</p>
+<h2>Step 4: przegląd istniejących testów</h2>
+<h3><code>AccessModeSwitchIntegrationTest.switchToNetworkAccessMovesTheCampsiteAndListsItsPedestalsAsRequested</code></h3>
+<p><strong>Asercja</strong>: zwrócony tryb, <code>affiliate.getParent().getName()</code>, <code>pedestal.isListedInApp()</code>, <code>pedestal.isRemoteControl()</code> na encji. <strong>Problem</strong>: nazwa rodzica to struktura wewnętrzna. Flagi na encji to stan, a nie skutek. Zwrócony tryb jest OK. <strong>Sugestia</strong>: zostawić zwrócony tryb, nazwę rodzica zastąpić T1 (karta sieciowa przyjęta), flagi zastąpić T3(a)(b)/T4 (DTO + zdalny start). <strong>Werdykt</strong>: SMELL</p>
+<h3><code>AccessModeSwitchIntegrationTest.networkAccessCampsiteNotListedInTheAppIsNotRemoteControlled</code></h3>
+<p><strong>Asercja</strong>: flagi encji. <strong>Problem</strong>: jak wyżej, a do tego brakuje drugiej połowy znaczenia: „nie w aplikacji, ale otwarty dla sieci”. <strong>Sugestia</strong>: T4 scenariusz B. <strong>Werdykt</strong>: SMELL</p>
+<h3><code>AccessModeSwitchIntegrationTest.switchToHouseCardsOnlyHidesThePedestalsAndStopsCampsiteSettlement</code></h3>
+<p><strong>Asercja</strong>: nazwa rodzica, trzy flagi encji. <strong>Problem</strong>: nazwa testu mówi o skutkach („hides”, „stops settlement”), a asercje sprawdzają flagi. <strong>Sugestia</strong>: T2 + T3 (DTO, odrzucony zdalny start, rekord zużycia z <code>settledByCampsite=false</code>). <strong>Werdykt</strong>: SMELL</p>
+<h3><code>AccessModeSwitchIntegrationTest.groupThatIsNoAffiliateCampsiteIsNotSwitched</code></h3>
+<p><strong>Asercja</strong>: <code>null</code> z serwisu i nazwa rodzica „HR SITES”. <strong>Problem</strong>: sprawdza drzewo, a nie brak skutku. <strong>Sugestia</strong>: T9(a) przez <code>GroupApi</code> (<code>ConflictException</code>) + snapshot. <strong>Werdykt</strong>: SMELL</p>
+<h3><code>AccessModeSwitchIntegrationTest.onlyARealSwitchIsAnnouncedAsEvent</code></h3>
+<p><strong>Asercja</strong>: zdarzenie <code>ACCESS_MODE_SWITCHED</code> w kolejce. <strong>Problem</strong>: według ustalenia 6 zdarzenia nikt nie konsumuje, więc asercja zamraża szczegół. <strong>Sugestia</strong>: usunąć albo zastąpić twinem T9 (odmowa = brak skutku, przełączenie = skutek). <strong>Werdykt</strong>: SMELL</p>
+<h3><code>AffiliateGroupServiceTest</code> (5 testów <code>checkAccessMode</code> / <code>isAffiliate</code> na <code>InMemoryGroups</code>)</h3>
+<p><strong>Asercja</strong>: wynik statycznej metody liczącej tryb z nazwy rodzica. <strong>Problem</strong>: test pośredniej abstrakcji (ustalenie 9: wybrane B). Zamraża regułę „tryb = prefiks nazwy bezpośredniego rodzica”. <code>accessModeLooksOnlyAtTheDirectParent</code> utrwala szczegół, którego nikt poza kodem nie widzi. <strong>Sugestia</strong>: skutki trybu pokrywają T1–T6. <code>isAffiliate</code> jest obserwowalne przez T9(a). Te testy można zostawić jako szybkie testy reguły nazewnictwa albo usunąć po napisaniu T1–T9; to decyzja zespołu. <strong>Werdykt</strong>: SMELL (łagodny)</p>
+<h3><code>WelcomeCardAdoptionCheckIntegrationTest.campsiteWithNetworkAccessDoesNotAdopt</code></h3>
+<p><strong>Asercja</strong>: <code>checkAndAdopt</code> zwraca <code>false</code>. <strong>Problem</strong>: Given ustawia <code>affiliate.setParent(...)</code> bezpośrednio, czyli wstrzykuje stan z pominięciem operacji przełączenia. Asercja na zwracanej decyzji jest akceptowalna, ale nie pokazuje, co widzi gość. <strong>Sugestia</strong>: T5, czyli przełączenie przez <code>switchAccessMode</code> i asercja na następnym przyłożeniu karty. <strong>Werdykt</strong>: SMELL</p>
+<h2>Testability Issues</h2>
+<ul><li><strong>Przeniesienie między regionami nie ma operacji w aplikacji</strong> (ustalenie 1). Given musi odtworzyć skrypt SQL.</li></ul>
+<p>  Proponowany helper testowy: <code>moveCampsite(campsite, newParent)</code>, który robi to co skrypt   (<code>UPDATE TBL_GROUP SET PARENT_ID = :parent WHERE ID = :id</code> przez <code>JdbcTemplate</code>) i potem <code>entityManager.flush(); clear();</code>.   Lepsze to niż <code>setParent</code> na encji, bo nie zostawia nieaktualnej listy <code>children</code> u starego rodzica w kontekście   persystencji i działa tak jak prawdziwy skrypt. Bez zmian w kodzie produkcyjnym.</p>
+<ul><li><strong>Umowa akceptacji karty sieciowej zależy od danych</strong> (ustalenie 5). Każdy test z kartą sieciową ustawia ją jawnie</li></ul>
+<p>  w Given przez <code>groupManager.addAcceptanceAgreement</code>.</p>
+<ul><li><strong>Przygarnięcie karty idzie przez kolejkę zdarzeń</strong> (<code>CHECK_WELCOME_CARD_ADOPTION</code>). W teście wołamy krok</li></ul>
+<p>  słuchacza synchronicznie (<code>checkAndAdopt</code>), a asercja jest na następnej autoryzacji.</p>
+<ul><li><strong>Rekord zużycia wymaga pełnego poboru</strong> (sesja, start, stop). Warto mieć jeden helper „pobór na gnieździe”</li></ul>
+<p>  wzorowany na <code>SupplySessionIntegrationTest</code> i używany w T3.</p>
+<h2>Step 5: podsumowanie</h2>
+<p><strong>Zidentyfikowane zachowania</strong>: 13 (T1–T13) <strong>Wzorce trudne do testowania</strong>: SIDE-EFFECT + twin ×7 (T1–T5, T11, T12), cross-module/EVENTUAL-EFFECT ×11, PERMISSION-GATE ×1 (T9b/c), NOTHING-HAPPENED + snapshot ×1 (T9), HISTORY-DEPENDENT ×1 (T5) <strong>Testy do napisania</strong>: 13 scenariuszy (ok. 20 metod testowych z parami i parametryzacją) <strong>Testy do poprawy</strong>: 7 z werdyktem SMELL</p>
+<h3>Główna zasada testowania dla tego obszaru</h3>
+<p>Rodzic grupy to wejście do decyzji, a nie wynik. Każdy test przeniesienia kończy się w punkcie obserwacji konkretnej osoby: wynik przyłożenia karty (gość), <code>PedestalDTO</code> i zdalny start (aplikacja), <code>findManageableGroups</code> / <code>getGroupAttributes</code> (obsługa, operator), flaga rozliczenia na rekordzie i rynek (back office). Nigdy na <code>getParent()</code>.</p><p><a href="anatomia-observable-behavior-test-advisor.html">Anatomia skilla →</a></p></article></main></body></html>

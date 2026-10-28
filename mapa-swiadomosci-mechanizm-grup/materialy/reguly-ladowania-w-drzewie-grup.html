@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dziwne reguły ładowania</title>
+<style>
+:root{--tlo:#ffffff;--panel:#f7f5f2;--tekst:#1f1f1f;--przyg:#666;--ramka:#d6d0c8;--zm:#fbe1c9;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#161514;--panel:#211f1d;--tekst:#eee;--przyg:#aaa;--ramka:#3c3834;--zm:#4a2e18;color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#161514;--panel:#211f1d;--tekst:#eee;--przyg:#aaa;--ramka:#3c3834;--zm:#4a2e18;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--tlo);color:var(--tekst);font:16px/1.55 -apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:32px 16px 56px}
+h2{font-size:18px;margin:32px 0 8px}
+ul{margin:4px 0;padding-left:22px}
+code{font:13px ui-monospace,Menlo,monospace}
+.etap{font-size:13px;color:var(--przyg);margin:12px 0 6px}
+.pp{display:flex;flex-wrap:wrap;gap:12px 40px;margin-top:8px}
+.drzewo,.drzewo ul{list-style:none;margin:0;padding:0}
+.drzewo ul{padding-left:22px}
+.drzewo li{position:relative;padding:3px 0 3px 16px}
+.drzewo>li{padding-left:0}
+.drzewo ul>li::before{content:"";position:absolute;left:0;top:0;bottom:0;border-left:1px solid var(--przyg)}
+.drzewo ul>li:last-child::before{height:15px}
+.drzewo ul>li::after{content:"";position:absolute;left:0;top:15px;width:13px;border-top:1px solid var(--przyg)}
+.drzewo span{display:inline-block;font:13px ui-monospace,Menlo,monospace;padding:2px 7px;border-radius:5px;background:var(--panel);border:1px solid var(--ramka)}
+.drzewo span.a{border-style:dashed;background:transparent}
+.drzewo span.zm{outline:2px solid #d9822b;outline-offset:1px}
+.drzewo mark{background:var(--zm);color:inherit;padding:0 2px}
+</style>
+<main>
+<p class="etap">Ramka ciągła = grupa w drzewie, przerywana = to, co jest do grupy podpięte. Podświetlone = co się zmienia.</p>
+<p><b>Prompt:</b> Wymień reguły sterowania grupowaniem w kontekście autoryzacji karty.</p>
+<p>Przykłady, w których to, czy karta ładuje na słupku, zależy od nazwy węzła albo od jego miejsca w drzewie, a nie od jawnej reguły.</p>
+
+<h2>1. Prefiks nazwy wyznacza rynek, a rynek decyduje o karcie powitalnej</h2>
+<ul>
+<li><code>GroupServiceHelper.checkMarket</code> (<code>GroupServiceHelper.java:180</code>) uznaje grupę za część rynku, jeśli jej nazwa zaczyna się od „HR ”, „IT ”, „FR ” albo „ES ”.</li>
+<li><code>determineMarketByGroupId</code> (<code>GroupService.java:173</code>) idzie w górę po rodzicach, aż trafi na taki prefiks.</li>
+<li>Gdy gość przykłada kartę powitalną, <code>checkAndAdopt</code> (<code>WelcomeCardAdoptionService.java:91</code>) ustala rynek słupka i szuka karty tylko w puli powitalnej tego rynku.</li>
+<li><b>Skutek:</b> zmiana nazwy węzła bliżej słupka na nazwę z innym prefiksem, np. region pod „IT SITES” nazwany „FR Riviera”, zmienia rynek słupków pod nim. Karta powitalna z puli IT nie zostanie przygarnięta i nie stanie się kartą domową.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #2 "IT SITES"</span><ul><li><span class="g">Group #60 "Riviera"</span><ul><li><span class="a">Pedestal P7</span></li></ul></li></ul></li><li><span class="g">Group #3 "IT ISSUERS"</span><ul><li><span class="g">Group #42 "IT WELCOME_CARD_POOL"</span><ul><li><span class="a">Guest</span><ul><li><span class="a">CampingCard C1</span></li></ul></li></ul></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #2 "IT SITES"</span><ul><li><span class="g zm">Group #60 "<mark>FR Riviera</mark>"</span><ul><li><span class="a">Pedestal P7</span></li></ul></li></ul></li><li><span class="g">Group #3 "IT ISSUERS"</span><ul><li><span class="g">Group #42 "IT WELCOME_CARD_POOL"</span><ul><li><span class="a">Guest</span><ul><li><span class="a">CampingCard C1</span></li></ul></li></ul></li></ul></li></ul></div></div>
+<h2>2. Tryb dostępu kempingu afiliacyjnego to nazwa rodzica</h2>
+<ul>
+<li><code>checkAccessMode</code> (<code>AffiliateGroupService.java:132</code>) sprawdza tylko, czy nazwa rodzica zaczyna się od „NETWORK ACCESS” albo „HOUSE CARDS ONLY”.</li>
+<li>Przygarnięcie karty wymaga trybu „HOUSE CARDS ONLY” (<code>WelcomeCardAdoptionService.java:137</code>).</li>
+<li><b>Skutek:</b> przepięcie grupy kempingu pod innego rodzica albo zmiana nazwy rodzica zmienia tryb dostępu bez zmiany żadnego pola.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span><ul><li><span class="g">Group #50 "AFFILIATE marko"</span></li></ul></li><li><span class="g">Group #30 "NETWORK ACCESS HR"</span></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span></li><li><span class="g">Group #30 "NETWORK ACCESS HR"</span><ul><li><span class="g zm"><mark>Group #50 "AFFILIATE marko"</mark></span></li></ul></li></ul></li></ul></div></div>
+<h2>3. „Kemping afiliacyjny” i jego właściciel są zapisani w nazwie</h2>
+<ul>
+<li><code>isAffiliate</code> (<code>AffiliateGroupService.java:153</code>) uznaje grupę za afiliacyjną, gdy jest typu SITE i jej nazwa zaczyna się od „AFFILIATE ” plus login.</li>
+<li><code>getAffiliateOwner</code> (<code>WelcomeCardAdoptionService.java:159</code>) odcina prefiks i to, co zostaje, uznaje za login właściciela. Na ten login zapisuje przygarniętą kartę domową.</li>
+<li><b>Skutek:</b> literówka w nazwie grupy oznacza, że karta trafia do innego właściciela albo do nikogo.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span><ul><li><span class="g">Group #50 "AFFILIATE marko" · SITE</span><ul><li><span class="a">Pedestal P9</span></li></ul></li></ul></li><li><span class="a">Userinfo "marko"</span></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span><ul><li><span class="g zm">Group #50 "<mark>AFFILIATE makro</mark>" · SITE</span><ul><li><span class="a">Pedestal P9</span></li></ul></li></ul></li><li><span class="a">Userinfo "marko"</span></li></ul></div></div>
+<h2>4. Umowy akceptacji: najbliższy przodek zastępuje listy wyżej</h2>
+<ul>
+<li><code>getAcceptanceAgreements</code> (<code>GroupServiceHelper.java:89–112</code>) idzie od grupy wydawcy karty w górę. Pierwsza grupa z niepustą listą umów wygrywa, listy wyżej nie są brane pod uwagę.</li>
+<li><b>Skutek:</b> dodanie jednej umowy na grupie pod moją grupą wydawcy, np. dla festiwalu, odcina tej gałęzi wszystkie umowy dziedziczone z góry. Karty, które ładowały wszędzie, nagle ładują tylko na festiwalu.</li>
+<li>Umowa wskazuje grupę kempingów, a liczy się całe jej poddrzewo. Przeniesienie kempingu pod inną grupę sprawia, że kemping wchodzi pod cudze umowy albo z nich wypada.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #100 "PartnerX" · ISSUER</span><ul><li><span class="a">umowy → #20, #21</span></li><li><span class="g">Group #101 "PartnerX Festival"</span><ul><li><span class="a">umowy → brak</span></li><li><span class="a">Guest</span><ul><li><span class="a">CampingCard C2</span></li></ul></li></ul></li></ul></li><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #20 "HR Dalmacja"</span></li><li><span class="g">Group #21 "HR Istra"</span></li><li><span class="g">Group #40 "Zadar Festival"</span></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #100 "PartnerX" · ISSUER</span><ul><li><span class="a">umowy → #20, #21</span></li><li><span class="g">Group #101 "PartnerX Festival"</span><ul><li><span class="a zm">umowy → <mark>#40</mark></span></li><li><span class="a">Guest</span><ul><li><span class="a">CampingCard C2</span></li></ul></li></ul></li></ul></li><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #20 "HR Dalmacja"</span></li><li><span class="g">Group #21 "HR Istra"</span></li><li><span class="g">Group #40 "Zadar Festival"</span></li></ul></li></ul></div></div>
+<h2>5. Karty domowe liczą się wzdłuż całej linii przodków</h2>
+<ul>
+<li>Lista kart domowych słupka (<code>getHouseCardsForPedestal</code>, <code>HouseCardService.java:83</code>) to karty jego grupy i wszystkich przodków (<code>fetchParentLineIds</code>).</li>
+<li>Właściciel kempingu w konsoli widzi za to karty z poddrzewa (<code>HouseCardService.java:109</code>), czyli liczone w drugą stronę.</li>
+<li><b>Skutek:</b> przeniesienie mojej grupy pod inną grupę sprawia, że na moich słupkach ładują karty domowe nowego przodka, a karty starego przestają. Zmiana w grupie nad moją zmienia, kto u mnie ładuje.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #20 "HR Dalmacja"</span><ul><li><span class="a">HouseCard H1 · active</span></li><li><span class="g">Group #22 "Camping Zadar"</span><ul><li><span class="a">Pedestal P3</span></li></ul></li></ul></li><li><span class="g">Group #21 "HR Istra"</span><ul><li><span class="a">HouseCard H2 · active</span></li></ul></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #20 "HR Dalmacja"</span><ul><li><span class="a">HouseCard H1 · active</span></li></ul></li><li><span class="g">Group #21 "HR Istra"</span><ul><li><span class="a">HouseCard H2 · active</span></li><li><span class="g zm"><mark>Group #22 "Camping Zadar"</mark></span><ul><li><span class="a">Pedestal P3</span></li></ul></li></ul></li></ul></li></ul></div></div>
+<h2>6. Atrybuty dziedziczone decydują, czy słupek ma lokalną listę kart</h2>
+<ul>
+<li><code>getLocalListAttribute</code> (<code>LocalListAttributeService.java:45</code>) i <code>adoptionIsAllowedFor</code> (<code>WelcomeCardAdoptionService.java:64</code>) biorą atrybut z najbliższego przodka, który go ma. Brak atrybutu na całej linii oznacza „nie”.</li>
+<li>Od lokalnej listy zależy, czy słupek wpuści kartę bez połączenia z serwerem (<code>LocalCardListService.java:127</code>). Karty domowe idą na listę przed kartami gości, a przy przekroczeniu pojemności karty gości wypadają z listy (<code>LocalCardListService.java:157–166</code>).</li>
+<li><b>Skutek:</b> ustawienie atrybutu na grupie nad moją, np. regionu, zmienia działanie moich słupków offline.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="a">LocalListAttribute · localListAllowed=true</span></li><li><span class="g">Group #20 "HR Dalmacja"</span><ul><li><span class="g">Group #22 "Camping Zadar"</span><ul><li><span class="a">Pedestal P3</span></li></ul></li></ul></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="a">LocalListAttribute · localListAllowed=true</span></li><li><span class="g">Group #20 "HR Dalmacja"</span><ul><li><span class="a zm"><mark>LocalListAttribute · localListAllowed=false</mark></span></li><li><span class="g">Group #22 "Camping Zadar"</span><ul><li><span class="a">Pedestal P3</span></li></ul></li></ul></li></ul></li></ul></div></div>
+<h2>7. Przełączenie trybu przepisuje słupki, ale tylko te, które istnieją w chwili przełączenia</h2>
+<ul>
+<li><code>switchAccessMode</code> (<code>AffiliateGroupService.java:70–102</code>) przepina rodzica i przepisuje flagi słupków grupy kempingu. Bez blokady.</li>
+<li>Według dokumentacji metody słupki w trybie „HOUSE CARDS ONLY” nie są widoczne w aplikacji i nie da się nimi sterować zdalnie.</li>
+<li><b>Skutek:</b> słupek dodany w trakcie przełączenia albo dwóch adminów naraz to słupki w innym trybie niż grupa. O ładowaniu decyduje wtedy flaga słupka, a nie tryb w nazwie rodzica.</li>
+</ul>
+<div class="pp"><div><div class="etap">przed</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span><ul><li><span class="g">Group #50 "AFFILIATE marko"</span><ul><li><span class="a">Pedestal P9 · listedInApp=false · remoteControl=false</span></li></ul></li></ul></li><li><span class="g">Group #30 "NETWORK ACCESS HR"</span></li></ul></li></ul></div><div><div class="etap">po</div><ul class="drzewo"><li><span class="g">Group #1 "HR SITES"</span><ul><li><span class="g">Group #31 "HOUSE CARDS ONLY HR"</span></li><li><span class="g">Group #30 "NETWORK ACCESS HR"</span><ul><li><span class="g zm"><mark>Group #50 "AFFILIATE marko"</mark></span><ul><li><span class="a">Pedestal P9 · listedInApp=<mark>true</mark> · remoteControl=<mark>true</mark></span></li><li><span class="a">Pedestal P10 · listedInApp=false · remoteControl=false</span></li></ul></li></ul></li></ul></li></ul></div></div>
+<p style="margin-top:32px"><b>Wspólny wzór:</b> prawo do ładowania (umowa wydawcy z kempingiem, sieć albo tylko karty domowe, karta przygarnięta) nie istnieje jako pojęcie. Wynika z nazw węzłów i z tego, kto jest czyim przodkiem. Każda operacja na drzewie, czyli nazwa, przeniesienie albo atrybut nad moją grupą, jest więc po cichu zmianą reguł ładowania.</p>
+</main>
+</html>

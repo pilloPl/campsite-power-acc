@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Migracja do nowego stosu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--tlo:#f4efe6;--tekst:#201a16;--przygaszony:#6b5f54;--akcent:#b5632b;--cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tekst:#f1e9dd;--przygaszony:#ab9d8c;--akcent:#e08a4c;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tekst:#f1e9dd;--przygaszony:#ab9d8c;--akcent:#e08a4c;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--tlo);color:var(--tekst);font:17px/1.7 "IBM Plex Sans","Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:48px 16px 96px}
+.eyebrow{font:500 .74rem/1 "IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+h1{font:560 clamp(2rem,5vw,3rem)/1.15 "Fraunces",Georgia,serif;margin:0 0 12px}
+.intro{color:var(--przygaszony);margin:0 0 28px}
+.ramka{position:relative;margin:0 0 24px}
+.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 "IBM Plex Mono",monospace;padding:6px 10px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+blockquote{margin:0;padding:26px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));font-size:.97rem;line-height:1.65}
+blockquote p{margin:.7em 0}
+blockquote ul{margin:.4em 0;padding-left:22px}
+code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--kod);padding:2px 6px;border-radius:5px}
+</style>
+<main>
+<p class="eyebrow">Gdybyśmy migrowali do F#</p>
+<h1>Migracja do nowego stosu</h1>
+<p class="intro">Prompt dla Claude Code w repo systemu. Wstaw w klamry obszar, obecny stos i stos docelowy, np. <code>.NET / F#</code>.</p>
+
+<div class="ramka"><span class="etykieta">prompt</span><button class="kopiuj" type="button">kopiuj</button>
+<blockquote id="prompt">
+<p>Przeanalizuj {REPO / OBSZAR} pod kątem migracji z {OBECNY STOS I WERSJE} do {DOCELOWY STOS I WERSJE}. Celem jest zachowanie wymaganych zachowań systemu przy zmianie technologii.</p>
+<p>Szukam ukrytej semantyki technologii oraz konkretnych miejsc, na których możemy utknąć podczas migracji. Nie wystarczy lista bibliotek i ich zamienników.</p>
+<p>Specyficzne i trudne do przeniesienia użycia technologii. Znajdź niszowe API, rozszerzenia dostawcy, nietypowe konfiguracje, obejścia ograniczeń, zależności od szczegółów implementacyjnych oraz przestarzałe mechanizmy. Dla każdego wskaż ewentualny odpowiednik w nowym stosie, różnice zachowania i brakujące możliwości. Wprost powiedz: „tu będzie dużo roboty — dlatego”. Nie zakładaj, że podobnie nazwane API zapewnia tę samą semantykę.</p>
+<p>Mechanizmy przekrojowe — jak naprawdę działają w tym systemie. Zbadaj transakcje, współbieżność i blokady, wielowątkowość i asynchroniczność, propagację kontekstu, obsługę błędów, retry, timeouty, zaokrąglenia i precyzję liczb oraz czas i strefy czasowe. Pokaż dowody w kodzie: konkretne wywołania, adnotacje, konfiguracje, SQL, triggery i ścieżki wykonania. Oddziel to, co aplikacja ustawia jawnie, od zachowania odziedziczonego po frameworku, runtime’ie, sterowniku lub bazie. Wskaż, gdzie zmiana domyślnych ustawień w nowym stosie zmieni zachowanie.</p>
+<p>Kontrakty z innymi systemami. Zidentyfikuj kontrakty wejściowe i wyjściowe, które trzeba zachować: formaty danych, serializację, nagłówki, kody i treść błędów, uwierzytelnianie, specyficzne protokoły oraz ich rozszerzenia. Uwzględnij także kolejność komunikatów, potwierdzenia odbioru, ponowienia, duplikaty, idempotencję i ograniczenia czasowe. Szukaj kontraktów nieudokumentowanych, ale zakodowanych w implementacji lub testach integracyjnych.</p>
+<p>Co rzeczywiście jest używane. Jeśli dostępne są logi, traces, metryki lub profile wykonania, zestaw je z kodem: które endpointy, integracje, ścieżki i mechanizmy technologiczne są aktywne, jak często i w jakich warunkach. Rozdziel „istnieje w kodzie”, „zaobserwowano w działaniu” i „nie zaobserwowano w badanej próbce”. Brak śladu nie oznacza nieużywanego kodu. Podaj zakres obserwacji i luki w pokryciu. Jeśli danych brakuje, wskaż, co warto zebrać.</p>
+<p>Wynik zacznij od krótkiej listy najważniejszych trudności migracji. Dla każdej podaj:</p>
+<ul>
+<li>miejsce i dowód w kodzie, a jeśli dostępne — również dowód z działania systemu;</li>
+<li>obecne zachowanie i jego zależność od technologii;</li>
+<li>odpowiednik w nowym stosie lub jego brak, wraz z różnicami semantycznymi;</li>
+<li>konsekwencję dla migracji;</li>
+<li>najmniejszy test lub eksperyment, który sprawdzi zachowanie i wykonalność przeniesienia.</li>
+</ul>
+<p>Oddziel fakty od hipotez. Dokumentację wykorzystuj do wyjaśniania semantyki konkretnych wersji, ale nie traktuj jej jako dowodu, że system korzysta z danego mechanizmu. Proponowane odpowiedniki zweryfikuj w dokumentacji docelowego stosu; niezweryfikowane oznacz wprost.</p>
+</blockquote></div>
+</main>
+<script>
+document.querySelector(".kopiuj").addEventListener("click", e => {
+  const el = document.getElementById("prompt");
+  const tekst = [...el.children].map(n => n.tagName === "UL" ? [...n.children].map(li => "- " + li.innerText).join("\n") : n.innerText).join("\n\n");
+  navigator.clipboard.writeText(tekst).then(() => { e.target.textContent = "skopiowane"; setTimeout(() => e.target.textContent = "kopiuj", 1500); });
+});
+</script>
+</html>

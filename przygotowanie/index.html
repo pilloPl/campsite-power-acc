@@ -1,0 +1,253 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Przygotowanie środowiska</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}
+.zmiany>h2,.zmiany>h3{color:#c0392b}
+.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);
+  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}
+.czat .scena{display:block;width:100%;height:96px}
+.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}
+.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}
+.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}
+.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}
+.czat .scena .namiot{fill:var(--akcent)}
+.czat .scena .slupek{fill:var(--mocny)}
+.czat .scena .iskra{fill:#f3c74a}
+.czat .tresc{padding:4px 20px 18px}
+.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}
+.czat p{margin:0 0 12px;color:var(--przygaszony)}
+.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}
+.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}
+.czat li img{width:38px;height:38px;border-radius:50%;flex:none}
+.czat li b{color:var(--mocny)}
+.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}
+.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}
+.czat a:hover{background:var(--cyjan);color:var(--panel)}
+.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}
+.czat.asystent .tresc{padding-top:16px}
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:50px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+.drogi{margin:14px 0}
+.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--panel);color:var(--przygaszony)}
+.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}
+.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+.drogi>section>h3:first-child{margin-top:.9em}
+@media print{
+  .drogi .wybor{display:none}
+  .drogi>section[hidden]{display:block}
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+</style></head><body><header class="hero"><div class="wrap"><p class="eyebrow">Przed szkoleniem</p><h1>Przygotowanie środowiska</h1></div></header><main class="wrap"><article class="zadanie">
+<h2>🎯 Cel</h2>
+<p>Zanim przyjdziesz na szkolenie: miej zainstalowane to, czego potrzebujemy, pobrany kod i <strong>sprawdź, że system odpala się u Ciebie lokalnie</strong>. Lista jest celowo minimalna.</p>
+<section class="zmiany"><h2>🔴 Zmiany</h2>
+<p>Przygotowanie zmieniło się po wysłaniu zaproszenia. Jeśli zrobiłeś je wcześniej, raz przed szkoleniem pobierz nowe repo i skille (w katalogu repo):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">cd campsite-power-acc
+git pull
+git -C .claude/skills fetch -q
+git -C .claude/skills switch -f czysto
+git -C .claude/skills reset -q --hard &#x27;@{u}&#x27;</code></pre><pre data-os="win" hidden><code class="lang-powershell">cd campsite-power-acc
+git pull
+git -C .claude/skills fetch -q
+git -C .claude/skills switch -f czysto
+git -C .claude/skills reset -q --hard &#x27;@{u}&#x27;</code></pre></div>
+<p>Potem jeszcze raz zainstaluj narzędzie z sekcji „Na koniec” (na dole strony). Inne zmiany: Node.js 22+ zamiast 20, nowe kroki drogi „Bez kontenerów” (<code>mvn install</code>, PostgreSQL) i port 5432 w drodze „Docker”.</p>
+</section><h2>Co musisz mieć (minimum)</h2>
+<p><strong>Zawsze:</strong></p>
+<ul><li><strong>Claude Code</strong>: tu dzieje się całe szkolenie. Instalacja: <a href="https://docs.claude.com/en/docs/claude-code/overview">docs.claude.com/claude-code</a>. Po instalacji w terminalu działa komenda <code>claude</code>.</li><li><strong>Git</strong>: do pobrania kodu. Sprawdź: <code>git --version</code>. Brak? → <a href="https://git-scm.com/downloads">git-scm.com/downloads</a> (na Windows komendy wklejasz do PowerShell; przy każdej komendzie jest przełącznik „Windows”).</li><li><strong>Node.js 22+</strong> (22.13 lub nowszy): do narzędzi i skryptów skilli szkoleniowych (nie instaluje się razem z Claude Code). Sprawdź: <code>node -v</code>. Brak? → macOS <code>brew install node</code>, Windows <code>winget install OpenJS.NodeJS.LTS</code>, Linux <a href="https://nodejs.org/en/download">nodejs.org</a>.</li></ul>
+<h2>Co pobrać</h2>
+<p>Repo systemu, na którym ćwiczymy (publiczne):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">git clone https://github.com/pilloPl/campsite-power-acc.git
+cd campsite-power-acc
+git log --oneline | head -5     # upewnij się, że jest historia
+git clone -b czysto https://github.com/pilloPl/legacy-ai-skille .claude/skills   # miejsce na skille do zadań, na razie puste</code></pre><pre data-os="win" hidden><code class="lang-powershell">git clone https://github.com/pilloPl/campsite-power-acc.git
+cd campsite-power-acc
+git log --oneline | Select-Object -First 5     # upewnij się, że jest historia
+git clone -b czysto https://github.com/pilloPl/legacy-ai-skille .claude/skills   # miejsce na skille do zadań, na razie puste</code></pre></div>
+<h2>Uruchom system</h2>
+<p>Wybierz jedną drogę. System działa na <a href="http://localhost:8080">http://localhost:8080</a> (Docker, Podman) albo <a href="http://localhost:5173">http://localhost:5173</a> (bez kontenerów), login <code>admin</code> / <code>demo-admin</code>. Błędy z <code>adria-club.example</code> w logu są normalne: to partner demo bez serwera.</p>
+<div class="drogi"><div class="wybor"><button type="button" data-droga="Docker" class="wl">Docker</button><button type="button" data-droga="Podman">Podman</button><button type="button" data-droga="Bez kontenerów">Bez kontenerów</button></div><section data-droga="Docker"><h3>Docker (zalecana)</h3>
+<p>Jeden program stawia bazę i aplikację.</p>
+<ul><li><strong>Docker Desktop</strong>: <a href="https://www.docker.com/products/docker-desktop/">docker.com/products/docker-desktop</a>. Sprawdź: <code>docker --version</code>.</li></ul>
+<p><strong>Uruchom</strong> (w katalogu repo):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">docker compose up -d                       # baza PostgreSQL 16
+docker build -t campsite-power .
+docker run -p 8080:8080 -e CAMPSITE_DB_HOST=host.docker.internal campsite-power</code></pre><pre data-os="win" hidden><code class="lang-powershell">docker compose up -d                       # baza PostgreSQL 16
+docker build -t campsite-power .
+docker run -p 8080:8080 -e CAMPSITE_DB_HOST=host.docker.internal campsite-power</code></pre></div>
+<p>Port 5432 zajęty (<code>port is already allocated</code>, np. masz lokalnego Postgresa)? Postaw bazę na innym porcie i podaj go aplikacji:</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">CAMPSITE_DB_PORT=5440 docker compose up -d
+docker run -p 8080:8080 -e CAMPSITE_DB_HOST=host.docker.internal -e CAMPSITE_DB_PORT=5440 campsite-power</code></pre><pre data-os="win" hidden><code class="lang-powershell">$env:CAMPSITE_DB_PORT=5440; docker compose up -d
+docker run -p 8080:8080 -e CAMPSITE_DB_HOST=host.docker.internal -e CAMPSITE_DB_PORT=5440 campsite-power</code></pre></div>
+<p>Port 8080 zajęty? Zmień tylko pierwszą liczbę w <code>-p</code>, np. <code>-p 8081:8080</code>. System będzie wtedy na <a href="http://localhost:8081">http://localhost:8081</a>. To samo działa w Podmanie.</p>
+</section><section data-droga="Podman" hidden><h3>Podman (gdy nie masz Dockera)</h3>
+<p>Te same kroki co w drodze „Docker”, tylko komendą <code>podman</code> zamiast <code>docker</code>.</p>
+<ul><li><strong>Podman</strong>: <a href="https://podman.io/docs/installation">podman.io</a>: macOS <code>brew install podman</code>, Windows <code>winget install RedHat.Podman</code>, Linux z menedżera pakietów (<code>sudo apt install podman</code>). Sprawdź: <code>podman --version</code>.</li><li>Na macOS i Windows raz uruchom maszynę Podmana: <code>podman machine init</code>, potem <code>podman machine start</code> (Linux tego nie potrzebuje).</li></ul>
+<p><strong>Uruchom</strong> (w katalogu repo, po <code>podman machine start</code> na macOS i Windows):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">podman run -d --name campsite-power-pg -p 5432:5432 -e POSTGRES_DB=campsite_power -e POSTGRES_USER=campsite -e POSTGRES_PASSWORD=campsite docker.io/library/postgres:16
+podman build -t campsite-power .
+podman run -p 8080:8080 -e CAMPSITE_DB_HOST=host.containers.internal campsite-power</code></pre><pre data-os="win" hidden><code class="lang-powershell">podman run -d --name campsite-power-pg -p 5432:5432 -e POSTGRES_DB=campsite_power -e POSTGRES_USER=campsite -e POSTGRES_PASSWORD=campsite docker.io/library/postgres:16
+podman build -t campsite-power .
+podman run -p 8080:8080 -e CAMPSITE_DB_HOST=host.containers.internal campsite-power</code></pre></div>
+</section><section data-droga="Bez kontenerów" hidden><h3>Bez kontenerów (Java 21 + Maven + PostgreSQL 16)</h3>
+<p>Potrzebne, jeśli nie chcesz Dockera (Node 22+ masz już z minimum). Najprościej menedżerem pakietów:</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash"># macOS (Homebrew – https://brew.sh)
+brew install openjdk@21 maven postgresql@16
+
+# Linux (Debian/Ubuntu – JDK + Maven z repo)
+sudo apt install openjdk-21-jdk maven postgresql</code></pre><pre data-os="win" hidden><code class="lang-powershell">winget install EclipseAdoptium.Temurin.21.JDK
+winget install Apache.Maven
+winget install PostgreSQL.PostgreSQL.16</code></pre></div>
+<p>Uruchom PostgreSQL i załóż bazę (użytkownik <code>campsite</code>, hasło <code>campsite</code>):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash"># macOS: postgresql@16 nie trafia sam do PATH (w nowym terminalu powtórz export)
+brew services start postgresql@16
+export PATH=&quot;$(brew --prefix postgresql@16)/bin:$PATH&quot;
+createuser -P campsite                      # hasło: campsite
+createdb -O campsite campsite_power
+
+# Linux: jako użytkownik postgres
+sudo -u postgres createuser -P campsite     # hasło: campsite
+sudo -u postgres createdb -O campsite campsite_power</code></pre><pre data-os="win" hidden><code class="lang-powershell">$env:Path += &quot;;C:\Program Files\PostgreSQL\16\bin&quot;   # winget nie dodaje Postgresa do PATH
+createuser -U postgres -P campsite         # dwa razy hasło campsite, potem hasło użytkownika postgres z instalacji
+createdb -U postgres -O campsite campsite_power</code></pre></div>
+<p>Sprawdź: <code>java -version</code> (→ 21), <code>mvn -v</code>, <code>node -v</code> (→ 22+), <code>psql --version</code> (→ 16). Na Windows po każdym <code>winget install</code> otwórz nowe okno PowerShell, inaczej nowej komendy nie widać.</p>
+<p><strong>Uruchom</strong> (w katalogu repo, PostgreSQL z bazą <code>campsite_power</code> działa). W pierwszym terminalu backend (<code>install</code> raz i po każdym <code>git pull</code>):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">mvn -q -DskipTests install
+mvn -pl campsite-server spring-boot:run -Dspring-boot.run.profiles=demo</code></pre><pre data-os="win" hidden><code class="lang-powershell">mvn -q -DskipTests install
+mvn -pl campsite-server spring-boot:run &quot;-Dspring-boot.run.profiles=demo&quot;</code></pre></div>
+<p>W drugim terminalu konsola, potem w przeglądarce <a href="http://localhost:5173">http://localhost:5173</a></p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">cd campsite-console &amp;&amp; npm ci &amp;&amp; npm run dev</code></pre><pre data-os="win" hidden><code class="lang-powershell">cd campsite-console; npm ci; npm run dev</code></pre></div>
+</section></div><h2>Sprawdź Claude w projekcie</h2>
+<p><strong>Claude uruchamiaj zawsze w katalogu repo, po <code>git pull</code>:</strong></p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">cd campsite-power-acc
+git pull
+claude</code></pre><pre data-os="win" hidden><code class="lang-powershell">cd campsite-power-acc
+git pull
+claude</code></pre></div>
+<h2>Na koniec: narzędzie, którego użyjemy na szkoleniu</h2>
+<p>Instalacja (jedna komenda):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">rm -rf /tmp/legacy-ai-skille &amp;&amp; git clone --depth 1 https://github.com/pilloPl/legacy-ai-skille.git /tmp/legacy-ai-skille &amp;&amp; mkdir -p ~/.claude/skills &amp;&amp; cp -R /tmp/legacy-ai-skille/harness-lens ~/.claude/skills/</code></pre><pre data-os="win" hidden><code class="lang-powershell">Remove-Item -Recurse -Force $env:TEMP\legacy-ai-skille -ErrorAction Ignore; git clone --depth 1 https://github.com/pilloPl/legacy-ai-skille.git $env:TEMP\legacy-ai-skille; New-Item -ItemType Directory -Force $HOME\.claude\skills | Out-Null; Copy-Item -Recurse -Force $env:TEMP\legacy-ai-skille\harness-lens $HOME\.claude\skills\</code></pre></div>
+<p>Sprawdzenie: wystarczy, że ta komenda wypisze <code>gotowe</code> (narzędzie uruchomimy razem na szkoleniu):</p>
+<div class="ramka kod os"><span class="etykieta">⌨️ Terminal</span><span class="system"><button type="button" data-os="unix" class="wl">macOS / Linux</button><button type="button" data-os="win">Windows</button></span><button type="button" class="kopiuj">⧉ kopiuj</button><pre data-os="unix"><code class="lang-bash">node --check ~/.claude/skills/harness-lens/lens.mjs &amp;&amp; echo gotowe</code></pre><pre data-os="win" hidden><code class="lang-powershell">node --check $HOME\.claude\skills\harness-lens\lens.mjs; if ($?) { &quot;gotowe&quot; }</code></pre></div>
+<p>Spokojnie z <code>rm -rf</code> (i <code>Remove-Item</code> na Windows): kasuje wyłącznie tymczasowy katalog <code>legacy-ai-skille</code> po ewentualnej wcześniejszej instalacji, żeby <code>git clone</code> pobrał świeżą kopię. Nic poza nim nie usuwa.</p></article><footer class="stopka">Materiały szkolenia „AI w pracy z systemami legacy".</footer></main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{
+r.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);
+r.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}
+document.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));
+try{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}
+function ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];
+if(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);
+g.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}
+document.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));
+try{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}
+document.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{
+const t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();
+// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z bloków bash wycinamy # …
+const k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))
+x=x.split('\n').filter(l=>!/^\s*#/.test(l)).map(l=>l.replace(/\s+#\s.*$/,'')).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+navigator.clipboard.writeText(x).then(()=>{
+const s=b.textContent;b.textContent='✓ skopiowane';setTimeout(()=>b.textContent=s,1500)})}))</script></body></html>

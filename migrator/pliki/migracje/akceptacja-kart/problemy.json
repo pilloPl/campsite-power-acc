@@ -1,0 +1,248 @@
+{
+  "problemy": [
+    {
+      "id": "P01",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "drzewo SITE głębsze niż kemping → region: do 4 poziomów pod korzeniem rynku, cele umów i karty obsługi na poziomach 0–3",
+      "ile": 210,
+      "przyklady": [
+        "HR SITES poziom 4: 35 grup / 100 słupków",
+        "umowy z korzeniem rynku: 4",
+        "karta obsługi na korzeniu HR SITES: 1"
+      ],
+      "zrodlo": "D06",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D06",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 210
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "słupki na grupie SITE, która ma dzieci (kemping i region naraz)",
+      "ile": 11,
+      "przyklady": [
+        "HR SITES poziom 1: 1 grupa",
+        "poziom 2: 5",
+        "poziom 3: 4",
+        "HR-NORTH: 1"
+      ],
+      "zrodlo": "D06",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D01",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 11
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "ten sam UID karty gościa dwa razy (nieskasowane karty w dwóch różnych wydawcach)",
+      "ile": 12,
+      "przyklady": [
+        "3367714248",
+        "3367801357"
+      ],
+      "zrodlo": "D09",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D09",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 12
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "wydawca przypięty w złym miejscu: grupa ISSUER pod grupą SITE",
+      "ile": 1,
+      "przyklady": [
+        "600001507 VILLAGE SIBENIK RECEPTION CARDS (220 gości, 231 kart)"
+      ],
+      "zrodlo": "D15",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D15",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 1
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "umowy wydawców spoza porcji (FR, IT) z kempingami HR; wydawcy z listami spoza porcji",
+      "ile": 3,
+      "przyklady": [
+        "FR ISSUERS → HR SITES: 1",
+        "IT ISSUERS → HR SITES: 2"
+      ],
+      "zrodlo": "D08",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D14",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 3
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "nazwy wydawców różne tylko wielkością liter (wołający M2 tłumaczy nazwę na grupę bez rozróżniania wielkości liter)",
+      "ile": 1,
+      "przyklady": [
+        "600001505 FR CAMPING PASS",
+        "600001506 FR Camping Pass"
+      ],
+      "zrodlo": "D02",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D19",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 1
+        }
+      ]
+    },
+    {
+      "id": "P07",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "wydawcy z „NETWORK” w nazwie poza poddrzewem NETWORK CARD (homonim: nie są Siecią)",
+      "ile": 3,
+      "przyklady": [
+        "900000012 IT NETWORK GUESTS",
+        "900000013 FR NETWORK GUESTS",
+        "900000014 ES NETWORK GUESTS"
+      ],
+      "zrodlo": "D11",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D11",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 3
+        }
+      ]
+    },
+    {
+      "id": "P08",
+      "data": "2026-10-24 20:59",
+      "krok": "dane",
+      "rodzaj": "układ",
+      "opis": "ten sam UID na karcie gościa i na karcie obsługi",
+      "ile": 1,
+      "przyklady": [
+        "(1 UID, zapytanie D09)"
+      ],
+      "zrodlo": "D09",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D12",
+        "data": "2026-10-24 21:00"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 20:59",
+          "ile": 1
+        }
+      ]
+    },
+    {
+      "id": "P09",
+      "data": "2026-10-24 21:13",
+      "krok": "roznice",
+      "rodzaj": "pominięte",
+      "opis": "pytania z requests.json bez odpowiedzi portu: 7×404 słupek HR-NORTH poza zakresem admin, 17×403 karta poza zakresem (wydawca pod kempingiem, UID z najnowszą kartą FR/IT)",
+      "ile": 24,
+      "przyklady": [
+        "M1 problem 3021492166 @ HR-00086 (403)",
+        "M23 problem lista HR-01634 (404)",
+        "M1 problem 3367745924 @ HR-00021 (403)"
+      ],
+      "zrodlo": "roznice/odpowiedzi-1.jsonl",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D20",
+        "data": "2026-10-24 21:13"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 21:13",
+          "ile": 24
+        }
+      ]
+    },
+    {
+      "id": "P10",
+      "data": "2026-10-24 21:29",
+      "krok": "kontrola",
+      "rodzaj": "kontrola",
+      "opis": "8 UID zdublowanych, których najnowsza karta należy do wydawcy FR/IT (poza porcją): stary model odpowiada z tej karty (nie), nowy „nie znam” — M1 8 pytań, M4 8 pytań",
+      "ile": 16,
+      "przyklady": [
+        "M1 3367745924 @ HR-00021: false | nie znam",
+        "M4 3367801357: false | nie znam",
+        "M1 3367722167 @ HR-00305: false | nie znam"
+      ],
+      "zrodlo": "kontrola/oczekiwane.jsonl vs kontrola/nowy.jsonl",
+      "wyjasnienie": {
+        "jak": "decyzja",
+        "decyzja": "D14",
+        "data": "2026-10-24 21:29"
+      },
+      "historia": [
+        {
+          "data": "2026-10-24 21:29",
+          "ile": 16
+        }
+      ]
+    }
+  ]
+}

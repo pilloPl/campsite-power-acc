@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Podbicie Spring Boota</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560&family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--tlo:#f4efe6;--tekst:#201a16;--przygaszony:#6b5f54;--akcent:#b5632b;--cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tekst:#f1e9dd;--przygaszony:#ab9d8c;--akcent:#e08a4c;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tekst:#f1e9dd;--przygaszony:#ab9d8c;--akcent:#e08a4c;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--tlo);color:var(--tekst);font:17px/1.7 "IBM Plex Sans","Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:48px 16px 96px}
+.eyebrow{font:500 .74rem/1 "IBM Plex Mono",monospace;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+h1{font:560 clamp(2rem,5vw,3rem)/1.15 "Fraunces",Georgia,serif;margin:0 0 12px}
+.intro{color:var(--przygaszony);margin:0 0 28px}
+.ramka{position:relative;margin:0 0 24px}
+.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 "IBM Plex Mono",monospace;padding:6px 10px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+blockquote{margin:0;padding:26px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));font-size:.97rem;line-height:1.65}
+blockquote p{margin:.7em 0}
+blockquote h3{font:600 1rem/1.4 "IBM Plex Sans",sans-serif;margin:1.2em 0 .3em}
+blockquote ul{margin:.4em 0;padding-left:22px}
+code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--kod);padding:2px 6px;border-radius:5px}
+</style>
+<main>
+<p class="eyebrow">Lekka polerka technologiczna</p>
+<h1>Podbicie Spring Boota</h1>
+<p class="intro">Prompt dla Claude Code w repo systemu. Wstaw w klamry repo, gałąź i wersję docelową albo zostaw „najnowsza stabilna”.</p>
+
+<div class="ramka"><span class="etykieta">prompt</span><button class="kopiuj" type="button">kopiuj</button>
+<blockquote id="prompt">
+<p>Przeanalizuj {REPO, BRANCH} pod kątem aktualizacji Spring Boota do {WERSJA DOCELOWA / NAJNOWSZA STABILNA WERSJA}.</p>
+<p>Celem jest zachowanie zachowania aplikacji oraz ustalenie pełnego zasięgu zmian wymuszonych aktualizacją: co wystarczy podbić, co trzeba dostosować i jakie kolejne aktualizacje to uruchomi.</p>
+<p>Jeśli wersja docelowa nie jest wskazana, ustal najnowszą stabilną wersję na dzień analizy na podstawie oficjalnych źródeł. Podaj dokładną wersję i datę sprawdzenia. Nie wybieraj milestone ani release candidate.</p>
+<h3>1. Ustal rzeczywisty punkt wyjścia</h3>
+<p>Zidentyfikuj wersje Spring Boota, Spring Frameworka, Spring Security, JDK, Maven/Gradle oraz bibliotek i pluginów.</p>
+<p>Rozróżnij:</p>
+<ul>
+<li>wersje deklarowane w projekcie;</li>
+<li>wersje zarządzane przez parent/BOM;</li>
+<li>jawne nadpisania wersji;</li>
+<li>wersje faktycznie rozwiązane przez build;</li>
+<li>wersje używane w CI, obrazie kontenera i środowisku uruchomieniowym.</li>
+</ul>
+<p>Jeśli możesz, wygeneruj effective POM i dependency tree lub odpowiedniki Gradle. Zaznacz profile, zakresy i moduły objęte sprawdzeniem. Nie przedstawiaj samej deklaracji w pliku jako dowodu rzeczywistej wersji runtime.</p>
+<h3>2. Zbuduj łańcuchy wymuszonych aktualizacji</h3>
+<p>Szukam odpowiedzi: „Jak daleko sięgnie ta zmiana i ile innych rzeczy będę musiał podbić?”</p>
+<p>Dla każdej zależności pokaż ciąg:</p>
+<p>aktualizacja Boota → zmiana wymagania lub wersji → dotknięta biblioteka/narzędzie → dostosowanie kodu, konfiguracji albo wdrożenia.</p>
+<p>Uwzględnij zależności przechodnie oraz wymagania spoza drzewa Maven/Gradle: JDK, serwer aplikacyjny, sterownik i wersję bazy, narzędzia testowe, generatory kodu, annotation processory, agenty, obrazy bazowe i CI.</p>
+<p>Dla każdego ogniwa podaj:</p>
+<ul>
+<li>dlaczego poprzednia zmiana wymusza następną;</li>
+<li>dowód w oficjalnej dokumentacji zgodności lub migration guide;</li>
+<li>dowód użycia w repo;</li>
+<li>gdzie łańcuch się kończy albo czego brakuje, żeby to ustalić.</li>
+</ul>
+<p>Nie traktuj każdej nowszej wersji jako obowiązkowej aktualizacji. Rozdziel:</p>
+<ul>
+<li>zmianę wersji wykonaną automatycznie przez BOM;</li>
+<li>konieczną ręczną aktualizację;</li>
+<li>konieczne dostosowanie kodu lub konfiguracji;</li>
+<li>aktualizację opcjonalną;</li>
+<li>niepotwierdzoną zgodność wymagającą eksperymentu.</li>
+</ul>
+<p>Sprawdź również konflikty: czy rozwiązanie problemu jednej biblioteki nie wymusza wersji niezgodnej z inną.</p>
+<h3>3. Znajdź miejsca, gdzie aktualizacja zmieni zachowanie</h3>
+<p>Zbadaj użyte mechanizmy, szczególnie:</p>
+<ul>
+<li>transakcje, ORM, generowanie SQL, lazy loading, flush i schemat bazy;</li>
+<li>security, kolejność filtrów, sesje, CSRF, CORS i dopasowanie ścieżek;</li>
+<li>serializację JSON, walidację, obsługę błędów i kontrakty HTTP;</li>
+<li>klientów HTTP, timeouty, retry, pule połączeń;</li>
+<li>executory, schedulery, współbieżność i propagację kontekstu;</li>
+<li>konfigurację, auto-configuration, domyślne ustawienia i kolejność inicjalizacji;</li>
+<li>observability, testy, mockowanie i narzędzia ingerujące w bytecode.</li>
+</ul>
+<p>Szukaj szczególnie niszowych API, klas wewnętrznych frameworka, własnych rozszerzeń, ręcznie skonfigurowanych beanów, wyłączonej auto-konfiguracji i obejść dawnych błędów.</p>
+<p>Pokaż konkretne miejsca w kodzie. Nie przepisuj całego migration guide — wybierz zmiany dotyczące tego repo. Oddziel zmiany łamiące kompilację od takich, które przejdą build, ale zmienią działanie.</p>
+<h3>4. Zaproponuj najmniejszą spójną ścieżkę aktualizacji</h3>
+<p>Porównaj bezpośredni skok z aktualizacją etapami. Zaproponuj etapy tylko wtedy, gdy zmniejszają konkretną niepewność lub są wymagane.</p>
+<p>Dla każdego etapu określ zestaw wersji, konieczne zmiany, kryterium zakończenia i sposób powrotu. Uwzględnij zgodność starej i nowej wersji ze wspólną bazą oraz zmiany schematu, które mogłyby utrudnić rollback.</p>
+<h3>5. Wynik zacznij od: „Podbicie Boota pociągnie za sobą…”</h3>
+<p>Przedstaw:</p>
+<ul>
+<li>najważniejsze łańcuchy wymuszonych zmian;</li>
+<li>tabelę: komponent → obecna wersja → wymagana wersja/zakres → powód → rodzaj pracy → dowód;</li>
+<li>miejsca największego ryzyka wraz z najmniejszym testem rozstrzygającym;</li>
+<li>osobne liczby komponentów zmienianych przez BOM, ręcznych aktualizacji i obszarów wymagających dostosowania.</li>
+</ul>
+<p>Nie utożsamiaj liczby zmienionych artefaktów z pracochłonnością.</p>
+<p>Jeśli dostępne są logi, traces i metryki, wykorzystaj je do ustalenia, które dotknięte mechanizmy rzeczywiście pracują. Bez nich nie uznawaj kodu za nieużywany.</p>
+<p>Na końcu wskaż, co sprawdzono przez uruchomienie, co wynika z kodu i dokumentacji, a co pozostaje hipotezą. Zielona kompilacja nie jest wystarczającym dowodem zgodności zachowania.</p>
+</blockquote></div>
+</main>
+<script>
+document.querySelector(".kopiuj").addEventListener("click", e => {
+  const el = document.getElementById("prompt");
+  const tekst = [...el.children].map(n => n.tagName === "UL" ? [...n.children].map(li => "- " + li.innerText).join("\n") : n.innerText).join("\n\n");
+  navigator.clipboard.writeText(tekst).then(() => { e.target.textContent = "skopiowane"; setTimeout(() => e.target.textContent = "kopiuj", 1500); });
+});
+</script>
+</html>

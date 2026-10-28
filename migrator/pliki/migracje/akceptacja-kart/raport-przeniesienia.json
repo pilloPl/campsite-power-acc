@@ -1,0 +1,18 @@
+{
+  "przeniesione": {
+    "miejsca (grupy SITE)": 720,
+    "członkostwa w regionie (spłaszczone)": 1890,
+    "wydawcy (grupy ISSUER)": 865,
+    "członkostwa wydawców": 860,
+    "umowy": 644,
+    "słupki": 560,
+    "karty gości": 59280,
+    "karty bez posiadacza": 26,
+    "karty obsługi": 376
+  },
+  "pominiete": [
+    {"powod": "umowa: cel nie jest grupą SITE (stara reguła go nie liczy)", "ile": 1, "decyzja": "D07", "przyklady": ["600001501→600000730"]},
+    {"powod": "karta: ten sam UID co nowsza karta (stary model bierze najnowszą)", "ile": 4, "decyzja": "D09", "przyklady": ["3367714248 #620172712", "3367738005 #620172718", "3367793438 #620172732"]}
+  ],
+  "uwagi": ["wydawca pod grupą SITE (bez organizacji nadrzędnej, D15): VILLAGE SIBENIK RECEPTION CARDS"]
+}

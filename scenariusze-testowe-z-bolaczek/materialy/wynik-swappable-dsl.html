@@ -1,0 +1,225 @@
+<!doctype html><html lang="pl"><head><script>(function(){var d=document.documentElement;d.style.visibility="hidden";
+var pokaz=function(){d.style.visibility=""};var t=setTimeout(pokaz,4000);
+fetch("../../wyniki.json",{cache:"no-store"}).then(function(r){return r.json()}).then(function(w){clearTimeout(t);var n=Date.now();
+if(w.od&&w.do&&n>=Date.parse(w.od)&&n<Date.parse(w.do)&&(w.opublikowane||[]).indexOf("scenariusze-testowe-z-bolaczek")<0){
+document.open();document.write("<!doctype html><html lang=\"pl\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Scenariusze testowe z bol\u0105czek \u2013 wynik<\/title><link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap\"><style>\n:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;\n  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;\n  --font-display:\"Fraunces\",Georgia,serif;--font-body:\"IBM Plex Sans\",\"Segoe UI\",sans-serif;--font-mono:\"IBM Plex Mono\",ui-monospace,Menlo,monospace;\n  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}\n@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}\n:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;\n  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;\n  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}\n*{box-sizing:border-box}\nhtml{background:var(--tlo)}\nbody{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;\n  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}\n.wrap{max-width:900px;margin:0 auto;padding-inline:20px}\n.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);\n  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),\n    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),\n    linear-gradient(160deg,var(--tlo),var(--tlo-2))}\n.hero::before{content:\"\";position:absolute;inset:0;pointer-events:none;opacity:.45;\n  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);\n  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}\n.hero .wrap{position:relative}\n.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}\n.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}\n.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}\n.metryczka strong{color:var(--akcent);font-weight:500}\n.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}\nmain{padding-block:clamp(28px,5vw,56px) 96px}\nh1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}\nh2{font-size:clamp(1.5rem,3.2vw,2rem)}\nh3{font-size:1.2rem}\nmain>h2:first-child,article>h2:first-child{margin-top:0}\na{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}\na:hover{color:var(--akcent-jasny)}\np{margin:.8em 0}\nstrong{color:var(--mocny)}\n.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.film:hover{color:#fff;filter:brightness(1.07)}\nol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}\nol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}\nol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}\nol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}\n.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}\n.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}\n.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}\n.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}\nnav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}\nnav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}\nnav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}\n.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}\n.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}\n.zmiany>h2,.zmiany>h3{color:#c0392b}\n.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}\n.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}\n.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}\n.wnioski h2{margin-top:.6em;font-size:1.3rem}\n.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}\n.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}\npre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}\ncode{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}\npre code{background:none;padding:0}\nblockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}\n/* polecenie: kroki, prompty, komendy */\n.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);\n  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}\n.czat .scena{display:block;width:100%;height:96px}\n.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}\n.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}\n.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}\n.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}\n.czat .scena .namiot{fill:var(--akcent)}\n.czat .scena .slupek{fill:var(--mocny)}\n.czat .scena .iskra{fill:#f3c74a}\n.czat .tresc{padding:4px 20px 18px}\n.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}\n.czat p{margin:0 0 12px;color:var(--przygaszony)}\n.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}\n.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}\n.czat li img{width:38px;height:38px;border-radius:50%;flex:none}\n.czat li b{color:var(--mocny)}\n.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}\n.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}\n.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}\n.czat a:hover{background:var(--cyjan);color:var(--panel)}\n.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}\n.czat.asystent .tresc{padding-top:16px}\narticle.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}\narticle.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;\n  padding:18px 22px 16px 64px;box-shadow:var(--cien)}\narticle.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;\n  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}\n.ramka{position:relative;margin:14px 0}\n.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;\n  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}\n.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;\n  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}\n.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}\n.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);\n  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}\n.ramka.prompt>blockquote p{margin:.3em 0}\n.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}\n.ramka.kod>pre{margin:0;padding-top:50px}\n.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}\n.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--tlo);color:var(--przygaszony)}\n.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\ntable{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}\nth,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}\nth{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}\ntr:last-child td{border-bottom:0}\ntd code{color:var(--akcent)}\nimg{max-width:100%;border-radius:10px}\nfigure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}\nfigure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}\nfigure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}\nhr{border:none;border-top:1px solid var(--ramka);margin:32px 0}\nfooter.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}\n.drogi{margin:14px 0}\n.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}\n.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);\n  background:var(--panel);color:var(--przygaszony)}\n.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}\n.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}\n.drogi>section>h3:first-child{margin-top:.9em}\n@media print{\n  .drogi .wybor{display:none}\n  .drogi>section[hidden]{display:block}\n  body{background:#fff;color:#000;font-size:11pt}\n  .hero{background:none;border:none;padding:0}\n  .hero::before{display:none}\n  .wrap{max-width:none;padding:0}\n  main{padding:0}\n  a{color:#000;text-decoration:underline}\n  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}\n  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}\n  figure.video{border:1px solid #ccc;box-shadow:none;background:none}\n  figure.video video{display:none}\n  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}\n  .zadanie+.zadanie{page-break-before:always;border:none}\n  nav,footer.stopka{display:none}\n  pre,table,blockquote{page-break-inside:avoid}\n}\n<\/style><\/head><body><header class=\"hero\"><div class=\"wrap\"><p class=\"eyebrow\">\ud83d\udcca Wynik zadania<\/p><h1>Scenariusze testowe z bol\u0105czek<\/h1><\/div><\/header><main class=\"wrap\"><p class=\"intro\">\u23f3 Wynik zostanie opublikowany po zadaniu.<\/p><footer class=\"stopka\">Materia\u0142y szkolenia \u201eAI w pracy z systemami legacy\".<\/footer><\/main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{\nr.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);\nr.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}\ndocument.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));\ntry{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}\nfunction ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];\nif(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);\ng.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}\ndocument.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));\ntry{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}\ndocument.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{\nconst t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();\n// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z blok\u00f3w bash wycinamy # \u2026\nconst k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))\nx=x.split('\\n').filter(l=>!/^\\s*#/.test(l)).map(l=>l.replace(/\\s+#\\s.*$/,'')).join('\\n').replace(/\\n{3,}/g,'\\n\\n').trim();\nnavigator.clipboard.writeText(x).then(()=>{\nconst s=b.textContent;b.textContent='\u2713 skopiowane';setTimeout(()=>b.textContent=s,1500)})}))<\/script><\/body><\/html>");document.close();}else pokaz();}).catch(function(){clearTimeout(t);pokaz()});})();</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Architektura testów</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:22px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:24px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+@media print{
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  section.modul{page-break-before:always}
+  section.modul:first-of-type{page-break-before:auto}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+
+.warstwa{border:1px solid var(--ramka);border-radius:14px;background:var(--panel);box-shadow:var(--cien);padding:6px 22px 14px;margin:22px 0}
+.warstwa h2{margin-top:.8em}
+.nr{font-family:var(--font-mono);color:var(--akcent);font-size:.8em;margin-right:.4em}
+.dwa{display:grid;grid-template-columns:1fr;gap:6px}
+.dwa>div{min-width:0}
+.dwa h3{margin-top:.6em;font-size:1.1rem}
+pre{overflow-x:auto}
+
+:root{--fg:var(--tekst);--mut:var(--przygaszony);--card:var(--panel);--line:var(--ramka);--test:#6b5f54;--test-bg:var(--tlo-2);
+  --dsl:#6b3fa0;--dsl-bg:#efe6f8;--jak:#a4491b;--jak-bg:#fbe9df;--new:#2b5fa8;--new-bg:#e3ecf9}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--test:#ab9d8c;--dsl:#c3a0ee;--dsl-bg:#2e2340;--jak:#f0996a;--jak-bg:#3a261b;--new:#7fb0f0;--new-bg:#1d2a3d}}
+:root[data-theme=dark]{--test:#ab9d8c;--dsl:#c3a0ee;--dsl-bg:#2e2340;--jak:#f0996a;--jak-bg:#3a261b;--new:#7fb0f0;--new-bg:#1d2a3d}
+.miejsce{background:var(--panel);border:1px solid var(--ramka);border-radius:14px;box-shadow:var(--cien);padding:6px 22px 16px;margin:22px 0}
+.miejsce h3{margin-top:1em}
+.pytanie{font-family:var(--font-display);font-size:1.3rem;line-height:1.4;margin:.4em 0;color:var(--mocny)}
+.tag{display:inline-block;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;padding:4px 8px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);margin-right:6px}
+.tag.jak{border-color:var(--akcent);color:var(--akcent)}
+.rysunek svg{width:100%;height:auto;display:block;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;box-shadow:var(--cien)}
+.rysunek svg text{fill:var(--tekst);font-family:var(--font-body)}
+ul.linki{padding-left:1.2em}
+</style></head><body><header class="hero"><div class="wrap"><p class="eyebrow">swappable-dsl · wynik działania</p><h1>Architektura testów</h1>
+<p class="intro">Kto jest na jakiej wysokości: scenariusze, DSL, dwa sterowniki i system pod testem.</p></div></header>
+<main><div class="wrap">
+<section class="miejsce rysunek">
+<svg viewBox="0 0 920 560" role="img" aria-label="Cztery warstwy: scenariusze, DSL, dwa sterowniki, dwa systemy">
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor" style="color:#888"/></marker></defs>
+
+  <!-- etykiety wysokości -->
+  <g font-size="12" style="fill:var(--mut)">
+    <text x="12" y="30" style="fill:var(--mut);font-weight:700">WARSTWA 1 (najwyżej)</text>
+    <text x="12" y="172" style="fill:var(--mut);font-weight:700">WARSTWA 2</text>
+    <text x="12" y="314" style="fill:var(--mut);font-weight:700">WARSTWA 3</text>
+    <text x="12" y="456" style="fill:var(--mut);font-weight:700">WARSTWA 4 (najniżej)</text>
+  </g>
+
+  <!-- 1. testy -->
+  <text x="12" y="48" font-size="15" font-weight="700">Test cases (scenariusze)</text>
+  <g>
+    <rect x="200" y="14" width="230" height="86" rx="8" fill="var(--test-bg)" stroke="var(--test)"/>
+    <text x="315" y="38" text-anchor="middle" font-size="12.5" font-weight="700">1. Karta wydawcy z umową</text>
+    <text x="315" y="58" text-anchor="middle" font-size="12">given: świat z umową</text>
+    <text x="315" y="76" text-anchor="middle" font-size="12">when: acceptedAt(2001, BAY)</text>
+    <text x="315" y="92" text-anchor="middle" font-size="12">then: tak</text>
+    <rect x="445" y="14" width="230" height="86" rx="8" fill="var(--test-bg)" stroke="var(--test)"/>
+    <text x="560" y="38" text-anchor="middle" font-size="12.5" font-weight="700">2. Kemping bez umowy</text>
+    <text x="560" y="58" text-anchor="middle" font-size="12">given: świat z umową</text>
+    <text x="560" y="76" text-anchor="middle" font-size="12">when: acceptedAt(2001, LAKE)</text>
+    <text x="560" y="92" text-anchor="middle" font-size="12">then: nie (obok: BAY → tak)</text>
+    <rect x="690" y="14" width="220" height="86" rx="8" fill="var(--test-bg)" stroke="var(--test)"/>
+    <text x="800" y="38" text-anchor="middle" font-size="12.5" font-weight="700">3. Umowy oddziału (charakteryzacja)</text>
+    <text x="800" y="58" text-anchor="middle" font-size="12">given: oddział z własną umową</text>
+    <text x="800" y="76" text-anchor="middle" font-size="12">when: LAKE → tak, BAY → nie</text>
+    <text x="800" y="92" text-anchor="middle" font-size="12">then: tak i nie</text>
+  </g>
+  <text x="12" y="66" font-size="11.5" style="fill:var(--mut)">piszą tylko CO,</text>
+  <text x="12" y="82" font-size="11.5" style="fill:var(--mut)">jedna klasa abstrakcyjna</text>
+  <text x="12" y="98" font-size="11.5" style="fill:var(--mut)">CardAcceptanceScenarios</text>
+
+  <!-- strzałka test → DSL -->
+  <line x1="315" y1="100" x2="450" y2="140" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <line x1="560" y1="100" x2="500" y2="140" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <line x1="800" y1="100" x2="560" y2="140" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <text x="640" y="124" font-size="12" style="fill:var(--mut)">test woła tylko DSL</text>
+
+  <!-- 2. DSL -->
+  <text x="12" y="190" font-size="15" font-weight="700">DSL (język CO)</text>
+  <text x="12" y="208" font-size="11.5" style="fill:var(--mut)">stały, ten sam dla obu modeli</text>
+  <rect x="200" y="142" width="710" height="86" rx="8" fill="var(--dsl-bg)" stroke="var(--dsl)" stroke-width="2"/>
+  <text x="555" y="168" text-anchor="middle" font-size="13" font-weight="700">dsl.world()  →  komendy sytuacji:  issuer, campsite, pedestal, agreementWithCampsite, guest, card</text>
+  <text x="555" y="192" text-anchor="middle" font-size="13" font-weight="700">dsl.acceptedAt(cardUid, pedestalCode)  →  boolean (pytanie portu CardAcceptance)</text>
+  <text x="555" y="214" text-anchor="middle" font-size="12">brak słów: grupa, podgrupa, drzewo, rodzic, ISSUER, SITE</text>
+
+  <!-- strzałki DSL → sterowniki -->
+  <line x1="400" y1="228" x2="330" y2="282" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <line x1="710" y1="228" x2="740" y2="282" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <text x="535" y="262" text-anchor="middle" font-size="12" style="fill:var(--mut)">ten sam DSL, dwa sterowniki do wyboru</text>
+
+  <!-- 3. sterowniki -->
+  <text x="12" y="332" font-size="15" font-weight="700">Sterowniki</text>
+  <text x="12" y="350" font-size="11.5" style="fill:var(--mut)">tu się podmienia model</text>
+  <rect x="200" y="284" width="340" height="86" rx="8" fill="var(--jak-bg)" stroke="var(--jak)" stroke-width="2"/>
+  <text x="370" y="310" text-anchor="middle" font-size="13" font-weight="700">Sterownik legacy</text>
+  <text x="370" y="330" text-anchor="middle" font-size="12">LegacyCardAcceptanceWorld + LegacyCardAcceptance</text>
+  <text x="370" y="350" text-anchor="middle" font-size="12">świat zasila model grup, adapter pyta GroupService</text>
+  <rect x="570" y="284" width="340" height="86" rx="8" fill="var(--new-bg)" stroke="var(--new)" stroke-width="2"/>
+  <text x="740" y="310" text-anchor="middle" font-size="13" font-weight="700">Sterownik nowego modelu</text>
+  <text x="740" y="330" text-anchor="middle" font-size="12">NewModelCardAcceptanceWorld + NewModelCardAcceptance</text>
+  <text x="740" y="350" text-anchor="middle" font-size="12">buduje się sam (inMemory), bez Springa</text>
+
+  <!-- strzałki sterowniki → SUT -->
+  <line x1="370" y1="370" x2="370" y2="424" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+  <line x1="740" y1="370" x2="740" y2="424" stroke="#888" stroke-width="2" marker-end="url(#a)" style="color:#888"/>
+
+  <!-- 4. SUT -->
+  <text x="12" y="474" font-size="15" font-weight="700">System pod testem</text>
+  <text x="12" y="492" font-size="11.5" style="fill:var(--mut)">tu mówi JAK</text>
+  <rect x="200" y="426" width="340" height="104" rx="8" fill="var(--jak-bg)" stroke="var(--jak)"/>
+  <text x="370" y="452" text-anchor="middle" font-size="13" font-weight="700">Model grup (legacy)</text>
+  <text x="370" y="472" text-anchor="middle" font-size="12">GroupService.isCardAcceptedAt</text>
+  <text x="370" y="490" text-anchor="middle" font-size="12">GroupServiceHelper.extractAllAcceptingSiteGroupIds</text>
+  <text x="370" y="508" text-anchor="middle" font-size="12">pedestalDao.findByCodeAndGroupIds</text>
+  <rect x="570" y="426" width="340" height="104" rx="8" fill="var(--new-bg)" stroke="var(--new)"/>
+  <text x="740" y="452" text-anchor="middle" font-size="13" font-weight="700">Nowy model (osobny moduł)</text>
+  <text x="740" y="472" text-anchor="middle" font-size="12">własne pojęcia nowego modelu</text>
+  <text x="740" y="490" text-anchor="middle" font-size="12">nie importuje nic z legacy</text>
+  <text x="740" y="508" text-anchor="middle" font-size="12">odtwarza dzisiejsze zachowanie</text>
+</svg>
+<p>Od góry: scenariusze wołają tylko DSL. DSL jest ten sam dla obu modeli. Pod nim dwa sterowniki, w których podmienia się model. Najniżej system pod testem, który mówi JAK.</p>
+</section>
+</div></main></body></html>

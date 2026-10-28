@@ -1,0 +1,947 @@
+{
+  "_skala_pewnosci": "90–100: potwierdzone w danych (i w kodzie); 60–89: z kodu albo dokumentacji; 0–59: heurystyka, zgadywanie",
+  "decyzje": [
+    {
+      "id": "D01",
+      "data": "2026-10-24 20:55",
+      "krok": "zakres",
+      "obszar": "jednostka: kemping",
+      "stary": "grupa SITE (TBL_GROUP typename=SITE), słupki pedestal.group_id",
+      "nowy": "OrganizationUnit z rolą ACCEPTOR, słupek = rzut Pedestals.standsAt",
+      "decyzja": "kemping = grupa SITE, na której wiszą słupki; grupa SITE nad nią = region",
+      "dlaczego": "przepięte miejsca pytają tylko przez słupek; LegacyAcceptanceWorld zakłada kemping jako grupę SITE ze słupkiem",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/world/LegacyAcceptanceWorld.java:50",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:59",
+          "sql": "with recursive t(id,root,lvl) as (select id,name,0 from tbl_group where parent_id is null and typename='SITE' and name in ('HR SITES','HR-NORTH') union all select g.id,t.root,t.lvl+1 from tbl_group g join t on g.parent_id=t.id) select root, lvl, count(*) grupy, sum((select count(*) from pedestal p where p.group_id=t.id)) slupki, sum(case when exists(select 1 from tbl_group c where c.parent_id=t.id) and exists(select 1 from pedestal p where p.group_id=t.id) then 1 else 0 end) grupy_ze_slupkami_i_dziecmi from t group by root,lvl order by 1,2",
+          "cel": "(to samo zapytanie co przy D06) rozkład głębokości drzewa SITE w porcji HR i słupki na grupach, które mają dzieci",
+          "wynik": "root|lvl|grupy|slupki|grupy_ze_slupkami_i_dziecmi\nHR-NORTH|0|1|0|0\nHR-NORTH|1|2|6|1\nHR-NORTH|2|3|7|0\nHR SITES|0|1|0|0\nHR SITES|1|27|48|1\nHR SITES|2|72|138|5\nHR SITES|3|100|261|4\nHR SITES|4|35|100|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:55",
+          "status": "hipoteza",
+          "pewnosc": 70
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 90,
+          "uwagi": "dane: 11 grup SITE w HR ma jednocześnie słupki i dzieci (kemping i region naraz) — każda grupa SITE ze słupkami jest kempingiem, także gdy ma dzieci"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "11 grup ze słupkami i dziećmi: zgodne M1–M3, ale biznes powinien potwierdzić, że to kempingi",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D02",
+      "data": "2026-10-24 20:55",
+      "krok": "zakres",
+      "obszar": "jednostka: wydawca i Sieć",
+      "stary": "grupa ISSUER; podgrupa = dziecko; grupa NETWORK CARD",
+      "nowy": "Company/OrganizationUnit z rolą ISSUER, ISSUER_MEMBERSHIP, party.network()",
+      "decyzja": "każda grupa ISSUER pod HR ISSUERS = wydawca (nazwa grupy = IssuerName); dziecko = jednostka z ISSUER_MEMBERSHIP; NETWORK CARD = Sieć",
+      "dlaczego": "port M2 zwraca nazwy grup wydawców (LegacyCardAcceptance fetchByGroupId(id).getName()); M4 liczy poddrzewo NETWORK CARD",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/LegacyCardAcceptance.java:58",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "with recursive i(id) as (select id from tbl_group where name='HR ISSUERS' union all select g.id from tbl_group g join i on g.parent_id=i.id) select (select count(*) from tbl_group where typename='ISSUER') wydawcy_wszystkie, (select count(*) from tbl_group where typename='SITE') grupy_site_wszystkie, (select count(*) from (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1) z) nazwy_wydawcow_rozne_wielkoscia, (select count(*) from i) wydawcy_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id in (select id from i)) karty_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id=600001507) karty_wydawcy_pod_kempingiem",
+          "cel": "rozmiar struktury (wszystkie grupy ISSUER i SITE) i porcji kart HR; nazwy wydawców różne tylko wielkością liter",
+          "wynik": "wydawcy_wszystkie|grupy_site_wszystkie|nazwy_wydawcow_rozne_wielkoscia|wydawcy_hr|karty_hr|karty_wydawcy_pod_kempingiem\n865|720|1|314|59058|231"
+        },
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "select g.id, g.name, p.name rodzic, (select count(*) from guest gu where gu.group_id=g.id) goscie, (select count(*) from group_associatedgroup a where a.group_id=g.id) umowy from tbl_group g join tbl_group p on p.id=g.parent_id where g.typename='ISSUER' and lower(g.name) in (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1)",
+          "cel": "które nazwy wydawców różnią się tylko wielkością liter",
+          "wynik": "id|name|rodzic|goscie|umowy\n600001505|FR CAMPING PASS|FR ISSUERS|402|1\n600001506|FR Camping Pass|FR ISSUERS|403|1"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:55",
+          "status": "hipoteza",
+          "pewnosc": 75
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 90,
+          "uwagi": "dane: 865 grup ISSUER (314 HR); NETWORK CARD pod HR ISSUERS; wydawca VILLAGE SIBENIK RECEPTION CARDS przypięty pod grupą SITE; para nazw FR różnych tylko wielkością liter"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "nazwa grupy jako IssuerName działa; para nazw FR różnych wielkością liter w D19",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D03",
+      "data": "2026-10-24 20:55",
+      "krok": "zakres",
+      "obszar": "jednostka: karta gościa i karta obsługi",
+      "stary": "camping_card + guest.group_id; housecard (active, deleted)",
+      "nowy": "Person CARDHOLDER z CARD_UID + CARD_ISSUANCE; Person STAFF_MEMBER z HOUSE_CARD_NUMBER = housecard.id + STAFF_ASSIGNMENT",
+      "decyzja": "karta gościa = najnowsza nieskasowana camping_card dla UID; karta obsługi = housecard nieskasowana i aktywna, numer = id",
+      "dlaczego": "CampingCardDao.findByCardRfid bierze najnowszą nieskasowaną; HouseCardDao.findActiveByGroupIds: deleted=false i active=true",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/persistence/dao/CampingCardDao.java:15",
+      "podstawa": "dane",
+      "pewnosc": 92,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:59",
+          "sql": "with d as (select card_rfid, count(*) n, count(distinct g.id) grup, count(distinct coalesce(g.id,-1)) filter (where true) x, bool_or(c.guest_id is null) bez from camping_card c left join guest gu on gu.id=c.guest_id left join tbl_group g on g.id=gu.group_id where not c.deleted group by card_rfid having count(*)>1) select count(*) uid_zdublowane, sum(n) karty, count(*) filter (where grup>1) w_roznych_grupach, count(*) filter (where bez) z_kartą_bez_goscia, min(card_rfid) przyklad1, max(card_rfid) przyklad2, (select count(*) from camping_card c join housecard h on h.rfid=c.card_rfid and not h.deleted where not c.deleted) uid_karty_i_obslugi, (select count(*) from (select card_rfid from camping_card where not deleted group by card_rfid having count(distinct lower(card_rfid))<>count(distinct card_rfid)) z) x from d",
+          "cel": "(to samo zapytanie co przy D09) UID zdublowane wśród nieskasowanych kart: ile, czy w różnych wydawcach; kolizje UID karty gościa i karty obsługi",
+          "wynik": "uid_zdublowane|karty|w_roznych_grupach|z_kartą_bez_goscia|przyklad1|przyklad2|uid_karty_i_obslugi|x\n12|24|12|0|3367714248|3367801357|1|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:55",
+          "status": "hipoteza",
+          "pewnosc": 75
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 92,
+          "uwagi": "dane: 12 UID zdublowanych (24 karty, każdy w dwóch wydawcach) → reguła max id ważna; 1 UID wspólny dla karty gościa i karty obsługi"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 92,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "reguła najnowszej karty potwierdzona kontrolą",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D04",
+      "data": "2026-10-24 20:55",
+      "krok": "zakres",
+      "obszar": "cel trwały",
+      "stary": "tabele drzewa grup",
+      "nowy": "PartyConfiguration.inMemory() (bez persystencji)",
+      "decyzja": "translator przy starcie: komponent obok AcceptanceSeeder (campsite-seeder), czyta stare tabele w jednej transakcji read-only po seedzie",
+      "dlaczego": "nowy model nie ma tabel; tryb szkolenie: przy starcie szybciej",
+      "zrodlo": "campsite-party/CLAUDE.md:28",
+      "podstawa": "kod",
+      "pewnosc": 88,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:59",
+          "sql": "with recursive i(id) as (select id from tbl_group where name='HR ISSUERS' union all select g.id from tbl_group g join i on g.parent_id=i.id) select (select count(*) from tbl_group where typename='ISSUER') wydawcy_wszystkie, (select count(*) from tbl_group where typename='SITE') grupy_site_wszystkie, (select count(*) from (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1) z) nazwy_wydawcow_rozne_wielkoscia, (select count(*) from i) wydawcy_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id in (select id from i)) karty_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id=600001507) karty_wydawcy_pod_kempingiem",
+          "cel": "(to samo zapytanie co przy D02) rozmiar struktury (wszystkie grupy ISSUER i SITE) i porcji kart HR; nazwy wydawców różne tylko wielkością liter",
+          "wynik": "wydawcy_wszystkie|grupy_site_wszystkie|nazwy_wydawcow_rozne_wielkoscia|wydawcy_hr|karty_hr|karty_wydawcy_pod_kempingiem\n865|720|1|314|59058|231"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:55",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 88,
+          "uwagi": "model bez persystencji; porcja ~59 tys. kart + 1585 grup mieści się w pamięci (dane), sam wybór celu z kodu"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 88,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "przy starcie wystarczy dla porcji (304 ms); docelowo model potrzebuje persystencji",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D05",
+      "data": "2026-10-24 20:55",
+      "krok": "zakres",
+      "obszar": "porcja",
+      "stary": "cały system: 4 rynki",
+      "nowy": "model Party w pamięci",
+      "decyzja": "porcja = rynek HR: poddrzewa HR SITES i HR-NORTH, HR ISSUERS, NETWORK CARD; login admin (zakres HR)",
+      "dlaczego": "HR ma układy do sprawdzenia (drugi korzeń SITE HR-NORTH, goście w grupach SITE); jeden rynek mieści się w pamięci; admin ma zakres HR",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/world/LegacyAcceptanceWorld.java:17",
+      "podstawa": "kod",
+      "pewnosc": 85,
+      "status": "zastąpiona",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:59",
+          "sql": "with recursive i(id) as (select id from tbl_group where name='HR ISSUERS' union all select g.id from tbl_group g join i on g.parent_id=i.id) select (select count(*) from tbl_group where typename='ISSUER') wydawcy_wszystkie, (select count(*) from tbl_group where typename='SITE') grupy_site_wszystkie, (select count(*) from (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1) z) nazwy_wydawcow_rozne_wielkoscia, (select count(*) from i) wydawcy_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id in (select id from i)) karty_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id=600001507) karty_wydawcy_pod_kempingiem",
+          "cel": "(to samo zapytanie co przy D02) rozmiar struktury (wszystkie grupy ISSUER i SITE) i porcji kart HR; nazwy wydawców różne tylko wielkością liter",
+          "wynik": "wydawcy_wszystkie|grupy_site_wszystkie|nazwy_wydawcow_rozne_wielkoscia|wydawcy_hr|karty_hr|karty_wydawcy_pod_kempingiem\n865|720|1|314|59058|231"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:55",
+          "status": "hipoteza",
+          "pewnosc": 70
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "zastąpiona",
+          "pewnosc": 85,
+          "uwagi": "porcja przeformułowana w D14 (struktura całości, egzemplarze HR)"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "zastąpienie przez D14 słuszne",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D06",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "głębokość drzewa SITE",
+      "stary": "umowa obejmuje całe poddrzewo grupy celu (dowolna głębokość); karty obsługi z całej linii rodziców słupka",
+      "nowy": "covers: kemping albo grupy, do których kemping ma REGION_MEMBERSHIP (jeden skok); StaffAssignmentReach tak samo",
+      "decyzja": "spłaszczenie: REGION_MEMBERSHIP od każdej grupy SITE do każdego jej przodka SITE (także korzenia rynku)",
+      "dlaczego": "relationships.from(kemping, REGION_MEMBERSHIP) zwraca wszystkie członkostwa, więc rozpisanie na każdy poziom daje ten sam zasięg co poddrzewo",
+      "zrodlo": "campsite-party/src/main/java/io/pillopl/party/AcceptancePermissions.java:118",
+      "podstawa": "dane",
+      "pewnosc": 93,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:57",
+          "sql": "with recursive t(id,root,lvl) as (select id,name,0 from tbl_group where parent_id is null and typename='SITE' and name in ('HR SITES','HR-NORTH') union all select g.id,t.root,t.lvl+1 from tbl_group g join t on g.parent_id=t.id) select root, lvl, count(*) grupy, sum((select count(*) from pedestal p where p.group_id=t.id)) slupki, sum(case when exists(select 1 from tbl_group c where c.parent_id=t.id) and exists(select 1 from pedestal p where p.group_id=t.id) then 1 else 0 end) grupy_ze_slupkami_i_dziecmi from t group by root,lvl order by 1,2",
+          "cel": "rozkład głębokości drzewa SITE w porcji HR i słupki na grupach, które mają dzieci",
+          "wynik": "root|lvl|grupy|slupki|grupy_ze_slupkami_i_dziecmi\nHR-NORTH|0|1|0|0\nHR-NORTH|1|2|6|1\nHR-NORTH|2|3|7|0\nHR SITES|0|1|0|0\nHR SITES|1|27|48|1\nHR SITES|2|72|138|5\nHR SITES|3|100|261|4\nHR SITES|4|35|100|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 80
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 93,
+          "uwagi": "dane: drzewo SITE HR ma 4 poziomy pod korzeniem (HR-NORTH 2), cele umów na poziomach 0–3 — jeden skok nowego modelu nie wystarczy, spłaszczenie konieczne"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 93,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "spłaszczenie daje te same odpowiedzi na 4 poziomach; zaciera różnicę rynek/region (kontrola znaczenia)",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D07",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "reguła umów: najbliższa niepusta lista",
+      "stary": "najbliższy przodek-lub-sam z umową z grupą SITE zastępuje wyższych; wpisy z celem innego typu ignorowane",
+      "nowy": "AgreementsOfIssuer.ownReplaceInherited (ta sama reguła)",
+      "decyzja": "przenosimy tylko wpisy group_associatedgroup z celem SITE; reguła liczona przez nowy model",
+      "dlaczego": "reguła powielona w kodzie i SQL (findAcceptingGroupIds) — SQL to gotowa kontrola niezależna",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/group/GroupServiceHelper.java:89",
+      "podstawa": "dane",
+      "pewnosc": 93,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "with recursive anc(id,a,lvl) as (select id,parent_id,1 from tbl_group where typename='ISSUER' and parent_id is not null union all select anc.id,g.parent_id,anc.lvl+1 from anc join tbl_group g on g.id=anc.a where g.parent_id is not null), own as (select distinct ga.group_id id from group_associatedgroup ga join tbl_group t on t.id=ga.associatedgroup_id and t.typename='SITE'), s(id,lvl) as (select id,0 from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.lvl+1 from tbl_group g join s on g.parent_id=s.id) select (select count(*) from own) wydawcy_z_wlasna_lista, (select count(distinct anc.id) from anc join own o1 on o1.id=anc.id join own o2 on o2.id=anc.a) zastepuja_liste_przodka, (select count(*) from tbl_group g where g.typename='ISSUER' and g.id not in (select id from own) and exists(select 1 from anc join own o on o.id=anc.a where anc.id=g.id)) dziedzicza, (select string_agg(lvl||':'||n, ', ' order by lvl) from (select s.lvl, count(*) n from group_associatedgroup ga join s on s.id=ga.associatedgroup_id group by s.lvl) z) cele_wg_poziomu, (select count(*) from group_associatedgroup ga join tbl_group t on t.id=ga.associatedgroup_id where t.typename<>'SITE') wpisy_cel_nie_site",
+          "cel": "reguła najbliższej listy: ilu wydawców zastępuje listę przodka, ilu dziedziczy; na jakim poziomie drzewa SITE są cele umów",
+          "wynik": "wydawcy_z_wlasna_lista|zastepuja_liste_przodka|dziedzicza|cele_wg_poziomu|wpisy_cel_nie_site\n173|8|681|0:4, 1:117, 2:333, 3:190|1"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 93,
+          "uwagi": "dane: 173 wydawców z własną listą, 8 zastępuje listę przodka, 681 dziedziczy; 1 wpis z celem ISSUER (ignorowany przez regułę)"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 93,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "reguła z SQL potwierdzona 480/480",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D08",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "wydawcy w M2 — wszystkie grupy ISSUER",
+      "stary": "findGroupIdsAcceptedAt przechodzi wszystkie grupy ISSUER systemu (każdy rynek, korzenie też)",
+      "nowy": "issuersAcceptedAt: wszystkie podmioty z rolą ISSUER",
+      "decyzja": "każda grupa ISSUER z poddrzew porcji, także korzeń HR ISSUERS, jest podmiotem ISSUER; do sprawdzenia: umowy wydawców spoza HR z kempingami HR",
+      "dlaczego": "inaczej M2 zgubi wydawców (korzeń, inny rynek)",
+      "zrodlo": "campsite-core/src/main/resources/sql/sqls.xml:68",
+      "podstawa": "dane",
+      "pewnosc": 92,
+      "status": "odrzucona",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:57",
+          "sql": "with recursive s(id,root) as (select id,name from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.root from tbl_group g join s on g.parent_id=s.id), i(id,root) as (select id,name from tbl_group where parent_id is null and typename='ISSUER' union all select g.id,i.root from tbl_group g join i on g.parent_id=i.id) select o.typename owner_typ, coalesce(i.root,'-') owner_rynek, tg.typename cel_typ, coalesce(s.root,'-') cel_rynek, count(*) wpisy, count(distinct ga.group_id) wlasciciele from group_associatedgroup ga join tbl_group o on o.id=ga.group_id join tbl_group tg on tg.id=ga.associatedgroup_id left join i on i.id=o.id left join s on s.id=tg.id group by 1,2,3,4 order by 1,2,3,4",
+          "cel": "umowy: typ właściciela i celu, rynek właściciela i celu (czy wydawcy spoza HR mają umowy z kempingami HR)",
+          "wynik": "owner_typ|owner_rynek|cel_typ|cel_rynek|wpisy|wlasciciele\nISSUER|-|SITE|HR SITES|1|1\nISSUER|ES ISSUERS|SITE|ES SITES|5|3\nISSUER|ES ISSUERS|SITE|FR SITES|1|1\nISSUER|FR ISSUERS|SITE|ES SITES|2|2\nISSUER|FR ISSUERS|SITE|FR SITES|203|54\nISSUER|FR ISSUERS|SITE|HR SITES|1|1\nISSUER|FR ISSUERS|SITE|IT SITES|1|1\nISSUER|HR ISSUERS|ISSUER|-|1|1\nISSUER|HR ISSUERS|SITE|ES SITES|3|2\nISSUER|HR ISSUERS|SITE|FR SITES|4|3\n… (16 wierszy)"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 70
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "odrzucona",
+          "pewnosc": 92,
+          "uwagi": "dane: wydawcy FR (1 wpis) i IT (2) mają umowy z kempingami HR, a wydawcy z umowami poza porcją dziedziczą/zastępują listy — sama porcja HR ISSUERS zgubi wydawców w M2 i zmieni regułę zastępowania; zastąpiona przez D14"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "hipoteza słusznie obalona danymi (FR/IT umowy z HR)",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D09",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "karta: duplikaty UID i karta bez gościa",
+      "stary": "findByCardRfid: najnowsza (max id) nieskasowana karta o UID; karta bez gościa → nie",
+      "nowy": "Parties.findOneBy(CARD_UID) zwraca pierwszą znalezioną (kolejność mapy); CardsWithoutHolder → nie",
+      "decyzja": "jeden podmiot na UID: karta o max id wśród nieskasowanych; bez gościa → CardsWithoutHolder",
+      "dlaczego": "dwa podmioty z tym samym UID dają losową odpowiedź",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/persistence/dao/CampingCardDao.java:15",
+      "podstawa": "dane",
+      "pewnosc": 92,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "with d as (select card_rfid, count(*) n, count(distinct g.id) grup, count(distinct coalesce(g.id,-1)) filter (where true) x, bool_or(c.guest_id is null) bez from camping_card c left join guest gu on gu.id=c.guest_id left join tbl_group g on g.id=gu.group_id where not c.deleted group by card_rfid having count(*)>1) select count(*) uid_zdublowane, sum(n) karty, count(*) filter (where grup>1) w_roznych_grupach, count(*) filter (where bez) z_kartą_bez_goscia, min(card_rfid) przyklad1, max(card_rfid) przyklad2, (select count(*) from camping_card c join housecard h on h.rfid=c.card_rfid and not h.deleted where not c.deleted) uid_karty_i_obslugi, (select count(*) from (select card_rfid from camping_card where not deleted group by card_rfid having count(distinct lower(card_rfid))<>count(distinct card_rfid)) z) x from d",
+          "cel": "UID zdublowane wśród nieskasowanych kart: ile, czy w różnych wydawcach; kolizje UID karty gościa i karty obsługi",
+          "wynik": "uid_zdublowane|karty|w_roznych_grupach|z_kartą_bez_goscia|przyklad1|przyklad2|uid_karty_i_obslugi|x\n12|24|12|0|3367714248|3367801357|1|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 80
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 92,
+          "uwagi": "dane: 12 UID ×2 w różnych wydawcach — jeden podmiot na UID (max id), druga karta pominięta z powodem"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 92,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "zgodne z findByCardRfid; 8 UID z najnowszą kartą poza porcją dają nie znam",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D10",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "karta gościa w grupie innej niż ISSUER",
+      "stary": "grupa gościa SITE: getAcceptanceAgreements idzie w górę po SITE, nie znajduje umów z SITE → nie; poza poddrzewem NETWORK CARD → nie",
+      "nowy": "brak wydawcy",
+      "decyzja": "karta gościa z grupą spoza ISSUER → CardsWithoutHolder (znana, odpowiedź „nie” w M1 i M4)",
+      "dlaczego": "ta sama odpowiedź bez wymyślania wydawcy",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/group/GroupService.java:338",
+      "podstawa": "dane",
+      "pewnosc": 95,
+      "status": "odrzucona",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:57",
+          "sql": "select g.typename grupa_goscia, count(distinct gu.id) goscie, count(c.id) karty_nieskasowane, count(*) filter (where gu.deleted) karty_skasowanych_gosci, (select count(*) from camping_card x where not x.deleted and x.guest_id is null) karty_bez_goscia from guest gu join tbl_group g on g.id=gu.group_id left join camping_card c on c.guest_id=gu.id and not c.deleted group by 1",
+          "cel": "czy goście siedzą w grupach innych niż ISSUER; karty bez gościa; goście skasowani z kartami",
+          "wynik": "grupa_goscia|goscie|karty_nieskasowane|karty_skasowanych_gosci|karty_bez_goscia\nISSUER|160588|169931|1685|26"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 65
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "odrzucona",
+          "pewnosc": 95,
+          "uwagi": "dane: wszyscy goście (160 588) są w grupach ISSUER; 220 gości „w HR SITES” to wydawca VILLAGE SIBENIK RECEPTION CARDS przypięty pod kempingiem; zastąpiona przez D15"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "słusznie odrzucona: goście są tylko w grupach ISSUER",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D11",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "Sieć: grupa NETWORK CARD",
+      "stary": "karta sieci = grupa gościa w poddrzewie NETWORK CARD (findManageable)",
+      "nowy": "belongsToNetwork: łańcuch ISSUER_MEMBERSHIP dochodzi do party.network() (nazwa THE NETWORK)",
+      "decyzja": "NETWORK CARD = jednostka ISSUER o tej samej nazwie z ISSUER_MEMBERSHIP do party.network(); poddrzewo jak zwykli wydawcy",
+      "dlaczego": "M2 zwraca nazwy — network() nazywa się THE NETWORK, więc NETWORK CARD nie może być samym network()",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/LegacyCardAcceptance.java:76",
+      "podstawa": "dane",
+      "pewnosc": 91,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:57",
+          "sql": "select g.id, g.name, g.typename, p.name parent, p.typename parent_typ, (select count(*) from tbl_group c where c.parent_id=g.id) dzieci, (select count(*) from guest gu where gu.group_id=g.id) goscie, (select count(*) from group_associatedgroup a where a.group_id=g.id) umowy from tbl_group g left join tbl_group p on p.id=g.parent_id where g.typename='ISSUER' and (p.typename is distinct from 'ISSUER') or g.name ilike '%network%'",
+          "cel": "grupy ISSUER, których rodzic nie jest ISSUER (korzenie, przypięte w złym miejscu) i grupy Sieci",
+          "wynik": "id|name|typename|parent|parent_typ|dzieci|goscie|umowy\n1|HR ISSUERS|ISSUER|||59|0|0\n2|IT ISSUERS|ISSUER|||53|0|0\n3|FR ISSUERS|ISSUER|||55|0|0\n31|NETWORK CARD|ISSUER|HR ISSUERS|ISSUER|4|141|6\n51|NETWORK ACCESS HR|SITE|HR SITES|SITE|0|0|0\n52|NETWORK ACCESS IT|SITE|IT SITES|SITE|0|0|0\n53|NETWORK ACCESS FR|SITE|FR SITES|SITE|0|0|0\n4|ES ISSUERS|ISSUER|||3|0|0\n54|NETWORK ACCESS ES|SITE|ES SITES|SITE|0|0|0\n1011|SEED NETWORK KIDS|ISSUER|NETWORK CARD|ISSUER|0|1|0\n… (17 wierszy)"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 70
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 91,
+          "uwagi": "dane: NETWORK CARD (id 31) pod HR ISSUERS, 4 jednostki, 6 własnych umów; IT/FR/ES NETWORK GUESTS leżą poza poddrzewem Sieci → nie są kartami sieci (homonim nazwy)"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 91,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "Sieć po poddrzewie, nie po nazwie — kontrola znaczenia potwierdza",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D12",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "karty obsługi: RENTAL i UID",
+      "stary": "getHouseCardsForPedestal zwraca aktywne nieskasowane karty STAFF i RENTAL z linii rodziców",
+      "nowy": "houseCardNumbersAt: HOUSE_CARD_NUMBER osób z STAFF_ASSIGNMENT",
+      "decyzja": "każda aktywna nieskasowana housecard (STAFF i RENTAL) → osoba STAFF_MEMBER z HOUSE_CARD_NUMBER=id, bez CARD_UID",
+      "dlaczego": "M3 porównuje identyfikatory; CARD_UID u obsługi mógłby zasłonić kartę gościa o tym samym UID",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/card/HouseCardService.java:90",
+      "podstawa": "dane",
+      "pewnosc": 92,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "with recursive s(id,root,lvl) as (select id,name,0 from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.root,s.lvl+1 from tbl_group g join s on g.parent_id=s.id) select coalesce(s.root,'(grupa '||g.typename||')') rynek, h.house_card_type, h.active, h.deleted, count(*) ile, count(*) filter (where s.lvl=0) na_korzeniu, count(*) filter (where not exists(select 1 from pedestal p where p.group_id=h.group_id)) na_grupie_bez_slupkow from housecard h join tbl_group g on g.id=h.group_id left join s on s.id=h.group_id where s.root in ('HR SITES','HR-NORTH') or s.root is null group by 1,2,3,4 order by 1,2,3,4",
+          "cel": "karty obsługi porcji HR: typ, aktywne/skasowane, ile na korzeniu i na grupach bez słupków (region)",
+          "wynik": "rynek|house_card_type|active|deleted|ile|na_korzeniu|na_grupie_bez_slupkow\nHR-NORTH|RENTAL|t|f|2|0|0\nHR-NORTH|STAFF|f|f|1|0|0\nHR-NORTH|STAFF|t|f|3|0|0\nHR SITES|RENTAL|f|f|1|0|0\nHR SITES|RENTAL|t|f|130|0|32\nHR SITES|STAFF|f|f|26|0|10\nHR SITES|STAFF|t|f|241|1|73\nHR SITES|STAFF|t|t|1|0|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 75
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 92,
+          "uwagi": "dane: HR 376 aktywnych nieskasowanych (132 RENTAL), 105 na grupach bez słupków (region), 1 na korzeniu HR SITES, 1 aktywna skasowana (pomijana jak w legacy)"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 92,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "zachowuje dzisiejszą odpowiedź M3; karty RENTAL jako obsługa to kompromis znaczeniowy do decyzji biznesu",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D13",
+      "data": "2026-10-24 20:57",
+      "krok": "kod",
+      "obszar": "słupek: skasowany, bez grupy",
+      "stary": "M1: skasowany → nie; M2: skasowany → pusty zbiór; M3: findByCode bez filtra deleted; słupek bez grupy: M3 pusty, M2 wyjątek (requireNonNull)",
+      "nowy": "Pedestals: tylko słupki znane, nieznany → nie znam",
+      "decyzja": "przenosimy nieskasowane słupki z grupą w porcji; skasowane i bez grupy pomijamy (nowy model ich nie zna → router pyta stary)",
+      "dlaczego": "skasowany słupek dałby w nowym modelu odpowiedź z umów zamiast „nie”",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/LegacyCardAcceptance.java:44",
+      "podstawa": "dane",
+      "pewnosc": 92,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 20:58",
+          "sql": "with recursive s(id,root) as (select id,name from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.root from tbl_group g join s on g.parent_id=s.id) select coalesce(s.root, case when p.group_id is null then '(bez grupy)' else '(grupa '||g.typename||')' end) rynek, count(*) slupki, count(*) filter (where p.deleted) skasowane, (select count(*) from (select code from pedestal group by code having count(*)>1) z) kody_zdublowane, (select count(*) from (select lower(code) from pedestal group by lower(code) having count(distinct code)>1) z) kody_rozne_wielkoscia_liter from pedestal p left join tbl_group g on g.id=p.group_id left join s on s.id=p.group_id group by 1 order by 1",
+          "cel": "słupki: skasowane, bez grupy, w grupie innego typu, kody zdublowane i różne tylko wielkością liter",
+          "wynik": "rynek|slupki|skasowane|kody_zdublowane|kody_rozne_wielkoscia_liter\n(bez grupy)|1|0|0|0\nES SITES|8|0|0|0\nFR SITES|581|1|0|0\nHR-NORTH|13|0|0|0\nHR SITES|547|0|0|0\nIT SITES|546|0|0|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 20:57",
+          "status": "hipoteza",
+          "pewnosc": 70
+        },
+        {
+          "data": "2026-10-24 20:59",
+          "status": "do potwierdzenia",
+          "pewnosc": 92,
+          "uwagi": "dane: w HR brak słupków skasowanych i bez grupy; 1 słupek bez grupy i 1 skasowany poza porcją; kody bez duplikatów i kolizji wielkości liter"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 92,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "w porcji brak słupków skasowanych i bez grupy",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D14",
+      "data": "2026-10-24 21:00",
+      "krok": "dane",
+      "obszar": "porcja (zamiast D05)",
+      "stary": "drzewa SITE i ISSUER wszystkich rynków, egzemplarze per rynek",
+      "nowy": "model Party w pamięci",
+      "decyzja": "struktura całości: wszystkie grupy SITE (720) i ISSUER (865) z członkostwami i wszystkimi umowami (cel SITE); egzemplarze tylko HR: słupki pod HR SITES i HR-NORTH, karty gości wydawców z poddrzewa HR ISSUERS (w tym NETWORK CARD) i wydawcy VILLAGE SIBENIK RECEPTION CARDS, karty obsługi w grupach SITE HR",
+      "dlaczego": "M2 przechodzi wszystkich wydawców systemu (FR i IT mają umowy z kempingami HR); pominięcie umów z celem poza porcją zmieniłoby regułę zastępowania (wydawca bez listy dziedziczy po przodku)",
+      "zrodlo": "campsite-core/src/main/resources/sql/sqls.xml:68",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "with recursive s(id,root) as (select id,name from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.root from tbl_group g join s on g.parent_id=s.id), i(id,root) as (select id,name from tbl_group where parent_id is null and typename='ISSUER' union all select g.id,i.root from tbl_group g join i on g.parent_id=i.id) select o.typename owner_typ, coalesce(i.root,'-') owner_rynek, tg.typename cel_typ, coalesce(s.root,'-') cel_rynek, count(*) wpisy, count(distinct ga.group_id) wlasciciele from group_associatedgroup ga join tbl_group o on o.id=ga.group_id join tbl_group tg on tg.id=ga.associatedgroup_id left join i on i.id=o.id left join s on s.id=tg.id group by 1,2,3,4 order by 1,2,3,4",
+          "cel": "(to samo zapytanie co przy D08) umowy: typ właściciela i celu, rynek właściciela i celu (czy wydawcy spoza HR mają umowy z kempingami HR)",
+          "wynik": "owner_typ|owner_rynek|cel_typ|cel_rynek|wpisy|wlasciciele\nISSUER|-|SITE|HR SITES|1|1\nISSUER|ES ISSUERS|SITE|ES SITES|5|3\nISSUER|ES ISSUERS|SITE|FR SITES|1|1\nISSUER|FR ISSUERS|SITE|ES SITES|2|2\nISSUER|FR ISSUERS|SITE|FR SITES|203|54\nISSUER|FR ISSUERS|SITE|HR SITES|1|1\nISSUER|FR ISSUERS|SITE|IT SITES|1|1\nISSUER|HR ISSUERS|ISSUER|-|1|1\nISSUER|HR ISSUERS|SITE|ES SITES|3|2\nISSUER|HR ISSUERS|SITE|FR SITES|4|3\n… (16 wierszy)"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "konieczne dla M2; porcja egzemplarzy HR",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D15",
+      "data": "2026-10-24 21:00",
+      "krok": "dane",
+      "obszar": "wydawca przypięty pod kempingiem",
+      "stary": "grupa ISSUER VILLAGE SIBENIK RECEPTION CARDS z rodzicem SITE (VILLAGE SIBENIK), 220 gości, 1 własna umowa",
+      "nowy": "ISSUER bez ISSUER_MEMBERSHIP",
+      "decyzja": "grupa ISSUER z rodzicem innego typu → wydawca bez organizacji nadrzędnej; jego karty przenosimy",
+      "dlaczego": "legacy idzie w górę po rodzicu SITE, ale wydawca ma własną listę, więc wyżej nie dochodzi; M4: poza Siecią",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/group/GroupServiceHelper.java:89",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "select g.id, g.name, g.typename, p.name parent, p.typename parent_typ, (select count(*) from tbl_group c where c.parent_id=g.id) dzieci, (select count(*) from guest gu where gu.group_id=g.id) goscie, (select count(*) from group_associatedgroup a where a.group_id=g.id) umowy from tbl_group g left join tbl_group p on p.id=g.parent_id where g.typename='ISSUER' and (p.typename is distinct from 'ISSUER') or g.name ilike '%network%'",
+          "cel": "(to samo zapytanie co przy D11) grupy ISSUER, których rodzic nie jest ISSUER (korzenie, przypięte w złym miejscu) i grupy Sieci",
+          "wynik": "id|name|typename|parent|parent_typ|dzieci|goscie|umowy\n1|HR ISSUERS|ISSUER|||59|0|0\n2|IT ISSUERS|ISSUER|||53|0|0\n3|FR ISSUERS|ISSUER|||55|0|0\n31|NETWORK CARD|ISSUER|HR ISSUERS|ISSUER|4|141|6\n51|NETWORK ACCESS HR|SITE|HR SITES|SITE|0|0|0\n52|NETWORK ACCESS IT|SITE|IT SITES|SITE|0|0|0\n53|NETWORK ACCESS FR|SITE|FR SITES|SITE|0|0|0\n4|ES ISSUERS|ISSUER|||3|0|0\n54|NETWORK ACCESS ES|SITE|ES SITES|SITE|0|0|0\n1011|SEED NETWORK KIDS|ISSUER|NETWORK CARD|ISSUER|0|1|0\n… (17 wierszy)"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "zgodne dla VILLAGE SIBENIK RECEPTION CARDS w kontroli (aplikacja ich nie pokaże — P09)",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D16",
+      "data": "2026-10-24 21:00",
+      "krok": "dane",
+      "obszar": "karty skasowanych gości",
+      "stary": "guest.deleted nie jest sprawdzany przez isCardAcceptedAt ani isNetworkCard",
+      "nowy": "CARD_ISSUANCE",
+      "decyzja": "karty nieskasowane skasowanych gości przenosimy jak pozostałe (1685 w całym systemie)",
+      "dlaczego": "stary model ich nie odróżnia w przepiętych miejscach; inaczej różnica M1/M4",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/group/GroupService.java:335",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "select g.typename grupa_goscia, count(distinct gu.id) goscie, count(c.id) karty_nieskasowane, count(*) filter (where gu.deleted) karty_skasowanych_gosci, (select count(*) from camping_card x where not x.deleted and x.guest_id is null) karty_bez_goscia from guest gu join tbl_group g on g.id=gu.group_id left join camping_card c on c.guest_id=gu.id and not c.deleted group by 1",
+          "cel": "(to samo zapytanie co przy D10) czy goście siedzą w grupach innych niż ISSUER; karty bez gościa; goście skasowani z kartami",
+          "wynik": "grupa_goscia|goscie|karty_nieskasowane|karty_skasowanych_gosci|karty_bez_goscia\nISSUER|160588|169931|1685|26"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "stary model nie sprawdza skasowania gościa",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D17",
+      "data": "2026-10-24 21:00",
+      "krok": "mapowanie",
+      "obszar": "trwała mapa identyfikatorów",
+      "stary": "pedestal.code, camping_card.card_rfid, housecard.id, tbl_group.name (ISSUER)",
+      "nowy": "Pedestals code, CARD_UID, HOUSE_CARD_NUMBER, Party.name",
+      "decyzja": "identyfikatory odpowiedzi przenosimy 1:1: kod słupka, UID karty, numer karty obsługi = housecard.id, nazwa wydawcy = nazwa grupy (bez zmiany wielkości liter); PartyId losowy, mapa grupa.id → PartyId tylko w pamięci translatora",
+      "dlaczego": "M2 zwraca nazwy, M3 identyfikatory housecard — muszą być równe w obu modelach",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/acceptance/PartyCardAcceptance.java:38",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "with recursive s(id,root) as (select id,name from tbl_group where parent_id is null and typename='SITE' union all select g.id,s.root from tbl_group g join s on g.parent_id=s.id) select coalesce(s.root, case when p.group_id is null then '(bez grupy)' else '(grupa '||g.typename||')' end) rynek, count(*) slupki, count(*) filter (where p.deleted) skasowane, (select count(*) from (select code from pedestal group by code having count(*)>1) z) kody_zdublowane, (select count(*) from (select lower(code) from pedestal group by lower(code) having count(distinct code)>1) z) kody_rozne_wielkoscia_liter from pedestal p left join tbl_group g on g.id=p.group_id left join s on s.id=p.group_id group by 1 order by 1",
+          "cel": "(to samo zapytanie co przy D13) słupki: skasowane, bez grupy, w grupie innego typu, kody zdublowane i różne tylko wielkością liter",
+          "wynik": "rynek|slupki|skasowane|kody_zdublowane|kody_rozne_wielkoscia_liter\n(bez grupy)|1|0|0|0\nES SITES|8|0|0|0\nFR SITES|581|1|0|0\nHR-NORTH|13|0|0|0\nHR SITES|547|0|0|0\nIT SITES|546|0|0|0"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "identyfikatory 1:1, M2/M3 zgodne",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D18",
+      "data": "2026-10-24 21:00",
+      "krok": "mapowanie",
+      "obszar": "translator zamiast seedu Party",
+      "stary": "seed (SEED …) już leży w starej bazie pod HR SITES / HR ISSUERS / NETWORK CARD",
+      "nowy": "AcceptanceSeeder zasiewa Party światem przy każdym starcie",
+      "decyzja": "aplikacja z profilem acceptance-migration bez acceptance-seed: Party dostaje wszystko (także dane seedu) z translatora; seeder nie działa, więc nie ma podwójnych podmiotów",
+      "dlaczego": "seed w Party nie zna drzewa nad sobą (umowy z korzeniem HR SITES, karta obsługi na korzeniu), a podwójne podmioty z tym samym UID dają losową odpowiedź",
+      "zrodlo": "campsite-seeder/src/main/java/io/pillopl/seeder/AcceptanceSeeder.java:105",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "with recursive i(id) as (select id from tbl_group where name='HR ISSUERS' union all select g.id from tbl_group g join i on g.parent_id=i.id) select (select count(*) from tbl_group where typename='ISSUER') wydawcy_wszystkie, (select count(*) from tbl_group where typename='SITE') grupy_site_wszystkie, (select count(*) from (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1) z) nazwy_wydawcow_rozne_wielkoscia, (select count(*) from i) wydawcy_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id in (select id from i)) karty_hr, (select count(*) from camping_card c join guest gu on gu.id=c.guest_id where not c.deleted and gu.group_id=600001507) karty_wydawcy_pod_kempingiem",
+          "cel": "(to samo zapytanie co przy D02) rozmiar struktury (wszystkie grupy ISSUER i SITE) i porcji kart HR; nazwy wydawców różne tylko wielkością liter",
+          "wynik": "wydawcy_wszystkie|grupy_site_wszystkie|nazwy_wydawcow_rozne_wielkoscia|wydawcy_hr|karty_hr|karty_wydawcy_pod_kempingiem\n865|720|1|314|59058|231"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "bez podwójnych podmiotów; seed jest w starej bazie",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D19",
+      "data": "2026-10-24 21:00",
+      "krok": "mapowanie",
+      "obszar": "nazwy wydawców różne tylko wielkością liter",
+      "stary": "FR CAMPING PASS i FR Camping Pass — dwie grupy",
+      "nowy": "dwa podmioty ISSUER o różnych nazwach",
+      "decyzja": "przenosimy obie bez zmian; tłumaczenie nazwa → grupa u wołającego M2 (findByNameIgnoringCase) poza migracją — problem otwarty dla wpięcia, nie dla danych",
+      "dlaczego": "port porównuje nazwy dokładnie; kolizja dotyczy kodu wołającego i rynku FR (poza porcją)",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/group/GroupService.java:203",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:00",
+          "sql": "select g.id, g.name, p.name rodzic, (select count(*) from guest gu where gu.group_id=g.id) goscie, (select count(*) from group_associatedgroup a where a.group_id=g.id) umowy from tbl_group g join tbl_group p on p.id=g.parent_id where g.typename='ISSUER' and lower(g.name) in (select lower(name) from tbl_group where typename='ISSUER' group by lower(name) having count(*)>1)",
+          "cel": "(to samo zapytanie co przy D02) które nazwy wydawców różnią się tylko wielkością liter",
+          "wynik": "id|name|rodzic|goscie|umowy\n600001505|FR CAMPING PASS|FR ISSUERS|402|1\n600001506|FR Camping Pass|FR ISSUERS|403|1"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:00",
+          "status": "hipoteza",
+          "pewnosc": 85
+        },
+        {
+          "data": "2026-10-24 21:00",
+          "status": "do potwierdzenia",
+          "pewnosc": 90
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "dane bez zmian; tłumaczenie nazw u wołającego M2 zostaje ryzykiem wpięcia (FR)",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    },
+    {
+      "id": "D20",
+      "data": "2026-10-24 21:13",
+      "krok": "roznice",
+      "obszar": "pytania, które nie dochodzą do portu",
+      "stary": "kontrola dostępu konsoli przed pytaniem: admin (HR STAFF) nie widzi słupków pod drugim korzeniem HR-NORTH (404) ani kart wydawcy pod kempingiem i kart, których najnowszy egzemplarz UID należy do wydawcy FR/IT (403)",
+      "nowy": "te same fakty są w modelu Party (słupki HR-NORTH, karty VILLAGE SIBENIK RECEPTION CARDS)",
+      "decyzja": "24 pytania bez odpowiedzi portu nie są różnicą; P02/P04 (HR-NORTH, wydawca pod kempingiem) sprawdza kontrola niezależna (krok 7) wprost z tabel, bez aplikacji",
+      "dlaczego": "żaden login konsoli nie ma zakresu HR-NORTH (korzeń bez rynku) ani kart wydawcy przypiętego pod kempingiem; kontrola niezależna nie potrzebuje loginu",
+      "zrodlo": "campsite-core/src/main/java/io/pillopl/card/ValidationService.java:325",
+      "podstawa": "dane",
+      "pewnosc": 90,
+      "status": "przyjęta",
+      "zapytania": [
+        {
+          "data": "2026-10-24 21:13",
+          "sql": "select u.username, g.name zakres, (select count(*) from tbl_group x where x.parent_id is null and x.typename='SITE' and x.name not like '% SITES') korzenie_site_bez_rynku from userinfo u left join tbl_group g on g.id=u.group_id where u.username like 'admin%'",
+          "cel": "zakres loginów konsoli i korzenie SITE spoza rynków (HR-NORTH)",
+          "wynik": "username|zakres|korzenie_site_bez_rynku\nadmin.it|IT STAFF|1\nadmin.fr|FR STAFF|1\nadmin.es|ES STAFF|1\nadmin|HR STAFF|1"
+        }
+      ],
+      "kto": "Claude",
+      "historia": [
+        {
+          "data": "2026-10-24 21:13",
+          "status": "hipoteza",
+          "pewnosc": 80
+        },
+        {
+          "data": "2026-10-24 21:13",
+          "status": "do potwierdzenia",
+          "pewnosc": 90,
+          "uwagi": "dane: 4 loginy admin* mają zakres grup STAFF rynków; HR-NORTH jest osobnym korzeniem SITE — żaden zakres go nie obejmuje"
+        },
+        {
+          "data": "2026-10-24 21:31",
+          "status": "przyjęta",
+          "pewnosc": 90,
+          "uwagi": "kontrola 480/480 w porcji, aplikacja 234/0/0"
+        }
+      ],
+      "werdykt": {
+        "werdykt": "zaakceptowana",
+        "uwagi": "HR-NORTH i karty wydawcy pod kempingiem sprawdzone tylko kontrolą bez aplikacji — przyjmuję, ale żaden login konsoli ich nie widzi, to osobny problem uprawnień",
+        "kto": "auto",
+        "data": "2026-10-24 21:31"
+      }
+    }
+  ]
+}

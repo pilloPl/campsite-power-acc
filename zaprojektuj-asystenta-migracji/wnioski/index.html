@@ -1,0 +1,186 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Zaprojektuj swój własny harness – Wnioski</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"><style>
+:root{--tlo:#f4efe6;--tlo-2:#ece4d6;--tekst:#201a16;--mocny:#2b2420;--przygaszony:#6b5f54;--akcent:#b5632b;--akcent-jasny:#d07a3e;
+  --cyjan:#1f7a73;--ramka:#d8cdbb;--panel:#fbf8f2;--kod:#efe7da;--link:#b5632b;
+  --font-display:"Fraunces",Georgia,serif;--font-body:"IBM Plex Sans","Segoe UI",sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --cien:0 1px 2px rgba(60,40,20,.05),0 10px 30px -12px rgba(60,40,20,.18);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}}
+:root[data-theme=dark]{--tlo:#15110e;--tlo-2:#1d1712;--tekst:#f1e9dd;--mocny:#fbf5ea;--przygaszony:#ab9d8c;
+  --akcent:#e08a4c;--akcent-jasny:#f0a568;--cyjan:#5bc3b9;--ramka:#352b22;--panel:#1f1812;--kod:#241c15;--link:#f0a568;
+  --cien:0 1px 2px rgba(0,0,0,.3),0 10px 30px -12px rgba(0,0,0,.6);color-scheme:dark}
+*{box-sizing:border-box}
+html{background:var(--tlo)}
+body{margin:0;min-height:100vh;background:var(--tlo);color:var(--tekst);font:17px/1.7 var(--font-body);-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(180deg,transparent 40%,color-mix(in oklab,var(--cyjan) 6%,transparent))}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px}
+.hero{position:relative;overflow:hidden;padding-block:clamp(36px,6vw,72px) clamp(32px,5vw,56px);border-bottom:1px solid var(--ramka);
+  background:radial-gradient(120% 80% at 85% -10%,color-mix(in oklab,var(--akcent) 22%,transparent),transparent 60%),
+    radial-gradient(90% 70% at -10% 110%,color-mix(in oklab,var(--cyjan) 20%,transparent),transparent 55%),
+    linear-gradient(160deg,var(--tlo),var(--tlo-2))}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(var(--ramka) 1px,transparent 1px),linear-gradient(90deg,var(--ramka) 1px,transparent 1px);
+  background-size:44px 44px;-webkit-mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent);mask-image:radial-gradient(70% 70% at 60% 20%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(2.2rem,5.5vw,3.8rem);margin:0;letter-spacing:-.015em}
+.eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;color:var(--akcent);margin:0 0 14px}
+.metryczka{font-family:var(--font-mono);font-size:.82rem;color:var(--przygaszony);margin:16px 0 0}
+.metryczka strong{color:var(--akcent);font-weight:500}
+.intro{color:var(--przygaszony);font-size:clamp(1.05rem,2.2vw,1.22rem);max-width:62ch;margin:18px 0 0}
+main{padding-block:clamp(28px,5vw,56px) 96px}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:560;line-height:1.15;margin:1.8em 0 .55em;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:clamp(1.5rem,3.2vw,2rem)}
+h3{font-size:1.2rem}
+main>h2:first-child,article>h2:first-child{margin-top:0}
+a{color:var(--link);text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:2px}
+a:hover{color:var(--akcent-jasny)}
+p{margin:.8em 0}
+strong{color:var(--mocny)}
+.film{display:inline-flex;align-items:center;gap:10px;margin:8px 0 20px;padding:12px 20px;border-radius:999px;background:var(--akcent);color:#fff;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.film:hover{color:#fff;filter:brightness(1.07)}
+ol.spis{list-style:none;padding:0;margin:0;display:grid;gap:18px}
+ol.spis>li{background:var(--panel);border:1px solid var(--ramka);border-radius:16px;padding:22px 24px;box-shadow:var(--cien)}
+ol.spis>li>.modul-tyt{font-family:var(--font-display);font-size:1.35rem;font-weight:560;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+ol.spis>li>.modul-tyt small{font-family:var(--font-mono);color:var(--przygaszony);font-weight:400;font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+.zadania{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px}
+.zadania a{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ramka);border-radius:12px;background:var(--tlo);color:var(--tekst);text-decoration:none;font-weight:500;transition:border-color .12s,transform .12s}
+.zadania a:hover{border-color:var(--akcent);color:var(--akcent);transform:translateX(2px)}
+.zadania a .nr{font-family:var(--font-display);color:var(--akcent);font-size:1.15rem;min-width:1.4em}
+nav.okruszki{font-size:.92rem;margin-bottom:26px;display:flex;flex-wrap:wrap;gap:8px}
+nav.okruszki a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--przygaszony);padding:6px 14px;border:1px solid var(--ramka);border-radius:999px;background:color-mix(in oklab,var(--panel) 80%,transparent)}
+nav.okruszki a:hover{color:var(--akcent);border-color:var(--akcent)}
+.zadanie+.zadanie{border-top:1px solid var(--ramka);padding-top:8px;margin-top:48px}
+.zmiany{border:2px solid #c0392b;background:color-mix(in oklab,#c0392b 9%,var(--panel));border-radius:14px;padding:4px 22px 10px;margin:24px 0}
+.zmiany>h2,.zmiany>h3{color:#c0392b}
+.miro{display:inline-flex;align-items:center;gap:10px;margin:4px 0 12px;padding:9px 16px 9px 10px;border-radius:12px;background:#ffd02f;color:#050038;font-weight:600;text-decoration:none;box-shadow:var(--cien)}
+.miro:hover{filter:brightness(1.05);text-decoration:none}.miro svg{flex:none}
+.wnioski{background:var(--panel);border:1px solid var(--ramka);border-left:4px solid var(--akcent);padding:8px 24px;border-radius:0 14px 14px 0;margin-top:28px;box-shadow:var(--cien)}
+.wnioski h2{margin-top:.6em;font-size:1.3rem}
+.notatki{margin-top:24px;border:1px dashed var(--ramka);border-radius:12px;padding:8px 18px;background:var(--panel)}
+.notatki summary{cursor:pointer;color:var(--przygaszony);font-weight:600}
+pre{background:var(--panel);border:1px solid var(--ramka);padding:16px 18px;border-radius:14px;overflow-x:auto;font-size:.86rem;line-height:1.65}
+code{font-family:var(--font-mono);font-size:.86em;background:var(--kod);padding:2px 6px;border-radius:5px}
+pre code{background:none;padding:0}
+blockquote{margin:18px 0;padding:6px 20px;border-left:4px solid var(--cyjan);background:var(--panel);border-radius:0 12px 12px 0;color:var(--przygaszony)}
+/* polecenie: kroki, prompty, komendy */
+.czat{position:relative;overflow:hidden;margin:0 0 24px;border:1px solid var(--ramka);border-radius:18px;box-shadow:var(--cien);
+  background:linear-gradient(180deg,color-mix(in oklab,var(--cyjan) 14%,var(--panel)),var(--panel) 70%)}
+.czat .scena{display:block;width:100%;height:96px}
+.czat .scena .niebo{fill:color-mix(in oklab,var(--cyjan) 18%,var(--panel))}
+.czat .scena .gory{fill:color-mix(in oklab,var(--cyjan) 34%,var(--panel))}
+.czat .scena .las{fill:color-mix(in oklab,var(--cyjan) 62%,var(--tekst))}
+.czat .scena .laka{fill:color-mix(in oklab,#6a9a3c 55%,var(--panel))}
+.czat .scena .namiot{fill:var(--akcent)}
+.czat .scena .slupek{fill:var(--mocny)}
+.czat .scena .iskra{fill:#f3c74a}
+.czat .tresc{padding:4px 20px 18px}
+.czat h3{margin:0 0 4px;font:600 1.2rem/1.3 var(--font-display);color:var(--mocny)}
+.czat p{margin:0 0 12px;color:var(--przygaszony)}
+.czat ul{list-style:none;margin:0 0 14px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px 14px}
+.czat li{display:flex;gap:10px;align-items:center;font-size:.9rem;line-height:1.35;color:var(--przygaszony)}
+.czat li img{width:38px;height:38px;border-radius:50%;flex:none}
+.czat li b{color:var(--mocny)}
+.czat nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.czat nav span{font-weight:600;color:var(--mocny);margin-right:4px}
+.czat a{padding:6px 14px;border-radius:999px;border:1px solid var(--cyjan);color:var(--cyjan);background:var(--panel);text-decoration:none;font-weight:600}
+.czat a:hover{background:var(--cyjan);color:var(--panel)}
+.czat.asystent{background:linear-gradient(180deg,color-mix(in oklab,var(--akcent) 12%,var(--panel)),var(--panel) 70%)}
+.czat.asystent .tresc{padding-top:16px}
+article.zadanie>ol{list-style:none;counter-reset:krok;padding:0;margin:18px 0;display:grid;gap:16px}
+article.zadanie>ol>li{counter-increment:krok;position:relative;background:var(--panel);border:1px solid var(--ramka);border-radius:16px;
+  padding:18px 22px 16px 64px;box-shadow:var(--cien)}
+article.zadanie>ol>li::before{content:counter(krok);position:absolute;left:18px;top:16px;width:32px;height:32px;border-radius:50%;
+  display:grid;place-items:center;background:var(--akcent);color:#fff;font:600 .95rem/1 var(--font-display)}
+.ramka{position:relative;margin:14px 0}
+.ramka>.etykieta{position:absolute;left:14px;top:-10px;font:600 .68rem/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;background:var(--tlo);border:1px solid var(--ramka);color:var(--przygaszony)}
+.ramka>.kopiuj{position:absolute;right:10px;top:10px;font:500 .74rem/1 var(--font-mono);padding:6px 10px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--ramka);background:var(--tlo);color:var(--przygaszony)}
+.ramka>.kopiuj:hover{color:var(--akcent);border-color:var(--akcent)}
+.ramka.prompt>blockquote{margin:0;padding:46px 20px 14px;border:1px solid color-mix(in oklab,var(--cyjan) 45%,var(--ramka));border-left:4px solid var(--cyjan);
+  border-radius:14px;background:color-mix(in oklab,var(--cyjan) 7%,var(--panel));color:var(--tekst);font-size:.97rem;line-height:1.65}
+.ramka.prompt>blockquote p{margin:.3em 0}
+.ramka.prompt>.etykieta{color:var(--cyjan);border-color:color-mix(in oklab,var(--cyjan) 45%,var(--ramka))}
+.ramka.kod>pre{margin:0;padding-top:50px}
+.ramka .system{position:absolute;right:92px;top:10px;display:flex;gap:4px}
+.ramka .system button{font:500 .72rem/1 var(--font-mono);padding:6px 9px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--tlo);color:var(--przygaszony)}
+.ramka .system button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+table{border-collapse:collapse;width:100%;font-size:.93rem;margin:18px 0;background:var(--panel);border:1px solid var(--ramka);border-radius:14px;overflow:hidden}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--ramka)}
+th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--przygaszony);background:var(--kod)}
+tr:last-child td{border-bottom:0}
+td code{color:var(--akcent)}
+img{max-width:100%;border-radius:10px}
+figure.video{margin:24px 0;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--ramka);box-shadow:0 30px 80px -40px rgba(0,0,0,.6);background:#000}
+figure.video video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+figure.video figcaption{position:absolute;left:14px;top:12px;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:#f4efe6;background:rgba(20,16,12,.6);padding:6px 10px;border-radius:999px;backdrop-filter:blur(6px);pointer-events:none}
+hr{border:none;border-top:1px solid var(--ramka);margin:32px 0}
+footer.stopka{border-top:1px solid var(--ramka);padding-block:36px;color:var(--przygaszony);font-size:.85rem}
+.drogi{margin:14px 0}
+.drogi .wybor{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
+.drogi .wybor button{font:600 .9rem/1 var(--font-body);padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid var(--ramka);
+  background:var(--panel);color:var(--przygaszony)}
+.drogi .wybor button:hover{border-color:var(--akcent);color:var(--akcent)}
+.drogi .wybor button.wl{background:var(--akcent);border-color:var(--akcent);color:#fff}
+.drogi>section>h3:first-child{margin-top:.9em}
+@media print{
+  .drogi .wybor{display:none}
+  .drogi>section[hidden]{display:block}
+  body{background:#fff;color:#000;font-size:11pt}
+  .hero{background:none;border:none;padding:0}
+  .hero::before{display:none}
+  .wrap{max-width:none;padding:0}
+  main{padding:0}
+  a{color:#000;text-decoration:underline}
+  .film,nav.okruszki a{color:#000;background:none;border:none;padding:0}
+  ol.spis>li,.zadania a,.notatki,.wnioski,pre,table{box-shadow:none;border:1px solid #ccc;background:none}
+  figure.video{border:1px solid #ccc;box-shadow:none;background:none}
+  figure.video video{display:none}
+  figure.video figcaption{position:static;color:#000;background:none;padding:8px 12px}
+  .zadanie+.zadanie{page-break-before:always;border:none}
+  nav,footer.stopka{display:none}
+  pre,table,blockquote{page-break-inside:avoid}
+}
+</style></head><body><header class="hero"><div class="wrap"><nav class="okruszki"><a href="../">🎯 Zaprojektuj swój własny harness</a></nav><p class="eyebrow">💡 Wnioski</p><h1>Zaprojektuj swój własny harness</h1></div></header><main class="wrap"><div class="wnioski"><h2>💡 Wnioski</h2><h2>Wnioski</h2>
+<h3>Użytkownicy i miejsce działania</h3>
+<ul><li>Z asystenta korzystają programiści, analitycy BI i product ownerzy. Dobrze znają SQL, narzędzia AI znają średnio, więc pracują w przeglądarce, bez terminala i repo.</li><li>Z laptopów nie ma dostępu do bazy ani zrzutów, więc asystent działa na serwerze klienta, obok bazy. Laptop dostaje tylko odpowiedź.</li><li>Dlatego Claude Code na laptopie odpada: dane nie mogą przez niego przejść, nawet zanim zostaną zamaskowane. Claude Code (albo Agent SDK) może za to działać na serwerze klienta, obok bazy, w trybie bez terminala (<code>claude -p</code>), z modelem w chmurze klienta (Bedrock albo Vertex), więc dane nie wychodzą poza tę chmurę. To pełnoprawna opcja obok własnej pętli.</li><li>Model nie jest wybrany i może się zmienić, więc pętla i narzędzia należą do Was, a model stoi za jednym interfejsem.</li></ul>
+<h3>Decyzje</h3>
+<ul><li>Poprzednie decyzje asystent bierze z logu decyzji. Bez logu nie ma skąd wiedzieć, co zespół już ustalił.</li><li>Model patrzy na decyzje i tylko na ich podstawie odpowiada: ktoś już zdecydował, że tych danych nie mapujemy, albo mapujemy je zgodnie z konkretną decyzją.</li><li>Decyzję ktoś może zmienić, więc trzeba ustalić, kto może. Zmiana decyzji ma osobne uprawnienia i osobne dane logowania niż zwykła praca z asystentem. Zmiana trafia do logu, więc widzą ją wszyscy.</li></ul>
+<h3>Prompt systemowy</h3>
+<p>Prompt systemowy mówi dokładnie, co asystent ma robić.</p>
+<ul><li>Kolejność pracy:
+<ol><li>Sprawdź wklejkę: czy te dane naprawdę istnieją w starym systemie, czy ktoś nie wymyślił sobie użytkownika.</li><li>Sprawdź, co już wiadomo o nowym modelu.</li><li>Sprawdź, jak oba modele odpowiadają dziś; może dane są już zmigrowane.</li></ol></li><li>Sprawdzamy tak dokładnie, żeby powtarzalne przypadki rozstrzygały się zawsze tak samo.</li><li>Wynik ma trzy możliwości: przenieść, nie przenosić, nierozstrzygnięte (<code>cannot_map</code>).</li><li>Czego asystent nigdy nie robi: nie wymyśla decyzji, nie luzuje reguł, nie zmienia danych. Dlatego narzędzie SQL jest zamknięte w kodzie na sam odczyt.</li></ul>
+<h3>Oszczędność</h3>
+<p>Prompt mówi też, jak konkretnie budować zapytania SQL, żeby model ich nie wymyślał i nie przepalał kroków:</p>
+<ul><li>kilka zapytań zamiast piętnastu, bez długich serii;</li><li>tylko to, o co ktoś zapytał;</li><li><code>count(*)</code> zamiast listy wierszy, gdy liczy się liczba;</li><li>raczej jedno zapytanie z kilkoma złączeniami niż kilka osobnych;</li><li>żadnego zapytania dwa razy;</li><li>propozycja pokazuje tylko kilka wyników, a więcej dopiero na prośbę użytkownika;</li><li>odpowiedź konkretnym językiem, bez waty: liczby, nazwy, numery decyzji.</li></ul>
+<h3>Narzędzia</h3>
+<ul><li>Asystent musi rozumieć dokumentację obecnego modelu. Najlepiej, gdy dostaje ją przez narzędzie.</li><li>Zwykły SQL modele już znają. Przy specyficznej technologii (np. dialekt bazy, własny framework) trzeba dać link do jej dokumentacji, osobno dla starej i nowej technologii.</li><li>Podstawowe narzędzia: stary model (odczyt), nowy model (odczyt) i porównaj. Porównanie asystent woła sam, zawsze gdy trzeba sprawdzić, czy mapowanie się udało.</li><li>Decyzje obsługuje osobne, deterministyczne narzędzie: czytaj, dodaj, zmień. Model woła operację, więc każda decyzja zapisuje się tak samo. Kto nie ma prawa zmieniać decyzji, dostaje zestaw narzędzi bez operacji zmiany. Gdy takie prawo dostanie, rozszerzamy mu zestaw narzędzi.</li><li>Odmowa też idzie przez deterministyczne narzędzia, z dokładnym uzasadnieniem. W naszym asystencie są dwa: <code>skip_by_decision</code> („nie przenosimy”, z numerem decyzji, która tak mówi) i <code>cannot_map</code> („nie umiem”: jaki fakt, czego brakuje, co trzeba rozstrzygnąć). Odmowa ma wtedy stały kształt, który człowiek może sprawdzić.</li><li>Dostęp do internetu to decyzja do wyważenia. Pomaga przy technologii, której model nie zna, ale model zaczyna odpowiadać ogólnikami zamiast trzymać się decyzji i danych. Rozstrzyga technologia i problem.</li></ul>
+<h3>Anonimizacja</h3>
+<ul><li>Są narzędzia, które anonimizują dane (np. Presidio, bramki LLM). Anonimizacja musi się odbyć poza laptopem, na serwerze obok bazy.</li><li>Anonimizatorem może być lokalny LLM albo deterministyczne narzędzie. Kolejność: najpierw wyszukuje dane wrażliwe, potem je normalizuje (np. formaty dat i telefonów), na końcu podmienia na znaczniki według klucza. Mapowanie działa w obie strony: <code>[OSOBA_1]</code> w odpowiedzi modelu da się zamienić z powrotem na prawdziwą wartość, a słownik zostaje na serwerze.</li><li>Dane powinny być zamaskowane też na froncie: człowiek w przeglądarce widzi znaczniki zamiast danych osobowych.</li></ul>
+<h3>Pętla i wybór rozwiązania</h3>
+<ul><li>To była symulacja: projekt na kartce albo tablicy, bez kodu. Te same pytania wracają przy każdym asystencie, który pracuje na danych klienta.</li><li>Pętla jest prosta. Model dostaje prompt systemowy, stos wiadomości i listę narzędzi. Jeśli prosi o narzędzie, pętla je wykonuje i dokłada wynik na stos. Jeśli odpowiada tekstem, tura się kończy. Asystent migracji, którego zbudowaliśmy na to szkolenie, mieści ją w jednej metodzie, z limitem 16 kroków. Więcej pracy wymagają użytkownicy, decyzje, prompt, narzędzia i anonimizacja.</li><li>Takie rozwiązanie możecie proponować swoim klientom, gdy z narzędzia korzystają osoby spoza zespołu programistów, dane nie mogą wyjść poza serwer albo model nie jest wybrany.</li><li>Zerknijcie na Claude Agent SDK. Daje harness Claude Code (pętlę, kompakcję, uprawnienia, hooki) jako bibliotekę w Waszej aplikacji. Piszecie tylko narzędzia i bramki. Działa z modelami Claude, więc przy otwartym wyborze modelu porównajcie go z własną pętlą.</li></ul>
+<h3>Czemu nie po prostu Claude Code?</h3>
+<p>Zespołowi programistów zwykle wystarczy Claude Code ze skillem i dostępem do bazy tylko do odczytu. Własna pętla w aplikacji (albo Claude Agent SDK) ma sens, gdy zachodzi któryś z warunków:</p>
+<table><thead><tr><th>Warunek</th><th>Claude Code ze skillem</th><th>Własna pętla w aplikacji / Agent SDK</th></tr></thead><tbody><tr><td>Korzystają osoby spoza zespołu programistów (BI, PO)</td><td>wymaga terminala i repo</td><td>przeglądarka, bez instalacji</td></tr><tr><td>Twarde granice (tylko odczyt, zapis tylko przyciskiem człowieka)</td><td>w uprawnieniach i prompcie, da się je poluzować; jest bash</td><td>w kodzie narzędzi, model ich nie obejdzie</td></tr><tr><td>Narzędzie musi sięgać do wnętrza aplikacji (podgląd na kopii modelu, przycisk „Wgraj”)</td><td>tylko z zewnątrz</td><td>wprost, w tym samym procesie</td></tr><tr><td>Dane nie mogą trafić na laptopy</td><td>na laptopie tak; na serwerze klienta (<code>claude -p</code>, model przez Bedrock / Vertex) nie</td><td>wszystko na serwerze, za anonimizacją</td></tr><tr><td>Limit kosztów per zespół</td><td>tylko limity konta u dostawcy</td><td>budżet w kodzie</td></tr><tr><td>Model niewybrany albo inny niż Claude</td><td>tylko Claude</td><td>dowolny model za jednym interfejsem (Agent SDK: tylko Claude)</td></tr><tr><td>Budowa i utrzymanie</td><td>gotowe: pętla, kompakcja, subagenci</td><td>trzeba napisać narzędzia i bramki, a przy własnej pętli też pętlę</td></tr></tbody></table>
+<h3>Czego nie wzięliśmy pod uwagę</h3>
+<p>Projekt pomija to, co trzeba dołożyć, zanim asystent trafi do ludzi na stałe:</p>
+<ul><li>Dane testowe: złoty zestaw przypadków, przypadki brzegowe i próby ataku (prompt injection). Zestaw jest wersjonowany, żeby ten sam test za miesiąc dał porównywalny wynik. Warianty przypadków może generować mocniejszy model.</li><li>Ewaluacja: metryki twarde (np. trafność decyzji przenieść / nie przenosić / nierozstrzygnięte) i ocena przez drugi model (LLM-as-a-Judge): czy odpowiedź trzyma się decyzji i danych, czy nie zmyśla, czy nie wyciekają dane osobowe.</li><li>Wydajność i koszt: równoległe puszczanie testów, pomiar czasu do pierwszego tokenu, czasu odpowiedzi i zużycia tokenów. Wspólny interfejs nad dostawcami, żeby zmiana modelu nie wymagała przepisania testów.</li><li>Wersjonowanie promptów: prompt leży w pliku konfiguracji, poza kodem. Porównanie wersji promptu i parametrów (temperature, max_tokens) na tym samym zestawie.</li><li>Raporty i CI: widok wyników z filtrem na nieudane testy i pełnym śladem (prompt, odpowiedź, ocena). Skrócony zestaw testów w pipeline przed każdym wdrożeniem.</li></ul>
+<h2>Tok myślenia</h2>
+<p>Zaczynamy od ludzi i warunków klienta, bo one ustalają, gdzie działa pętla i czego narzędzia nie mogą zwrócić. Potem kontekst i reguły, narzędzia z granicami, miejsce człowieka, jeden przypadek przez cały harness. Na końcu zmiana wymagania i limity, które sprawdzają, czy projekt wytrzymuje pracę wielu osób.</p></div><footer class="stopka">Materiały szkolenia „AI w pracy z systemami legacy".</footer></main><script>function ustawOs(os){document.querySelectorAll('.ramka.os').forEach(r=>{
+r.querySelectorAll('pre[data-os]').forEach(p=>p.hidden=p.dataset.os!==os);
+r.querySelectorAll('.system button').forEach(b=>b.classList.toggle('wl',b.dataset.os===os))});try{localStorage.setItem('os',os)}catch(e){}}
+document.querySelectorAll('.system button').forEach(b=>b.addEventListener('click',()=>ustawOs(b.dataset.os)));
+try{const o=localStorage.getItem('os')||(/Win/.test(navigator.platform)?'win':'');if(o)ustawOs(o)}catch(e){}
+function ustawDroge(k){document.querySelectorAll('.drogi').forEach(g=>{const s=[...g.querySelectorAll(':scope>section')];
+if(!s.some(x=>x.dataset.droga===k))return;s.forEach(x=>x.hidden=x.dataset.droga!==k);
+g.querySelectorAll('.wybor button').forEach(b=>b.classList.toggle('wl',b.dataset.droga===k))});try{localStorage.setItem('droga',k)}catch(e){}}
+document.querySelectorAll('.drogi .wybor button').forEach(b=>b.addEventListener('click',()=>ustawDroge(b.dataset.droga)));
+try{const d=localStorage.getItem('droga');if(d)ustawDroge(d)}catch(e){}
+document.querySelectorAll('.ramka>.kopiuj').forEach(b=>b.addEventListener('click',()=>{
+const t=b.parentElement.querySelector('pre:not([hidden]),blockquote');let x=t.innerText.trim();
+// zsh na macOS bez konfiguracji nie zna komentarzy w wklejonych komendach: z bloków bash wycinamy # …
+const k=t.querySelector('code');if(t.dataset.os==='unix'||(k&&/lang-(bash|sh|zsh|shell)/.test(k.className)))
+x=x.split('\n').filter(l=>!/^\s*#/.test(l)).map(l=>l.replace(/\s+#\s.*$/,'')).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+navigator.clipboard.writeText(x).then(()=>{
+const s=b.textContent;b.textContent='✓ skopiowane';setTimeout(()=>b.textContent=s,1500)})}))</script></body></html>

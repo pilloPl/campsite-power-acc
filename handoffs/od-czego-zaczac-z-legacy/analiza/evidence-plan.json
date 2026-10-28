@@ -1,0 +1,395 @@
+{
+  "$schema_version": "evidence-plan/1.0",
+  "system": {
+    "name": "campsite-power",
+    "root": ".",
+    "class": "medium",
+    "numbers": {
+      "java_main_files": 831,
+      "java_main_loc": 46185,
+      "java_test_files": 256,
+      "java_test_loc": 26734,
+      "console_ts_files": 89,
+      "console_ts_loc": 17499,
+      "flyway_migrations": 80,
+      "tables": 65,
+      "foreign_keys": 86,
+      "plpgsql_functions": 9,
+      "views": 5,
+      "hand_written_sql_statements": 39,
+      "console_endpoints_post": 163,
+      "quartz_jobs": 15,
+      "commits": 633,
+      "commit_period": "2012-09..2017-07 plus two commits in 2026-10"
+    },
+    "paradigm": "Spring Boot service layer over JPA entities and hand-written SQL; three REST link generations for pedestals; Quartz jobs; in-process event bus with listeners; React console",
+    "red_flags": [
+      "no documentation besides README; no ADRs, no transcripts, no project-context.md",
+      "ticket system not reachable (user limited the run to the local repository): 84 ticket IDs in commit subjects, contents unknown",
+      "no commit bodies: intent only from one-line subjects",
+      "commit dates jump from 2017-07 directly to 2026-10: history may be reconstructed; treat dates as ordering, not calendar facts",
+      "consumption record is a wide denormalised snapshot (50+ columns) read by billing, issuer exchange, QR payment and reports",
+      "rules partly stored as data: group trees (SITE/ISSUER/STAFF), group attributes, whitelist filters, system properties, tariff tables",
+      "no database or runtime available: liveness and value distributions unknown"
+    ]
+  },
+  "consumers": [
+    {
+      "skill": "legacy-init",
+      "profile": {
+        "goal": "Evolve the architecture of the running system: find the places to start so that new features land faster",
+        "decisions": [
+          "which areas to inspect first",
+          "which heuristics guide the inspection",
+          "how far code alone can carry conclusions about business correctness"
+        ],
+        "gaps": [
+          "what-hurts",
+          "belongs-together",
+          "who-asks",
+          "why-built-this-way",
+          "domain-vocabulary",
+          "is-it-alive",
+          "what-it-holds"
+        ],
+        "ceilings": [
+          "without tickets or incidents, 'what hurts' rests on commit wording and structural clues only",
+          "without a database, liveness of states, tariffs and link generations is unknown",
+          "without an expert, domain wording is system wording from README/console"
+        ]
+      },
+      "last_used": "2026-10-25"
+    }
+  ],
+  "gaps": [
+    {
+      "id": "who-asks",
+      "status": "partial",
+      "closed_by": [
+        "art-console",
+        "art-readme",
+        "art-git"
+      ],
+      "invisible_while_open": "which party asks for a feature is inferred from console roles and user-story commit subjects; business intent remains a hypothesis"
+    },
+    {
+      "id": "is-it-alive",
+      "status": "open",
+      "closed_by": [],
+      "invisible_while_open": "no runtime, logs or database: whether link v1 pedestals, QR payments or seasonal contracts are used in production is unknown"
+    },
+    {
+      "id": "belongs-together",
+      "status": "partial",
+      "closed_by": [
+        "art-git",
+        "art-schema",
+        "art-code"
+      ],
+      "invisible_while_open": "boundaries come from packages, FK clusters and co-change; no event topology beyond the in-process bus"
+    },
+    {
+      "id": "what-hurts",
+      "status": "partial",
+      "closed_by": [
+        "art-git"
+      ],
+      "invisible_while_open": "no incidents, no ticket contents: pain is inferred from fix-like commit subjects and structure"
+    },
+    {
+      "id": "what-it-holds",
+      "status": "open",
+      "closed_by": [],
+      "invisible_while_open": "every status/enum value is treated as reachable; data-driven rules (group attributes, tariffs, system properties) are known only from schema and demo seed"
+    },
+    {
+      "id": "domain-vocabulary",
+      "status": "open",
+      "closed_by": [],
+      "invisible_while_open": "all words come from the system (README, console, code comments); no customer document, contract or standard"
+    },
+    {
+      "id": "why-built-this-way",
+      "status": "partial",
+      "closed_by": [
+        "art-tests",
+        "art-readme"
+      ],
+      "invisible_while_open": "no ADRs; deliberate vs accidental structure told apart only via tests and commit subjects"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "art-code",
+      "kind": "source-code",
+      "status": "found",
+      "location": ".",
+      "size": "831 main Java files / 46k LOC in 9 Maven modules",
+      "period": "checkout at 938d4ab (2026-10-22)",
+      "treatment": "sample",
+      "closes_gaps": [
+        "belongs-together"
+      ],
+      "notes": "implemented behaviour only; business correctness unknown. Core packages: supply, card, consumption, pricing, group(+attribute), pedestallink v1/v2/v3, qrpay, erp, issuer, power, monitoring, event.",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-tests",
+      "kind": "tests",
+      "status": "found",
+      "location": ".",
+      "size": "256 Java test files / 26.7k LOC (unit + Testcontainers integration); console Vitest and Playwright e2e",
+      "treatment": "sample",
+      "closes_gaps": [
+        "why-built-this-way"
+      ],
+      "notes": "expected behaviour as stated by developers; densest in infrastructure, card, group/attribute, pricing, event; thin in order, erp, qrpay, pedestallink v3",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-schema",
+      "kind": "db-migrations",
+      "status": "found",
+      "location": "campsite-db-migrations/src/main/resources/db/migration",
+      "size": "80 Flyway scripts, 65 tables, 86 FKs, 9 PL/pgSQL functions, 5 views/MVs, 0 triggers",
+      "period": "V1..V256",
+      "treatment": "read-fully",
+      "closes_gaps": [
+        "belongs-together",
+        "what-it-holds"
+      ],
+      "notes": "status/type columns on 11+ tables; functions in rfid_utils, card_utils, order_utils, socket status report; seed scripts (group, tariff) are system defaults, not business facts",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-sql",
+      "kind": "hand-written-sql",
+      "status": "found",
+      "location": "campsite-core/src/main/resources/sql/sqls.xml",
+      "size": "39 named statements, 1042 lines",
+      "treatment": "read-fully",
+      "closes_gaps": [
+        "belongs-together"
+      ],
+      "notes": "group tree/acceptance queries, supply/incident pages, dashboard, map, utilization, card lists for pedestals and partners, consumption reports, ERP marking, QR process chain/archive",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-git",
+      "kind": "git-history",
+      "status": "found",
+      "location": ".git",
+      "size": "633 commits, 84 distinct ticket IDs (prefixes CAMP, PED, ISS, OPS, CRD, BIL, RPT, QRP, SUP, MIG, PWR, HR), 249 commits without ticket, no commit bodies",
+      "period": "2012-09-19..2017-07-06 (+2 commits 2026-10)",
+      "treatment": "aggregate",
+      "closes_gaps": [
+        "belongs-together",
+        "what-hurts",
+        "who-asks"
+      ],
+      "aggregates": [
+        {
+          "path": "evidence/art-git/ticket-commit-counts.tsv",
+          "what": "commits per ticket ID with first/last date and a sample subject",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/ticket-prefix-counts.tsv",
+          "what": "commits per ticket prefix",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/commits-per-year.tsv",
+          "what": "commits per year",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/user-story-commits.tsv",
+          "what": "31 commit subjects written as user stories (As a ...)",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/package-churn.tsv",
+          "what": "commits touching each main Java package",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/file-churn-top60.tsv",
+          "what": "60 most often changed main Java files",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/co-change-pairs-since-2016.tsv",
+          "what": "package pairs changed in the same commit since 2016 (133 commits)",
+          "how": "evidence/art-git/aggregate.mjs"
+        },
+        {
+          "path": "evidence/art-git/summary.txt",
+          "what": "counts behind the above",
+          "how": "evidence/art-git/aggregate.mjs"
+        }
+      ],
+      "notes": "a ticket ID in a subject links a commit to a ticket; it does not say the ticket text is true. Dates may be reconstructed (gap 2017->2026). Ticket contents not retrieved: user limited the run to the local repository and no Jira/MCP connector is configured.",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-readme",
+      "kind": "developer-doc",
+      "status": "found",
+      "location": "README.md",
+      "size": "9.4 kB",
+      "treatment": "read-fully",
+      "closes_gaps": [
+        "who-asks",
+        "why-built-this-way"
+      ],
+      "notes": "developer-written; describes business purpose, modules, demo data, roles and console tabs. System wording, not customer wording.",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-console",
+      "kind": "frontend-code",
+      "status": "found",
+      "location": "campsite-console/src",
+      "size": "89 TS/TSX files, 16 tabs with role-based visibility (tabs.ts)",
+      "treatment": "sample",
+      "closes_gaps": [
+        "who-asks"
+      ],
+      "notes": "actions offered per role (reception, campsite manager, service technician, back office, market admin); vocabulary the staff sees on screen",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-demo-seed",
+      "kind": "demo-data",
+      "status": "found",
+      "location": "campsite-server/src/main/resources/db/demo",
+      "treatment": "skip",
+      "closes_gaps": [],
+      "notes": "demo network of 16 campsites; illustrates shapes, not business facts. Not used as evidence for business statements.",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-tickets",
+      "kind": "ticket-system",
+      "status": "not-asked",
+      "location": null,
+      "treatment": "skip",
+      "closes_gaps": [
+        "what-hurts",
+        "who-asks"
+      ],
+      "notes": "84 ticket IDs retained in evidence/art-git/ticket-commit-counts.tsv. User instruction: local repository only. No connector configured; nothing requested.",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-incidents",
+      "kind": "incident-reports",
+      "status": "n/a",
+      "location": null,
+      "treatment": "skip",
+      "closes_gaps": [
+        "what-hurts"
+      ],
+      "notes": "none in repository; run limited to local repo",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "art-runtime",
+      "kind": "database-or-logs",
+      "status": "n/a",
+      "location": null,
+      "treatment": "skip",
+      "closes_gaps": [
+        "is-it-alive",
+        "what-it-holds"
+      ],
+      "notes": "no database, logs or traces available; run limited to local repo",
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    },
+    {
+      "id": "calibration-20261025T082822Z-fdb1450e",
+      "kind": "analysis-calibration",
+      "status": "found",
+      "location": "analiza/calibrations/20261025T082822Z-fdb1450e/calibration.json",
+      "treatment": "read-fully",
+      "closes_gaps": [],
+      "added_by": "legacy-init",
+      "added_on": "2026-10-25"
+    }
+  ],
+  "ceilings": [
+    {
+      "consumer": "legacy-init",
+      "gap": "what-hurts",
+      "rule": "a candidate's pain level rests on structure and commit wording; never state that an area 'causes incidents'",
+      "active": true
+    },
+    {
+      "consumer": "legacy-init",
+      "gap": "is-it-alive",
+      "rule": "no link generation, payment channel or tariff kind may be called dead or unused",
+      "active": true
+    },
+    {
+      "consumer": "legacy-init",
+      "gap": "domain-vocabulary",
+      "rule": "domain words are system words until a business source confirms them",
+      "active": true
+    },
+    {
+      "consumer": "legacy-init",
+      "gap": "what-it-holds",
+      "rule": "every enum/status value is treated as reachable; data-driven rules are known by shape only",
+      "active": true
+    }
+  ],
+  "reading_budget": [
+    {
+      "scope": "system",
+      "read_fully": [
+        "README.md",
+        "sqls.xml",
+        "migrations of supply, consumption, tariff, group, erp, issuer"
+      ],
+      "aggregate": [
+        "git history (evidence/art-git)"
+      ],
+      "sample": [
+        "core packages supply, card, consumption, pricing, group, pedestallink, erp, issuer, qrpay",
+        "console tabs.ts and one page per role",
+        "tests of the sampled packages"
+      ],
+      "skip": [
+        "demo seed as business evidence",
+        "generated OpenAPI client",
+        "console styling"
+      ],
+      "note": "class medium: the supply-to-billing flow fits one context; the whole system does not"
+    }
+  ],
+  "open_requests": [],
+  "log": [
+    {
+      "date": "2026-10-25",
+      "by": "legacy-init",
+      "change": "initial plan from local repository only (user constraint); git aggregates written under evidence/art-git"
+    },
+    {
+      "date": "2026-10-25",
+      "by": "legacy-init",
+      "change": "Registered calibration-20261025T082822Z-fdb1450e; no gaps automatically closed."
+    }
+  ]
+}
